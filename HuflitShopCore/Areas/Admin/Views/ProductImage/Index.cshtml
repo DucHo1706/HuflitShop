@@ -1,0 +1,42 @@
+﻿@model IEnumerable<HuflitShopCore.DTOs.ProductImageDTO>
+
+@{
+    ViewData["Title"] = "Quản lý hình ảnh: " + ViewBag.Product.ProductName;
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Quản lý hình ảnh: <span class="text-primary">@ViewBag.Product.ProductName</span></h2>
+
+<div class="mb-4 mt-3">
+    <a asp-action="Create" asp-route-productId="@ViewBag.Product.Id" class="btn btn-primary">
+        <i class="fas fa-plus-circle"></i> Thêm hình ảnh mới
+    </a>
+    <a asp-controller="Products" asp-action="Index" class="btn btn-secondary">Trở về danh sách sản phẩm</a>
+</div>
+
+<div class="row">
+    @if (!Model.Any())
+    {
+        <div class="col-12">
+            <p class="alert alert-info">Sản phẩm này chưa có hình ảnh nào.</p>
+        </div>
+    }
+    else
+    {
+        @foreach (var item in Model)
+        {
+            <div class="col-md-3 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <img src="@item.ImageUrl" class="card-img-top" alt="Product Image" style="height: 200px; object-fit: contain; padding: 10px;" />
+                    <div class="card-footer text-center bg-white border-top-0">
+                        <form asp-action="Delete" method="post">
+                            <input type="hidden" name="id" value="@item.Id" />
+                            <input type="hidden" name="productId" value="@item.ProductId" />
+                            <button type="submit" class="btn btn-danger btn-sm w-100" onclick="return confirm('Bạn có chắc chắn muốn xóa hình ảnh này? Dữ liệu file trên ổ cứng cũng sẽ bị xóa.');">Xóa ảnh</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>

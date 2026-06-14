@@ -1,0 +1,127 @@
+@{
+    var variants = ViewBag.Variants as List<HuflitShopCore.DTOs.ProductVariantDTO>;
+    var sizeList = ViewBag.SizeList as SelectList;
+    var colorList = ViewBag.ColorList as SelectList;
+    var productId = ViewBag.ProductId as string;
+}
+
+<!-- Form thêm phân loại hàng loạt (Ma trận) -->
+<form asp-action="CreateBulk" asp-controller="ProductVariant" asp-area="Admin" method="post" class="mb-4 bg-light p-3 rounded border">
+    <input type="hidden" name="productId" value="@productId" />
+    <h6 class="mb-3 font-weight-bold">Tạo nhanh nhiều phân loại</h6>
+    <p class="text-muted small">Tick vào các ô tương ứng để tạo phân loại mới. Các ô có dấu <i class="fas fa-check-circle text-success"></i> là phân loại đã tồn tại.</p>
+    <div class="table-responsive">
+        <table class="table table-sm table-bordered text-center" style="font-size: 0.9rem;">
+            <thead class="thead-light">
+                <tr>
+                    <th class="align-middle">Size / Màu</th>
+                    @foreach(var color in colorList)
+                    {
+                        <th class="align-middle">@color.Text</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @{ int index = 0; }
+                @foreach(var size in sizeList)
+                {
+                    <tr>
+                        <td class="font-weight-bold align-middle">@size.Text</td>
+                        @foreach(var color in colorList)
+                        {
+                            var existingVariant = variants.FirstOrDefault(v => v.SizeId == size.Value && v.ColorId == color.Value);
+                            if (existingVariant != null)
+                            {
+                                <td class="align-middle bg-light" title="Phân loại đã tồn tại">
+                                    <i class="fas fa-check-circle text-success"></i>
+                                </td>
+                            }
+                            else
+                            {
+                                <td class="align-middle">
+                                    <div class="input-group input-group-sm">
+                                        <div class="input-group-prepend">
+                                            <div class="input-group-text">
+                                                <input type="checkbox" name="variants[@index].IsSelected" value="true" class="variant-checkbox">
+                                            </div>
+                                        </div>
+                                        <input type="number" name="variants[@index].AdditionalPrice" class="form-control" value="0" min="0" disabled>
+                                        <input type="hidden" name="variants[@index].SizeId" value="@size.Value">
+                                        <input type="hidden" name="variants[@index].ColorId" value="@color.Value">
+                                    </div>
+                                </td>
+                                index++;
+                            }
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <button type="submit" class="btn btn-info mt-2"><i class="fas fa-plus-circle"></i> Thêm các phân loại đã chọn</button>
+</form>
+
+<!-- Bảng phân loại hiện có -->
+<table class="table table-bordered table-striped" id="variants-table">
+    <thead class="thead-dark">
+        <tr>
+            <th>Kích thước</th>
+            <th>Màu sắc</th>
+            <th>Số lượng tồn</th>
+            <th>Giá cộng thêm</th>
+            <th>Trạng thái</th>
+            <th class="text-center">Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (variants != null && variants.Any())
+        {
+            foreach (var item in variants)
+            {
+                <tr>
+                    <td>@item.SizeName</td>
+                    <td>
+                        @item.ColorName
+                        @if (!string.IsNullOrEmpty(item.ColorHexCode))
+                        {
+                            <span style="display:inline-block; width:15px; height:15px; background-color:@item.ColorHexCode; border:1px solid #ccc; margin-left:5px; vertical-align:middle;"></span>
+                        }
+                    </td>
+                    <td class="text-center font-weight-bold @(item.StockQuantity > 0 ? "text-success" : "text-danger")">@item.StockQuantity</td>
+                    <td>@item.AdditionalPrice.ToString("N0") VNĐ</td>
+                    <td class="text-center">
+                        @if (item.IsActive) { <span class="badge bg-success text-white">Đang bán</span> }
+                        else { <span class="badge bg-secondary text-white">Ngừng bán</span> }
+                    </td>
+                    <td class="text-center">
+                        <button type="button" class="btn btn-warning btn-sm edit-variant-btn"
+                                data-id="@item.Id"
+                                data-price="@item.AdditionalPrice"
+                                data-name="@item.SizeName - @item.ColorName"
+                                data-toggle="modal" data-target="#editVariantModal" title="Sửa giá">
+                            <i class="fas fa-edit"></i>
+                        </button>
+
+                        <form asp-action="ToggleStatus" asp-controller="ProductVariant" asp-area="Admin" method="post" class="d-inline" onsubmit="return confirm('Thay đổi trạng thái kinh doanh của phân loại này?');">
+                            <input type="hidden" name="id" value="@item.Id" />
+                            <input type="hidden" name="productId" value="@productId" />
+                            <button type="submit" class="btn btn-@(item.IsActive ? "warning" : "success") btn-sm" title="@(item.IsActive ? "Ngừng bán" : "Mở bán lại")">
+                                <i class="fas fa-@(item.IsActive ? "ban" : "check-circle")"></i>
+                            </button>
+                        </form>
+
+                        <form asp-action="Delete" asp-controller="ProductVariant" asp-area="Admin" method="post" class="d-inline" onsubmit="return confirm('Xóa vĩnh viễn phân loại này?');">
+                            <input type="hidden" name="id" value="@item.Id" />
+                            <input type="hidden" name="productId" value="@productId" />
+                            <button type="submit" class="btn btn-danger btn-sm" title="Xóa"><i class="fas fa-trash"></i></button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr><td colspan="6" class="text-center">Chưa có phân loại nào. Hãy thêm ở form trên!</td></tr>
+        }
+    </tbody>
+</table>

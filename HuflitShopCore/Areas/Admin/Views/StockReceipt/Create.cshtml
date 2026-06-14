@@ -1,0 +1,158 @@
+@model HuflitShopCore.DTOs.StockReceiptDTO
+
+@{
+    ViewData["Title"] = "Tạo phiếu nhập kho";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid mt-4">
+    <form asp-action="Create" method="post">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Tạo Phiếu Nhập Kho Mới</h6>
+            </div>
+            <div class="card-body">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <h5 class="font-weight-bold">1. Thông tin chung</h5>
+                <div class="row">
+                    <div class="form-group mb-3 col-md-6">
+                        <label asp-for="SupplierId" class="control-label font-weight-bold">Nhà cung cấp <span class="text-danger">*</span></label>
+                        <select asp-for="SupplierId" class="form-control" asp-items="ViewBag.SupplierList">
+                            <option value="">-- Chọn nhà cung cấp --</option>
+                        </select>
+                        <span asp-validation-for="SupplierId" class="text-danger"></span>
+                    </div>
+                </div>
+                <hr />
+
+                <h5 class="font-weight-bold">2. Chọn Sản phẩm & Nhập số lượng phân loại</h5>
+                <p class="text-muted">Chọn sản phẩm, sau đó nhập số lượng và đơn giá cho các phân loại có hàng về.</p>
+
+                <div class="row">
+                    <div class="col-md-5 mb-4">
+                        <label class="control-label font-weight-bold">Tìm kiếm Sản phẩm <span class="text-danger">*</span></label>
+                        <select id="select-product" class="form-control">
+                            <option value="">-- Tìm sản phẩm --</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="variant-matrix-container" class="table-responsive" style="display:none;">
+                    <table class="table table-bordered">
+                        <thead class="bg-light">
+                            <tr>
+                                <th>Màu sắc</th>
+                                <th>Kích thước</th>
+                                <th class="text-center">Tồn kho hiện tại</th>
+                                <th style="width: 150px;">Số lượng nhập</th>
+                                <th style="width: 200px;">Giá nhập (VNĐ)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="variant-matrix-body">
+                            <!-- Nội dung được sinh bởi JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Tạo phiếu và tiếp tục
+                </button>
+                <a asp-action="Index" class="btn btn-secondary">Trở về</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('select[name="SupplierId"]').select2({ placeholder: "Gõ để tìm nhà cung cấp..." });
+            
+            $('#select-product').select2({
+                placeholder: "Gõ tên sản phẩm, danh mục hoặc thương hiệu...",
+                minimumInputLength: 0,
+                allowClear: true,
+                ajax: {
+                    url: '@Url.Action("SearchProducts", "StockReceipt")',
+                    dataType: 'json',
+                    delay: 250, // Độ trễ trước khi gửi request
+                    data: function (params) {
+                        return {
+                            term: params.term, // search term
+                            categoryId: $('.cate-filter.active').data('id'), // Thêm lọc theo danh mục
+                            page: params.page || 1
+                        };
+                    },
+                    processResults: function (data, params) {
+                        params.page = params.page || 1;
+                        return {
+                            results: data.results,
+                            pagination: { more: data.pagination.more }
+                        };
+                    },
+                    cache: true
+                }
+            });
+
+            // Xử lý khi nhấn vào Gợi ý (Quick Pick)
+            $('.quick-pick').click(function() {
+                var id = $(this).data('id');
+                var name = $(this).text().trim();
+                
+                // Set giá trị cho select2 và trigger change
+                var option = new Option(name, id, true, true);
+                $('#select-product').append(option).trigger('change');
+            });
+
+            // Xử lý bộ lọc danh mục
+            $('.cate-filter').click(function() {
+                $('.cate-filter').removeClass('active btn-primary').addClass('btn-light');
+                $(this).addClass('active btn-primary').removeClass('btn-light');
+                $('#select-product').val(null).trigger('change'); // Reset search khi đổi danh mục
+            });
+
+            $('#select-product').change(function() {
+                var productId = $(this).val();
+                var container = $('#variant-matrix-container');
+                var tbody = $('#variant-matrix-body');
+
+                tbody.empty();
+
+                if (productId) {
+                    container.show();
+                    tbody.append('<tr><td colspan="5" class="text-center">Đang tải phân loại...</td></tr>');
+                    
+                    $.getJSON('@Url.Action("GetVariantsByProduct", "StockReceipt")', { productId: productId }, function(data) {
+                        tbody.empty();
+                        if(data.length === 0) {
+                            tbody.append('<tr><td colspan="5" class="text-center text-danger">Sản phẩm này chưa được cấu hình phân loại.</td></tr>');
+                            return;
+                        }
+                        $.each(data, function(i, item) {
+                            var row = `
+                                <tr>
+                                    <td>${item.color}</td>
+                                    <td>${item.size} ${item.isActive ? '' : '<span class="badge badge-warning">Ngừng bán</span>'}</td>
+                                    <td class="text-center">${item.stock}</td>
+                                    <td>
+                                        <input type="hidden" name="Details[${i}].ProductVariantId" value="${item.id}" />
+                                        <input type="number" name="Details[${i}].Quantity" class="form-control" min="0" value="0" />
+                                    </td>
+                                    <td>
+                                        <input type="number" name="Details[${i}].UnitPrice" class="form-control" min="0" value="0" />
+                                    </td>
+                                </tr>`;
+                            tbody.append(row);
+                        });
+                    });
+                } else {
+                    container.hide();
+                }
+            });
+        });
+    </script>
+}

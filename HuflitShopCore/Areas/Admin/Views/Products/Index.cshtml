@@ -1,0 +1,55 @@
+﻿@model IEnumerable<HuflitShopCore.DTOs.ProductDTO>
+@{
+    ViewData["Title"] = "Quản lý sản phẩm";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4 mt-4">
+        <h1 class="h3 mb-0 text-gray-800">Danh sách sản phẩm</h1>
+        <a asp-action="Create" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+            <i class="fas fa-plus-circle fa-sm text-white-50"></i> Thêm sản phẩm mới
+        </a>
+    </div>
+
+    <table class="table table-bordered table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th>Tên sản phẩm</th>
+                <th>Danh mục</th>
+                <th>Giá bán</th>
+                <th>Thương hiệu</th>
+                <th>Trạng thái</th>
+                <th style="width: 150px;">Hành động</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.ProductName</td>
+                        <td>@(item.CategoryName ?? "---")</td>
+                        <td>@item.CurrentPrice.ToString("N0") VNĐ</td>
+                        <td>@(item.Trademark ?? "---")</td>
+                        <td>
+                            @if (!item.IsDeleted) { <span class="badge bg-success text-white">Đang bán</span> }
+                            else { <span class="badge bg-danger text-white">Đã khóa</span> }
+                        </td>
+                        <td>
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm" title="Sửa"><i class="fas fa-edit"></i></a>
+                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm text-white" title="Chi tiết"><i class="fas fa-info-circle"></i></a>
+                            <form asp-action="ToggleStatus" asp-route-id="@item.Id" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn thay đổi trạng thái sản phẩm này?');">
+                                <button type="submit" class="btn btn-@(item.IsDeleted ? "success" : "danger") btn-sm" title="@(item.IsDeleted ? "Mở khóa" : "Khóa")">
+                                    <i class="fas fa-@(item.IsDeleted ? "unlock" : "lock")"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            }
+            else { <tr><td colspan="6" class="text-center">Chưa có dữ liệu sản phẩm</td></tr> }
+        </tbody>
+    </table>
+</div>

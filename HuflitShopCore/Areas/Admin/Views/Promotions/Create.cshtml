@@ -1,0 +1,64 @@
+﻿@model HuflitShopCore.DTOs.PromotionDTO
+
+@{
+    ViewData["Title"] = "Thêm chương trình khuyến mãi";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid mt-4">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Thêm chương trình khuyến mãi mới</h6>
+        </div>
+        <div class="card-body">
+            <form asp-action="Create" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label asp-for="PromoCode" class="control-label font-weight-bold">Mã Khuyến mãi <span class="text-danger">*</span></label>
+                            <input asp-for="PromoCode" class="form-control" placeholder="VD: SUMMER2024" />
+                            <span asp-validation-for="PromoCode" class="text-danger"></span>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label asp-for="DiscountType" class="control-label font-weight-bold">Loại giảm giá</label>
+                            <select asp-for="DiscountType" class="form-control">
+                                <option value="Percent">Phần trăm (%)</option>
+                                <option value="FixedAmount">Số tiền cố định (VNĐ)</option>
+                            </select>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label asp-for="DiscountValue" class="control-label font-weight-bold">Mức giảm <span class="text-danger">*</span></label>
+                            <input asp-for="DiscountValue" class="form-control" type="number" step="0.01" />
+                            <span class="text-muted"><small>Ví dụ: 10 (giảm 10%) hoặc 50000 (giảm 50.000đ).</small></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label asp-for="StartDate" class="control-label font-weight-bold">Ngày bắt đầu <span class="text-danger">*</span></label>
+                            <input asp-for="StartDate" class="form-control" type="datetime-local" />
+                        </div>
+                        <div class="form-group mb-3">
+                            <label asp-for="EndDate" class="control-label font-weight-bold">Ngày kết thúc <span class="text-danger">*</span></label>
+                            <input asp-for="EndDate" class="form-control" type="datetime-local" />
+                        </div>
+                        <div class="form-group form-check mt-4">
+                            <label class="form-check-label font-weight-bold">
+                                <input class="form-check-input" asp-for="IsActive" /> Kích hoạt khuyến mãi
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group mt-4">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Lưu dữ liệu</button>
+                    <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Trở về danh sách</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

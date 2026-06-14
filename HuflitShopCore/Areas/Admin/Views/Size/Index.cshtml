@@ -1,0 +1,47 @@
+﻿@model IEnumerable<HuflitShopCore.DTOs.SizeDTO>
+@{
+    ViewData["Title"] = "Quản lý Kích thước";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid mt-4">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Danh sách kích thước</h1>
+        <a asp-action="Create" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+            <i class="fas fa-plus-circle fa-sm text-white-50"></i> Thêm kích thước mới
+        </a>
+    </div>
+
+    <table class="table table-bordered table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th>Tên kích thước</th>
+                <th>Phân loại (SizeType)</th>
+                <th style="width: 150px;" class="text-center">Hành động</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                foreach (var item in Model)
+                {
+                    <tr>
+                        <td class="font-weight-bold">@item.SizeName</td>
+                        <td>
+                            @if (item.SizeType == "Clothes") { <span>Quần áo</span> }
+                            else if (item.SizeType == "Shoes") { <span>Giày dép</span> }
+                            else { <span>@item.SizeType</span> }
+                        </td>
+                        <td class="text-center">
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm" title="Sửa"><i class="fas fa-edit"></i></a>
+                            <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa kích thước này?');">
+                                <button type="submit" class="btn btn-danger btn-sm" title="Xóa"><i class="fas fa-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            }
+            else { <tr><td colspan="3" class="text-center">Chưa có dữ liệu</td></tr> }
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,34 @@
+@model HuflitShopCore.DTOs.ColorDTO
+@{
+    ViewData["Title"] = "Chỉnh sửa màu sắc";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid mt-4">
+    <h2>Chỉnh sửa màu sắc</h2>
+    <hr />
+    <div class="row">
+        <div class="col-md-6">
+            <form asp-action="Edit" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Id" />
+                
+                <div class="form-group mb-3">
+                    <label asp-for="ColorName" class="control-label fw-bold">Tên màu sắc <span class="text-danger">*</span></label>
+                    <input asp-for="ColorName" class="form-control" />
+                    <span asp-validation-for="ColorName" class="text-danger"></span>
+                </div>
+                
+                <div class="form-group mb-3">
+                    <label asp-for="HexCode" class="control-label fw-bold">Mã màu (Hex Code)</label>
+                    <input asp-for="HexCode" class="form-control" type="color" style="height: 40px;" />
+                </div>
+                
+                <div class="form-group mt-4">
+                    <button type="submit" class="btn btn-primary">Cập nhật thay đổi</button>
+                    <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

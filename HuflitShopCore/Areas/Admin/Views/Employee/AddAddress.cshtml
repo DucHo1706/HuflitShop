@@ -1,0 +1,54 @@
+﻿@model HuflitShopCore.Models.Address
+@{
+    ViewData["Title"] = "Địa chỉ nhân viên";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid mt-4">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Cập nhật địa chỉ nhân viên</h1>
+        <a asp-action="Index" class="btn btn-secondary btn-sm shadow-sm">
+            <i class="fas fa-arrow-left fa-sm text-white-50"></i> Quay lại
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <form asp-action="AddAddress" asp-route-id="@ViewBag.UserId" method="post" class="card shadow p-4">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="UserId" value="@ViewBag.UserId" />
+                
+                <div class="form-group mb-3">
+                    <label asp-for="City" class="control-label fw-bold">Tỉnh / Thành phố</label>
+                    <input asp-for="City" class="form-control" placeholder="Nhập tỉnh/thành phố..." />
+                    <span asp-validation-for="City" class="text-danger"></span>
+                </div>
+                
+                <div class="form-group mb-3">
+                    <label asp-for="District" class="control-label fw-bold">Quận / Huyện</label>
+                    <input asp-for="District" class="form-control" placeholder="Nhập quận/huyện..." />
+                    <span asp-validation-for="District" class="text-danger"></span>
+                </div>
+                
+                <div class="form-group mb-3">
+                    <label asp-for="SpecificAddress" class="control-label fw-bold">Địa chỉ cụ thể</label>
+                    <input asp-for="SpecificAddress" class="form-control" placeholder="Nhập số nhà, tên đường, phường/xã..." />
+                    <span asp-validation-for="SpecificAddress" class="text-danger"></span>
+                </div>
+                
+                <div class="form-group mt-4">
+                    <button type="submit" class="btn btn-primary">Lưu địa chỉ</button>
+                    <a asp-action="Index" class="btn btn-secondary">Hủy</a>
+                </div>
+
+                @if (ViewBag.Message != null)
+                {
+                    <div class="alert mt-3 @(ViewBag.Message ? "alert-success" : "alert-danger")">
+                        @(ViewBag.Message ? "Cập nhật địa chỉ thành công." : "Cập nhật địa chỉ thất bại.")
+                    </div>
+                }
+            </form>
+        </div>
+    </div>
+</div>

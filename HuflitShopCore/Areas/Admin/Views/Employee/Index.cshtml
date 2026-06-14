@@ -1,0 +1,68 @@
+﻿@model IEnumerable<HuflitShopCore.DTOs.EmployeeDTO>
+@{
+    ViewData["Title"] = "Quản lý nhân viên";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4 mt-4">
+        <h1 class="h3 mb-0 text-gray-800">Quản lý nhân viên</h1>
+        <a asp-action="Create" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+            <i class="fas fa-user-plus fa-sm text-white-50"></i> Thêm nhân viên
+        </a>
+    </div>
+
+    <table class="table table-bordered table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th>Họ và tên</th>
+                <th>Giới tính</th>
+                <th>Ngày sinh</th>
+                <th>Địa chỉ</th>
+                <th>Trạng thái</th>
+                <th style="width: 180px;">Hành động</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.FullName</td>
+                        <td>@item.GenderName</td>
+                        <td>@(item.DateOfBirth.HasValue ? item.DateOfBirth.Value.ToString("dd/MM/yyyy") : "---")</td>
+                        <td>@(string.IsNullOrEmpty(item.FullAddress) ? "---" : item.FullAddress)</td>
+                        <td>
+                            @if (item.IsActive)
+                            {
+                                <span class="badge bg-success text-white">Đang làm việc</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger text-white">Đã nghỉ việc</span>
+                            }
+                        </td>
+                        <td>
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm" title="Sửa"><i class="fas fa-edit"></i></a>
+                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm text-white" title="Chi tiết"><i class="fas fa-info-circle"></i></a>
+                            <a asp-action="AddAddress" asp-route-id="@item.Id" class="btn btn-secondary btn-sm" title="Thêm địa chỉ"><i class="fas fa-map-marker-alt"></i></a>
+                            @if (item.IsActive)
+                            {
+                                <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn cho nhân viên này nghỉ việc?');">
+                                    <button type="submit" class="btn btn-danger btn-sm" title="Xóa"><i class="far fa-trash-alt"></i></button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="6" class="text-center">Chưa có dữ liệu nhân viên</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

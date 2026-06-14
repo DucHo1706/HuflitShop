@@ -1,0 +1,54 @@
+﻿@model IEnumerable<HuflitShopCore.DTOs.SupplierDTO>
+@{
+    ViewData["Title"] = "Quản lý nhà cung cấp";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4 mt-4">
+        <h1 class="h3 mb-0 text-gray-800">Danh sách nhà cung cấp</h1>
+        <a asp-action="Create" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+            <i class="fas fa-plus-circle fa-sm text-white-50"></i> Thêm nhà cung cấp mới
+        </a>
+    </div>
+
+    <table class="table table-bordered table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th>Tên nhà cung cấp</th>
+                <th>Điện thoại</th>
+                <th>Email</th>
+                <th>Địa chỉ</th>
+                <th>Trạng thái</th>
+                <th style="width: 150px;">Hành động</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.Name</td>
+                        <td>@(item.PhoneNumber ?? "---")</td>
+                        <td>@(item.Email ?? "---")</td>
+                        <td>@(item.Address ?? "---")</td>
+                        <td>
+                            @if (item.IsActive) { <span class="badge bg-success text-white">Đang hợp tác</span> }
+                            else { <span class="badge bg-danger text-white">Ngừng hợp tác</span> }
+                        </td>
+                        <td>
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm" title="Sửa"><i class="fas fa-edit"></i></a>
+                            <form asp-action="ToggleStatus" asp-route-id="@item.Id" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn thay đổi trạng thái nhà cung cấp này?');">
+                                <button type="submit" class="btn btn-@(item.IsActive ? "danger" : "success") btn-sm" title="@(item.IsActive ? "Ngừng hợp tác" : "Hợp tác")">
+                                    <i class="fas fa-@(item.IsActive ? "ban" : "check")"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            }
+            else { <tr><td colspan="6" class="text-center">Chưa có dữ liệu nhà cung cấp</td></tr> }
+        </tbody>
+    </table>
+</div>

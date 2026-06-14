@@ -1,0 +1,50 @@
+@model IEnumerable<HuflitShopCore.DTOs.ColorDTO>
+@{
+    ViewData["Title"] = "Quản lý Màu sắc";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid mt-4">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Danh sách màu sắc</h1>
+        <a asp-action="Create" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+            <i class="fas fa-plus-circle fa-sm text-white-50"></i> Thêm màu mới
+        </a>
+    </div>
+
+    <table class="table table-bordered table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th>Tên màu sắc</th>
+                <th>Mã màu (Hex)</th>
+                <th>Hiển thị</th>
+                <th style="width: 150px;" class="text-center">Hành động</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                foreach (var item in Model)
+                {
+                    <tr>
+                        <td class="font-weight-bold">@item.ColorName</td>
+                        <td>@(item.HexCode ?? "---")</td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(item.HexCode))
+                            {
+                                <span style="display:inline-block; width:30px; height:30px; background-color:@item.HexCode; border:1px solid #ccc; border-radius:4px;"></span>
+                            }
+                        </td>
+                        <td class="text-center">
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm" title="Sửa"><i class="fas fa-edit"></i></a>
+                            <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa màu này?');">
+                                <button type="submit" class="btn btn-danger btn-sm" title="Xóa"><i class="fas fa-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            }
+            else { <tr><td colspan="4" class="text-center">Chưa có dữ liệu</td></tr> }
+        </tbody>
+    </table>
+</div>

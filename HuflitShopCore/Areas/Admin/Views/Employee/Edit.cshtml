@@ -1,0 +1,72 @@
+﻿@model HuflitShopCore.DTOs.EmployeeDTO
+@{
+    ViewData["Title"] = "Chỉnh sửa thông tin nhân viên";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid mt-4">
+    <h1 class="h3 mb-2 text-gray-800">Chỉnh sửa thông tin</h1>
+    <p class="mb-4">Cập nhật thông tin cho nhân viên: @Model.FullName</p>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Thông tin chi tiết</h6>
+        </div>
+        <div class="card-body">
+            <form asp-action="Edit" method="post">
+                <input type="hidden" asp-for="Id" />
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label asp-for="FullName" class="control-label font-weight-bold"></label>
+                            <input asp-for="FullName" class="form-control" />
+                            <span asp-validation-for="FullName" class="text-danger"></span>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label asp-for="Email" class="control-label font-weight-bold"></label>
+                            <input asp-for="Email" class="form-control" readonly />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label asp-for="PhoneNumber" class="control-label font-weight-bold"></label>
+                            <input asp-for="PhoneNumber" class="form-control" />
+                            <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label asp-for="DateOfBirth" class="control-label font-weight-bold"></label>
+                            <input asp-for="DateOfBirth" class="form-control" type="date" />
+                            <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label asp-for="Gender" class="control-label font-weight-bold"></label>
+<select asp-for="Gender" class="form-control">
+                                <option value="0">Nữ</option>
+                                <option value="1">Nam</option>
+                                <option value="2">Khác</option>
+                            </select>
+                            <span asp-validation-for="Gender" class="text-danger"></span>
+                        </div>
+                         <div class="form-group mb-3">
+                            <label asp-for="IsActive" class="control-label font-weight-bold">Trạng thái</label>
+                            <select asp-for="IsActive" class="form-control">
+                                <option value="true">Đang làm việc</option>
+                                <option value="false">Đã nghỉ việc</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group mt-4">
+                    <input type="submit" value="Lưu thay đổi" class="btn btn-primary" />
+                    <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

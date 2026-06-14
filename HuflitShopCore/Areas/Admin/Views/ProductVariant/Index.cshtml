@@ -1,0 +1,55 @@
+@model IEnumerable<HuflitShopCore.DTOs.ProductVariantDTO>
+
+@{
+    ViewData["Title"] = "Quản lý biến thể: " + ViewBag.Product.ProductName;
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Quản lý biến thể: <span class="text-primary">@ViewBag.Product.ProductName</span></h2>
+
+<div class="mb-3 mt-3">
+    <a asp-action="Create" asp-route-productId="@ViewBag.Product.Id" class="btn btn-primary">Thêm biến thể mới</a>
+    <a asp-controller="Products" asp-action="Index" class="btn btn-secondary">Trở về danh sách sản phẩm</a>
+</div>
+
+<table class="table table-bordered table-striped">
+    <thead class="thead-dark">
+        <tr>
+            <th>Kích thước</th>
+            <th>Màu sắc</th>
+            <th>Số lượng tồn</th>
+            <th>Giá cộng thêm (VNĐ)</th>
+            <th class="text-center">Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (!Model.Any())
+        {
+            <tr>
+                <td colspan="5" class="text-center">Sản phẩm này chưa có biến thể nào.</td>
+            </tr>
+        }
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.SizeName</td>
+                <td>
+                    @item.ColorName
+                    @if (!string.IsNullOrEmpty(item.ColorHexCode))
+                    {
+                        <span style="display:inline-block; width:15px; height:15px; background-color:@item.ColorHexCode; border:1px solid #ccc; margin-left:5px; vertical-align:middle;"></span>
+                    }
+                </td>
+                <td>@item.StockQuantity</td>
+                <td>@String.Format("{0:0,0}", item.AdditionalPrice)</td>
+                <td class="text-center">
+                    <form asp-action="Delete" method="post" style="display:inline;">
+                        <input type="hidden" name="id" value="@item.Id" />
+                        <input type="hidden" name="productId" value="@item.ProductId" />
+                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Bạn có chắc chắn muốn xóa biến thể này? Các dữ liệu liên quan có thể bị ảnh hưởng.');">Xóa</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

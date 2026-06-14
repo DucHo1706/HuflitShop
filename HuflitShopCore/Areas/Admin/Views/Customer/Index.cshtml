@@ -1,0 +1,78 @@
+﻿@model IEnumerable<HuflitShopCore.DTOs.CustomerDTO>
+@{
+    ViewData["Title"] = "Quản lý khách hàng";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4 mt-4">
+        <h1 class="h3 mb-0 text-gray-800">Quản lý khách hàng</h1>
+    </div>
+
+    <table class="table table-bordered table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th>Họ và tên</th>
+                <th>Giới tính</th>
+                <th>Ngày sinh</th>
+                <th>Ngày tham gia</th>
+                <th>Trạng thái</th>
+                <th>Hành động</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.FullName</td>
+                        <td>@item.GenderName</td>
+                        <td>@(item.DateOfBirth.HasValue ? item.DateOfBirth.Value.ToString("dd/MM/yyyy") : "---")</td>
+                        <td>@(item.JoinedDate.HasValue ? item.JoinedDate.Value.ToString("dd/MM/yyyy") : "---")</td>
+                        <td>
+                            @if (item.IsActive == true)
+                            {
+                                <span class="badge bg-success text-white">Đang hoạt động</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger text-white">Vô hiệu hóa</span>
+                            }
+                        </td>
+                        <td>
+                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm text-white" title="Chi tiết">
+                                <i class="fas fa-info-circle"></i>
+                            </a>
+                            <a asp-action="OrderView" asp-route-id="@item.Id" class="btn btn-primary btn-sm text-white" title="Lịch sử đơn hàng">
+                                <i class="fas fa-shopping-cart"></i>
+                            </a>
+                            @if (item.IsActive == true)
+                            {
+                                <form asp-action="Disable" asp-route-id="@item.Id" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn vô hiệu hóa khách hàng này?');">
+                                    <button type="submit" class="btn btn-danger btn-sm" title="Vô hiệu hóa">
+                                        <i class="fas fa-ban"></i>
+                                    </button>
+                                </form>
+                            }
+                            else
+                            {
+                                <form asp-action="AvailableCustomer" asp-route-id="@item.Id" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn kích hoạt lại khách hàng này?');">
+                                    <button type="submit" class="btn btn-success btn-sm" title="Kích hoạt">
+                                        <i class="fas fa-check-circle"></i>
+                                    </button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="6" class="text-center">Chưa có dữ liệu khách hàng</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

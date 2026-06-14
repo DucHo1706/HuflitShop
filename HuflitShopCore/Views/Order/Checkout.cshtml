@@ -1,0 +1,88 @@
+@model HuflitShopCore.Models.Address
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Checkout";
+
+    decimal total = ViewBag.Total is decimal d ? d : 0;
+    var paymentMethodHint = "Thanh toán giả lập";
+}
+
+<div class="page-header mb-0">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <h2 class="wow fadeInDown" data-wow-delay="0.5s">Thanh toán</h2>
+            </div>
+            <div class="col-12 wow fadeInUp" data-wow-delay="0.5s">
+                <a asp-controller="Home" asp-action="Index">Home</a>
+                <a asp-controller="Cart" asp-action="Cart">Giỏ hàng</a>
+                <a asp-controller="Order" asp-action="Checkout">Thanh toán</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container" style="margin-top: 2rem;">
+    <div class="row">
+        <div class="col-lg-7">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="mb-3">Thông tin nhận hàng</h4>
+
+                    <form asp-action="PlaceOrder" asp-controller="Order" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="form-group">
+                            <label asp-for="SpecificAddress">Địa chỉ cụ thể</label>
+                            <input asp-for="SpecificAddress" class="form-control" placeholder="VD: 12 Nguyễn Văn A" />
+                            <span asp-validation-for="SpecificAddress" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mt-3">
+                            <label asp-for="City">Tỉnh/Thành phố</label>
+                            <input asp-for="City" class="form-control" placeholder="Nhập tên tỉnh/thành" />
+                            <span asp-validation-for="City" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mt-3">
+                            <label asp-for="District">Quận/Huyện</label>
+                            <input asp-for="District" class="form-control" placeholder="Nhập tên quận/huyện" />
+                            <span asp-validation-for="District" class="text-danger"></span>
+                        </div>
+
+                        <button type="submit" class="btn btn-success mt-4">
+                            Xác nhận đặt hàng (Payment: @paymentMethodHint)
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="mb-3">Tóm tắt đơn hàng</h4>
+
+                    <div class="d-flex justify-content-between">
+                        <span>Tổng tiền</span>
+                        <strong>@String.Format("{0:0,0}", total)</strong>
+                    </div>
+
+                    <hr />
+                    <div class="text-muted">
+                        Quy trình giả lập theo luồng:
+                        <ol class="mb-0">
+                            <li>Sản phẩm có trong giỏ</li>
+                            <li>Nhập thông tin khách hàng/địa chỉ</li>
+                            <li>Bấm “Xác nhận đặt hàng”</li>
+                            <li>Hệ thống tạo Order và đánh dấu thanh toán thành công</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

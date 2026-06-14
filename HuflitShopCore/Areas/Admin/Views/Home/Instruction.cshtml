@@ -1,0 +1,120 @@
+@{
+    ViewData["Title"] = "Hướng dẫn sử dụng hệ thống";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid mt-4">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800"><i class="fas fa-book-open text-primary"></i> Hướng dẫn vận hành Hệ thống Admin từ A - Z</h1>
+    </div>
+
+    <div class="alert alert-info shadow-sm mb-4">
+        <strong><i class="fas fa-lightbulb"></i> Quy tắc cốt lõi:</strong> Hãy tạo dữ liệu từ những bảng cơ sở (không phụ thuộc) trước, sau đó mới tạo các bảng phức tạp. Hệ thống sử dụng cơ chế <b>Khóa/Mở khóa (Soft Delete)</b> thay vì xóa hẳn để bảo toàn dữ liệu hóa đơn trong quá khứ.
+    </div>
+
+    <div class="row">
+        <!-- Cột trái: Lộ trình các bước -->
+        <div class="col-lg-8">
+            <div class="card shadow mb-4 border-left-primary">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Lộ trình vận hành chuẩn (Theo thứ tự)</h6>
+                </div>
+                <div class="card-body">
+                    
+                    <h5 class="font-weight-bold text-dark mt-2">Bước 1: Thiết lập dữ liệu nền tảng</h5>
+                    <p>Trước khi kinh doanh, bạn cần tạo các dữ liệu phụ trợ cơ bản:</p>
+                    <ul>
+                        <li><b>Danh mục:</b> Tạo các loại hàng (Áo, Quần, Váy...).</li>
+                        <li><b>Màu sắc & Kích thước:</b> Khai báo các Size (S, M, L) và Màu (Đỏ, Xanh...) có thể bán.</li>
+                        <li><b>Nhà cung cấp:</b> Tạo thông tin xưởng/đại lý để sau này nhập kho.</li>
+                    </ul>
+                    <hr />
+
+                    <h5 class="font-weight-bold text-dark mt-4">Bước 2: Hướng dẫn chi tiết tạo 1 Sản phẩm bán được từ A - Z</h5>
+                    <p>Giả sử bạn muốn bán <b>"Áo Polo thể thao"</b> (Gồm 2 màu: Đỏ, Đen - 2 Size: M, L), bạn làm theo trình tự:</p>
+                    
+                    <div class="alert alert-secondary text-dark">
+                        <strong>Giai đoạn 2.1: Tạo "Vỏ" sản phẩm (Thông tin chung)</strong>
+                        <ol class="mt-2 mb-0">
+                            <li>Vào menu <b>Sản phẩm</b>, bấm <i>Thêm sản phẩm mới</i>.</li>
+                            <li><b>Tên sản phẩm:</b> Đặt tên rõ ràng (VD: <i>Áo Polo thể thao nam vải cá sấu</i>).</li>
+                            <li><b>Giá bán:</b> Nhập số tiền bán cho khách (VD: <i>200000</i>). Tuyệt đối không nhập số âm.</li>
+                            <li><b>Mô tả sản phẩm:</b> Đây là lời chào hàng. Gợi ý cấu trúc chuẩn:
+                                <ul class="mb-2">
+                                    <li><i>Điểm nổi bật:</i> Chất liệu vải gì? (Mát, thấm mồ hôi).</li>
+                                    <li><i>Kiểu dáng:</i> Form dáng ra sao? Phù hợp mặc đi đâu? (Đi làm, đi chơi).</li>
+                                    <li><i>Bảo quản:</i> Có được giặt máy không? Có ủi nhiệt độ cao không?</li>
+                                </ul>
+                            </li>
+                            <li>Bấm <b>Thêm sản phẩm</b> để lưu lại.</li>
+                        </ol>
+                    </div>
+                    
+                    <div class="alert alert-secondary text-dark">
+                        <strong>Giai đoạn 2.2: Tạo Phân loại (Biến thể) & Hình ảnh</strong>
+                        <p class="mb-1">Sau khi lưu, bạn đang ở màn hình Danh sách sản phẩm. Hãy tìm cái áo vừa tạo và bấm vào nút <b>Chi tiết</b> (Màu xanh dương).</p>
+                        <ol class="mt-0 mb-0">
+                            <li>Cuộn xuống dưới, bấm <b>Quản lý kho biến thể</b>. Lần lượt thêm các tổ hợp: M-Đỏ, M-Đen, L-Đỏ, L-Đen. <i>(Lưu ý: Tồn kho lúc này vẫn bằng 0, khách chưa thể mua)</i>.</li>
+                            <li>Trở lại trang Chi tiết sản phẩm, bấm <b>Quản lý hình ảnh</b>. Tải lên 3-4 góc chụp chân thực của sản phẩm.</li>
+                        </ol>
+                    </div>
+                    <hr />
+
+                    <h5 class="font-weight-bold text-dark mt-4">Bước 3: Nhập Kho (Cực kỳ quan trọng)</h5>
+                    <p>Sản phẩm chỉ xuất hiện trên Website và cho phép Khách mua khi nó có <b>Tồn kho > 0</b>.</p>
+                    <ul>
+                        <li>Vào <b>Quản lý Kho -> Nhập kho</b>. Tạo phiếu nhập mới, chọn Nhà cung cấp.</li>
+                        <li>Ở bước thêm chi tiết, tìm chọn đúng "Áo Polo - Đỏ - M", nhập Số lượng nhập (VD: 50) và Giá vốn nhập vào. Bấm (+).</li>
+                        <li><i>Hệ thống sẽ tự động cộng số lượng vào tồn kho. Lúc này chiếc áo Polo đã chính thức sẵn sàng lên kệ!</i></li>
+                    </ul>
+                    <hr />
+
+                    <h5 class="font-weight-bold text-dark mt-4">Bước 4: Marketing & Bán hàng</h5>
+                    <ul>
+                        <li>Tạo các <b>Chương trình Khuyến mãi</b> (Mã giảm giá theo % hoặc tiền mặt) để kích cầu.</li>
+                        <li>Theo dõi các <b>Đơn hàng</b> mới: Duyệt đơn -> Đóng gói -> Đang giao -> Hoàn thành.</li>
+                        <li>Kiểm duyệt <b>Phản hồi (Reviews)</b> của khách hàng. Xóa các đánh giá vi phạm chuẩn mực.</li>
+                    </ul>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Cột phải: Tính năng và Lưu ý -->
+        <div class="col-lg-4">
+            <div class="card shadow mb-4 border-bottom-danger">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-danger"><i class="fas fa-exclamation-triangle"></i> Giải thích tính năng Khóa / Xóa</h6>
+                </div>
+                <div class="card-body">
+                    <p class="text-justify">
+                        Trong quá trình vận hành, đôi khi một sản phẩm hết hạn bán, nhân viên nghỉ việc hoặc ngừng hợp tác với nhà cung cấp. 
+                    </p>
+                    <p class="text-justify">
+                        Hệ thống cung cấp nút bấm <b><i class="fas fa-unlock text-success"></i> Mở khóa</b> / <b><i class="fas fa-lock text-danger"></i> Khóa</b> thay vì Xóa vĩnh viễn. Việc "Khóa" mang lại lợi ích:
+                    </p>
+                    <ul>
+                        <li class="mb-2">Ẩn sản phẩm khỏi khách hàng ngoài Website.</li>
+                        <li class="mb-2">Nhân viên bị khóa không thể đăng nhập Admin.</li>
+                        <li class="mb-2"><b>Bảo vệ lịch sử:</b> Đơn hàng cũ, phiếu nhập cũ chứa sản phẩm bị khóa vẫn có thể xem được bình thường mà không bị lỗi.</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card shadow mb-4 border-bottom-success">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-success"><i class="fas fa-check-circle"></i> Trạng thái Đơn hàng</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><span class="badge bg-warning text-dark">Chờ duyệt</span>: Khách vừa đặt.</li>
+                        <li class="mb-2"><span class="badge bg-info text-white">Đóng gói</span>: Đang xuất kho.</li>
+                        <li class="mb-2"><span class="badge bg-primary text-white">Đang giao</span>: Giao cho Shipper.</li>
+                        <li class="mb-2"><span class="badge bg-success text-white">Hoàn thành</span>: Khách nhận được hàng, cập nhật thành "Đã thanh toán".</li>
+                        <li class="mb-2"><span class="badge bg-danger text-white">Đã hủy</span>: Đơn bị hủy bỏ.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

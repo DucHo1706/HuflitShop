@@ -1,0 +1,42 @@
+@{
+    var images = ViewBag.Images as List<HuflitShopCore.DTOs.ProductImageDTO>;
+    var productId = ViewBag.ProductId as string;
+}
+
+<!-- Form thêm hình ảnh -->
+<form asp-action="Create" asp-controller="ProductImage" asp-area="Admin" method="post" enctype="multipart/form-data" class="mb-4 bg-light p-3 rounded border">
+    <input type="hidden" name="ProductId" value="@productId" />
+    <div class="row align-items-end">
+        <div class="col-md-9">
+            <label class="font-weight-bold">Chọn hình ảnh</label>
+            <input type="file" name="ImageFile" class="form-control-file" accept="image/*" required />
+        </div>
+        <div class="col-md-3">
+            <button type="submit" class="btn btn-success w-100"><i class="fas fa-upload"></i> Tải ảnh lên</button>
+        </div>
+    </div>
+</form>
+
+<!-- Danh sách hình ảnh hiện có -->
+<div class="row">
+    @if (images != null && images.Any())
+    {
+        foreach (var img in images)
+        {
+            <div class="col-md-3 mb-3 text-center">
+                <div class="border rounded p-2 position-relative h-100 d-flex flex-column justify-content-between">
+                    <img src="@img.ImageUrl" class="img-fluid rounded mb-2" style="max-height: 150px; object-fit: cover;" />
+                    <form asp-action="Delete" asp-controller="ProductImage" asp-area="Admin" method="post" class="mt-2" onsubmit="return confirm('Xóa hình ảnh này?');">
+                        <input type="hidden" name="id" value="@img.Id" />
+                        <input type="hidden" name="productId" value="@productId" />
+                        <button type="submit" class="btn btn-danger btn-sm w-100"><i class="fas fa-trash"></i> Xóa ảnh</button>
+                    </form>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="col-12 text-center text-muted">Chưa có hình ảnh nào. Hãy tải lên ảnh mới!</div>
+    }
+</div>

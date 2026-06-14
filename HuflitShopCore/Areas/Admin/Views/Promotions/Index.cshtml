@@ -1,0 +1,74 @@
+﻿@model IEnumerable<HuflitShopCore.DTOs.PromotionDTO>
+@{
+    ViewData["Title"] = "Quản lý khuyến mãi";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid mt-4">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Danh sách chương trình khuyến mãi</h1>
+        <a asp-action="Create" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+            <i class="fas fa-plus-circle fa-sm text-white-50"></i> Thêm khuyến mãi mới
+        </a>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <table class="table table-bordered table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Mã KM</th>
+                        <th>Mức giảm giá</th>
+                        <th>Ngày bắt đầu</th>
+                        <th>Ngày kết thúc</th>
+                        <th>Trạng thái</th>
+                        <th style="width: 150px;" class="text-center">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td><span class="badge bg-info text-white">@item.PromoCode</span></td>
+                                <td>
+                                    @if(item.DiscountType == "Percent") {
+                                        <span class="font-weight-bold text-danger">@item.DiscountValue.ToString("0.##")%</span>
+                                    } else {
+                                        <span class="font-weight-bold text-danger">@item.DiscountValue.ToString("N0") VNĐ</span>
+                                    }
+                                </td>
+                                <td>@item.StartDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>@item.EndDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>
+                                    @if (item.IsOngoing)
+                                    {
+                                        <span class="badge bg-success text-white">Đang áp dụng</span>
+                                    }
+                                    else if (item.StartDate > DateTime.Now && item.IsActive)
+                                    {
+                                        <span class="badge bg-warning text-dark">Sắp diễn ra</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary text-white">Đã ngưng / Kết thúc</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm" title="Sửa"><i class="fas fa-edit"></i></a>
+                                    <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa khuyến mãi này?');">
+                                        <button type="submit" class="btn btn-danger btn-sm" title="Xóa">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else { <tr><td colspan="5" class="text-center">Chưa có dữ liệu khuyến mãi</td></tr> }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

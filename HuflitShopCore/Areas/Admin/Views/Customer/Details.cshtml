@@ -1,0 +1,46 @@
+﻿@model HuflitShopCore.DTOs.CustomerDTO
+@{
+    ViewData["Title"] = "Thông tin khách hàng";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid mt-4">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Thông tin chi tiết khách hàng</h1>
+        <a asp-action="Index" class="btn btn-secondary btn-sm shadow-sm">
+            <i class="fas fa-arrow-left fa-sm text-white-50"></i> Quay lại
+        </a>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Hồ sơ khách hàng: @Model.FullName</h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3 font-weight-bold">Họ và tên:</div>
+                <div class="col-md-9 mb-3">@Model.FullName</div>
+
+                <div class="col-md-3 font-weight-bold">Giới tính:</div>
+                <div class="col-md-9 mb-3">@Model.GenderName</div>
+
+                <div class="col-md-3 font-weight-bold">Ngày sinh:</div>
+                <div class="col-md-9 mb-3">@(Model.DateOfBirth.HasValue ? Model.DateOfBirth.Value.ToString("dd/MM/yyyy") : "---")</div>
+
+                <div class="col-md-3 font-weight-bold">Email:</div>
+                <div class="col-md-9 mb-3">@Model.Email</div>
+
+                <div class="col-md-3 font-weight-bold">Số điện thoại:</div>
+                <div class="col-md-9 mb-3">@(string.IsNullOrEmpty(Model.PhoneNumber) ? "---" : Model.PhoneNumber)</div>
+
+                <div class="col-md-3 font-weight-bold">Địa chỉ:</div>
+                <div class="col-md-9 mb-3">@(string.IsNullOrEmpty(Model.FullAddress) ? "Chưa cập nhật địa chỉ" : Model.FullAddress)</div>
+
+                <div class="col-md-3 font-weight-bold">Trạng thái:</div>
+                <div class="col-md-9 mb-3">
+                    @(Model.IsActive == true ? "Đang hoạt động" : "Bị vô hiệu hóa")
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

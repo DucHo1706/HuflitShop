@@ -1,0 +1,68 @@
+@model HuflitShopCore.DTOs.ProductVariantDTO
+
+@{
+    ViewData["Title"] = "Thêm biến thể cho: " + ViewBag.ProductName;
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Thêm biến thể mới</h2>
+<h4>Sản phẩm: <span class="text-info">@ViewBag.ProductName</span></h4>
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            
+            <!-- Giữ lại ProductId để map ngược lại Model -->
+            <input type="hidden" asp-for="ProductId" />
+
+            <div class="form-group mb-3">
+                <label asp-for="SizeId" class="control-label font-weight-bold">Kích thước</label>
+                <select asp-for="SizeId" class="form-control" asp-items="ViewBag.SizeList">
+                    <option value="">-- Chọn kích thước --</option>
+                </select>
+                <span asp-validation-for="SizeId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="ColorId" class="control-label font-weight-bold">Màu sắc</label>
+                <select asp-for="ColorId" class="form-control" asp-items="ViewBag.ColorList">
+                    <option value="">-- Chọn màu sắc --</option>
+                </select>
+                <span asp-validation-for="ColorId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="AdditionalPrice" class="control-label font-weight-bold">Giá cộng thêm (VNĐ)</label>
+                <input asp-for="AdditionalPrice" class="form-control" type="number" step="0.01" />
+                <span class="text-muted"><small>Khoản tiền cộng thêm vào giá gốc của sản phẩm cho biến thể này (nếu có).</small></span>
+                <span asp-validation-for="AdditionalPrice" class="text-danger"></span>
+            </div>
+
+            <!-- StockQuantity được set ẩn bằng 0, vì quy trình chuẩn là Nhập kho để tăng số lượng -->
+            <input type="hidden" asp-for="StockQuantity" value="0" />
+
+            <div class="form-group mt-4">
+                <input type="submit" value="Lưu biến thể" class="btn btn-primary" />
+                <a asp-action="Index" asp-route-productId="@Model.ProductId" class="btn btn-secondary">Hủy bỏ</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <!-- Thêm thư viện Select2 từ CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    
+    <script>
+        $(document).ready(function() {
+            // Kích hoạt tính năng tìm kiếm cho Dropdown Size và Color
+            $('#SizeId').select2({ placeholder: "Gõ để tìm Kích thước..." });
+            $('#ColorId').select2({ placeholder: "Gõ để tìm Màu sắc..." });
+        });
+    </script>
+}

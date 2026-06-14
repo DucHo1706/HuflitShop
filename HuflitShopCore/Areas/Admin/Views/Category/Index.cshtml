@@ -1,0 +1,41 @@
+﻿@model IEnumerable<HuflitShopCore.DTOs.CategoryDTO>
+@{
+    ViewData["Title"] = "Quản lý danh mục";
+    // Bạn có thể đổi lại layout thực tế của Admin template nếu cần
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml"; 
+}
+
+<div class="container-fluid">
+    <h2 class="mt-4">Quản lý danh mục</h2>
+    <p>
+        <a asp-action="Create" class="btn btn-primary">Tạo danh mục mới</a>
+    </p>
+
+    <table class="table table-bordered table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th>Tên danh mục</th>
+                <th>Danh mục cha</th>
+                <th style="width: 150px;">Hành động</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.CategoryName</td>
+                        <td>@(item.ParentName ?? "---")</td>
+                        <td>
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm">Sửa</a>
+                            <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa danh mục [@item.CategoryName] không?');">
+                                <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>

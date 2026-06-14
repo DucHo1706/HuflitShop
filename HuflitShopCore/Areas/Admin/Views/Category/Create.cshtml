@@ -1,0 +1,36 @@
+﻿@model HuflitShopCore.DTOs.CategoryDTO
+@{
+    ViewData["Title"] = "Tạo danh mục mới";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid mt-4">
+    <h2>Tạo danh mục mới</h2>
+    <hr />
+    <div class="row">
+        <div class="col-md-6">
+            <form asp-action="Create" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                
+                <div class="form-group mb-3">
+                    <label asp-for="CategoryName" class="control-label fw-bold">Tên danh mục</label>
+                    <input asp-for="CategoryName" class="form-control" placeholder="Nhập tên danh mục..." />
+                    <span asp-validation-for="CategoryName" class="text-danger"></span>
+                </div>
+                
+                <div class="form-group mb-3">
+                    <label asp-for="ParentId" class="control-label fw-bold">Thuộc danh mục cha (Tùy chọn)</label>
+                    <select asp-for="ParentId" class="form-control" asp-items="ViewBag.ParentList">
+                        <option value="">-- Chọn danh mục cha --</option>
+                    </select>
+                    <span asp-validation-for="ParentId" class="text-danger"></span>
+                </div>
+                
+                <div class="form-group">
+                    <button type="submit" class="btn btn-success">Lưu danh mục</button>
+                    <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,173 @@
+﻿@model HuflitShopCore.DTOs.ProductDTO
+
+@{
+    ViewData["Title"] = "Chi tiết sản phẩm";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid mt-4">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Thông tin chi tiết sản phẩm</h1>
+        <div>
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning btn-sm shadow-sm">
+                <i class="fas fa-edit fa-sm text-white-50"></i> Chỉnh sửa
+            </a>
+            <a asp-action="Index" class="btn btn-secondary btn-sm shadow-sm">
+                <i class="fas fa-arrow-left fa-sm text-white-50"></i> Quay lại
+            </a>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Sản phẩm: @Model.ProductName</h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3 font-weight-bold">Tên sản phẩm:</div>
+                <div class="col-md-9 mb-3">@Model.ProductName</div>
+                <div class="col-md-3 font-weight-bold">Danh mục:</div>
+                <div class="col-md-9 mb-3">@(Model.CategoryName ?? "---")</div>
+                <div class="col-md-3 font-weight-bold">Giá bán:</div>
+                <div class="col-md-9 mb-3">@Model.CurrentPrice.ToString("N0") VNĐ</div>
+                <div class="col-md-3 font-weight-bold">Năm sản xuất:</div>
+                <div class="col-md-9 mb-3">@(Model.ManufactureYear?.ToString() ?? "---")</div>
+                <div class="col-md-3 font-weight-bold">Thương hiệu:</div>
+                <div class="col-md-9 mb-3">@(Model.Trademark ?? "---")</div>
+                <div class="col-md-3 font-weight-bold">Xuất xứ:</div>
+                <div class="col-md-9 mb-3">@(Model.Origin ?? "---")</div>
+                <div class="col-md-3 font-weight-bold">Trạng thái:</div>
+                <div class="col-md-9 mb-3">@(Model.IsDeleted ? "Đã khóa (Ngừng kinh doanh)" : "Đang kinh doanh")</div>
+                <div class="col-md-3 font-weight-bold">Mô tả:</div>
+                <div class="col-md-9 mb-3">@(string.IsNullOrEmpty(Model.Description) ? "Không có" : Model.Description)</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <ul class="nav nav-tabs card-header-tabs" id="productDetailsTab" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="variants-tab" data-toggle="tab" href="#variants" role="tab" aria-controls="variants" aria-selected="true"><i class="fas fa-tags mr-2"></i>Quản lý Phân loại</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="images-tab" data-toggle="tab" href="#images" role="tab" aria-controls="images" aria-selected="false"><i class="fas fa-images mr-2"></i>Quản lý Hình ảnh</a>
+                </li>
+            </ul>
+        </div>
+        <div class="card-body">
+            <div class="tab-content" id="productDetailsTabContent">
+                <div class="tab-pane fade show active" id="variants" role="tabpanel" aria-labelledby="variants-tab">
+                    <!-- Placeholder for Variants Partial View -->
+                    <div id="variants-placeholder">
+                        <div class="text-center p-5"><i class="fas fa-spinner fa-spin fa-3x"></i><p>Đang tải phân loại...</p></div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="images" role="tabpanel" aria-labelledby="images-tab">
+                    <!-- Placeholder for Images Partial View -->
+                    <div id="images-placeholder">
+                        <div class="text-center p-5"><i class="fas fa-spinner fa-spin fa-3x"></i><p>Đang tải hình ảnh...</p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL SỬA GIÁ BIẾN THỂ -->
+<div class="modal fade" id="editVariantModal" tabindex="-1" role="dialog" aria-labelledby="editVariantModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form asp-action="Edit" asp-controller="ProductVariant" asp-area="Admin" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editVariantModalLabel">Chỉnh sửa Phân loại</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    @* Bắt buộc phải có AntiForgeryToken cho form trong Modal *@
+                    @Html.AntiForgeryToken()
+
+                    <input type="hidden" name="Id" id="editVariantId" />
+                    <input type="hidden" name="ProductId" value="@Model.Id" />
+
+                    <div class="form-group">
+                        <label class="font-weight-bold">Phân loại:</label>
+                        <p id="editVariantName" class="form-control-plaintext bg-light p-2 rounded"></p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editAdditionalPrice" class="font-weight-bold">Giá cộng thêm (VNĐ)</label>
+                        <input type="number" name="AdditionalPrice" id="editAdditionalPrice" class="form-control" min="0" step="1000" required />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            var productId = '@Model.Id';
+
+            // Load Variants Partial View via AJAX
+            $('#variants-placeholder').load('/Admin/Products/VariantsPartial?productId=' + productId, function(response, status, xhr) {
+                if (status == "error") {
+                    $(this).html("<p class='alert alert-danger'>Lỗi tải dữ liệu phân loại: " + xhr.status + " " + xhr.statusText + "</p>");
+                } else {
+                    // Khởi tạo lại các script cho nội dung vừa tải
+                    // 'this' ở đây là #variants-placeholder
+                    var placeholder = $(this);
+                    placeholder.find('select[name="SizeId"]').select2({ placeholder: "Chọn Size...", dropdownParent: placeholder });
+                    placeholder.find('select[name="ColorId"]').select2({ placeholder: "Chọn Màu...", dropdownParent: placeholder });
+
+                    // Kích hoạt DataTable cho bảng phân loại
+                    $('#variants-table').DataTable({
+                        "language": {
+                            "url": "//cdn.datatables.net/plug-ins/1.11.3/i18n/vi.json"
+                        },
+                        "pageLength": 5, // Hiển thị 5 dòng mỗi trang
+                        "lengthMenu": [ [5, 10, 25, -1], [5, 10, 25, "Tất cả"] ],
+                        "destroy": true // Cho phép khởi tạo lại table
+                    });
+
+                    // Kích hoạt logic cho ma trận tạo hàng loạt
+                    placeholder.find('.variant-checkbox').change(function() {
+                        var priceInput = $(this).closest('.input-group').find('input[type="number"]');
+                        if ($(this).is(':checked')) {
+                            priceInput.prop('disabled', false);
+                        } else {
+                            priceInput.prop('disabled', true);
+                            priceInput.val(0); // Reset giá trị khi bỏ chọn
+                        }
+                    });
+                }
+            });
+
+            // Load Images Partial View via AJAX
+            $('#images-placeholder').load('/Admin/Products/ImagesPartial?productId=' + productId, function(response, status, xhr) {
+                if (status == "error") {
+                    $(this).html("<p class='alert alert-danger'>Lỗi tải dữ liệu hình ảnh: " + xhr.status + " " + xhr.statusText + "</p>");
+                }
+            });
+
+            // SỬA LỖI: Dùng event delegation để bắt sự kiện click cho nút sửa
+            $('#variants-placeholder').on('click', '.edit-variant-btn', function () {
+                var variantId = $(this).data('id');
+                var variantPrice = $(this).data('price');
+                var variantName = $(this).data('name');
+
+                $('#editVariantId').val(variantId);
+                $('#editAdditionalPrice').val(variantPrice);
+                $('#editVariantName').text(variantName);
+            });
+        });
+    </script>
+}

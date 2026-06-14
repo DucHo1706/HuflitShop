@@ -1,0 +1,38 @@
+@model HuflitShopCore.DTOs.ProductImageDTO
+
+@{
+    ViewData["Title"] = "Thêm hình ảnh cho: " + Model.ProductName;
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Thêm hình ảnh mới</h2>
+<h4>Sản phẩm: <span class="text-info">@Model.ProductName</span></h4>
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+        <!-- enctype="multipart/form-data" là bắt buộc để tải file lên Server -->
+        <form asp-action="Create" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            
+            <!-- Giữ lại ID và Tên Sản phẩm -->
+            <input type="hidden" asp-for="ProductId" />
+            <input type="hidden" asp-for="ProductName" />
+
+            <div class="form-group mb-3">
+                <label asp-for="ImageFile" class="control-label font-weight-bold">Chọn hình ảnh tải lên</label>
+                <input asp-for="ImageFile" class="form-control-file form-control" type="file" accept="image/*" />
+                <span asp-validation-for="ImageFile" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mt-4">
+                <input type="submit" value="Tải lên" class="btn btn-primary" />
+                <a asp-action="Index" asp-route-productId="@Model.ProductId" class="btn btn-secondary">Hủy bỏ</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
