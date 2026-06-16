@@ -1,4 +1,35 @@
-﻿@inject HuflitShopCore.Data.AppDbContext _context
+@inject HuflitShopCore.Data.AppDbContext _context
+@using System.Security.Claims
+@{
+    var isAuth = User.Identity != null && User.Identity.IsAuthenticated;
+    var userId = isAuth ? User.FindFirstValue(ClaimTypes.NameIdentifier) : null;
+    string? guestCartId = Context.Request.Cookies["GuestCartId"];
+    
+    int cartCount = 0;
+    if (_context != null)
+    {
+        if (isAuth && !string.IsNullOrEmpty(userId))
+        {
+            cartCount = _context.Carts.Where(c => c.UserId == userId).Sum(c => c.Quantity);
+        }
+        else if (!string.IsNullOrEmpty(guestCartId))
+        {
+            cartCount = _context.Carts.Where(c => c.SessionId == guestCartId).Sum(c => c.Quantity);
+        }
+    }
+
+    bool isEmployeeOrAdmin = false;
+    if (isAuth && !string.IsNullOrEmpty(userId) && _context != null)
+    {
+        isEmployeeOrAdmin = _context.UserRoles.Any(r => r.UserId == userId);
+    }
+
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+    var isHome = string.Equals(currentController, "Home", StringComparison.OrdinalIgnoreCase) && 
+                 string.Equals(currentAction, "Index", StringComparison.OrdinalIgnoreCase);
+    var headerClass = isHome ? "hea-index" : "bg-white shadow-sm";
+}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -6,79 +37,298 @@
     <meta charset="utf-8">
     <title>@ViewData["Title"] - HUFLIT SHOP</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <meta content="Free Website Template" name="keywords">
-    <meta content="Free Website Template" name="description">
+    <meta content="Clothing Shop, E-Commerce" name="keywords">
+    <meta content="Huflit Shop - Thời trang nữ thiết kế cao cấp" name="description">
 
     <!-- Google Font -->
-    <link href="~/Client/css/FontFamily.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Sapo Template Stylesheets (No legacy heritage) -->
+    <link href="~/Bean/bootstrap-4-3-min.css" rel="stylesheet">
 
-    <!-- CSS Libraries -->
-    <link href="~/Client/css/bootstrap.min.css" rel="stylesheet">
-    <link href="~/Client/css/all.min.css" rel="stylesheet">
-    <link href="~/Client/lib/animate/animate.min.css" rel="stylesheet">
-    <link href="~/Client/lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
-    <link href="~/Client/lib/flaticon/font/flaticon.css" rel="stylesheet">
-    <link href="~/Client/lib/tempusdominus/css/tempusdominus-bootstrap-4.min.css" rel="stylesheet" />
-    <link rel="stylesheet" type="text/css" href="~/Client/css/pushbar.css">
-    <link href="~/Client/lib/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+    <!-- Sapo Template Stylesheets -->
+    <link href="~/Bean/main.scss.css" rel="stylesheet" type="text/css" media="all">
+    @if (isHome)
+    {
+        <!-- Premium Homepage Stylesheet -->
+        <link href="~/css/homepage.css" rel="stylesheet" />
+    }
+    else
+    {
+        <!-- Sapo Homepage Stylesheet (Legacy) -->
+        <link href="~/Bean/index.scss.css" rel="stylesheet" type="text/css" media="all">
+    }
+    <link rel="stylesheet" href="~/Bean/aos_anima.css">
+    <link href="~/Bean/quickviews_popup_cart.scss.css" rel="stylesheet" type="text/css" media="all">
+    <link href="~/lib/font-awesome/css/all.min.css" rel="stylesheet">
+    <link href="~/css/chat.css" rel="stylesheet" />
 
-
-    <!-- Template Stylesheet -->
-    <link href="~/Client/css/style.css" rel="stylesheet">
-    <link href="~/css/chat.css" />
+    <style>
+        :root {
+            --mainColor: #2563eb;
+            --subColor: #1e293b;
+            --textColor: #334155;
+            --hover: #1d4ed8;
+            --colorContact: #2563eb;
+            --price: #ef4444;
+            --bgFoot: #0f172a;
+            --rotate-letter: 8deg;
+            --icon-size: 107px;
+        }
+        body, h1, h2, h3, h4, h5, h6, a, p, span, label, input, select, button, textarea {
+            font-family: 'Outfit', sans-serif !important;
+        }
+        footer.footer {
+            background-color: #0f172a !important;
+        }
+        .dropdown-menu {
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        .box_top_hea.dropdown:hover .dropdown-menu {
+            display: block;
+        }
+        .language-select .dropdown:hover .dropdown-menu {
+            display: block;
+        }
+        header.header.hea-index:not(.hSticky) .main-header {
+            margin-top: 15px !important;
+        }
+        .nav_new_menu .dropdown:hover .dropdown-menu {
+            display: block !important;
+        }
+        .nav_new_menu .dropdown-menu {
+            position: absolute !important;
+            margin-top: 0 !important;
+            border: 1px solid rgba(0,0,0,0.08) !important;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.12) !important;
+            border-radius: 8px !important;
+            padding: 8px 0 !important;
+            min-width: 170px !important;
+            background-color: #ffffff !important;
+            left: auto !important;
+            right: 0 !important;
+            display: none;
+            z-index: 1050 !important;
+        }
+        .nav_new_menu .dropdown-item {
+            display: block !important;
+            width: 100% !important;
+            padding: 10px 20px !important;
+            clear: both !important;
+            font-weight: 500 !important;
+            color: #334155 !important;
+            text-align: left !important;
+            white-space: nowrap !important;
+            background-color: transparent !important;
+            border: 0 !important;
+            font-size: 14px !important;
+            text-transform: none !important;
+            letter-spacing: normal !important;
+            height: auto !important;
+            line-height: 1.5 !important;
+            transition: all 0.2s !important;
+        }
+        .nav_new_menu .dropdown-item:hover {
+            color: #2563eb !important;
+            background-color: #f1f5f9 !important;
+            text-decoration: none !important;
+        }
+        .nav_new_menu .dropdown-item i {
+            width: 18px !important;
+            text-align: center !important;
+            margin-right: 8px !important;
+            color: #64748b !important;
+        }
+        .nav_new_menu .dropdown-item:hover i {
+            color: #2563eb !important;
+        }
+        /* Disable pseudo-elements added by Sapo template for nested items */
+        .nav_new_menu .dropdown-item::before,
+        .nav_new_menu .dropdown-item::after {
+            display: none !important;
+            content: none !important;
+        }
+    </style>
 </head>
 
 <body>
-    <!-- Plugin Trang Facebook -->
-    @* Tạm ẩn FB SDK lúc Dev
-    <div id="fb-root"></div>
-    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/vi_VN/sdk.js#xfbml=1&version=v12.0&appId=534483551121734&autoLogAppEvents=1" nonce="dApvqMup"></script> 
-    *@
-
-    <!-- Nav Bar Start -->
-    <div class="navbar navbar-expand-lg bg-white navbar-light shadow-sm sticky-top px-4 py-2">
-        <div class="container-fluid align-items-center">
-
-            <a asp-controller="Home" asp-action="Index" class="navbar-brand">
-                <img src="~/Client/img/logo-shop.png" alt="HuflitShop Logo" style="max-height: 50px;" />
-            </a>
-
-            <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-
-            <div class="collapse navbar-collapse" id="navbarCollapse">
-                <div class="navbar-nav mx-auto font-weight-bold">
-                    <a asp-controller="Home" asp-action="Index" class="nav-item nav-link">Trang chủ</a>
-                    <a asp-controller="About" asp-action="About" class="nav-item nav-link">Về chúng tôi</a>
-                    <a asp-controller="Product" asp-action="Product" class="nav-item nav-link">Sản phẩm</a>
-                    <a asp-controller="Chat" asp-action="Chat" class="nav-item nav-link">Chat</a>
-					<partial name="_LoginPartial" />
-				</div>
-                <div class="d-flex align-items-center ml-auto">
-                    <form asp-controller="Product" asp-action="Search" method="get" role="search" class="d-flex mr-3 my-2 my-lg-0">
-                        <div class="input-group">
-                            <input type="search" class="form-control px-4" placeholder="Tìm kiếm..." value="@ViewData["GetProduct"]" name="search" aria-label="Search" style="border-radius: 20px 0 0 20px; outline: none; box-shadow: none;" />
-                            <div class="input-group-append">
-                                <button type="submit" class="btn btn-success px-3" style="border-radius: 0 20px 20px 0;">
-                                    <i class="fa fa-search"></i>
+    <div class="bodywrap">
+        <!-- Nav Bar Start -->
+        <header class="header @headerClass">
+            <div class="topbarhea" bis_skin_checked="1">
+                <div class="container" bis_skin_checked="1">
+                    <div class="box-topbar" bis_skin_checked="1">
+                        <div class="row " bis_skin_checked="1">
+                            <div class="col-lg-7 col-md-7 col-sm-12 col-xs-12 col-12 d-none d-md-block" bis_skin_checked="1">
+                                <div class="box_text_hi" bis_skin_checked="1">
+                                    <div class="box_text_item" bis_skin_checked="1">
+                                        <span>Chào mừng bạn đến với Huflit Shop</span>
+                                    </div>
+                                    <div class="box_text_item" title="0947 653 170" bis_skin_checked="1">
+                                        <a href="tel:+84947653170" title="0947 653 170" class="opaci_href"></a>
+                                        <div class="img_top" bis_skin_checked="1">
+                                            <img width="36" height="36" src="/Bean/icon_topbar_2.png" alt="Huflit Shop" class="lazyload loaded" data-was-processed="true">
+                                        </div>
+                                        <span class="bold">0947 653 170</span>
+                                    </div>
+                                </div>
+                            </div>
+                        <div class="col-lg-5 col-md-5 col-sm-12 col-xs-12 col-12 text-hea-right" bis_skin_checked="1">
+                            <div class="language-select" bis_skin_checked="1">
+                                <button class="btn btn-outline-secondary dropdown-toggle d-flex align-items-center gap-2" type="button" id="languageDropdown">
+                                    <img src="~/Bean/vn.png" alt="Vietnam Flag"> VI
                                 </button>
+                                <ul class="dropdown-menu" aria-labelledby="languageDropdown">
+                                    <li>
+                                        <a class="dropdown-item" href="#" data-lang="vi">
+                                            <img src="~/Bean/vn.png" alt="Vietnam Flag" class="flag-icon"> Tiếng Việt
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="#" data-lang="en">
+                                            <img src="~/Bean/en.png" alt="UK Flag" class="flag-icon"> English
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            
+                            <div class="box_top_hea" bis_skin_checked="1">
+                                <a href="/About/About" title="Hệ thống chi nhánh" class="opaci_href"></a>
+                                <div class="img_top" bis_skin_checked="1">
+                                    <img width="36" height="36" src="~/Bean/icon_topbar_3.png" alt="Huflit Shop" class="lazyload loaded" data-was-processed="true">
+                                </div>
+                                <span class="sub-text">Hệ thống chi nhánh</span>
                             </div>
                         </div>
-                    </form>
-
-                    <div class="cart pl-2">
-                        <a asp-controller="Cart" asp-action="Cart" class="btn btn-outline-success position-relative" style="border-radius: 50%; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center;">
-                            <i class="fas fa-shopping-cart fa-lg"></i>
-                            @if (User.Identity != null && User.Identity.IsAuthenticated)
-                            {
-                                @* Badge số lượng giỏ hàng *@
-                                @* <span class="position-absolute badge rounded-pill bg-danger text-white" style="top: -5px; right: -5px; font-size: 0.75rem;">0</span> *@
-                            }
-                        </a>
                     </div>
                 </div>
             </div>
+        </div>
+        
+        <div class="main-header" bis_skin_checked="1">
+            <div class="container" bis_skin_checked="1">
+                <div class="box-hearder" bis_skin_checked="1">
+                    <div class="row align-items-center" bis_skin_checked="1">
+                        <div class="col-lg-2 col-md-8 col-5 header-logo" bis_skin_checked="1">
+                            <a asp-controller="Home" asp-action="Index" class="logo-wrapper" title="Huflit Shop">
+                            <img src="~/Client/img/logo-shop.png" alt="Huflit Shop" style="max-height: 50px; width: auto;" class="lazyload loaded" data-was-processed="true">
+                        </a>
+                        </div>
+                        <div class="col-lg-8 col-md-12 col-12" bis_skin_checked="1">
+                            <div class="header-menu" bis_skin_checked="1">
+                                <div class="navigation-horizontal overflow" bis_skin_checked="1">
+                                    <div class="row" bis_skin_checked="1">
+                                        <div class="col-lg-12 col-sm-12 col-xs-12 col-12 sudes-main-header tab-content-mb" bis_skin_checked="1">
+                                            <div class="col-menu" bis_skin_checked="1">
+                                                <ul class="nav nav_new_menu">
+                                                    <li class="nav-item active">
+                                                        <a class="nav-link" asp-controller="Home" asp-action="Index" title="Trang chủ">Trang chủ</a>
+                                                    </li>
+                                                    <li class="nav-item">
+                                                        <a class="nav-link" asp-controller="Product" asp-action="Product" title="Sản phẩm">Sản phẩm</a>
+                                                    </li>
+                                                    <li class="nav-item">
+                                                        <a class="nav-link" asp-controller="About" asp-action="About" title="Về chúng tôi">Về chúng tôi</a>
+                                                    </li>
+                                                    @if (isAuth && !string.IsNullOrEmpty(userId))
+                                                    {
+                                                        <li class="nav-item dropdown">
+                                                            <a class="nav-link dropdown-toggle" href="javascript:;" id="userMenuDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-display="static">
+                                                                <i class="fas fa-user mr-1 text-primary"></i> @(User.FindFirst("Name")?.Value ?? "Tài khoản")
+                                                            </a>
+                                                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userMenuDropdown">
+                                                                <a class="dropdown-item text-dark px-3 py-2 d-block" asp-action="Profile" asp-controller="Profile" style="font-size: 14px;">Trang cá nhân</a>
+                                                                @if (isEmployeeOrAdmin)
+                                                                {
+                                                                    <a class="dropdown-item text-primary px-3 py-2 d-block border-top pt-2 mt-1" asp-area="Admin" asp-controller="Home" asp-action="Index" style="font-size: 14px; font-weight: bold;"><i class="fas fa-user-shield mr-1"></i>Quản trị</a>
+                                                                }
+                                                                <a class="dropdown-item text-danger px-3 py-2 d-block border-top mt-2 pt-2" asp-action="Logout" asp-controller="Login" style="font-size: 14px;">Đăng xuất</a>
+                                                            </div>
+                                                        </li>
+                                                    }
+                                                    else
+                                                    {
+                                                        <li class="nav-item">
+                                                            <a class="nav-link" asp-controller="Login" asp-action="Login" asp-route-returnUrl="@Context.Request.Path"><i class="fas fa-sign-in-alt mr-1 text-primary"></i>Đăng nhập</a>
+                                                        </li>
+                                                    }
+                                                </ul>
+                                            </div>
+                                            <div class="control-menu" bis_skin_checked="1">
+                                                <a href="#" id="prev" class="unactive"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path fill="#fff" d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l192 192c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 278.6 86.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-192 192z"></path></svg></a>
+                                                <a href="#" id="next"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path fill="#fff" d="M342.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L274.7 256 105.4 86.6c-12.5-12.5-12.5-32.8 0-45.3s-32.8-12.5-45.3 0l192 192z"></path></svg></a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-2 col-md-4 col-7 header-right" bis_skin_checked="1">
+                            <div class="sudes-header-search" bis_skin_checked="1">
+                                <a class="button-search" href="javascript:;" title="Tìm kiếm">
+                                    <span class="box-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                                            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"></path>
+                                        </svg>
+                                    </span>
+                                </a>
+                            </div>
+                            <div class="sudes-header-iwish" bis_skin_checked="1">
+                                <a href="#" title="Danh sách yêu thích">
+                                    <span class="box-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-heart" viewBox="0 0 16 16">
+                                            <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z"></path>
+                                        </svg>
+                                        <span class="js-wishlist-count">0</span>
+                                    </span>
+                                </a>
+                            </div>
+
+                            
+                            <div class="sudes-header-cart header-action_cart" bis_skin_checked="1">
+                                <a class="a-hea" href="/Cart/Cart" aria-label="Giỏ hàng" title="Giỏ hàng">
+                                    <span class="box-icon">
+                                        <i class="fas fa-shopping-cart" style="font-size: 24px; color: var(--mainColor);"></i>
+                                        @if (cartCount > 0)
+                                        {
+                                            <span class="count_item count_item_pr">@cartCount</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="count_item count_item_pr">0</span>
+                                        }
+                                    </span>
+                                </a>
+                            </div>
+                            <button class="menu-icon md-hidden" aria-label="Menu" id="btn-menu-mobile" title="Menu">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
+                                    <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div> 
+        </div>
+        <div class="mobile-nav-overflow" bis_skin_checked="1"></div>
+    </header>
+
+    <div class="popup-search" bis_skin_checked="1">
+        <div class="search-header" bis_skin_checked="1">
+            <div class="list-top-item header_tim_kiem" bis_skin_checked="1">
+                <form asp-controller="Product" asp-action="Search" method="get" class="header-search-form input-group search-bar" role="search">
+                    <input name="search" required="" class="input-group-field auto-search search-auto form-control" placeholder="Tìm kiếm sản phẩm..." autocomplete="off" type="text" value="@ViewData["GetProduct"]">
+                    <button type="submit" class="btn icon-fallback-text" aria-label="Tìm kiếm" title="Tìm kiếm">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"></path>
+                        </svg>
+                    </button>
+                </form>
+            </div>
+        </div>
+        <div class="close-popup-search" bis_skin_checked="1">
+            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" viewBox="0 0 512.001 512.001" style="enable-background:new 0 0 512.001 512.001;" xml:space="preserve"> <g> <g> <path d="M284.286,256.002L506.143,34.144c7.811-7.811,7.811-20.475,0-28.285c-7.811-7.81-20.475-7.811-28.285,0L256,227.717    L34.143,5.859c-7.811-7.811-20.475-7.811-28.285,0c-7.81,7.811-7.811,20.475,0,28.285l221.857,221.857L5.858,477.859    c-7.811,7.811-7.811,20.475,0,28.285c3.905,3.905,9.024,5.857,14.143,5.857c5.119,0,10.237-1.952,14.143-5.857L256,284.287    l221.857,221.857c3.905,3.905,9.024,5.857,14.143,5.857s10.237-1.952,14.143-5.857c7.811-7.811,7.811-20.475,0-28.285    L284.286,256.002z"></path> </g> </g> </svg>
         </div>
     </div>
     <!-- Nav Bar End -->
@@ -104,131 +354,186 @@
     <!-- Messenger Plugin chat Code -->
     @* Tạm ẩn FB Chat lúc Dev
     <div id="fb-root"></div>
-
-    <!-- Your Plugin chat code -->
-    <div id="fb-customer-chat" class="fb-customerchat"></div> 
     *@
-
     <!-- Footer Start -->
-    <div class="footer">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-5">
-                    <img src="~/Client/img/logo-shop.png" width="70%" />
-                </div>
-                <div class="col-lg-7">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="footer-contact">
-                                <h2>HUFLIT SHOP - Thời trang nữ</h2>
-                                <p>
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#719a0a" class="bi bi-geo-alt-fill" viewBox="0 0 16 16">
-                                        <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z" />
-                                    </svg>
-                                    <a href="#">test</a>
-                                </p>
-                                <p>
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#719a0a" class="bi bi-telephone-fill" viewBox="0 0 16 16">
-                                        <path fill-rule="evenodd" d="M1.885.511a1.745 1.745 0 0 1 2.61.163L6.29 2.98c.329.423.445.974.315 1.494l-.547 2.19a.678.678 0 0 0 .178.643l2.457 2.457a.678.678 0 0 0 .644.178l2.189-.547a1.745 1.745 0 0 1 1.494.315l2.306 1.794c.829.645.905 1.87.163 2.611l-1.034 1.034c-.74.74-1.846 1.065-2.877.702a18.634 18.634 0 0 1-7.01-4.42 18.634 18.634 0 0 1-4.42-7.009c-.362-1.03-.037-2.137.703-2.877L1.885.511z" />
-                                    </svg>
-                                    <a href="tel:+84947653170">test</a>
-                                </p>
-                                <p>
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#719a0a" class="bi bi-envelope-fill" viewBox="0 0 16 16">
-                                        <path d="M.05 3.555A2 2 0 0 1 2 2h12a2 2 0 0 1 1.95 1.555L8 8.414.05 3.555zM0 4.697v7.104l5.803-3.558L0 4.697zM6.761 8.83l-6.57 4.027A2 2 0 0 0 2 14h12a2 2 0 0 0 1.808-1.144l-6.57-4.027L8 9.586l-1.239-.757zm3.436-.586L16 11.801V4.697l-5.803 3.546z" />
-                                    </svg>
-                                    <a href="#">abc@gmail.com</a>
-                                </p>
-                                <div class="footer-social">
-                                    <a href="#">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-facebook" viewBox="0 0 16 16">
-                                            <path d="M16 8.049c0-4.446-3.582-8.05-8-8.05C3.58 0-.002 3.603-.002 8.05c0 4.017 2.926 7.347 6.75 7.951v-5.625h-2.03V8.05H6.75V6.275c0-2.017 1.195-3.131 3.022-3.131.876 0 1.791.157 1.791.157v1.98h-1.009c-.993 0-1.303.621-1.303 1.258v1.51h2.218l-.354 2.326H9.25V16c3.824-.604 6.75-3.934 6.75-7.951z" />
+    <footer class="footer" style="background-image:url('https://bizweb.dktcdn.net/100/601/974/themes/1047016/assets/bg_footer.jpg?1776407985038')">
+        <div class="container" bis_skin_checked="1">
+            <div class="mid-footer" bis_skin_checked="1">
+                <div class="row" bis_skin_checked="1">
+                    <div class="col-xs-12 col-md-12 col-lg-cus-35 footer-info" bis_skin_checked="1">
+                        <div class="logo-footer" bis_skin_checked="1">
+                            <a asp-controller="Home" asp-action="Index" title="Huflit Shop">
+                                <img width="388" height="108" src="~/Client/img/logo-shop-footer.png" alt="Huflit Shop" class="lazyload">
+                            </a>
+                        </div>
+                        <div class="info_foo_content" bis_skin_checked="1">
+                            Huflit Shop - Đơn vị cung cấp <b>thời trang thiết kế nữ cao cấp</b> hàng đầu, cam kết uy tín, chất lượng và phong cách hiện đại cho phái đẹp.
+                        </div>
+                        <div class="list-menu toggle-mn" bis_skin_checked="1">
+                            <div class="content-contact clearfix mb-3" bis_skin_checked="1">
+                                <span class="list_footer">
+                                    <b><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M12.005 11.8928C13.9204 8.88722 13.6796 9.2622 13.7348 9.18383C14.4322 8.20023 14.8008 7.04257 14.8008 5.83594C14.8008 2.63602 12.2041 0 9 0C5.80634 0 3.19922 2.63081 3.19922 5.83594C3.19922 7.0418 3.57553 8.22976 4.29574 9.22662L5.99491 11.8929C4.17822 12.172 1.08984 13.004 1.08984 14.8359C1.08984 15.5037 1.52571 16.4554 3.60218 17.197C5.05209 17.7148 6.96906 18 9 18C12.7978 18 16.9102 16.9287 16.9102 14.8359C16.9102 13.0037 13.8254 12.1726 12.005 11.8928ZM5.17672 8.6465C5.17092 8.63743 5.16488 8.62857 5.15855 8.61985C4.55924 7.79537 4.25391 6.81824 4.25391 5.83594C4.25391 3.19859 6.37755 1.05469 9 1.05469C11.617 1.05469 13.7461 3.19954 13.7461 5.83594C13.7461 6.81982 13.4465 7.7638 12.8796 8.56656C12.8288 8.63357 13.0939 8.22182 9 14.6457L5.17672 8.6465ZM9 16.9453C4.85177 16.9453 2.14453 15.726 2.14453 14.8359C2.14453 14.2377 3.53559 13.2541 6.61809 12.8707L8.55527 15.9104C8.65209 16.0623 8.81979 16.1543 8.99996 16.1543C9.18014 16.1543 9.34787 16.0623 9.44466 15.9104L11.3818 12.8707C14.4644 13.2541 15.8555 14.2377 15.8555 14.8359C15.8555 15.7184 13.1726 16.9453 9 16.9453Z" fill="black"></path>
+                                        <path d="M9 3.19922C7.54611 3.19922 6.36328 4.38205 6.36328 5.83594C6.36328 7.28982 7.54611 8.47266 9 8.47266C10.4539 8.47266 11.6367 7.28982 11.6367 5.83594C11.6367 4.38205 10.4539 3.19922 9 3.19922ZM9 7.41797C8.12767 7.41797 7.41797 6.70827 7.41797 5.83594C7.41797 4.96361 8.12767 4.25391 9 4.25391C9.87233 4.25391 10.582 4.96361 10.582 5.83594C10.582 6.70827 9.87233 7.41797 9 7.41797Z" fill="black"></path>
                                         </svg>
+                                    </b>
+                                    828 Sư Vạn Hạnh, Phường 13, Quận 10, TP. Hồ Chí Minh
+                                </span>
+                            </div>
+                            <div class="content-contact clearfix mb-3" bis_skin_checked="1">
+                                <span class="list_footer">
+                                    <b><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <g clip-path="url(#clip0_250_4882)">
+                                            <path d="M12.645 9.91174C12.3175 9.57067 11.9224 9.38832 11.5036 9.38832C11.0883 9.38832 10.6898 9.56729 10.3487 9.90836L9.28164 10.9721C9.19384 10.9248 9.10604 10.8809 9.02162 10.837C8.90005 10.7762 8.78523 10.7188 8.6873 10.658C7.68774 10.0232 6.77935 9.19583 5.90811 8.12535C5.48599 7.5918 5.20233 7.14267 4.99634 6.68679C5.27325 6.43352 5.52989 6.17012 5.77978 5.91685C5.87434 5.8223 5.96889 5.72437 6.06344 5.62982C6.7726 4.92066 6.7726 4.00215 6.06344 3.29299L5.14155 2.3711C5.03686 2.26641 4.9288 2.15835 4.8275 2.05029C4.62488 1.84092 4.41214 1.6248 4.19264 1.42219C3.86508 1.098 3.47335 0.925781 3.06137 0.925781C2.64939 0.925781 2.25091 1.098 1.91322 1.42219C1.90985 1.42556 1.90985 1.42556 1.90647 1.42894L0.75832 2.58722C0.326075 3.01947 0.0795609 3.54626 0.0255303 4.15748C-0.0555155 5.14354 0.234899 6.06206 0.457775 6.66315C1.00483 8.13886 1.82205 9.50651 3.04111 10.9721C4.5202 12.7382 6.29983 14.1329 8.33273 15.1156C9.10942 15.4836 10.1461 15.9193 11.3044 15.9936C11.3753 15.9969 11.4496 16.0003 11.5172 16.0003C12.2972 16.0003 12.9523 15.72 13.4656 15.1628C13.469 15.1561 13.4758 15.1527 13.4791 15.1459C13.6547 14.9332 13.8574 14.7407 14.0701 14.5347C14.2153 14.3963 14.3639 14.2511 14.5091 14.0991C14.8434 13.7513 15.019 13.3461 15.019 12.9307C15.019 12.512 14.84 12.1101 14.499 11.7724L12.645 9.91174ZM13.854 13.4676C13.8506 13.4676 13.8506 13.471 13.854 13.4676C13.7223 13.6095 13.5872 13.7378 13.442 13.8796C13.2225 14.089 12.9996 14.3085 12.7902 14.555C12.4492 14.9197 12.0473 15.0919 11.5205 15.0919C11.4699 15.0919 11.4158 15.0919 11.3652 15.0885C10.3622 15.0244 9.43022 14.6327 8.7312 14.2983C6.81987 13.3731 5.14155 12.0595 3.74688 10.3946C2.59536 9.00673 1.82542 7.7235 1.31551 6.34572C1.00146 5.50487 0.886642 4.84975 0.937296 4.23178C0.971065 3.83668 1.12303 3.50912 1.40331 3.22883L2.55484 2.07731C2.7203 1.92197 2.8959 1.83755 3.06813 1.83755C3.28087 1.83755 3.45309 1.96587 3.56115 2.07393C3.56453 2.07731 3.56791 2.08068 3.57129 2.08406C3.77728 2.27655 3.97314 2.47578 4.17913 2.68853C4.28381 2.79659 4.39187 2.90465 4.49994 3.01609L5.42183 3.93798C5.77978 4.29594 5.77978 4.62687 5.42183 4.98483C5.3239 5.08276 5.22935 5.18069 5.13142 5.27524C4.84776 5.56565 4.5776 5.83581 4.28381 6.09921C4.27706 6.10596 4.27031 6.10934 4.26693 6.11609C3.97651 6.40651 4.03054 6.69017 4.09133 6.88265C4.09471 6.89278 4.09808 6.90291 4.10146 6.91304C4.34122 7.49387 4.67891 8.04093 5.1922 8.69267L5.19558 8.69605C6.12761 9.8442 7.11029 10.7391 8.19427 11.4246C8.33273 11.5124 8.47456 11.5833 8.60963 11.6508C8.7312 11.7116 8.84602 11.769 8.94395 11.8298C8.95746 11.8366 8.97096 11.8467 8.98447 11.8535C9.09929 11.9109 9.20735 11.9379 9.31878 11.9379C9.59907 11.9379 9.77467 11.7623 9.83208 11.7049L10.987 10.55C11.1018 10.4352 11.2841 10.2967 11.4969 10.2967C11.7063 10.2967 11.8785 10.4284 11.9832 10.5432C11.9865 10.5466 11.9865 10.5466 11.9899 10.55L13.8506 12.4107C14.1984 12.7551 14.1984 13.1097 13.854 13.4676Z" fill="black"></path>
+                                            <path d="M8.64678 3.80573C9.53153 3.95431 10.3352 4.37305 10.9768 5.01466C11.6185 5.65627 12.0338 6.45998 12.1858 7.34473C12.2229 7.56761 12.4154 7.72294 12.6349 7.72294C12.6619 7.72294 12.6856 7.71957 12.7126 7.71619C12.9625 7.67567 13.1279 7.43928 13.0874 7.18939C12.9051 6.11891 12.3985 5.14298 11.6252 4.36967C10.8519 3.59636 9.87598 3.08982 8.80549 2.90747C8.5556 2.86695 8.3226 3.03242 8.2787 3.27893C8.2348 3.52544 8.39689 3.76521 8.64678 3.80573Z" fill="black"></path>
+                                            <path d="M15.9814 7.05794C15.6809 5.29519 14.8502 3.69116 13.5737 2.41469C12.2972 1.13821 10.6932 0.307495 8.93044 0.00695018C8.68393 -0.0369496 8.45092 0.131896 8.40702 0.37841C8.3665 0.628301 8.53197 0.861308 8.78186 0.905208C10.3555 1.17198 11.7907 1.91828 12.9321 3.0563C14.0735 4.19769 14.8164 5.63288 15.0832 7.20652C15.1203 7.4294 15.3128 7.58473 15.5323 7.58473C15.5593 7.58473 15.583 7.58136 15.61 7.57798C15.8565 7.54083 16.0253 7.30445 15.9814 7.05794Z" fill="black"></path>
+                                        </g>
+                                        <defs>
+                                            <clippath id="clip0_250_4882">
+                                                <rect width="16" height="16" fill="white"></rect>
+                                            </clippath>
+                                        </defs>
+                                        </svg>
+                                    </b>
+                                    <a title="0947 653 170" href="tel:+84947653170">
+                                        0947 653 170
                                     </a>
-                                    <a href="#">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-instagram" viewBox="0 0 16 16">
-                                            <path d="M8 0C5.829 0 5.556.01 4.703.048 3.85.088 3.269.222 2.76.42a3.917 3.917 0 0 0-1.417.923A3.927 3.927 0 0 0 .42 2.76C.222 3.268.087 3.85.048 4.7.01 5.555 0 5.827 0 8.001c0 2.172.01 2.444.048 3.297.04.852.174 1.433.372 1.942.205.526.478.972.923 1.417.444.445.89.719 1.416.923.51.198 1.09.333 1.942.372C5.555 15.99 5.827 16 8 16s2.444-.01 3.298-.048c.851-.04 1.434-.174 1.943-.372a3.916 3.916 0 0 0 1.416-.923c.445-.445.718-.891.923-1.417.197-.509.332-1.09.372-1.942C15.99 10.445 16 10.173 16 8s-.01-2.445-.048-3.299c-.04-.851-.175-1.433-.372-1.941a3.926 3.926 0 0 0-.923-1.417A3.911 3.911 0 0 0 13.24.42c-.51-.198-1.092-.333-1.943-.372C10.443.01 10.172 0 7.998 0h.003zm-.717 1.442h.718c2.136 0 2.389.007 3.232.046.78.035 1.204.166 1.486.275.373.145.64.319.92.599.28.28.453.546.598.92.11.281.24.705.275 1.485.039.843.047 1.096.047 3.231s-.008 2.389-.047 3.232c-.035.78-.166 1.203-.275 1.485a2.47 2.47 0 0 1-.599.919c-.28.28-.546.453-.92.598-.28.11-.704.24-1.485.276-.843.038-1.096.047-3.232.047s-2.39-.009-3.233-.047c-.78-.036-1.203-.166-1.485-.276a2.478 2.478 0 0 1-.92-.598 2.48 2.48 0 0 1-.6-.92c-.109-.281-.24-.705-.275-1.485-.038-.843-.046-1.096-.046-3.233 0-2.136.008-2.388.046-3.231.036-.78.166-1.204.276-1.486.145-.373.319-.64.599-.92.28-.28.546-.453.92-.598.282-.11.705-.24 1.485-.276.738-.034 1.024-.044 2.515-.045v.002zm4.988 1.328a.96.96 0 1 0 0 1.92.96.96 0 0 0 0-1.92zm-4.27 1.122a4.109 4.109 0 1 0 0 8.217 4.109 4.109 0 0 0 0-8.217zm0 1.441a2.667 2.667 0 1 1 0 5.334 2.667 2.667 0 0 1 0-5.334z" />
-                                        </svg>
+                                </span>
+                            </div>
+                            <div class="content-contact clearfix" bis_skin_checked="1">
+                                <span class="list_footer">
+                                    <b><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M14.5938 2.375H1.40625C0.629281 2.375 0 3.00819 0 3.78125V12.2188C0 12.9964 0.633906 13.625 1.40625 13.625H14.5938C15.3642 13.625 16 12.9991 16 12.2188V3.78125C16 3.00956 15.3732 2.375 14.5938 2.375ZM14.3968 3.3125C14.1095 3.59828 9.16509 8.51666 8.99438 8.68647C8.72875 8.95209 8.37562 9.09834 8 9.09834C7.62437 9.09834 7.27125 8.95206 7.00475 8.68559C6.88994 8.57137 2.00009 3.70731 1.60319 3.3125H14.3968ZM0.9375 12.0279V3.97266L4.98869 8.0025L0.9375 12.0279ZM1.60378 12.6875L5.65338 8.66366L6.34272 9.34937C6.78541 9.79206 7.37397 10.0358 8 10.0358C8.62603 10.0358 9.21459 9.79206 9.65641 9.35025L10.3466 8.66366L14.3962 12.6875H1.60378ZM15.0625 12.0279L11.0113 8.0025L15.0625 3.97266V12.0279Z" fill="black"></path>
+                                        </svg> </b>
+                                    <a title="abc@gmail.com" href="mailto:abc@gmail.com">
+                                        abc@gmail.com
+                                    </a>
+                                </span>
+                            </div>
+                            <div class="social-footer" bis_skin_checked="1">
+                                <div class="social" bis_skin_checked="1">
+                                    <a href="https://facebook.com/" target="_blank" aria-label="Facebook" title="Theo dõi Huflit Shop trên Facebook">
+                                        <img class="lazyload" width="50" height="50" alt="Facebook" data-src="https://bizweb.dktcdn.net/100/601/974/themes/1047016/assets/icon_face_book.png?1776407985038" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAANSURBVBhXYzh8+PB/AAffA0nNPuCLAAAAAElFTkSuQmCC">
+                                    </a>
+                                    <a href="https://www.instagram.com/" target="_blank" aria-label="Instagram" title="Theo dõi Huflit Shop trên Instagram">
+                                        <img class="lazyload" width="100" height="101" alt="Instagram" data-src="https://bizweb.dktcdn.net/100/601/974/themes/1047016/assets/insta.png?1776407985038" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAANSURBVBhXYzh8+PB/AAffA0nNPuCLAAAAAElFTkSuQmCC">
+                                    </a>
+                                    <a href="https://shopee.vn/" target="_blank" aria-label="Shopee" title="Theo dõi Huflit Shop trên Shopee">
+                                        <img class="lazyload" width="50" height="50" alt="Shopee" data-src="https://bizweb.dktcdn.net/100/601/974/themes/1047016/assets/icon-shop-ee.png?1776407985038" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAANSURBVBhXYzh8+PB/AAffA0nNPuCLAAAAAElFTkSuQmCC">
+                                    </a>
+                                    <a href="https://www.lazada.vn/" target="_blank" aria-label="Lazada" title="Theo dõi Huflit Shop trên Lazada">
+                                        <img class="lazyload" width="50" height="50" alt="Lazada" data-src="https://bizweb.dktcdn.net/100/601/974/themes/1047016/assets/icon_lazada.png?1776407985038" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAANSURBVBhXYzh8+PB/AAffA0nNPuCLAAAAAElFTkSuQmCC">
+                                    </a>
+                                    <a href="https://www.tiktok.com/vi-VN" target="_blank" aria-label="Tiktok" title="Theo dõi Huflit Shop trên Tiktok">
+                                        <img class="lazyload" width="50" height="50" alt="Tiktok" data-src="https://bizweb.dktcdn.net/100/601/974/themes/1047016/assets/icon_tik_tok.png?1776407985038" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAANSURBVBhXYzh8+PB/AAffA0nNPuCLAAAAAElFTkSuQmCC">
                                     </a>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="footer-link">
-                                <h2>HUFLIT SHOP</h2>
-                                <a asp-controller="Home" asp-action="Index">Trang chủ</a>
-                                <a asp-controller="About" asp-action="About">Về chúng tôi</a>
-                                <a asp-controller="Product" asp-action="Product">Sản phẩm</a>
-                                <a href="#1">Liên hệ</a>
-                            </div>
+                    </div>
+                    <div class="col-xs-12 col-md-4 col-lg-cus-20 footer-click" bis_skin_checked="1">
+                        <h4 class="title-menu clicked">
+                            <span>Chính Sách</span>
+                        </h4>
+                        <ul class="list-menu toggle-mn hidden-mob">
+                            <li class="li_menu">
+                                <a asp-controller="About" asp-action="About" title="Giới thiệu chung">Giới thiệu chung</a>
+                            </li>
+                            <li class="li_menu">
+                                <a href="#" title="Liên hệ chúng tôi">Liên hệ chúng tôi</a>
+                            </li>
+                            <li class="li_menu">
+                                <a href="#" title="Chính sách thành viên">Chính sách thành viên</a>
+                            </li>
+                            <li class="li_menu">
+                                <a href="#" title="Chính sách thanh toán">Chính sách thanh toán</a>
+                            </li>
+                            <li class="li_menu">
+                                <a href="#" title="Chính sách đổi sản phẩm">Chính sách đổi sản phẩm</a>
+                            </li>
+                            <li class="li_menu">
+                                <a href="#" title="Chính sách bảo mật">Chính sách bảo mật</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-xs-12 col-md-4 col-lg-cus-20 footer-click" bis_skin_checked="1">
+                        <h4 class="title-menu clicked">
+                            <span>Sản phẩm nổi bật</span>
+                        </h4>
+                        <ul class="list-menu toggle-mn hidden-mob footer-click">
+                            <li class="li_menu">
+                                <a asp-controller="Product" asp-action="Product" title="Váy Đầm Thiết Kế">Váy Đầm Thiết Kế</a>
+                            </li>
+                            <li class="li_menu">
+                                <a asp-controller="Product" asp-action="Product" title="Set Trang Phục Năng Động">Set Trang Phục Năng Động</a>
+                            </li>
+                            <li class="li_menu">
+                                <a asp-controller="Product" asp-action="Product" title="Thời Trang Công Sở">Thời Trang Công Sở</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-xs-12 col-md-4 col-lg-cus-25" bis_skin_checked="1">
+                        <div class="block-payment" bis_skin_checked="1">
+                            <h4 class="title-menu">
+                                <span>Đăng Ký Nhận Tin</span>
+                            </h4>
+                            <span class="content-mailchimp">Đăng ký ngay! Để nhận thật nhiều ưu đãi từ HUFLIT SHOP</span>
+                            <form id="mc-form" class="newsletter-form" data-toggle="validator" novalidate="true">
+                                <input aria-label="Địa chỉ Email" type="email" class="form-control" placeholder="Nhập địa chỉ email" name="EMAIL" required="" autocomplete="off">
+                                <button class="btn btn-default" type="submit" aria-label="Đăng ký nhận tin" name="subscribe">Đăng ký</button>
+                            </form>
                         </div>
                     </div>
                 </div>
+                <div class="bg-footer-bottom copyright clearfix" bis_skin_checked="1">
+                    <div class="row tablet" bis_skin_checked="1">
+                        <div class="col-lg-5 col-md-12 col-xs-12 order-lg-2" bis_skin_checked="1">
+                            <ul class="listmenu_footer">
+                                <li class="li_menu">
+                                    <a href="#" title="Trung tâm hỗ trợ">Trung tâm hỗ trợ</a>
+                                </li>
+                                <li class="li_menu">
+                                    <a href="#" title="Điều khoản &amp; Điều kiện">Điều khoản &amp; Điều kiện</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div id="copyright" class="col-lg-7 order-lg-1  col-md-12 col-xs-12 fot_copyright " bis_skin_checked="1">
+                            <span class="wsp">
+                                <span class="mobile">© Bản quyền thuộc về <b>Huflit Shop</b></span>
+                                <span class="dash"> | </span>
+                                <span class="opacity1">All Rights Reserved</span>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <a href="#" class="backtop" title="Lên đầu trang">
+                        <svg width="58" height="58" viewBox="0 0 58 58" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M18.5 29H39.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <path d="M29 18.5L39.5 29L29 39.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg>
+                    </a>
+                </div>
             </div>
         </div>
-        <div class="copyright">
-            <div class="container">
-                <p>Copyright &copy; by <a asp-controller="Home" asp-action="Index">HUFLIT SHOP</a>, All Right Reserved.</p>
-            </div>
-        </div>
-    </div>
-    <!-- Footer End -->
+    </footer>
+    </div> <!-- .bodywrap -->
 
-    <a href="#" class="back-to-top">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="white" class="bi bi-caret-up-fill" viewBox="0 0 16 16">
-            <path d="m7.247 4.86-4.796 5.481c-.566.647-.106 1.659.753 1.659h9.592a1 1 0 0 0 .753-1.659l-4.796-5.48a1 1 0 0 0-1.506 0z" />
-        </svg>
-    </a>
-
-    <!-- JavaScript Libraries -->
-    <script src="~/Client/js/jquery-3.4.1.min.js"></script>
+    <!-- Sapo Template and Essential JS Libraries -->
+    <script src="~/Bean/jquery.js" type="text/javascript"></script>
     <script src="~/Client/js/bootstrap.bundle.min.js"></script>
-    <script src="~/Client/lib/easing/easing.min.js"></script>
-    <script src="~/Client/lib/owlcarousel/owl.carousel.min.js"></script>
     <script src="~/Client/lib/tempusdominus/js/moment.min.js"></script>
-    <script src="~/Client/lib/tempusdominus/js/moment-timezone.min.js"></script>
-    <script src="~/Client/lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js"></script>
-    <script src="~/Client/lib/wow/wow.min.js"></script>
+    <script src="~/Bean/swiper.js" type="text/javascript"></script>
+    <script src="~/Bean/lazy.js" type="text/javascript"></script>
+    <!-- Sapo Template Core Scripts -->
+    <script src="~/Bean/quickview.js" type="text/javascript" defer></script>
+    <script src="~/Bean/waypoints.js" type="text/javascript"></script>
+    <script src="~/Bean/counterup.js" type="text/javascript"></script>
+    <script src="~/Bean/main.js" type="text/javascript"></script>
+    <script src="~/Bean/index.js" type="text/javascript"></script>
+    <script src="~/Bean/aos_anima.js" type="text/javascript"></script>
 
-    @*// cdn Boostrap 5*@
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
-    <script>
-        new WOW().init();
-    </script>
-
-    <!-- Alert -->
+    <!-- SweetAlert & Other Common Libraries -->
     <script src="~/lib/sweetalert/sweetalert.min.js"></script>
-
-    <!-- Plugin Messenger -->
-    @* Tạm ẩn script FB lúc dev
-    <script>
-        var chatbox = document.getElementById('fb-customer-chat');
-        chatbox.setAttribute("page_id", "101701408982171");
-        chatbox.setAttribute("attribution", "biz_inbox");
-
-        window.fbAsyncInit = function () {
-            FB.init({
-                xfbml: true,
-                version: 'v12.0'
-            });
-        };
-
-        (function (d, s, id) {
-            var js, fjs = d.getElementsByTagName(s)[0];
-            if (d.getElementById(id)) return;
-            js = d.createElement(s); js.id = id;
-            js.src = 'https://connect.facebook.net/vi_VN/sdk/xfbml.customerchat.js';
-            fjs.parentNode.insertBefore(js, fjs);
-        }(document, 'script', 'facebook-jssdk'));
-    </script>
-    *@
-
-    <!-- Contact Javascript File -->
-    <script src="~/Client/mail/jqBootstrapValidation.min.js"></script>
-    <script src="~/Client/mail/contact.js"></script>
-
-    <!-- Template Javascript -->
-    <script src="~/Client/js/main.js"></script>
 
     <!-- Address -->
     <script src="~/js/districts.min.js"></script>

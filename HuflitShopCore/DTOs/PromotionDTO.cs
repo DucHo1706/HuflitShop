@@ -1,9 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace HuflitShopCore.DTOs
 {
-    public class PromotionDTO
+    public class PromotionDTO : IValidatableObject
     {
         public string Id { get; set; } = string.Empty;
 
@@ -32,5 +33,13 @@ namespace HuflitShopCore.DTOs
         public bool IsActive { get; set; } = true;
         
         public bool IsOngoing => IsActive && StartDate <= DateTime.Now && EndDate >= DateTime.Now;
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (StartDate > EndDate)
+            {
+                yield return new ValidationResult("Ngày bắt đầu không được lớn hơn ngày kết thúc.", new[] { nameof(StartDate), nameof(EndDate) });
+            }
+        }
     }
 }

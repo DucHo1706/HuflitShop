@@ -62,6 +62,13 @@ namespace HuflitShopCore.Areas.Admin.Controllers
                 ModelState.AddModelError("SupplierId", "Vui lòng chọn nhà cung cấp.");
             }
 
+            // Xóa lỗi validation của Details items vì service sẽ tự lọc Quantity > 0
+            var detailErrors = ModelState.Keys.Where(k => k.StartsWith("Details[")).ToList();
+            foreach (var key in detailErrors)
+            {
+                ModelState.Remove(key);
+            }
+
             if (ModelState.IsValid)
             {
                 string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -82,6 +89,8 @@ namespace HuflitShopCore.Areas.Admin.Controllers
             // Nếu có lỗi, tải lại danh sách và hiển thị lại form
             var suppliers = await _supplierService.GetAllSuppliersAsync();
             ViewBag.SupplierList = new SelectList(suppliers.Where(s => s.IsActive), "Id", "Name", dto.SupplierId);
+            ViewBag.Categories = await _categoryService.GetAllCategoriesAsync();
+            ViewBag.LowStockProducts = await _productService.GetLowStockProductsAsync(10);
             return View(dto);
         }
 

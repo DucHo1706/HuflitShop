@@ -1,9 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace HuflitShopCore.DTOs
 {
-    public class EmployeeDTO
+    public class EmployeeDTO : IValidatableObject
     {
         public string? Id { get; set; }
 
@@ -31,5 +32,43 @@ namespace HuflitShopCore.DTOs
         public bool IsActive { get; set; } = true;
 
         public string FullAddress { get; set; } = string.Empty;
+
+        // Địa chỉ chi tiết
+        public string? City { get; set; }
+        public string? District { get; set; }
+        public string? SpecificAddress { get; set; }
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            // 1. Kiểm tra ngày sinh (DateOfBirth)
+            if (DateOfBirth.HasValue)
+            {
+                if (DateOfBirth.Value.Date > DateTime.Today)
+                {
+                    yield return new ValidationResult("Ngày sinh không được ở tương lai.", new[] { nameof(DateOfBirth) });
+                }
+                else if (DateOfBirth.Value.Date < DateTime.Today.AddYears(-120))
+                {
+                    yield return new ValidationResult("Ngày sinh không hợp lệ (vượt quá 120 tuổi).", new[] { nameof(DateOfBirth) });
+                }
+            }
+
+            // 2. Kiểm tra thông tin địa chỉ nếu có điền bất kỳ trường nào
+            if (!string.IsNullOrWhiteSpace(City) || !string.IsNullOrWhiteSpace(District) || !string.IsNullOrWhiteSpace(SpecificAddress))
+            {
+                if (string.IsNullOrWhiteSpace(City))
+                {
+                    yield return new ValidationResult("Vui lòng chọn/nhập Tỉnh/Thành phố.", new[] { nameof(City) });
+                }
+                if (string.IsNullOrWhiteSpace(District))
+                {
+                    yield return new ValidationResult("Vui lòng chọn/nhập Quận/Huyện.", new[] { nameof(District) });
+                }
+                if (string.IsNullOrWhiteSpace(SpecificAddress))
+                {
+                    yield return new ValidationResult("Vui lòng nhập Địa chỉ cụ thể.", new[] { nameof(SpecificAddress) });
+                }
+            }
+        }
     }
 }

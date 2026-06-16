@@ -1,4 +1,4 @@
-﻿using HuflitShopCore.DTOs;
+using HuflitShopCore.DTOs;
 using HuflitShopCore.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -27,7 +27,8 @@ namespace HuflitShopCore.Areas.Admin.Controllers
         public async Task<IActionResult> Create()
         {
             var categories = await _categoryService.GetAllCategoriesAsync();
-            ViewBag.ParentList = new SelectList(categories, "Id", "CategoryName");
+            var rootCategories = categories.Where(c => string.IsNullOrEmpty(c.ParentId));
+            ViewBag.ParentList = new SelectList(rootCategories, "Id", "CategoryName");
             return View(new CategoryDTO());
         }
 
@@ -37,11 +38,16 @@ namespace HuflitShopCore.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
-                await _categoryService.CreateCategoryAsync(dto);
-                return RedirectToAction(nameof(Index));
+                var (success, errorMsg) = await _categoryService.CreateCategoryAsync(dto);
+                if (success)
+                {
+                    return RedirectToAction(nameof(Index));
+                }
+                ModelState.AddModelError(string.Empty, errorMsg);
             }
             var categories = await _categoryService.GetAllCategoriesAsync();
-            ViewBag.ParentList = new SelectList(categories, "Id", "CategoryName", dto.ParentId);
+            var rootCategories = categories.Where(c => string.IsNullOrEmpty(c.ParentId));
+            ViewBag.ParentList = new SelectList(rootCategories, "Id", "CategoryName", dto.ParentId);
             return View(dto);
         }
 
@@ -52,7 +58,8 @@ namespace HuflitShopCore.Areas.Admin.Controllers
             if (category == null) return NotFound();
 
             var categories = await _categoryService.GetAllCategoriesAsync();
-            ViewBag.ParentList = new SelectList(categories.Where(c => c.Id != id), "Id", "CategoryName", category.ParentId);
+            var rootCategories = categories.Where(c => string.IsNullOrEmpty(c.ParentId) && c.Id != id);
+            ViewBag.ParentList = new SelectList(rootCategories, "Id", "CategoryName", category.ParentId);
             return View(category);
         }
 
@@ -62,11 +69,16 @@ namespace HuflitShopCore.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
-                await _categoryService.UpdateCategoryAsync(dto);
-                return RedirectToAction(nameof(Index));
+                var (success, errorMsg) = await _categoryService.UpdateCategoryAsync(dto);
+                if (success)
+                {
+                    return RedirectToAction(nameof(Index));
+                }
+                ModelState.AddModelError(string.Empty, errorMsg);
             }
             var categories = await _categoryService.GetAllCategoriesAsync();
-            ViewBag.ParentList = new SelectList(categories.Where(c => c.Id != dto.Id), "Id", "CategoryName", dto.ParentId);
+            var rootCategories = categories.Where(c => string.IsNullOrEmpty(c.ParentId) && c.Id != dto.Id);
+            ViewBag.ParentList = new SelectList(rootCategories, "Id", "CategoryName", dto.ParentId);
             return View(dto);
         }
 

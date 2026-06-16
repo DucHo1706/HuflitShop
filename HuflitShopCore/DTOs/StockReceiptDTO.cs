@@ -18,6 +18,7 @@ namespace HuflitShopCore.DTOs
         public DateTime ReceiptDate { get; set; } = DateTime.Now;
         public string? Note { get; set; }
         public decimal TotalAmount { get; set; } = 0;
+        public int ItemCount { get; set; } = 0; // Số lượng sản phẩm trong phiếu
 
         public List<StockReceiptDetailDTO> Details { get; set; } = new List<StockReceiptDetailDTO>();
     }

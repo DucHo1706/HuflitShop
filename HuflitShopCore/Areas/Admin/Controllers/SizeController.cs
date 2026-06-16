@@ -21,8 +21,9 @@ namespace HuflitShopCore.Areas.Admin.Controllers
             return View(sizes);
         }
 
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
+            await LoadExistingTypesAsync();
             return View(new SizeDTO());
         }
 
@@ -35,6 +36,7 @@ namespace HuflitShopCore.Areas.Admin.Controllers
                 await _sizeService.CreateSizeAsync(dto);
                 return RedirectToAction(nameof(Index));
             }
+            await LoadExistingTypesAsync();
             return View(dto);
         }
 
@@ -42,6 +44,7 @@ namespace HuflitShopCore.Areas.Admin.Controllers
         {
             var size = await _sizeService.GetSizeByIdAsync(id);
             if (size == null) return NotFound();
+            await LoadExistingTypesAsync();
             return View(size);
         }
 
@@ -54,6 +57,7 @@ namespace HuflitShopCore.Areas.Admin.Controllers
                 await _sizeService.UpdateSizeAsync(dto);
                 return RedirectToAction(nameof(Index));
             }
+            await LoadExistingTypesAsync();
             return View(dto);
         }
 
@@ -66,6 +70,14 @@ namespace HuflitShopCore.Areas.Admin.Controllers
             else
                 TempData["SuccessMessage"] = "Xóa kích thước thành công!";
             return RedirectToAction(nameof(Index));
+        }
+
+        private async Task LoadExistingTypesAsync()
+        {
+            var existingTypes = await _sizeService.GetExistingSizeTypesAsync();
+            if (!existingTypes.Contains("Clothes")) existingTypes.Add("Clothes");
+            if (!existingTypes.Contains("Shoes")) existingTypes.Add("Shoes");
+            ViewBag.ExistingTypes = existingTypes;
         }
     }
 }

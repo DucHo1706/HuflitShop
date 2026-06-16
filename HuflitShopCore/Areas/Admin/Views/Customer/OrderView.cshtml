@@ -1,63 +1,107 @@
-﻿@model IEnumerable<HuflitShopCore.DTOs.CustomerOrderDTO>
+@model IEnumerable<HuflitShopCore.DTOs.CustomerOrderDTO>
 @{
     ViewData["Title"] = "Lịch sử mua hàng";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
 
+<style>
+    .card-modern {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    }
+    .table-modern th {
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+        background-color: #f8f9fc;
+        border-bottom: 2px solid #e3e6f0;
+    }
+    .table-modern td {
+        vertical-align: middle;
+        font-size: 0.9rem;
+    }
+    .badge-status {
+        font-weight: 600;
+        padding: 6px 12px;
+        border-radius: 30px;
+    }
+</style>
+
 <div class="container-fluid mt-4">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Lịch sử mua hàng của khách hàng</h1>
-        <a asp-action="Index" class="btn btn-secondary btn-sm shadow-sm">
-            <i class="fas fa-arrow-left fa-sm text-white-50"></i> Quay lại
+        <div>
+            <h1 class="h3 mb-0 text-gray-800 font-weight-bold">Lịch sử mua hàng của khách hàng</h1>
+            <p class="text-muted mb-0">Danh sách các đơn hàng đã đặt của tài khoản này.</p>
+        </div>
+        <a asp-action="Index" class="btn btn-secondary shadow-sm" style="border-radius: 20px;">
+            <i class="fas fa-arrow-left fa-sm mr-1"></i> Quay lại
         </a>
     </div>
 
-    <table class="table table-bordered table-striped">
-        <thead class="thead-dark">
-            <tr>
-                <th>Mã đơn hàng</th>
-                <th>Ngày mua</th>
-                <th>Phương thức thanh toán</th>
-                <th>Giá trị đơn hàng</th>
-                <th>Trạng thái</th>
-                <th>Hành động</th>
-            </tr>
-        </thead>
-        <tbody>
-            @if (Model != null && Model.Any())
-            {
-                foreach (var item in Model)
-                {
-                    <tr>
-                        <td>@item.Id</td>
-                        <td>@(item.OrderDate.HasValue ? item.OrderDate.Value.ToString("dd/MM/yyyy HH:mm") : "---")</td>
-                        <td>@item.PaymentMethodName</td>
-                        <td>@item.FinalAmount.ToString("N0") VNĐ</td>
-                        <td>
-                            @switch (item.OrderStatus)
+    <div class="card card-modern mb-4">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover table-modern mb-0" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th class="pl-4">Mã đơn hàng</th>
+                            <th>Ngày mua</th>
+                            <th>Phương thức thanh toán</th>
+                            <th>Giá trị đơn hàng</th>
+                            <th>Trạng thái</th>
+                            <th class="text-center pr-4">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var item in Model)
                             {
-                                case 0: <span class="badge bg-warning text-dark">Chờ duyệt</span> break;
-                                case 1: <span class="badge bg-info text-white">Đóng gói</span> break;
-                                case 2: <span class="badge bg-primary text-white">Đang giao</span> break;
-                                case 3: <span class="badge bg-success text-white">Hoàn thành</span> break;
-                                case 4: <span class="badge bg-danger text-white">Đã hủy</span> break;
-                                default: <span class="badge bg-secondary text-white">Không xác định</span> break;
+                                <tr>
+                                    <td class="pl-4 font-weight-bold text-primary">#@item.Id.Substring(0, 8).ToUpper()</td>
+                                    <td class="text-secondary">@(item.OrderDate.HasValue ? item.OrderDate.Value.ToString("dd/MM/yyyy HH:mm") : "---")</td>
+                                    <td>@item.PaymentMethodName</td>
+                                    <td class="text-dark font-weight-bold">@item.FinalAmount.ToString("N0") đ</td>
+                                    <td>
+                                        @switch (item.OrderStatus)
+                                        {
+                                            case 0:
+                                                <span class="badge badge-status bg-warning text-dark"><i class="fas fa-hourglass-start mr-1"></i> Chờ duyệt</span>
+                                                break;
+                                            case 1:
+                                                <span class="badge badge-status bg-info text-white"><i class="fas fa-box mr-1"></i> Đóng gói</span>
+                                                break;
+                                            case 2:
+                                                <span class="badge badge-status bg-primary text-white"><i class="fas fa-shipping-fast mr-1"></i> Đang giao</span>
+                                                break;
+                                            case 3:
+                                                <span class="badge badge-status bg-success text-white"><i class="fas fa-check mr-1"></i> Hoàn thành</span>
+                                                break;
+                                            case 4:
+                                                <span class="badge badge-status bg-danger text-white"><i class="fas fa-times mr-1"></i> Đã hủy</span>
+                                                break;
+                                            default:
+                                                <span class="badge badge-status bg-secondary text-white">Không xác định</span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td class="text-center pr-4">
+                                        <a asp-controller="Order" asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm text-white" style="border-radius: 20px; padding: 4px 12px; font-size: 0.8rem;">
+                                            <i class="fas fa-eye mr-1"></i> Xem đơn
+                                        </a>
+                                    </td>
+                                </tr>
                             }
-                        </td>
-                        <td>
-                            <a asp-controller="Order" asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm text-white" title="Chi tiết đơn hàng">
-                                <i class="fas fa-info-circle"></i> Xem
-                            </a>
-                        </td>
-                    </tr>
-                }
-            }
-            else
-            {
-                <tr>
-                    <td colspan="6" class="text-center">Khách hàng này chưa có đơn hàng nào</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+                        }
+                        else
+                        {
+                            <tr><td colspan="6" class="text-center py-5 text-muted">Khách hàng này chưa có đơn hàng nào.</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>

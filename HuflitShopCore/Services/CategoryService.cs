@@ -45,8 +45,21 @@ namespace HuflitShopCore.Services
             };
         }
 
-        public async Task<bool> CreateCategoryAsync(CategoryDTO dto)
+        public async Task<(bool Success, string ErrorMsg)> CreateCategoryAsync(CategoryDTO dto)
         {
+            if (!string.IsNullOrEmpty(dto.ParentId))
+            {
+                var parent = await _context.Categories.FindAsync(dto.ParentId);
+                if (parent == null)
+                {
+                    return (false, "Danh mục cha không tồn tại.");
+                }
+                if (!string.IsNullOrEmpty(parent.ParentId))
+                {
+                    return (false, "Danh mục cha được chọn phải là danh mục gốc (không thuộc danh mục khác).");
+                }
+            }
+
             var category = new Category
             {
                 Id = Guid.NewGuid().ToString(),
@@ -56,22 +69,47 @@ namespace HuflitShopCore.Services
 
             _context.Categories.Add(category);
             await _context.SaveChangesAsync();
-            return true;
+            return (true, string.Empty);
         }
 
-        public async Task<bool> UpdateCategoryAsync(CategoryDTO dto)
+        public async Task<(bool Success, string ErrorMsg)> UpdateCategoryAsync(CategoryDTO dto)
         {
-            if (string.IsNullOrEmpty(dto.Id)) return false;
+            if (string.IsNullOrEmpty(dto.Id)) return (false, "ID danh mục không hợp lệ.");
 
             var category = await _context.Categories.FindAsync(dto.Id);
-            if (category == null) return false;
+            if (category == null) return (false, "Không tìm thấy danh mục.");
+
+            if (!string.IsNullOrEmpty(dto.ParentId))
+            {
+                if (dto.ParentId == dto.Id)
+                {
+                    return (false, "Một danh mục không thể chọn chính nó làm danh mục cha.");
+                }
+
+                var parent = await _context.Categories.FindAsync(dto.ParentId);
+                if (parent == null)
+                {
+                    return (false, "Danh mục cha không tồn tại.");
+                }
+                if (!string.IsNullOrEmpty(parent.ParentId))
+                {
+                    return (false, "Danh mục cha được chọn phải là danh mục gốc (không thuộc danh mục khác).");
+                }
+
+                // Nếu danh mục hiện tại đang có danh mục con, không được gán danh mục cha (để tránh sâu hơn 2 cấp)
+                var hasChildren = await _context.Categories.AnyAsync(c => c.ParentId == dto.Id);
+                if (hasChildren)
+                {
+                    return (false, "Danh mục này đang có danh mục con, không thể gán danh mục cha cho nó.");
+                }
+            }
 
             category.CategoryName = dto.CategoryName;
             category.ParentId = string.IsNullOrEmpty(dto.ParentId) ? null : dto.ParentId;
 
             _context.Categories.Update(category);
             await _context.SaveChangesAsync();
-            return true;
+            return (true, string.Empty);
         }
 
         public async Task<(bool Success, string ErrorMsg)> DeleteCategoryAsync(string id)

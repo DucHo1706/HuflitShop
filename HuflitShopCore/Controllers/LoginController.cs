@@ -30,10 +30,11 @@ namespace HuflitShopCore.Controllers
                 var claims = new List<Claim>
                 {
                     new Claim(ClaimTypes.NameIdentifier, user.Id),
-                    new Claim("UserName", user.UserName), //
-                    new Claim("Name", user.FullName), //
-                    new Claim("Avatar", user.Avatar ?? ""), //
-                    new Claim(ClaimTypes.Role, user.Role ?? "Customer") //
+                    new Claim("UserName", user.UserName), 
+                    new Claim("Name", user.FullName), 
+                    new Claim("Phone", user.PhoneNumber ?? ""), 
+                    new Claim("Avatar", user.Avatar ?? ""), 
+                    new Claim(ClaimTypes.Role, user.Role ?? "Customer") 
                 };
 
                 var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

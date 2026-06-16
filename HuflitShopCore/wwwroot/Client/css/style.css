@@ -2,9 +2,9 @@
 /********* General CSS *********/
 /*******************************/
 body {
-    color: #757575;
+    color: #4b5563;
     background: #ffffff;
-    font-family: 'open sans', sans-serif;
+    font-family: 'Outfit', sans-serif;
 }
 
 h1,
@@ -13,21 +13,21 @@ h3,
 h4,
 h5,
 h6 {
-    color: #454545;
-    font-family: 'Nunito', sans-serif;
+    color: #1f2937;
+    font-family: 'Outfit', sans-serif;
 }
 
 a {
-    font-family: 'Nunito', sans-serif;
+    font-family: 'Outfit', sans-serif;
     font-weight: 600;
-    color: #fbaf32;
+    color: #2563eb;
     transition: .3s;
 }
 
     a:hover,
     a:active,
     a:focus {
-        color: #719a0a;
+        color: #1d4ed8;
         outline: none;
         text-decoration: none;
     }
@@ -170,48 +170,50 @@ a {
 
 @media (min-width: 992px) {
     .navbar {
-        position: absolute;
+        position: sticky;
+        top: 0;
         width: 100%;
-        padding: 30px 60px;
-        background: transparent !important;
-        z-index: 9;
+        padding: 10px 30px;
+        background: #ffffff !important;
+        z-index: 999;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
     }
 
         .navbar.nav-sticky {
-            padding: 10px 60px;
+            padding: 10px 30px;
             background: #ffffff !important;
         }
 
         .navbar .navbar-brand {
-            color: #fbaf32;
+            color: #2563eb;
         }
 
         .navbar.nav-sticky .navbar-brand {
-            color: #fbaf32;
+            color: #2563eb;
         }
 
     .navbar-light .navbar-nav .nav-link,
     .navbar-light .navbar-nav .nav-link:focus {
-        padding: 10px 10px 8px 10px;
-        font-family: 'Nunito', sans-serif;
-        color: #ffffff;
-        font-size: 18px;
+        padding: 10px 15px;
+        font-family: 'Outfit', sans-serif;
+        color: #374151;
+        font-size: 16px;
         font-weight: 600;
     }
 
     .navbar-light.nav-sticky .navbar-nav .nav-link,
     .navbar-light.nav-sticky .navbar-nav .nav-link:focus {
-        color: #666666;
+        color: #374151;
     }
 
     .navbar-light .navbar-nav .nav-link:hover,
     .navbar-light .navbar-nav .nav-link.active {
-        color: #fbaf32;
+        color: #2563eb;
     }
 
     .navbar-light.nav-sticky .navbar-nav .nav-link:hover,
     .navbar-light.nav-sticky .navbar-nav .nav-link.active {
-        color: #fbaf32;
+        color: #2563eb;
     }
 }
 
@@ -222,7 +224,7 @@ a {
     }
 
         .navbar .navbar-brand {
-            color: #fbaf32;
+            color: #2563eb;
         }
 
         .navbar .navbar-nav {
@@ -2467,8 +2469,8 @@ a {
 .footer {
     position: relative;
     margin-top: 45px;
-    padding-top: 90px;
-    background: rgba(0, 0, 0, .04);
+    padding-top: 60px;
+    background: #0f172a !important;
 }
 
     .footer .footer-contact,
@@ -2476,7 +2478,7 @@ a {
     .footer .footer-newsletter {
         position: relative;
         margin-bottom: 45px;
-        color: #454545;
+        color: #cbd5e1 !important;
     }
 
         .footer .footer-contact h2,
@@ -2487,7 +2489,7 @@ a {
             padding-bottom: 10px;
             font-size: 22px;
             font-weight: 700;
-            color: #fbaf32;
+            color: #ffffff !important;
         }
 
             .footer .footer-contact h2::after,
@@ -2499,13 +2501,13 @@ a {
                 height: 2px;
                 bottom: 0;
                 left: 0;
-                background: #719a0a;
+                background: #2563eb !important;
             }
 
         .footer .footer-link a {
             display: block;
             margin-bottom: 10px;
-            color: #454545;
+            color: #cbd5e1 !important;
             transition: .3s;
         }
 
@@ -2515,23 +2517,23 @@ a {
                 font-family: "Font Awesome 5 Free";
                 font-weight: 900;
                 margin-right: 10px;
-                color: #fbaf32;
+                color: #2563eb !important;
             }
 
             .footer .footer-link a:hover {
-                color: #fbaf32;
+                color: #2563eb !important;
                 letter-spacing: 1px;
             }
 
         .footer .footer-contact p i {
             width: 25px;
-            color: #fbaf32;
+            color: #2563eb !important;
         }
 
         .footer .footer-contact > p > a {
             margin: 0;
             font-size: 14px;
-            color: #454545;
+            color: #cbd5e1 !important;
         }
 
     .footer .footer-social {
@@ -2548,14 +2550,14 @@ a {
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #fbaf32;
+            background: #2563eb !important;
             border-radius: 35px;
             font-size: 16px;
-            color: #ffffff;
+            color: #ffffff !important;
         }
 
             .footer .footer-social a:hover {
-                background: #719a0a;
+                background: #1d4ed8 !important;
             }
 
             .footer .footer-social a:last-child {
@@ -2570,8 +2572,9 @@ a {
     .footer .footer-newsletter input {
         height: 60px;
         background: transparent;
-        border: 1px solid #fbaf32;
+        border: 1px solid #2563eb !important;
         border-radius: 5px;
+        color: #ffffff;
     }
 
     .footer .footer-newsletter .btn {
@@ -2582,6 +2585,9 @@ a {
         padding: 8px 20px;
         font-size: 14px;
         font-weight: 700;
+        background: #2563eb !important;
+        color: #ffffff !important;
+        border: none;
     }
 
     .footer .copyright {
@@ -2589,19 +2595,19 @@ a {
         width: 100%;
         padding: 30px 0;
         text-align: center;
-        background: #ffffff;
+        background: #020617 !important;
     }
 
         .footer .copyright p {
             margin: 0;
             display: inline-block;
-            color: #454545;
+            color: #94a3b8 !important;
         }
 
             .footer .copyright p a {
-                color: #fbaf32;
+                color: #2563eb !important;
             }
 
                 .footer .copyright p a:hover {
-                    color: #719a0a;
+                    color: #1d4ed8 !important;
                 }

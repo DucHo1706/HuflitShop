@@ -1,4 +1,4 @@
-﻿using HuflitShopCore.Data;
+using HuflitShopCore.Data;
 using HuflitShopCore.Models;
 using HuflitShopCore.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -12,7 +12,11 @@ builder.Services.AddControllersWithViews();
 // 2. Cấu hình DbContext kết nối SQL Server
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseSqlServer(connectionString, sqlOptions => 
+        sqlOptions.EnableRetryOnFailure(
+            maxRetryCount: 5,
+            maxRetryDelay: TimeSpan.FromSeconds(10),
+            errorNumbersToAdd: null)));
 
 // 3. Cấu hình Cookie Authentication (theo đúng kiến trúc ban đầu của bạn)
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)

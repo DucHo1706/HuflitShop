@@ -12,7 +12,8 @@
                 <h6 class="m-0 font-weight-bold text-primary">Tạo Phiếu Nhập Kho Mới</h6>
             </div>
             <div class="card-body">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div asp-validation-summary="All" class="text-danger"></div>
+                <div id="debug-details" class="text-muted" style="font-size:12px; display:none;"></div>
 
                 <h5 class="font-weight-bold">1. Thông tin chung</h5>
                 <div class="row">
@@ -56,7 +57,10 @@
                 </div>
             </div>
             <div class="card-footer">
-                <button type="submit" class="btn btn-primary">
+                <button type="button" class="btn btn-light btn-sm" onclick="return (window.__debugPrintFormDetails ? window.__debugPrintFormDetails() : alert('Chưa có debug func'))">
+                    Debug bind form
+                </button>
+                <button type="submit" class="btn btn-primary" onclick="return __syncAndDebugDetailsBeforeSubmit();">
                     <i class="fas fa-save"></i> Tạo phiếu và tiếp tục
                 </button>
                 <a asp-action="Index" class="btn btn-secondary">Trở về</a>
@@ -69,9 +73,70 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
-        $(document).ready(function() {
+        function __syncAndDebugDetailsBeforeSubmit() {
+            try {
+                // Chỉ submit khi AJAX render xong bảng variant (tồn tại input Details[*])
+                // Tránh trường hợp user bấm submit quá nhanh hoặc tbody bị rebuild.
+                if (!window.__variantsRendered) {
+                    console.warn('[StockReceipt][SubmitGuard] __variantsRendered = false. Prevent submit.');
+                    return false;
+                }
+
+                // Không dùng alert để bạn copy log dễ hơn -> chỉ console.log
+                var details = [];
+
+
+                // Lấy đúng DOM đang hiển thị trong tbody (giảm rủi ro lệch index)
+                var tbody = $('#variant-matrix-body');
+                tbody.find('tr').each(function () {
+                    var rowInputs = $(this).find('input[name], select[name]');
+                    rowInputs.each(function () {
+                        var name = $(this).attr('name');
+                        var m = name && name.match(/^Details\[(\d+)\]\.(.+)$/);
+                        if (!m) return;
+
+                        var idx = parseInt(m[1], 10);
+                        var prop = m[2];
+                        while (details.length <= idx) details.push({});
+                        details[idx][prop] = $(this).val();
+                    });
+                });
+
+                var valid = details
+                    .map((d, i) => {
+                        var q = Number(d && d['Quantity'] != null ? d['Quantity'] : 0);
+                        if (q <= 0) return null;
+                        return {
+                            i: i,
+                            ProductVariantId: d['ProductVariantId'],
+                            Quantity: q,
+                            UnitPrice: Number(d['UnitPrice'] != null ? d['UnitPrice'] : 0)
+                        };
+                    })
+                    .filter(Boolean);
+
+                console.log('[StockReceipt][Submit][Details][Quantity>0 only]', valid);
+                console.log('[StockReceipt][Submit][Details][All raw]', details);
+            } catch (e) {
+                console.error('[StockReceipt][Submit][DebugError]', e);
+            }
+
+            // Hard guard: nếu không có bất kỳ input Details[i].* nào trong DOM thì không cho submit
+            var detailsInputsCount = $('input[name^="Details["]').length;
+            console.warn('[StockReceipt][SubmitGuard] detailsInputsCount=', detailsInputsCount);
+
+            if (detailsInputsCount <= 0) {
+                console.warn('[StockReceipt][SubmitGuard] No Details inputs found. Prevent submit.');
+                return false;
+            }
+
+            return true;
+        }
+
+
+        $(document).ready(function () {
             $('select[name="SupplierId"]').select2({ placeholder: "Gõ để tìm nhà cung cấp..." });
-            
+
             $('#select-product').select2({
                 placeholder: "Gõ tên sản phẩm, danh mục hoặc thương hiệu...",
                 minimumInputLength: 0,
@@ -99,23 +164,22 @@
             });
 
             // Xử lý khi nhấn vào Gợi ý (Quick Pick)
-            $('.quick-pick').click(function() {
+            $('.quick-pick').click(function () {
                 var id = $(this).data('id');
                 var name = $(this).text().trim();
-                
-                // Set giá trị cho select2 và trigger change
+
                 var option = new Option(name, id, true, true);
                 $('#select-product').append(option).trigger('change');
             });
 
             // Xử lý bộ lọc danh mục
-            $('.cate-filter').click(function() {
+            $('.cate-filter').click(function () {
                 $('.cate-filter').removeClass('active btn-primary').addClass('btn-light');
                 $(this).addClass('active btn-primary').removeClass('btn-light');
-                $('#select-product').val(null).trigger('change'); // Reset search khi đổi danh mục
+                $('#select-product').val(null).trigger('change');
             });
 
-            $('#select-product').change(function() {
+            $('#select-product').change(function () {
                 var productId = $(this).val();
                 var container = $('#variant-matrix-container');
                 var tbody = $('#variant-matrix-body');
@@ -125,14 +189,18 @@
                 if (productId) {
                     container.show();
                     tbody.append('<tr><td colspan="5" class="text-center">Đang tải phân loại...</td></tr>');
-                    
-                    $.getJSON('@Url.Action("GetVariantsByProduct", "StockReceipt")', { productId: productId }, function(data) {
+
+                    // Reset cờ render trước khi AJAX chạy
+                    window.__variantsRendered = false;
+
+                    $.getJSON('@Url.Action("GetVariantsByProduct", "StockReceipt")', { productId: productId }, function (data) {
                         tbody.empty();
-                        if(data.length === 0) {
+                        if (data.length === 0) {
                             tbody.append('<tr><td colspan="5" class="text-center text-danger">Sản phẩm này chưa được cấu hình phân loại.</td></tr>');
                             return;
                         }
-                        $.each(data, function(i, item) {
+
+                        $.each(data, function (i, item) {
                             var row = `
                                 <tr>
                                     <td>${item.color}</td>
@@ -143,11 +211,15 @@
                                         <input type="number" name="Details[${i}].Quantity" class="form-control" min="0" value="0" />
                                     </td>
                                     <td>
-                                        <input type="number" name="Details[${i}].UnitPrice" class="form-control" min="0" value="0" />
+                                        <input type="number" step="0.01" name="Details[${i}].UnitPrice" class="form-control unit-price" min="0" value="0" />
                                     </td>
                                 </tr>`;
                             tbody.append(row);
                         });
+
+                        // Render xong bảng variant -> bật cờ để cho submit
+                        window.__variantsRendered = true;
+
                     });
                 } else {
                     container.hide();
@@ -156,3 +228,4 @@
         });
     </script>
 }
+

@@ -91,7 +91,10 @@ namespace HuflitShopCore.Services
                 Gender = user.Gender,
                 DateOfBirth = user.DateOfBirth,
                 IsActive = user.IsActive,
-                FullAddress = address == null ? string.Empty : $"{address.City}, {address.District}, {address.SpecificAddress}"
+                FullAddress = address == null ? string.Empty : $"{address.City}, {address.District}, {address.SpecificAddress}",
+                City = address?.City ?? string.Empty,
+                District = address?.District ?? string.Empty,
+                SpecificAddress = address?.SpecificAddress ?? string.Empty
             };
         }
 
@@ -136,6 +139,20 @@ namespace HuflitShopCore.Services
             };
             _context.UserRoles.Add(userRole);
 
+            // Thêm địa chỉ mới nếu có nhập
+            if (!string.IsNullOrWhiteSpace(dto.City) && !string.IsNullOrWhiteSpace(dto.District) && !string.IsNullOrWhiteSpace(dto.SpecificAddress))
+            {
+                var address = new Address
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    UserId = user.Id,
+                    City = dto.City,
+                    District = dto.District,
+                    SpecificAddress = dto.SpecificAddress
+                };
+                _context.Addresses.Add(address);
+            }
+
             await _context.SaveChangesAsync();
             return (true, "Tạo tài khoản nhân viên thành công.");
         }
@@ -152,6 +169,37 @@ namespace HuflitShopCore.Services
             user.IsActive = dto.IsActive;
 
             _context.Users.Update(user);
+
+            // Cập nhật hoặc thêm mới địa chỉ
+            var address = await _context.Addresses.FirstOrDefaultAsync(a => a.UserId == dto.Id);
+            if (!string.IsNullOrWhiteSpace(dto.City) && !string.IsNullOrWhiteSpace(dto.District) && !string.IsNullOrWhiteSpace(dto.SpecificAddress))
+            {
+                if (address == null)
+                {
+                    address = new Address
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        UserId = dto.Id,
+                        City = dto.City,
+                        District = dto.District,
+                        SpecificAddress = dto.SpecificAddress
+                    };
+                    _context.Addresses.Add(address);
+                }
+                else
+                {
+                    address.City = dto.City;
+                    address.District = dto.District;
+                    address.SpecificAddress = dto.SpecificAddress;
+                    _context.Addresses.Update(address);
+                }
+            }
+            else if (address != null)
+            {
+                // Nếu người dùng xóa sạch thông tin địa chỉ trên form, xóa luôn record Address trong DB
+                _context.Addresses.Remove(address);
+            }
+
             await _context.SaveChangesAsync();
             return true;
         }

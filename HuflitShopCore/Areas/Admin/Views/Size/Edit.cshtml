@@ -1,4 +1,4 @@
-﻿@model HuflitShopCore.DTOs.SizeDTO
+@model HuflitShopCore.DTOs.SizeDTO
 @{
     ViewData["Title"] = "Chỉnh sửa kích thước";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
@@ -20,11 +20,18 @@
                 </div>
                 
                 <div class="form-group mb-3">
-                    <label asp-for="SizeType" class="control-label fw-bold">Phân loại (SizeType)</label>
-                    <select asp-for="SizeType" class="form-control">
-                        <option value="Clothes">Quần áo (S, M, L...)</option>
-                        <option value="Shoes">Giày dép (36, 37, 38...)</option>
-                    </select>
+                    <label asp-for="SizeType" class="control-label fw-bold">Phân loại (SizeType) <span class="text-danger">*</span></label>
+                    <input asp-for="SizeType" class="form-control" list="sizeTypeList" placeholder="Chọn hoặc nhập loại kích thước (VD: Clothes, Shoes, Hat...)" />
+                    <datalist id="sizeTypeList">
+                        @if (ViewBag.ExistingTypes != null)
+                        {
+                            foreach (var type in (List<string>)ViewBag.ExistingTypes)
+                            {
+                                <option value="@type"></option>
+                            }
+                        }
+                    </datalist>
+                    <span asp-validation-for="SizeType" class="text-danger"></span>
                 </div>
                 
                 <div class="form-group mt-4">

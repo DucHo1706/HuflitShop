@@ -73,5 +73,13 @@ namespace HuflitShopCore.Services
                 await _context.SaveChangesAsync();
             });
         }
+
+        public async Task<List<string>> GetExistingSizeTypesAsync()
+        {
+            return await _context.Sizes
+                .Select(s => s.SizeType)
+                .Distinct()
+                .ToListAsync();
+        }
     }
 }

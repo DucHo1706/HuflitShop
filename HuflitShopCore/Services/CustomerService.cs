@@ -64,9 +64,20 @@ namespace HuflitShopCore.Services
 
         public async Task<List<CustomerOrderDTO>> GetCustomerOrdersAsync(string userId)
         {
-            // Sẽ xử lý sau khi tạo xong Model Đơn Hàng (Order)
-            // Hiện tại trả về List trống để View không bị lỗi
-            return new List<CustomerOrderDTO>();
+            var orders = await _context.Orders
+                .Include(o => o.PaymentMethod)
+                .Where(o => o.UserId == userId)
+                .OrderByDescending(o => o.OrderDate)
+                .ToListAsync();
+
+            return orders.Select(o => new CustomerOrderDTO
+            {
+                Id = o.Id,
+                OrderDate = o.OrderDate,
+                PaymentMethodName = o.PaymentMethod?.MethodName ?? "---",
+                FinalAmount = o.FinalAmount,
+                OrderStatus = o.OrderStatus
+            }).ToList();
         }
     }
 }

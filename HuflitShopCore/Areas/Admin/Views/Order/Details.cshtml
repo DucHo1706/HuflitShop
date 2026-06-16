@@ -1,34 +1,72 @@
-﻿@model HuflitShopCore.DTOs.OrderDTO
+@model HuflitShopCore.DTOs.OrderDTO
 
 @{
     ViewData["Title"] = "Chi tiết Đơn Hàng";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
 
+<style>
+    .card-modern {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 25px rgba(0,0,0,0.05);
+    }
+    .info-label {
+        font-weight: 600;
+        color: #4e73df;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        margin-bottom: 2px;
+    }
+    .info-value {
+        color: #2e3752;
+        font-weight: 500;
+        font-size: 1rem;
+        margin-bottom: 15px;
+    }
+    .table-modern th {
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+        background-color: #f8f9fc;
+    }
+    .status-badge {
+        font-size: 0.9rem;
+        padding: 6px 16px;
+        border-radius: 30px;
+        font-weight: 600;
+        display: inline-block;
+    }
+</style>
+
 <div class="container-fluid mt-4">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Chi tiết đơn hàng: <span class="text-primary" title="@Model.Id">@Model.Id.Substring(0, 8)...</span></h1>
-        <a asp-action="Index" class="btn btn-sm btn-secondary shadow-sm">
-            <i class="fas fa-arrow-left fa-sm text-white-50"></i> Trở về danh sách
+        <div>
+            <h1 class="h3 mb-0 text-gray-800 font-weight-bold">Chi tiết đơn hàng: <span class="text-primary">#@Model.Id.Substring(0, 8).ToUpper()</span></h1>
+            <p class="text-muted mb-0">Đặt lúc: @Model.OrderDate.ToString("dd/MM/yyyy HH:mm")</p>
+        </div>
+        <a asp-action="Index" class="btn btn-secondary shadow-sm" style="border-radius: 20px;">
+            <i class="fas fa-arrow-left fa-sm mr-1"></i> Trở về danh sách
         </a>
     </div>
 
     <div class="row">
         <!-- Cột trái: Thông tin đơn hàng (Danh sách sản phẩm) -->
         <div class="col-xl-8 col-lg-7">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Sản phẩm đã đặt</h6>
+            <div class="card card-modern mb-4">
+                <div class="card-header py-3 bg-white border-0">
+                    <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-shopping-bag mr-2"></i>Sản phẩm đã đặt</h6>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-bordered text-center">
-                            <thead class="thead-light">
+                        <table class="table table-hover text-center table-modern">
+                            <thead>
                                 <tr>
-                                    <th class="text-left">Sản phẩm (Bản Snapshot)</th>
+                                    <th class="text-left">Sản phẩm</th>
                                     <th>Đơn giá</th>
-                                    <th>SL</th>
-                                    <th>Thành tiền</th>
+                                    <th>Số lượng</th>
+                                    <th class="text-right">Thành tiền</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -40,23 +78,24 @@
                                         </td>
                                         <td>@detail.PurchasedPrice.ToString("N0") đ</td>
                                         <td>@detail.Quantity</td>
-                                        <td class="text-danger font-weight-bold">@detail.TotalPrice.ToString("N0") đ</td>
+                                        <td class="text-danger font-weight-bold text-right">@detail.TotalPrice.ToString("N0") đ</td>
                                     </tr>
                                 }
                             </tbody>
                         </table>
                     </div>
                     
-                    <hr />
+                    <hr class="my-4" />
+                    
                     <!-- Tổng kết tiền -->
                     <div class="row justify-content-end text-right">
                         <div class="col-md-6 col-sm-12">
-                            <p class="mb-1">Tạm tính: <strong>@Model.TotalAmount.ToString("N0") đ</strong></p>
-                            <p class="mb-1">Phí vận chuyển: <strong>@Model.ShippingFee.ToString("N0") đ</strong></p>
-                            <p class="mb-1">Giảm giá: <strong class="text-success">- @Model.DiscountAmount.ToString("N0") đ</strong></p>
+                            <p class="mb-2 text-secondary">Tạm tính: <strong class="text-dark">@Model.TotalAmount.ToString("N0") đ</strong></p>
+                            <p class="mb-2 text-secondary">Phí vận chuyển: <strong class="text-dark">@Model.ShippingFee.ToString("N0") đ</strong></p>
+                            <p class="mb-2 text-secondary">Giảm giá: <strong class="text-success">- @Model.DiscountAmount.ToString("N0") đ</strong></p>
                             @if (!string.IsNullOrEmpty(Model.PromoCode))
                             {
-                                <p class="mb-1"><small class="text-muted">(Mã áp dụng: @Model.PromoCode)</small></p>
+                                <p class="mb-2"><small class="badge badge-success">Mã áp dụng: @Model.PromoCode</small></p>
                             }
                             <h4 class="text-danger font-weight-bold mt-3">Tổng cộng: @Model.FinalAmount.ToString("N0") đ</h4>
                         </div>
@@ -68,16 +107,29 @@
         <!-- Cột phải: Thông tin giao hàng & Trạng thái -->
         <div class="col-xl-4 col-lg-5">
             <!-- Box 1: Cập nhật Trạng thái đơn hàng -->
-            <div class="card shadow mb-4 border-bottom-warning">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-warning">Cập nhật trạng thái</h6>
+            <div class="card card-modern mb-4">
+                <div class="card-header py-3 bg-white border-0">
+                    <h6 class="m-0 font-weight-bold text-warning"><i class="fas fa-tasks mr-2"></i>Cập nhật trạng thái</h6>
                 </div>
                 <div class="card-body">
                     <form asp-action="UpdateStatus" method="post">
                         <input type="hidden" name="id" value="@Model.Id" />
+                        
                         <div class="form-group mb-3">
-                            <label class="font-weight-bold">Trạng thái hiện tại:</label>
-                            <select name="status" class="form-control font-weight-bold">
+                            <div class="info-label">Trạng thái hiện tại:</div>
+                            <div class="mb-3">
+                                @switch (Model.OrderStatus)
+                                {
+                                    case 0: <span class="status-badge bg-warning text-dark"><i class="fas fa-hourglass-start mr-1"></i> @Model.OrderStatusName</span>; break;
+                                    case 1: <span class="status-badge bg-info text-white"><i class="fas fa-box mr-1"></i> @Model.OrderStatusName</span>; break;
+                                    case 2: <span class="status-badge bg-primary text-white"><i class="fas fa-shipping-fast mr-1"></i> @Model.OrderStatusName</span>; break;
+                                    case 3: <span class="status-badge bg-success text-white"><i class="fas fa-check mr-1"></i> @Model.OrderStatusName</span>; break;
+                                    case 4: <span class="status-badge bg-danger text-white"><i class="fas fa-times mr-1"></i> @Model.OrderStatusName</span>; break;
+                                    default: <span class="status-badge bg-secondary text-white">@Model.OrderStatusName</span>; break;
+                                }
+                            </div>
+                            
+                            <select name="status" class="form-control font-weight-bold" style="border-radius: 8px;">
                                 <!option value="0" @(Model.OrderStatus == 0 ? "selected" : "")>Chờ duyệt</!option>
                                 <!option value="1" @(Model.OrderStatus == 1 ? "selected" : "")>Đóng gói</!option>
                                 <!option value="2" @(Model.OrderStatus == 2 ? "selected" : "")>Đang giao</!option>
@@ -85,28 +137,53 @@
                                 <!option value="4" @(Model.OrderStatus == 4 ? "selected" : "")>Đã hủy</!option>
                             </select>
                         </div>
-                        <button type="submit" class="btn btn-warning w-100" @(Model.OrderStatus == 3 || Model.OrderStatus == 4 ? "disabled" : "")>
-                            <i class="fas fa-sync-alt"></i> Cập nhật ngay
+                        
+                        <button type="submit" class="btn btn-warning w-100 text-dark font-weight-bold py-2" style="border-radius: 8px;" @(Model.OrderStatus == 3 || Model.OrderStatus == 4 ? "disabled" : "")>
+                            <i class="fas fa-sync-alt mr-1"></i> Cập nhật trạng thái
                         </button>
+                        
                         @if(Model.OrderStatus == 3 || Model.OrderStatus == 4)
                         {
-                            <p class="text-danger mt-3 small text-center"><i class="fas fa-info-circle"></i> Đơn hàng đã chốt, không thể thay đổi trạng thái.</p>
+                            <p class="text-danger mt-3 small text-center mb-0"><i class="fas fa-info-circle mr-1"></i> Đơn hàng đã kết thúc, không thể thay đổi trạng thái.</p>
                         }
                     </form>
                 </div>
             </div>
 
             <!-- Box 2: Thông tin Giao hàng -->
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-info">Thông tin giao hàng</h6>
+            <div class="card card-modern mb-4">
+                <div class="card-header py-3 bg-white border-0">
+                    <h6 class="m-0 font-weight-bold text-info"><i class="fas fa-truck mr-2"></i>Thông tin vận chuyển</h6>
                 </div>
                 <div class="card-body">
-                    <p><strong><i class="fas fa-user mr-2 text-primary"></i>Người nhận:</strong> <br />@Model.ShippingFullName</p>
-                    <p><strong><i class="fas fa-phone mr-2 text-success"></i>Số điện thoại:</strong> <br />@Model.ShippingPhoneNumber</p>
-                    <p><strong><i class="fas fa-map-marker-alt mr-2 text-danger"></i>Địa chỉ:</strong> <br />@Model.ShippingAddress, @Model.ShippingDistrict, @Model.ShippingCity</p>
-                    <hr />
-                    <p><strong><i class="fas fa-wallet mr-2 text-warning"></i>Phương thức TT:</strong> <br />@Model.PaymentMethodName</p>
+                    <div class="info-label">Người nhận hàng</div>
+                    <div class="info-value">@Model.ShippingFullName</div>
+
+                    <div class="info-label">Số điện thoại</div>
+                    <div class="info-value">@Model.ShippingPhoneNumber</div>
+
+                    <div class="info-label">Địa chỉ giao hàng</div>
+                    <div class="info-value">
+                        @Model.ShippingAddress<br />
+                        @Model.ShippingDistrict, @Model.ShippingCity
+                    </div>
+
+                    <hr class="my-3" />
+
+                    <div class="info-label">Phương thức thanh toán</div>
+                    <div class="info-value mb-2">@Model.PaymentMethodName</div>
+
+                    <div class="info-label">Trạng thái thanh toán</div>
+                    <div class="info-value mb-0">
+                        @if (Model.PaymentStatus == 1)
+                        {
+                            <span class="badge bg-success text-white py-1 px-3" style="border-radius: 20px;">Đã thanh toán</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger text-white py-1 px-3" style="border-radius: 20px;">Chưa thanh toán</span>
+                        }
+                    </div>
                 </div>
             </div>
         </div>

@@ -93,8 +93,15 @@ namespace HuflitShopCore.Services
                 OrderDate = o.OrderDate,
                 OrderStatus = o.OrderStatus,
                 PaymentStatus = o.PaymentStatus,
+                TotalAmount = o.TotalAmount,
+                DiscountAmount = o.DiscountAmount,
+                ShippingFee = o.ShippingFee,
                 FinalAmount = o.FinalAmount,
-                ShippingFullName = o.ShippingFullName
+                ShippingFullName = o.ShippingFullName,
+                ShippingPhoneNumber = o.ShippingPhoneNumber ?? string.Empty,
+                ShippingAddress = o.ShippingAddress ?? string.Empty,
+                ShippingCity = o.ShippingCity ?? string.Empty,
+                ShippingDistrict = o.ShippingDistrict ?? string.Empty
             };
         }
     }

@@ -1,4 +1,4 @@
-﻿@model HuflitShopCore.DTOs.EmployeeDTO
+@model HuflitShopCore.DTOs.EmployeeDTO
 @{
     ViewData["Title"] = "Thêm nhân viên mới";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
@@ -57,6 +57,31 @@
                                 <option value="2">Khác</option>
                             </select>
                             <span asp-validation-for="Gender" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                <hr class="mt-4 mb-4" />
+                <h5 class="font-weight-bold text-primary mb-3">Địa chỉ nhân viên (Tùy chọn)</h5>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group mb-3">
+                            <label asp-for="City" class="control-label font-weight-bold">Tỉnh / Thành phố</label>
+                            <input asp-for="City" class="form-control" placeholder="Nhập tỉnh/thành phố..." />
+                            <span asp-validation-for="City" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group mb-3">
+                            <label asp-for="District" class="control-label font-weight-bold">Quận / Huyện</label>
+                            <input asp-for="District" class="form-control" placeholder="Nhập quận/huyện..." />
+                            <span asp-validation-for="District" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group mb-3">
+                            <label asp-for="SpecificAddress" class="control-label font-weight-bold">Địa chỉ cụ thể</label>
+                            <input asp-for="SpecificAddress" class="form-control" placeholder="Số nhà, tên đường..." />
+                            <span asp-validation-for="SpecificAddress" class="text-danger"></span>
                         </div>
                     </div>
                 </div>

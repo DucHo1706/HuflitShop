@@ -21,7 +21,7 @@ namespace HuflitShopCore.Models
         public string PaymentMethodId { get; set; }
 
         [StringLength(50)]
-        public string PromotionId { get; set; }
+        public string? PromotionId { get; set; }
 
         public DateTime OrderDate { get; set; } = DateTime.Now;
         public int OrderStatus { get; set; } = 0; // 0: Chờ duyệt, 1: Đóng gói, 2: Đang giao, 3: Hoàn thành, 4: Hủy

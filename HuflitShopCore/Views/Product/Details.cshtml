@@ -1,10 +1,12 @@
 @model HuflitShopCore.Models.Product
 @using Microsoft.EntityFrameworkCore
 @inject HuflitShopCore.Data.AppDbContext _context
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
 @{
     Layout = "_Layout";
-    ViewData["Title"] = Model?.ProductName ?? "Details";
+    ViewData["Title"] = Model?.ProductName ?? "Chi tiết sản phẩm";
     var product = Model;
+    var cloudName = Configuration["CloudinarySettings:CloudName"] ?? "Tên_Cloud_Của_Bạn";
 
     var variants = product == null
         ? Enumerable.Empty<HuflitShopCore.Models.ProductVariant>()
@@ -13,170 +15,522 @@
             .Include(pv => pv.Color)
             .Where(pv => pv.ProductId == product.Id && pv.IsActive && pv.StockQuantity > 0)
             .ToList();
+
+    var images = product == null
+        ? new List<HuflitShopCore.Models.ProductImage>()
+        : _context.ProductImages
+            .Where(img => img.ProductId == product.Id)
+            .OrderBy(img => img.ImageOrder)
+            .ToList();
+
+    var mainImageUrl = "/Client/img/default-product.jpg";
+    if (images.Any())
+    {
+        var firstImg = images.First();
+        mainImageUrl = string.IsNullOrEmpty(firstImg.AssetVersion)
+            ? firstImg.PublicId
+            : "https://res.cloudinary.com/" + cloudName + "/image/upload/v" + firstImg.AssetVersion + "/" + firstImg.PublicId + ".jpg";
+    }
 }
 
-<div class="page-header mb-0">
-    <div class="container">
-        <div class="row">
-            <div class="col-12">
-                <h2 class="wow fadeInDown" data-wow-delay="0.5s">Chi tiết sản phẩm</h2>
-            </div>
-            <div class="col-12 wow fadeInUp" data-wow-delay="0.5s">
-                <a asp-controller="Home" asp-action="Index">Home</a>
-                <a asp-controller="Product" asp-action="Product">Product</a>
-                <span>@product?.ProductName</span>
-            </div>
-        </div>
+<style>
+    body {
+        background-color: #f5f5f5 !important;
+    }
+    .details-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+    .product-main-card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    /* Image Gallery Styles */
+    .gallery-main-img {
+        width: 100%;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid #eaeaea;
+        background-color: #fcfcfc;
+        position: relative;
+        padding-top: 110%; /* Fashion-ratio portrait aspect ratio */
+    }
+    .gallery-main-img img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s;
+    }
+    .gallery-main-img img:hover {
+        transform: scale(1.03);
+    }
+    .gallery-thumbnails {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        overflow-x: auto;
+        padding-bottom: 5px;
+    }
+    .gallery-thumb {
+        width: 70px;
+        height: 70px;
+        border-radius: 4px;
+        border: 2px solid transparent;
+        overflow: hidden;
+        cursor: pointer;
+        flex-shrink: 0;
+        opacity: 0.7;
+        transition: all 0.2s;
+    }
+    .gallery-thumb.active, .gallery-thumb:hover {
+        border-color: #2563eb;
+        opacity: 1;
+    }
+    .gallery-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* Product Specs & Selections */
+    .product-breadcrumb {
+        font-size: 0.9rem;
+        color: #6b7280;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .product-breadcrumb a {
+        color: #2563eb;
+        text-decoration: none;
+    }
+    .product-title {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 1rem;
+    }
+    .price-box {
+        background-color: #eff6ff;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: baseline;
+        gap: 1.5rem;
+    }
+    .price-label {
+        font-size: 0.9rem;
+        color: #4b5563;
+        font-weight: 600;
+    }
+    .price-current {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: #ef4444;
+    }
+    .price-current::after {
+        content: " đ";
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+
+    /* Selections buttons */
+    .selector-label {
+        font-weight: 600;
+        color: #374151;
+        width: 100px;
+        flex-shrink: 0;
+        font-size: 0.95rem;
+    }
+    .selector-group {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1.25rem;
+    }
+    .pill-btn {
+        background: white;
+        border: 1px solid #d1d5db;
+        border-radius: 4px;
+        padding: 6px 16px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: #374151;
+        cursor: pointer;
+        transition: all 0.2s;
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+    .pill-btn:hover {
+        border-color: #2563eb;
+        color: #2563eb;
+    }
+    .pill-btn.active {
+        border-color: #2563eb;
+        background-color: #eff6ff;
+        color: #2563eb;
+        font-weight: 600;
+        box-shadow: 0 0 0 1px #2563eb;
+    }
+
+    /* Quantity increment style */
+    .qty-btn {
+        background-color: white;
+        border: 1px solid #d1d5db;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .qty-btn:hover {
+        background-color: #f3f4f6;
+    }
+    .qty-input {
+        width: 60px;
+        height: 36px;
+        text-align: center;
+        border-top: 1px solid #d1d5db;
+        border-bottom: 1px solid #d1d5db;
+        border-left: none;
+        border-right: none;
+        font-weight: 600;
+        outline: none;
+    }
+
+    /* Primary Action Buttons */
+    .btn-action-cart {
+        background-color: #eff6ff !important;
+        border: 2px solid #2563eb !important;
+        color: #2563eb !important;
+        font-weight: 600;
+        padding: 0.85rem 2rem;
+        border-radius: 6px;
+        transition: all 0.2s;
+    }
+    .btn-action-cart:hover {
+        background-color: #2563eb !important;
+        color: white !important;
+    }
+    .btn-action-buy {
+        background-color: #2563eb !important;
+        border: 2px solid #2563eb !important;
+        color: white !important;
+        font-weight: 600;
+        padding: 0.85rem 2rem;
+        border-radius: 6px;
+        transition: all 0.2s;
+    }
+    .btn-action-buy:hover {
+        background-color: #1d4ed8 !important;
+        border-color: #1d4ed8 !important;
+    }
+    
+    /* Product Info Card */
+    .product-info-card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        padding: 2rem;
+    }
+    .info-header {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 1rem;
+        border-bottom: 1px solid #f3f4f6;
+        padding-bottom: 0.5rem;
+    }
+    .info-table td {
+        padding: 0.5rem 0;
+        font-size: 0.95rem;
+    }
+    .info-label {
+        color: #6b7280;
+        width: 150px;
+        font-weight: 500;
+    }
+    .info-val {
+        color: #1f2937;
+        font-weight: 600;
+    }
+</style>
+
+<div class="details-container">
+    <!-- Breadcrumb -->
+    <div class="product-breadcrumb">
+        <a asp-controller="Home" asp-action="Index">Trang chủ</a>
+        <span>&gt;</span>
+        <a asp-controller="Product" asp-action="Product">Sản phẩm</a>
+        <span>&gt;</span>
+        <a asp-action="Category" asp-controller="Product" asp-route-id="@product?.CategoryId">@product?.Category?.CategoryName</a>
+        <span>&gt;</span>
+        <span class="text-dark">@product?.ProductName</span>
     </div>
-</div>
 
-<div class="container" style="margin-top: 2rem;">
-    <div class="row">
-        <div class="col-lg-6">
-            <div class="card">
-                <div class="card-body">
-                    <h3 class="mb-2">@product?.ProductName</h3>
-                    <div class="text-muted">
-                        Giá sản phẩm: <strong id="basePrice">@String.Format("{0:0,0}", product?.CurrentPrice ?? 0)</strong>
-                    </div>
-                    <div class="text-muted">
-                        Giá theo biến thể: <strong id="variantPrice">@String.Format("{0:0,0}", product?.CurrentPrice ?? 0)</strong>
-                    </div>
-
-                    <hr />
-                    <p class="mb-0">@(product?.ProductName ?? "")</p>
-
+    <!-- Main Section -->
+    <div class="product-main-card">
+        <div class="row">
+            <!-- Left image gallery -->
+            <div class="col-md-5">
+                <div class="gallery-main-img">
+                    <img src="@mainImageUrl" id="mainImage" alt="@product?.ProductName" />
                 </div>
+                
+                @if (images.Count > 1)
+                {
+                    <div class="gallery-thumbnails">
+                        @for (var i = 0; i < images.Count; i++)
+                        {
+                            var img = images[i];
+                            var imgUrl = string.IsNullOrEmpty(img.AssetVersion)
+                                ? img.PublicId
+                                : "https://res.cloudinary.com/" + cloudName + "/image/upload/v" + img.AssetVersion + "/" + img.PublicId + ".jpg";
+                            <div class="gallery-thumb @(i == 0 ? "active" : "")" onclick="setMainImage('@imgUrl', this)">
+                                <img src="@imgUrl" alt="Thumbnail" />
+                            </div>
+                        }
+                    </div>
+                }
             </div>
-        </div>
 
-        <div class="col-lg-6">
-            <div class="card">
-                <div class="card-body">
-                    <h4 class="mb-3">Chọn Size & Màu</h4>
+            <!-- Right product actions -->
+            <div class="col-md-7">
+                <h1 class="product-title">@product?.ProductName</h1>
+                
+                <!-- Price Display box -->
+                <div class="price-box">
+                    <span class="price-label">Giá bán:</span>
+                    <span class="price-current" id="variantPrice">@((product?.CurrentPrice ?? 0).ToString("N0"))</span>
+                </div>
 
-                    @if (variants == null || !variants.Any())
-                    {
-                        <div class="alert alert-warning">Hiện sản phẩm này chưa có biến thể còn hàng.</div>
-                    }
-                    else
-                    {
-                        <div class="mb-3">
-                            <div class="text-muted">Chọn đúng biến thể để add giỏ.</div>
-                        </div>
+                @if (variants == null || !variants.Any())
+                {
+                    <div class="alert alert-warning font-weight-bold">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>Sản phẩm hiện đang hết hàng hoặc chưa có biến thể sẵn sàng.
+                    </div>
+                }
+                else
+                {
+                    <!-- Hidden Select controls to keep existing form submit functionality -->
+                    <select id="sizeSelect" style="display:none;" required>
+                        @foreach (var s in variants.Select(v => v.Size).Where(x => x != null).GroupBy(x => x!.Id).Select(g => g.First()!))
+                        {
+                            <option value="@s.Id">@s.SizeName</option>
+                        }
+                    </select>
+                    
+                    <select id="colorSelect" style="display:none;" required>
+                        @foreach (var c in variants.Select(v => v.Color).Where(x => x != null).GroupBy(x => x!.Id).Select(g => g.First()!))
+                        {
+                            <option value="@c.Id">@c.ColorName</option>
+                        }
+                    </select>
 
-                        <!-- Shoppper-style picker (UI) -->
-                        <div class="row">
-                            <div class="col-12">
-                                <div class="card border-0" style="background:#f8f9fa;">
-                                    <div class="card-body">
-                                        <form method="post" asp-controller="Product" asp-action="AddCart" id="addToCartForm">
-                                            @Html.AntiForgeryToken()
+                    <form method="post" asp-controller="Product" asp-action="AddCart" id="addToCartForm">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@product?.Id" />
+                        <input type="hidden" name="productVariantId" id="productVariantId" />
 
-                                            <div class="row">
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <label>Size</label>
-                                                        <select class="form-control" id="sizeSelect" required>
-                                                            @foreach (var s in variants.Select(v => v.Size).Where(x => x != null).GroupBy(x => x!.Id).Select(g => g.First()!))
-                                                            {
-                                                                <option value="@s.Id">@s.SizeName</option>
-                                                            }
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <label>Màu</label>
-                                                        <select class="form-control" id="colorSelect" required>
-                                                            @foreach (var c in variants.Select(v => v.Color).Where(x => x != null).GroupBy(x => x!.Id).Select(g => g.First()!))
-                                                            {
-                                                                <option value="@c.Id">@c.ColorName</option>
-                                                            }
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div class="form-group mt-3">
-                                                <label>Số lượng</label>
-                                                <input class="form-control" type="number" name="quantity" value="1" min="1" />
-                                            </div>
-
-                                            <input type="hidden" name="id" value="@product?.Id" />
-                                            <input type="hidden" name="productVariantId" id="productVariantId" />
-
-                                            <div class="d-flex" style="gap: 1rem; margin-top: 1rem;">
-                                                <button type="submit" class="btn btn-success flex-fill">Thêm vào giỏ</button>
-
-                                                <button type="button" class="btn btn-primary flex-fill" onclick="submitBuyNow();">
-                                                    Mua ngay
-                                                </button>
-                                            </div>
-
-                                        </form>
-
-                                        <script>
-                                            (function () {
-                                                const variants = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
-                                                    variants.Select(v => new { v.Id, v.SizeId, v.ColorId, v.AdditionalPrice }).ToList()
-                                                ));
-
-
-                                                const sizeSelect = document.getElementById('sizeSelect');
-                                                const colorSelect = document.getElementById('colorSelect');
-                                                const variantInput = document.getElementById('productVariantId');
-
-                                                function syncVariant() {
-                                                    const sizeId = sizeSelect?.value;
-                                                    const colorId = colorSelect?.value;
-
-                                                    const match = variants.find(v => v.SizeId === sizeId && v.ColorId === colorId);
-                                                    variantInput.value = match ? match.Id : '';
-
-                                                    // Tính giá theo biến thể: product.CurrentPrice + AdditionalPrice
-                                                    const base = @((product?.CurrentPrice ?? 0).ToString(System.Globalization.CultureInfo.InvariantCulture));
-                                                    const additional = match && match.AdditionalPrice ? Number(match.AdditionalPrice) : 0;
-                                                    const total = Number(base) + additional;
-
-                                                    const el = document.getElementById('variantPrice');
-                                                    if (el) {
-                                                        el.textContent = total.toLocaleString('vi-VN', { maximumFractionDigits: 0 });
-                                                    }
-                                                }
-
-
-                                                sizeSelect?.addEventListener('change', syncVariant);
-                                                colorSelect?.addEventListener('change', syncVariant);
-                                                syncVariant();
-                                            })();
-
-                                            function submitBuyNow() {
-                                                const form = document.getElementById('addToCartForm');
-                                                const variantInput = document.getElementById('productVariantId');
-
-                                                if (!variantInput.value) {
-                                                    alert('Vui lòng chọn đúng biến thể (Size + Màu).');
-                                                    return;
-                                                }
-
-                                                form.action = '@Url.Action("BuyNow","Product")';
-                                                form.method = 'post';
-                                                form.submit();
-                                            }
-                                        </script>
-
-
-                                        <hr />
-                                        <a class="btn btn-outline-secondary w-100" asp-controller="Cart" asp-action="Cart">Đi tới giỏ hàng</a>
-                                    </div>
-                                </div>
+                        <!-- Size Pills selection -->
+                        <div class="selector-group">
+                            <span class="selector-label">Kích thước:</span>
+                            <div class="d-flex flex-wrap" id="sizePillContainer">
+                                @foreach (var s in variants.Select(v => v.Size).Where(x => x != null).GroupBy(x => x!.Id).Select(g => g.First()!))
+                                {
+                                    <button type="button" class="pill-btn" data-value="@s.Id" onclick="selectSizePill('@s.Id', this)">@s.SizeName</button>
+                                }
                             </div>
                         </div>
-                    }
+
+                        <!-- Color Pills selection -->
+                        <div class="selector-group">
+                            <span class="selector-label">Màu sắc:</span>
+                            <div class="d-flex flex-wrap" id="colorPillContainer">
+                                @foreach (var c in variants.Select(v => v.Color).Where(x => x != null).GroupBy(x => x!.Id).Select(g => g.First()!))
+                                {
+                                    <button type="button" class="pill-btn" data-value="@c.Id" onclick="selectColorPill('@c.Id', this)">@c.ColorName</button>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Quantity counter -->
+                        <div class="selector-group mb-4">
+                            <span class="selector-label">Số lượng:</span>
+                            <div class="d-flex align-items-center">
+                                <button type="button" class="qty-btn" style="border-radius:4px 0 0 4px;" onclick="changeQty(-1)">-</button>
+                                <input type="text" name="quantity" id="qtyInput" value="1" readonly class="qty-input" />
+                                <button type="button" class="qty-btn" style="border-radius:0 4px 4px 0;" onclick="changeQty(1)">+</button>
+                            </div>
+                        </div>
+
+                        <!-- Add to Cart / Buy Now actions -->
+                        <div class="d-flex flex-wrap gap-3 mt-4">
+                            <button type="submit" class="btn btn-action-cart flex-fill py-3">
+                                <i class="fas fa-cart-plus mr-2"></i>Thêm Vào Giỏ Hàng
+                            </button>
+                            <button type="button" class="btn btn-action-buy flex-fill py-3" onclick="submitBuyNow();">
+                                <i class="fas fa-shopping-bag mr-2"></i>Mua Ngay
+                            </button>
+                        </div>
+                    </form>
+                }
+
+                <div class="mt-4 pt-3 border-top">
+                    <a class="btn btn-outline-secondary w-100" asp-controller="Cart" asp-action="Cart" style="border-radius:6px;">
+                        <i class="fas fa-shopping-cart mr-2"></i>Đi Tới Giỏ Hàng Của Bạn
+                    </a>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Product Description Details -->
+    <div class="product-info-card">
+        <h3 class="info-header"><i class="fas fa-file-alt mr-2 text-primary"></i>Thông tin chi tiết</h3>
+        
+        <table class="info-table mb-4" style="width: 100%; max-width: 600px;">
+            <tbody>
+                <tr>
+                    <td class="info-label">Danh mục:</td>
+                    <td class="info-val">@product?.Category?.CategoryName</td>
+                </tr>
+                @if (!string.IsNullOrEmpty(product?.Trademark))
+                {
+                    <tr>
+                        <td class="info-label">Thương hiệu:</td>
+                        <td class="info-val">@product.Trademark</td>
+                    </tr>
+                }
+                @if (!string.IsNullOrEmpty(product?.Origin))
+                {
+                    <tr>
+                        <td class="info-label">Xuất xứ:</td>
+                        <td class="info-val">@product.Origin</td>
+                    </tr>
+                }
+                @if (product?.ManufactureYear > 0)
+                {
+                    <tr>
+                        <td class="info-label">Năm sản xuất:</td>
+                        <td class="info-val">@product.ManufactureYear</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <h3 class="info-header mt-4"><i class="fas fa-book-open mr-2 text-primary"></i>Mô tả sản phẩm</h3>
+        <div class="text-dark pt-2" style="font-size: 1.05rem; line-height: 1.7; white-space: pre-line;">
+            @(string.IsNullOrWhiteSpace(product?.Description) ? "Hiện chưa có thông tin mô tả chi tiết cho sản phẩm này." : product.Description)
+        </div>
+    </div>
 </div>
+
+<script>
+    const variants = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+        variants.Select(v => new { v.Id, v.SizeId, v.ColorId, v.AdditionalPrice }).ToList()
+    ));
+
+    function setMainImage(url, el) {
+        document.getElementById('mainImage').src = url;
+        const thumbs = document.querySelectorAll('.gallery-thumb');
+        thumbs.forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
+    }
+
+    function selectSizePill(val, el) {
+        // Toggle active style in UI
+        const pills = document.querySelectorAll('#sizePillContainer .pill-btn');
+        pills.forEach(p => p.classList.remove('active'));
+        el.classList.add('active');
+
+        // Set backend hidden select value
+        const select = document.getElementById('sizeSelect');
+        if (select) {
+            select.value = val;
+        }
+        syncVariant();
+    }
+
+    function selectColorPill(val, el) {
+        // Toggle active style in UI
+        const pills = document.querySelectorAll('#colorPillContainer .pill-btn');
+        pills.forEach(p => p.classList.remove('active'));
+        el.classList.add('active');
+
+        // Set backend hidden select value
+        const select = document.getElementById('colorSelect');
+        if (select) {
+            select.value = val;
+        }
+        syncVariant();
+    }
+
+    function changeQty(delta) {
+        const input = document.getElementById('qtyInput');
+        let val = parseInt(input.value) || 1;
+        val += delta;
+        if (val < 1) val = 1;
+        input.value = val;
+    }
+
+    function syncVariant() {
+        const sizeSelect = document.getElementById('sizeSelect');
+        const colorSelect = document.getElementById('colorSelect');
+        const variantInput = document.getElementById('productVariantId');
+
+        const sizeId = sizeSelect?.value;
+        const colorId = colorSelect?.value;
+
+        const match = variants.find(v => v.SizeId === sizeId && v.ColorId === colorId);
+        if (variantInput) {
+            variantInput.value = match ? match.Id : '';
+        }
+
+        // Calculate final price: product.CurrentPrice + AdditionalPrice
+        const base = @((product?.CurrentPrice ?? 0).ToString(System.Globalization.CultureInfo.InvariantCulture));
+        const additional = match && match.AdditionalPrice ? Number(match.AdditionalPrice) : 0;
+        const total = Number(base) + additional;
+
+        const el = document.getElementById('variantPrice');
+        if (el) {
+            el.textContent = total.toLocaleString('vi-VN') + ' đ';
+        }
+    }
+
+    function submitBuyNow() {
+        const form = document.getElementById('addToCartForm');
+        const variantInput = document.getElementById('productVariantId');
+
+        if (!variantInput || !variantInput.value) {
+            alert('Vui lòng chọn đúng biến thể (Kích thước & Màu sắc).');
+            return;
+        }
+
+        // Set form action to BuyNow and submit
+        form.action = '@Url.Action("BuyNow", "Product")';
+        form.submit();
+    }
+
+    // Auto-select first size and color pills on load
+    document.addEventListener("DOMContentLoaded", function() {
+        const firstSize = document.querySelector('#sizePillContainer .pill-btn');
+        if (firstSize) firstSize.click();
+
+        const firstColor = document.querySelector('#colorPillContainer .pill-btn');
+        if (firstColor) firstColor.click();
+    });
+</script>
+
 

@@ -1,27 +1,33 @@
 using HuflitShopCore.Data;
 using HuflitShopCore.DTOs;
-using HuflitShopCore.Models; // Giả định Models: StockReceipt, StockReceiptDetail, InventoryTransaction, ProductVariant
+using HuflitShopCore.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
+using Microsoft.Extensions.Logging;
+
 namespace HuflitShopCore.Services
 {
     public class StockReceiptService
     {
         private readonly AppDbContext _context;
+        private readonly ILogger<StockReceiptService> _logger;
 
-        public StockReceiptService(AppDbContext context)
+        public StockReceiptService(AppDbContext context, ILogger<StockReceiptService> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         public async Task<List<StockReceiptDTO>> GetAllReceiptsAsync()
         {
             var receipts = await _context.StockReceiveds
                 .Include(r => r.Supplier)
+                .Include(r => r.User)
+                .Include(r => r.StockReceivedDetails)
                 .OrderByDescending(r => r.ReceivedDate)
                 .ToListAsync();
 
@@ -30,8 +36,10 @@ namespace HuflitShopCore.Services
                 Id = r.Id,
                 SupplierId = r.SupplierId,
                 SupplierName = r.Supplier?.SupplierName,
+                UserName = r.User?.FullName,
                 ReceiptDate = r.ReceivedDate,
-                TotalAmount = r.TotalCost
+                TotalAmount = r.TotalCost,
+                ItemCount = r.StockReceivedDetails?.Count ?? 0
             }).ToList();
         }
 
@@ -51,21 +59,6 @@ namespace HuflitShopCore.Services
                 ReceiptDate = r.ReceivedDate,
                 TotalAmount = r.TotalCost
             };
-        }
-
-        public async Task<string> CreateReceiptAsync(StockReceiptDTO dto, string userId)
-        {
-            var receipt = new StockReceived
-            {
-                Id = Guid.NewGuid().ToString(),
-                SupplierId = dto.SupplierId,
-                ReceivedDate = DateTime.Now,
-                TotalCost = 0
-            };
-
-            _context.StockReceiveds.Add(receipt);
-            await _context.SaveChangesAsync();
-            return receipt.Id;
         }
 
         public async Task<(bool Success, string? ReceiptId, string? ErrorMessage)> CreateReceiptWithBulkDetailsAsync(StockReceiptDTO dto, string userId)
@@ -113,6 +106,19 @@ namespace HuflitShopCore.Services
                     {
                         variant.StockQuantity += item.Quantity;
                         _context.ProductVariants.Update(variant);
+
+                        // 4. Ghi log giao dịch kho
+                        _context.InventoryTransactions.Add(new InventoryTransaction
+                        {
+                            Id = Guid.NewGuid().ToString(),
+                            ProductVariantId = item.ProductVariantId,
+                            TransactionType = "IN",
+                            QuantityChange = item.Quantity,
+                            RemainingStock = variant.StockQuantity,
+                            TransactionDate = DateTime.Now,
+                            ReferenceId = receipt.Id,
+                            Note = $"Nhập kho từ phiếu: {receipt.Id}"
+                        });
                     }
                 }
 
@@ -123,8 +129,10 @@ namespace HuflitShopCore.Services
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex,
+                    "[StockReceipt] CreateReceiptWithBulkDetailsAsync failed. SupplierId={SupplierId}, UserId={UserId}, DetailsCount={DetailsCount}",
+                    dto?.SupplierId, userId, dto?.Details?.Count ?? 0);
                 await transaction.RollbackAsync();
-                // Ghi log lỗi (ex) ở đây nếu cần
                 return (false, null, "Đã xảy ra lỗi hệ thống khi tạo phiếu nhập.");
             }
         }

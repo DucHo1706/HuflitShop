@@ -10,14 +10,18 @@ namespace HuflitShopCore.Controllers
     public class HomeController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly Microsoft.Extensions.Configuration.IConfiguration _configuration;
 
-        public HomeController(AppDbContext context)
+        public HomeController(AppDbContext context, Microsoft.Extensions.Configuration.IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
 
         public async Task<IActionResult> Index()
         {
+            var cloudName = _configuration["CloudinarySettings:CloudName"] ?? "Tên_Cloud_Của_Bạn";
+
             // Lấy 8 sản phẩm mới nhất, bao gồm ảnh Thumbnail và tổng số lượng tồn từ các biến thể
             var products = await _context.Products
                 .Where(p => p.IsDeleted == false)
@@ -31,7 +35,9 @@ namespace HuflitShopCore.Controllers
                     ImageDefault = _context.ProductImages
                         .Where(i => i.ProductId == p.Id)
                         .OrderBy(i => i.ImageOrder)
-                        .Select(i => "https://res.cloudinary.com/Tên_Cloud_Của_Bạn/image/upload/v" + i.AssetVersion + "/" + i.PublicId + ".jpg")
+                        .Select(i => (i.AssetVersion == null || i.AssetVersion == "")
+                            ? i.PublicId
+                            : "https://res.cloudinary.com/" + cloudName + "/image/upload/v" + i.AssetVersion + "/" + i.PublicId + ".jpg")
                         .FirstOrDefault() ?? "",
                     Count = _context.ProductVariants
                         .Where(pv => pv.ProductId == p.Id)

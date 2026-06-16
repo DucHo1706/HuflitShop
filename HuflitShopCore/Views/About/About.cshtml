@@ -1,120 +1,158 @@
-﻿﻿@{
-Layout = "_Layout";
-ViewData["Title"] = "About us";
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Về chúng tôi - HUFLIT SHOP";
 }
 
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
+    .about-header {
+        background: linear-gradient(135deg, #1e3a8a, #2563eb);
+        color: white;
+        padding: 5rem 0 3rem 0;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    .about-header h2 {
+        font-weight: 700;
+        font-size: 2.25rem;
+    }
+    .about-header a {
+        color: #bfdbfe;
+        text-decoration: none;
+        font-weight: 500;
+    }
+    .about-section {
+        padding: 3rem 0;
+    }
+    .about-section-header {
+        color: #2563eb;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 10px;
+    }
+    .about-title {
+        font-weight: 800;
+        color: #1f2937;
+        margin-bottom: 1.5rem;
+    }
+    .about-text p {
+        color: #4b5563;
+        font-size: 1.05rem;
+        line-height: 1.8;
+        margin-bottom: 1.25rem;
+    }
+    .about-img-box {
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e5e7eb;
+    }
+    .about-img-box img {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+    .feature-card {
+        border: none;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        border-radius: 12px;
+        transition: all 0.3s;
+        background: white;
+        padding: 1.5rem;
+        height: 100%;
+    }
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+        border-color: #2563eb;
+    }
+    .feature-card img {
+        border-radius: 8px;
+        margin-bottom: 1rem;
+    }
+    .feature-title {
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 0.75rem;
+    }
+</style>
+
 <!-- Page Header Start -->
-<div class="page-header mb-0">
+<div class="about-header">
     <div class="container">
-        <div class="row">
-            <div class="col-12">
-                <h2 class="wow fadeInDown" data-wow-delay="0.5s">Về chúng tôi</h2>
-            </div>
-            <div class="col-12 wow fadeInUp" data-wow-delay="0.5s">
-                <a asp-controller="Home" asp-action="Index">Home</a>
-                <a asp-controller="About" asp-action="Product">About us</a>
-            </div>
+        <h2>Về chúng tôi</h2>
+        <div class="mt-2">
+            <a asp-controller="Home" asp-action="Index">Trang chủ</a>
+            <span class="mx-2 text-white-50">&gt;</span>
+            <span class="text-white">Giới thiệu</span>
         </div>
     </div>
 </div>
 <!-- Page Header End -->
+
 <!-- Set Start -->
-<div class="food">
-    <div class="container">
-        <div class="row align-items-center wow swing" data-wow-offset="100" data-wow-delay="0.5s">
-            <div class="col-md-4">
-                <div class="card rounded-sm" style="padding: 20px; margin-bottom: 20px;">
-                    <img class="card-img-top" src="~/Client/img/set-1.jpg" alt="Card image cap" width="100%" />
-                    <div class="card-body">
-                        <h4 class="card-title" style="text-align:center">Combo Burger Khổng Lồ</h4>
-                        <p class="card-text">
-                            Combo burger ngập tràn phô mai và thịt bò nướng thơm lừng, xua tan ngay cơn đói của bạn.
-                        </p>
-                        <a asp-controller="Product" asp-action="Product" id="content">Ghé xem shop</a>
-                    </div>
-                </div>
+<div class="container mb-5">
+    <div class="row align-items-stretch">
+        <div class="col-md-4 mb-4">
+            <div class="feature-card">
+                <img class="w-100" src="~/Client/img/set-1.jpg" alt="Váy Đầm Thiết Kế" />
+                <h4 class="feature-title text-center mt-3">Váy Đầm Thiết Kế</h4>
+                <p class="text-muted text-center" style="font-size:0.95rem; line-height: 1.6;">
+                    Tuyển chọn đầm tiệc, đầm xoè nhẹ nhàng mang lại vẻ thanh lịch và kiêu sa tối đa cho người mặc.
+                </p>
             </div>
-            <div class="col-md-4">
-                <div class="card rounded-sm" style="padding: 20px; margin-bottom: 20px;">
-                    <img class="card-img-top" src="~/Client/img/set-2.jpg" alt="Card image cap" width="100%" />
-                    <div class="card-body">
-                        <h4 class="card-title" style="text-align:center">Combo Gà Rán & Khoai Tây</h4>
-                        <p class="card-text">
-                            Combo siêu tiết kiệm được nhiều bạn trẻ ưa chuộng bởi sự tiện lợi, giòn rụm và hấp dẫn.
-                        </p>
-                        <a asp-controller="Product" asp-action="Product" id="content">Ghé xem shop</a>
-                    </div>
-                </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="feature-card">
+                <img class="w-100" src="~/Client/img/set-2.jpg" alt="Set Đồ Năng Động" />
+                <h4 class="feature-title text-center mt-3">Set Đồ Năng Động</h4>
+                <p class="text-muted text-center" style="font-size:0.95rem; line-height: 1.6;">
+                    Sự kết hợp khoẻ khoắn của các mẫu blazer và chân váy giúp các cô gái tự tin trong học tập và dạo phố.
+                </p>
             </div>
-            <div class="col-md-4">
-                <div class="card rounded-sm" style="padding: 20px; margin-bottom: 20px;">
-                    <img class="card-img-top" src="~/Client/img/set-3.jpg" alt="Card image cap" width="100%" />
-                    <div class="card-body">
-                        <h4 class="card-title" style="text-align:center">Combo Gà Viên & Nước Ngọt</h4>
-                        <p class="card-text">
-                            Sự kết hợp tuyệt hảo tạo nên một bữa ăn nhanh đậm vị và vô cùng sảng khoái.
-                        </p>
-                        <a asp-controller="Product" asp-action="Product" id="content">Ghé xem shop</a>
-                    </div>
-                </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="feature-card">
+                <img class="w-100" src="~/Client/img/set-3.jpg" alt="Thời Trang Công Sở" />
+                <h4 class="feature-title text-center mt-3">Thời Trang Công Sở</h4>
+                <p class="text-muted text-center" style="font-size:0.95rem; line-height: 1.6;">
+                    Áo sơ mi lụa tơ tằm kết hợp quần tây thời thượng nâng tầm phong cách chuyên nghiệp nơi công sở.
+                </p>
             </div>
         </div>
     </div>
 </div>
 <!-- Set End -->
+
 <!-- About Start -->
-<div class="about">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-lg-6">
-                <div class="about-img wow heartBeat" data-wow-offset="120">
-                    <img src="~/Client/img/about.png" alt="Image">
-                    <button type="button" class="btn-play" data-toggle="modal"
-                            data-src="https://www.youtube.com/embed/c12hV_HaA6g" data-target="#videoModal">
-                        <span></span>
-                    </button>
-                </div>
+<div class="container about-section">
+    <div class="row align-items-center">
+        <div class="col-lg-6 mb-4">
+            <div class="about-img-box">
+                <img src="~/Client/img/about.png" alt="Về HUFLIT SHOP">
             </div>
-            <div class="col-lg-6">
-                <div class="about-content wow fadeInRight" data-wow-offset="120">
-                    <div class="section-header">
-                        <p>Về chúng tôi</p>
-                        <h2>HUFLIT SHOP - Chúng tôi luôn đồng hành cùng những bữa ăn ngon của bạn</h2>
-                    </div>
-                    <div class="about-text">
-                        <p>
-                            Với thực đơn đa dạng, luôn cập nhật những món ăn mới và khẩu vị của khách hàng, chúng tôi tự
-                            tin sẽ mạng lại cho bạn những trải nghiệm ẩm thực tốt nhất. Đồng thời, chúng tôi luôn đề cao
-                            tiêu chí mang đến cho khách hàng những phần ăn chất lượng nhất với giá cả luôn phải chăng.
-                        </p>
-                        <p>
-                            Với phương châm "Đồng hành cùng những bữa ăn ngon của bạn", chúng tôi luôn đặt chất lượng vệ
-                            sinh an toàn thực phẩm cũng như sự hài lòng của khách hàng lên hàng đầu.
-                        </p>
-                        <a class="btn custom-btn" asp-controller="Product" asp-action="Product">Mua sắm ngay</a>
-                    </div>
+        </div>
+        <div class="col-lg-6 mb-4">
+            <div class="pl-lg-4">
+                <div class="about-section-header">Giới thiệu cửa hàng</div>
+                <h2 class="about-title">HUFLIT SHOP - Đồng hành cùng phong cách và sự tự tin của bạn</h2>
+                <div class="about-text">
+                    <p>
+                        Với mong muốn mang đến những sản phẩm thời trang thiết kế chất lượng nhất, HUFLIT SHOP tự hào đồng hành cùng phái đẹp trên con đường tìm kiếm sự tự tin và phong thái riêng của bản thân.
+                    </p>
+                    <p>
+                        Mỗi dòng sản phẩm của chúng tôi từ đầm tiệc đến trang phục công sở đều được chọn lọc chất liệu kỹ lưỡng, đo may cẩn thận từng chi tiết và đảm bảo form dáng thoải mái, tôn vẻ quyến rũ tự nhiên của người phụ nữ Việt Nam.
+                    </p>
+                    <p>
+                        Sự tin yêu và hài lòng của khách hàng là động lực to lớn giúp HUFLIT SHOP tiếp tục sáng tạo và ra mắt nhiều bộ sưu tập bắt kịp xu hướng thời trang quốc tế.
+                    </p>
+                    <a class="btn btn-primary px-4 py-2 mt-2" asp-controller="Product" asp-action="Product" style="border-radius:30px; font-weight:600;">Xem sản phẩm ngay</a>
                 </div>
             </div>
         </div>
     </div>
 </div>
 <!-- About End -->
-<!-- Video Modal Start-->
-<div class="modal fade" id="videoModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-     aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-body">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-                <!-- 16:9 aspect ratio -->
-                <div class="embed-responsive embed-responsive-16by9">
-                    <iframe class="embed-responsive-item" src="" id="video" allowscriptaccess="always"
-                            allow="autoplay"></iframe>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- Video Modal End -->

@@ -12,10 +12,12 @@ namespace HuflitShopCore.Services
     public class ProductImageService
     {
         private readonly AppDbContext _context;
+        private readonly string _cloudName;
 
-        public ProductImageService(AppDbContext context)
+        public ProductImageService(AppDbContext context, Microsoft.Extensions.Configuration.IConfiguration config)
         {
             _context = context;
+            _cloudName = config["CloudinarySettings:CloudName"] ?? "Tên_Cloud_Của_Bạn";
         }
 
         public async Task<List<ProductImageDTO>> GetImagesByProductIdAsync(string productId)
@@ -29,7 +31,7 @@ namespace HuflitShopCore.Services
                 Id = i.Id,
                 ProductId = i.ProductId,
                 PublicId = i.PublicId,
-                ImageUrl = $"https://res.cloudinary.com/Tên_Cloud_Của_Bạn/image/upload/v{i.AssetVersion}/{i.PublicId}.jpg"
+                ImageUrl = string.IsNullOrEmpty(i.AssetVersion) ? i.PublicId : $"https://res.cloudinary.com/{_cloudName}/image/upload/v{i.AssetVersion}/{i.PublicId}.jpg"
             }).ToList();
         }
 
@@ -43,7 +45,7 @@ namespace HuflitShopCore.Services
                 Id = img.Id,
                 ProductId = img.ProductId,
                 PublicId = img.PublicId,
-                ImageUrl = $"https://res.cloudinary.com/Tên_Cloud_Của_Bạn/image/upload/v{img.AssetVersion}/{img.PublicId}.jpg"
+                ImageUrl = string.IsNullOrEmpty(img.AssetVersion) ? img.PublicId : $"https://res.cloudinary.com/{_cloudName}/image/upload/v{img.AssetVersion}/{img.PublicId}.jpg"
             };
         }
 

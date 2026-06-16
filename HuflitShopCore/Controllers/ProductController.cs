@@ -19,29 +19,90 @@ namespace HuflitShopCore.Controllers
         }
 
         // NOTE: Home layout used by views expects ViewBag.Categories.
-        public async Task<IActionResult> Product()
+        public async Task<IActionResult> Product(int page = 1)
         {
+            int pageSize = 12;
             ViewBag.Categories = await _context.Categories
                 .OrderBy(c => c.CategoryName)
                 .ToListAsync();
 
-            var products = await _context.Products
+            var query = _context.Products.AsQueryable();
+            int totalProducts = await query.CountAsync();
+            int totalPages = (int)System.Math.Ceiling((double)totalProducts / pageSize);
+            if (page < 1) page = 1;
+            if (page > totalPages && totalPages > 0) page = totalPages;
+
+            var products = await query
                 .OrderByDescending(p => p.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
+
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.Action = "Product";
 
             return View(products);
         }
 
-        public async Task<IActionResult> Category(string id)
+        public async Task<IActionResult> Category(string id, int page = 1)
         {
+            int pageSize = 12;
             ViewBag.Categories = await _context.Categories
                 .OrderBy(c => c.CategoryName)
                 .ToListAsync();
 
-            var products = await _context.Products
-                .Where(p => p.CategoryId == id)
+            var query = _context.Products.Where(p => p.CategoryId == id);
+            int totalProducts = await query.CountAsync();
+            int totalPages = (int)System.Math.Ceiling((double)totalProducts / pageSize);
+            if (page < 1) page = 1;
+            if (page > totalPages && totalPages > 0) page = totalPages;
+
+            var products = await query
                 .OrderByDescending(p => p.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
+
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.CategoryId = id;
+            ViewBag.Action = "Category";
+
+            return View("Product", products);
+        }
+
+        public async Task<IActionResult> Search(string search, int page = 1)
+        {
+            int pageSize = 12;
+            ViewBag.Categories = await _context.Categories
+                .OrderBy(c => c.CategoryName)
+                .ToListAsync();
+
+            ViewData["GetProduct"] = search;
+
+            var query = _context.Products.AsQueryable();
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(p => p.ProductName.Contains(search));
+            }
+
+            int totalProducts = await query.CountAsync();
+            int totalPages = (int)System.Math.Ceiling((double)totalProducts / pageSize);
+            if (page < 1) page = 1;
+            if (page > totalPages && totalPages > 0) page = totalPages;
+
+            var products = await query
+                .OrderByDescending(p => p.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.Search = search;
+            ViewBag.Action = "Search";
 
             return View("Product", products);
         }
@@ -98,8 +159,7 @@ namespace HuflitShopCore.Controllers
 
                 if (pv == null) return RedirectToAction("Index", "Home");
 
-                await AddOrUpdateCartItemAsync(pv.Id, Math.Max(1, quantity));
-                return RedirectToAction("Checkout", "Order");
+                return RedirectToAction("Checkout", "Order", new { buyNowVariantId = pv.Id, buyNowQty = Math.Max(1, quantity) });
             }
 
             var variant = await _context.ProductVariants
@@ -110,8 +170,21 @@ namespace HuflitShopCore.Controllers
             if (variant == null)
                 return RedirectToAction("Index", "Home");
 
-            await AddOrUpdateCartItemAsync(variant.Id, Math.Max(1, quantity));
-            return RedirectToAction("Checkout", "Order");
+            return RedirectToAction("Checkout", "Order", new { buyNowVariantId = variant.Id, buyNowQty = Math.Max(1, quantity) });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> BuyNow(string id)
+        {
+            var variant = await _context.ProductVariants
+                .Where(pv => pv.ProductId == id && pv.IsActive && pv.StockQuantity > 0)
+                .OrderBy(pv => pv.StockQuantity)
+                .FirstOrDefaultAsync();
+
+            if (variant == null)
+                return RedirectToAction("Index", "Home");
+
+            return RedirectToAction("Checkout", "Order", new { buyNowVariantId = variant.Id, buyNowQty = 1 });
         }
 
         // Backward compatibility: nếu view cũ chỉ gửi mỗi ProductId.

@@ -20,9 +20,24 @@
 <div class="container" style="margin-top: 2rem;">
     <div class="row justify-content-center">
         <div class="col-lg-8">
-            <div class="alert alert-success" role="alert">
-                Đơn hàng của bạn đã được tạo thành công.
-            </div>
+            @if (ViewBag.PaymentSuccess == null)
+            {
+                <div class="alert alert-success" role="alert">
+                    🎉 Đơn hàng của bạn đã được đặt thành công. Phương thức thanh toán: <strong>@ViewBag.PaymentMethodName</strong>.
+                </div>
+            }
+            else if (ViewBag.PaymentSuccess == true)
+            {
+                <div class="alert alert-success" role="alert">
+                    🎉 Thanh toán trực tuyến thành công qua VNPAY! Đơn hàng của bạn đang được xử lý.
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-danger" role="alert">
+                    ❌ Thanh toán trực tuyến qua VNPAY thất bại hoặc đã bị hủy. Đơn hàng này đã bị hủy bỏ tự động. Vui lòng thử lại.
+                </div>
+            }
 
             <div class="card">
                 <div class="card-body">
