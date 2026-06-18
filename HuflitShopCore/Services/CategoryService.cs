@@ -125,5 +125,13 @@ namespace HuflitShopCore.Services
                 await _context.SaveChangesAsync();
             });
         }
+
+        public async Task<List<Category>> GetCategoriesForCatalogAsync()
+        {
+            return await _context.Categories
+                .AsNoTracking()
+                .OrderBy(c => c.CategoryName)
+                .ToListAsync();
+        }
     }
 }

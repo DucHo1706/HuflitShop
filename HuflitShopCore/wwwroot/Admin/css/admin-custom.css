@@ -1,0 +1,506 @@
+/* ==========================================================================
+   Tracy Admin Custom Stylesheet - Luxury & Professional Minimalist Design
+   ========================================================================== */
+
+/* --- Fonts & Base Setup --- */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+body {
+    font-family: 'Outfit', sans-serif !important;
+    background-color: #f8fafc; /* Màu nền xám nhạt nhẹ nhàng quý phái */
+    color: #334155; /* Màu chữ slate đậm dịu mắt */
+}
+
+/* --- Global Scrollbar --- */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* --- Sidebar (Thanh điều hướng bên trái) --- */
+#accordionSidebar {
+    background: linear-gradient(180deg, #0d1e3d 0%, #1e40af 100%) !important; /* Royal Navy & Royal Blue */
+    box-shadow: 4px 0 24px rgba(13, 30, 61, 0.08);
+    border-right: 1px solid #1e3a8a;
+}
+
+#accordionSidebar .sidebar-brand {
+    height: 4.375rem;
+    text-decoration: none;
+    background-color: rgba(13, 30, 61, 0.4);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+#accordionSidebar .sidebar-brand-text {
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: #ffffff;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+}
+
+#accordionSidebar .sidebar-brand-icon i {
+    color: #38bdf8 !important; /* Xanh ngọc nhẹ */
+}
+
+/* Sidebar Links */
+#accordionSidebar .nav-item .nav-link {
+    padding: 0.85rem 1.5rem;
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: #94a3b8 !important;
+    transition: all 0.2s ease-in-out;
+}
+
+#accordionSidebar .nav-item .nav-link i {
+    margin-right: 0.75rem;
+    font-size: 0.95rem;
+    color: #64748b;
+    transition: all 0.2s ease-in-out;
+    width: 1.25rem;
+    text-align: center;
+}
+
+#accordionSidebar .nav-item .nav-link:hover,
+#accordionSidebar .nav-item.active .nav-link {
+    color: #ffffff !important;
+    background-color: rgba(255, 255, 255, 0.04);
+}
+
+#accordionSidebar .nav-item .nav-link:hover i,
+#accordionSidebar .nav-item.active .nav-link i {
+    color: #38bdf8 !important; /* Highlight icon */
+}
+
+#accordionSidebar .nav-item.active {
+    position: relative;
+}
+
+#accordionSidebar .nav-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 15%;
+    height: 70%;
+    width: 4px;
+    background-color: #38bdf8;
+    border-radius: 0 4px 4px 0;
+}
+
+/* Submenu / Collapse Inner Menu */
+#accordionSidebar .collapse-inner {
+    background-color: #09162e !important;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    margin: 0.25rem 1rem 0.5rem 1rem !important;
+    padding: 0.5rem 0 !important;
+    border-radius: 8px !important;
+}
+
+#accordionSidebar .collapse-inner .collapse-header {
+    color: #475569 !important;
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    padding: 0.5rem 1.2rem;
+    letter-spacing: 0.05em;
+}
+
+#accordionSidebar .collapse-inner .collapse-item {
+    color: #94a3b8 !important;
+    font-size: 0.85rem;
+    padding: 0.45rem 1.2rem;
+    font-weight: 400;
+    transition: all 0.2s ease;
+    border-radius: 4px;
+    margin: 0 0.5rem;
+}
+
+#accordionSidebar .collapse-inner .collapse-item:hover {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    color: #ffffff !important;
+    text-decoration: none;
+}
+
+#accordionSidebar .sidebar-divider {
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    margin: 0.75rem 0;
+}
+
+#accordionSidebar .sidebar-heading {
+    color: #475569 !important;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    padding: 0.75rem 1.5rem 0.25rem 1.5rem;
+    text-transform: uppercase;
+}
+
+/* --- Topbar (Thanh tìm kiếm & thông tin user ở trên) --- */
+.topbar {
+    background-color: #ffffff !important;
+    border-bottom: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+    height: 4.375rem;
+}
+
+.topbar .nav-item .nav-link {
+    color: #64748b !important;
+}
+
+.topbar .nav-item .nav-link:hover {
+    color: #0f172a !important;
+}
+
+.topbar .topbar-divider {
+    border-right: 1px solid #e2e8f0;
+}
+
+.img-profile {
+    border: 2px solid #f1f5f9;
+    padding: 1px;
+    object-fit: cover;
+}
+
+/* --- Content Wrapper & Cards --- */
+#content-wrapper {
+    background-color: #f8fafc !important;
+}
+
+.container-fluid {
+    padding-left: 2rem !important;
+    padding-right: 2rem !important;
+    padding-bottom: 2rem !important;
+}
+
+h1.h3 {
+    font-weight: 700;
+    color: #0f172a !important;
+    letter-spacing: -0.02em;
+}
+
+/* --- Modern Card Styling --- */
+.card {
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.01) !important;
+    background-color: #ffffff;
+    overflow: hidden;
+}
+
+.card-header {
+    background-color: #ffffff !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    padding: 1.25rem 1.5rem !important;
+}
+
+.card-header h6 {
+    font-weight: 600 !important;
+    color: #0f172a !important;
+}
+
+.card-body {
+    padding: 1.5rem !important;
+}
+
+/* --- Data Tables & Tables --- */
+.table-responsive {
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    background-color: #ffffff;
+}
+
+.table {
+    margin-bottom: 0 !important;
+    border-collapse: collapse !important;
+}
+
+.table-bordered {
+    border: none !important;
+}
+
+.table thead th {
+    background-color: #f8fafc !important;
+    color: #475569 !important;
+    font-weight: 600 !important;
+    font-size: 0.85rem !important;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 1rem 1.25rem !important;
+    border: none !important;
+    border-bottom: 2px solid #e2e8f0 !important;
+}
+
+.table tbody tr {
+    transition: background-color 0.15s ease-in-out;
+}
+
+.table tbody tr:hover {
+    background-color: #f1f5f9 !important; /* Hover tinh tế màu xám dịu */
+}
+
+.table tbody td {
+    padding: 1.1rem 1.25rem !important;
+    font-size: 0.92rem;
+    color: #334155;
+    border: none !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    vertical-align: middle !important;
+}
+
+/* DataTables Styling */
+.dataTables_wrapper .dataTables_length select,
+.dataTables_wrapper .dataTables_filter input {
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 6px !important;
+    padding: 0.35rem 0.75rem !important;
+    font-size: 0.88rem !important;
+    color: #334155 !important;
+    background-color: #ffffff !important;
+    outline: none !important;
+}
+
+.dataTables_wrapper .dataTables_filter input {
+    margin-left: 0.5em !important;
+    width: 250px !important;
+}
+
+.dataTables_wrapper .dataTables_info {
+    font-size: 0.85rem !important;
+    color: #64748b !important;
+    padding-top: 1rem !important;
+}
+
+.dataTables_wrapper .dataTables_paginate {
+    padding-top: 1rem !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    padding: 0.4rem 0.85rem !important;
+    margin-left: 2px !important;
+    border-radius: 6px !important;
+    border: 1px solid #e2e8f0 !important;
+    background: #ffffff !important;
+    color: #475569 !important;
+    font-size: 0.85rem !important;
+    transition: all 0.15s ease;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background: #f1f5f9 !important;
+    border-color: #cbd5e1 !important;
+    color: #0f172a !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current,
+.dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+    background: #1e40af !important;
+    border-color: #1e40af !important;
+    color: #ffffff !important;
+}
+
+/* --- Badges (Trạng thái) - Dạng Glassmorphic Tint tinh tế --- */
+.badge {
+    padding: 0.45em 0.8em !important;
+    font-size: 0.78rem !important;
+    font-weight: 600 !important;
+    border-radius: 6px !important;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    box-shadow: none !important;
+}
+
+/* Badges override */
+.badge.bg-success, .badge-success {
+    background-color: #f0fdf4 !important;
+    color: #16a34a !important;
+    border: 1px solid #bbf7d0 !important;
+}
+
+.badge.bg-danger, .badge-danger {
+    background-color: #fef2f2 !important;
+    color: #dc2626 !important;
+    border: 1px solid #fecaca !important;
+}
+
+.badge.bg-warning, .badge-warning {
+    background-color: #fffbeb !important;
+    color: #d97706 !important;
+    border: 1px solid #fde68a !important;
+}
+
+.badge.bg-info, .badge-info {
+    background-color: #f0f9ff !important;
+    color: #0284c7 !important;
+    border: 1px solid #bae6fd !important;
+}
+
+/* --- Buttons --- */
+.btn {
+    border-radius: 8px !important;
+    font-weight: 500 !important;
+    font-size: 0.88rem !important;
+    padding: 0.5rem 1rem;
+    transition: all 0.2s ease-in-out;
+    box-shadow: none !important;
+}
+
+.btn-sm {
+    padding: 0.35rem 0.75rem !important;
+    font-size: 0.82rem !important;
+    border-radius: 6px !important;
+}
+
+/* Custom button colors (Chuyên nghiệp hơn, không chói) */
+.btn-primary {
+    background-color: #1e40af !important;
+    border-color: #1e40af !important;
+    color: #ffffff !important;
+}
+
+.btn-primary:hover, .btn-primary:focus {
+    background-color: #1d4ed8 !important;
+    border-color: #1d4ed8 !important;
+}
+
+.btn-warning {
+    background-color: #fef3c7 !important;
+    border-color: #fde68a !important;
+    color: #d97706 !important;
+}
+
+.btn-warning:hover {
+    background-color: #fde68a !important;
+    color: #b45309 !important;
+}
+
+.btn-info {
+    background-color: #e0f2fe !important;
+    border-color: #bae6fd !important;
+    color: #0369a1 !important;
+}
+
+.btn-info:hover {
+    background-color: #bae6fd !important;
+    color: #0369a1 !important;
+}
+
+.btn-danger {
+    background-color: #fef2f2 !important;
+    border-color: #fecaca !important;
+    color: #b91c1c !important;
+}
+
+.btn-danger:hover {
+    background-color: #fecaca !important;
+    color: #991b1b !important;
+}
+
+.btn-success {
+    background-color: #ecfdf5 !important;
+    border-color: #a7f3d0 !important;
+    color: #047857 !important;
+}
+
+.btn-success:hover {
+    background-color: #a7f3d0 !important;
+    color: #065f46 !important;
+}
+
+/* Nút dạng Icon trong bảng */
+td a.btn-sm, td button.btn-sm {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    padding: 0 !important;
+    border-radius: 6px !important;
+    margin-right: 0.2rem;
+}
+
+td a.btn-sm i, td button.btn-sm i {
+    font-size: 0.85rem;
+}
+
+/* --- Toast Notification (Thông báo góc) --- */
+.toast-container {
+    top: 24px !important;
+    right: 24px !important;
+}
+
+.toast-container .alert {
+    border-radius: 10px !important;
+    border: none !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.05) !important;
+    padding: 1rem 1.25rem !important;
+    color: #0f172a !important;
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+}
+
+.toast-container .alert-success {
+    background-color: #f0fdf4 !important;
+    border-left: 4px solid #16a34a !important;
+}
+
+.toast-container .alert-danger {
+    background-color: #fef2f2 !important;
+    border-left: 4px solid #dc2626 !important;
+}
+
+.toast-container .alert .close {
+    opacity: 0.5;
+    text-shadow: none;
+    color: #0f172a;
+    outline: none !important;
+    padding: 0.8rem 1rem !important;
+}
+
+/* --- Form Fields & Labels --- */
+.form-control {
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 8px !important;
+    padding: 0.6rem 0.9rem !important;
+    font-size: 0.92rem !important;
+    color: #334155 !important;
+    background-color: #ffffff !important;
+    transition: all 0.15s ease-in-out !important;
+    box-shadow: none !important;
+}
+
+.form-control:focus {
+    border-color: #64748b !important;
+    background-color: #ffffff !important;
+}
+
+label.fw-bold {
+    font-weight: 600 !important;
+    color: #475569 !important;
+    font-size: 0.88rem !important;
+    margin-bottom: 0.4rem !important;
+}
+
+/* --- Sticky Footer --- */
+footer.sticky-footer {
+    background-color: #ffffff !important;
+    border-top: 1px solid #e2e8f0;
+    padding: 1.5rem 0 !important;
+}
+
+footer.sticky-footer span {
+    font-size: 0.82rem;
+    color: #64748b;
+    font-weight: 500;
+}

@@ -17,7 +17,7 @@ namespace HuflitShopCore.Services
         public ProductImageService(AppDbContext context, Microsoft.Extensions.Configuration.IConfiguration config)
         {
             _context = context;
-            _cloudName = config["CloudinarySettings:CloudName"] ?? "Tên_Cloud_Của_Bạn";
+            _cloudName = config["Cloudinary:CloudName"] ?? config["CloudinarySettings:CloudName"] ?? "dsamboqwp";
         }
 
         public async Task<List<ProductImageDTO>> GetImagesByProductIdAsync(string productId)

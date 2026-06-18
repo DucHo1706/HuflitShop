@@ -1,41 +1,50 @@
-﻿@model HuflitShopCore.DTOs.RegisterDTO
+@model HuflitShopCore.DTOs.RegisterDTO
 @{
     Layout = "_LayoutLogin";
-    ViewData["Title"] = "Register";
+    ViewData["Title"] = "Đăng ký";
 }
 
-<form method="post" class="form-login" id="form-login" asp-action="Register">
-    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-    <div class="form-group form-input">
-        <input asp-for="Name" type="text" placeholder="Họ và tên" />
+<h1 class="auth-form-box__title">Tạo tài khoản</h1>
+<p class="auth-form-box__sub">Đăng ký để trải nghiệm mua sắm cao cấp cùng Huflit Shop</p>
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="auth-alert">
+        <div asp-validation-summary="ModelOnly"></div>
+    </div>
+}
+
+<form method="post" id="form-register" asp-action="Register">
+    @Html.AntiForgeryToken()
+    <div class="auth-field">
+        <label>Họ và tên</label>
+        <input asp-for="Name" type="text" placeholder="Nguyễn Thị Lan" autocomplete="name" />
         <span asp-validation-for="Name" class="text-danger"></span>
     </div>
-    <div class="form-group form-input">
-        <input asp-for="PhoneNumber" type="tel" placeholder="Số điện thoại" />
+    <div class="auth-field">
+        <label>Số điện thoại</label>
+        <input asp-for="PhoneNumber" type="tel" placeholder="0912 345 678" autocomplete="tel" />
         <span asp-validation-for="PhoneNumber" class="text-danger"></span>
     </div>
-    <div class="form-group form-input">
-        <input asp-for="Email" type="email" placeholder="Email" />
+    <div class="auth-field">
+        <label>Email</label>
+        <input asp-for="Email" type="email" placeholder="example@email.com" autocomplete="email" />
         <span asp-validation-for="Email" class="text-danger"></span>
     </div>
-    <div class="form-group form-input">
-        <input asp-for="Password" type="password" placeholder="Mật khẩu mới" />
+    <div class="auth-field">
+        <label>Mật khẩu</label>
+        <input asp-for="Password" type="password" placeholder="Tối thiểu 6 ký tự" autocomplete="new-password" />
         <span asp-validation-for="Password" class="text-danger"></span>
     </div>
-    <div class="form-group form-input">
-        <input asp-for="ConfirmPassword" type="password" placeholder="Nhập lại mật khẩu" />
+    <div class="auth-field">
+        <label>Nhập lại mật khẩu</label>
+        <input asp-for="ConfirmPassword" type="password" placeholder="••••••••" autocomplete="new-password" />
         <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
     </div>
 
-    <div class="form-group form-button">
-        <input type="submit" style="text-transform: uppercase" id="login" class="form-submit" value="Đăng ký" />
-    </div>
+    <button type="submit" class="auth-submit" style="margin-top: 8px;">Tạo tài khoản</button>
 </form>
 
-
-<div class="form-group sugget-text">
-    <div class="text">Bạn đã có tài khoản?</div>
-    <div class="link register-link">
-        <a asp-controller="Login" asp-action="Login">Đăng nhập</a>
-    </div>
-</div>
+<p class="auth-switch">
+    Đã có tài khoản? <a asp-controller="Login" asp-action="Login">Đăng nhập</a>
+</p>

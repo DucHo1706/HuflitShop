@@ -1,4 +1,4 @@
-﻿@model IEnumerable<HuflitShopCore.DTOs.ReviewDTO>
+@model IEnumerable<HuflitShopCore.DTOs.ReviewDTO>
 
 @{
     ViewData["Title"] = "Quản lý Đánh giá";
@@ -35,13 +35,63 @@
                                     <td class="text-warning">
                                         @for (int i = 0; i < item.Rate; i++) { <i class="fas fa-star"></i> }
                                     </td>
-                                    <td>@item.Content</td>
+                                    <td>
+                                        <div class="text-dark">@item.Content</div>
+                                        @if (!string.IsNullOrEmpty(item.AdminReply))
+                                        {
+                                            <div class="small text-muted mt-2 p-2 rounded" style="background-color: rgba(13, 30, 61, 0.05); border-left: 3px solid #0d1e3d;">
+                                                <strong class="text-primary"><i class="fas fa-reply mr-1"></i>Tracy Shop:</strong> @item.AdminReply
+                                            </div>
+                                        }
+                                        @if (item.HelpfulVotes > 0)
+                                        {
+                                            <div class="mt-1" style="font-size: 0.8rem; color: #1e40af;">
+                                                <i class="far fa-thumbs-up"></i> Có <strong>@item.HelpfulVotes</strong> khách hàng thấy hữu ích
+                                            </div>
+                                        }
+                                    </td>
                                     <td>@item.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
-                                    <td class="text-center">
+                                    <td class="text-center" style="white-space: nowrap;">
+                                        <button type="button" class="btn btn-primary btn-sm mr-1" data-toggle="modal" data-target="#replyModal-@item.Id" title="Trả lời">
+                                            <i class="fas fa-reply"></i> Trả lời
+                                        </button>
                                         <form asp-action="Delete" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa phản hồi này?');">
                                             <input type="hidden" name="id" value="@item.Id" />
                                             <button type="submit" class="btn btn-danger btn-sm" title="Xóa"><i class="fas fa-trash"></i> Xóa</button>
                                         </form>
+
+                                        <!-- Reply Modal -->
+                                        <div class="modal fade text-left" id="replyModal-@item.Id" tabindex="-1" role="dialog" aria-labelledby="replyModalLabel-@item.Id" aria-hidden="true">
+                                            <div class="modal-dialog" role="document">
+                                                <div class="modal-content">
+                                                    <form asp-action="Reply" method="post">
+                                                        <input type="hidden" name="id" value="@item.Id" />
+                                                        <div class="modal-header bg-gradient-primary text-white">
+                                                            <h5 class="modal-title font-weight-bold" id="replyModalLabel-@item.Id">Phản hồi đánh giá</h5>
+                                                            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                                                                <span aria-hidden="true">&times;</span>
+                                                            </button>
+                                                        </div>
+                                                        <div class="modal-body text-dark">
+                                                            <div class="form-group mb-3">
+                                                                <label class="font-weight-bold text-muted" style="font-size: 0.85rem;">Đánh giá của khách:</label>
+                                                                <blockquote class="blockquote p-3 bg-light rounded" style="font-size: 0.95rem; border-left: 3px solid #dee2e6;">
+                                                                    "@item.Content"
+                                                                </blockquote>
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label for="replyText-@item.Id" class="font-weight-bold" style="font-size: 0.85rem;">Nội dung phản hồi từ shop:</label>
+                                                                <textarea class="form-control" name="replyText" id="replyText-@item.Id" rows="4" placeholder="Nhập câu trả lời..." required>@item.AdminReply</textarea>
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                                                            <button type="submit" class="btn btn-primary">Gửi phản hồi</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </td>
                                 </tr>
                             }

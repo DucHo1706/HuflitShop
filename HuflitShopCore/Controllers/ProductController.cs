@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using HuflitShopCore.Data;
 using HuflitShopCore.Models;
+using HuflitShopCore.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,32 +12,34 @@ namespace HuflitShopCore.Controllers
 {
     public class ProductController : Controller
     {
-        private readonly AppDbContext _context;
+        private readonly ProductService _productService;
+        private readonly CategoryService _categoryService;
+        private readonly CartService _cartService;
+        private readonly ReviewService _reviewService;
 
-        public ProductController(AppDbContext context)
+        public ProductController(ProductService productService, CategoryService categoryService, CartService cartService, ReviewService reviewService)
         {
-            _context = context;
+            _productService = productService;
+            _categoryService = categoryService;
+            _cartService = cartService;
+            _reviewService = reviewService;
         }
 
         // NOTE: Home layout used by views expects ViewBag.Categories.
-        public async Task<IActionResult> Product(int page = 1)
+        public async Task<IActionResult> Product(
+            decimal? minPrice = null,
+            decimal? maxPrice = null,
+            string? trademark = null,
+            string? sizeId = null,
+            string? colorId = null,
+            string? sortBy = null,
+            int page = 1)
         {
             int pageSize = 12;
-            ViewBag.Categories = await _context.Categories
-                .OrderBy(c => c.CategoryName)
-                .ToListAsync();
+            await PopulateFilterViewBagAsync(minPrice, maxPrice, trademark, sizeId, colorId, sortBy);
 
-            var query = _context.Products.AsQueryable();
-            int totalProducts = await query.CountAsync();
+            var (products, totalProducts) = await _productService.GetCatalogProductsAsync(null, null, page, pageSize, minPrice, maxPrice, trademark, sizeId, colorId, sortBy);
             int totalPages = (int)System.Math.Ceiling((double)totalProducts / pageSize);
-            if (page < 1) page = 1;
-            if (page > totalPages && totalPages > 0) page = totalPages;
-
-            var products = await query
-                .OrderByDescending(p => p.CreatedAt)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
 
             ViewBag.CurrentPage = page;
             ViewBag.TotalPages = totalPages;
@@ -45,24 +48,21 @@ namespace HuflitShopCore.Controllers
             return View(products);
         }
 
-        public async Task<IActionResult> Category(string id, int page = 1)
+        public async Task<IActionResult> Category(
+            string id,
+            decimal? minPrice = null,
+            decimal? maxPrice = null,
+            string? trademark = null,
+            string? sizeId = null,
+            string? colorId = null,
+            string? sortBy = null,
+            int page = 1)
         {
             int pageSize = 12;
-            ViewBag.Categories = await _context.Categories
-                .OrderBy(c => c.CategoryName)
-                .ToListAsync();
+            await PopulateFilterViewBagAsync(minPrice, maxPrice, trademark, sizeId, colorId, sortBy);
 
-            var query = _context.Products.Where(p => p.CategoryId == id);
-            int totalProducts = await query.CountAsync();
+            var (products, totalProducts) = await _productService.GetCatalogProductsAsync(id, null, page, pageSize, minPrice, maxPrice, trademark, sizeId, colorId, sortBy);
             int totalPages = (int)System.Math.Ceiling((double)totalProducts / pageSize);
-            if (page < 1) page = 1;
-            if (page > totalPages && totalPages > 0) page = totalPages;
-
-            var products = await query
-                .OrderByDescending(p => p.CreatedAt)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
 
             ViewBag.CurrentPage = page;
             ViewBag.TotalPages = totalPages;
@@ -72,32 +72,23 @@ namespace HuflitShopCore.Controllers
             return View("Product", products);
         }
 
-        public async Task<IActionResult> Search(string search, int page = 1)
+        public async Task<IActionResult> Search(
+            string search,
+            decimal? minPrice = null,
+            decimal? maxPrice = null,
+            string? trademark = null,
+            string? sizeId = null,
+            string? colorId = null,
+            string? sortBy = null,
+            int page = 1)
         {
             int pageSize = 12;
-            ViewBag.Categories = await _context.Categories
-                .OrderBy(c => c.CategoryName)
-                .ToListAsync();
+            await PopulateFilterViewBagAsync(minPrice, maxPrice, trademark, sizeId, colorId, sortBy);
 
             ViewData["GetProduct"] = search;
 
-            var query = _context.Products.AsQueryable();
-
-            if (!string.IsNullOrEmpty(search))
-            {
-                query = query.Where(p => p.ProductName.Contains(search));
-            }
-
-            int totalProducts = await query.CountAsync();
+            var (products, totalProducts) = await _productService.GetCatalogProductsAsync(null, search, page, pageSize, minPrice, maxPrice, trademark, sizeId, colorId, sortBy);
             int totalPages = (int)System.Math.Ceiling((double)totalProducts / pageSize);
-            if (page < 1) page = 1;
-            if (page > totalPages && totalPages > 0) page = totalPages;
-
-            var products = await query
-                .OrderByDescending(p => p.CreatedAt)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
 
             ViewBag.CurrentPage = page;
             ViewBag.TotalPages = totalPages;
@@ -109,12 +100,51 @@ namespace HuflitShopCore.Controllers
 
         public async Task<IActionResult> Details(string id)
         {
-            var product = await _context.Products
-                .Include(p => p.Category)
-                .FirstOrDefaultAsync(p => p.Id == id);
+            var product = await _productService.GetProductDetailsAsync(id);
 
             if (product == null) return NotFound();
+
+            var reviews = await _reviewService.GetReviewsByProductIdAsync(id);
+            ViewBag.Reviews = reviews;
+            ViewBag.AverageStars = reviews.Any() ? Math.Round(reviews.Average(r => r.RatingStars), 1) : 0;
+            ViewBag.TotalReviews = reviews.Count;
+
             return View(product);
+        }
+
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> PostReview(string productId, int ratingStars, string reviewComment)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId)) return Challenge();
+
+            if (ratingStars < 1 || ratingStars > 5)
+            {
+                TempData["ErrorMessage"] = "Số sao đánh giá phải từ 1 đến 5.";
+                return RedirectToAction("Details", new { id = productId });
+            }
+
+            var result = await _reviewService.AddReviewAsync(userId, productId, ratingStars, reviewComment);
+            if (result)
+            {
+                TempData["SuccessMessage"] = "Đăng đánh giá thành công!";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Đã xảy ra lỗi hoặc sản phẩm chưa có phân loại hàng để đánh giá.";
+            }
+
+            return RedirectToAction("Details", new { id = productId });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> VoteReview(string reviewId)
+        {
+            if (string.IsNullOrEmpty(reviewId)) return BadRequest("Review ID is required.");
+            var newVotes = await _reviewService.VoteHelpfulAsync(reviewId);
+            return Json(new { success = newVotes > 0, votes = newVotes });
         }
 
         [HttpPost]
@@ -126,8 +156,7 @@ namespace HuflitShopCore.Controllers
 
             if (!string.IsNullOrWhiteSpace(productVariantId))
             {
-                var pv = await _context.ProductVariants
-                    .FirstOrDefaultAsync(x => x.Id == productVariantId && x.IsActive && x.StockQuantity > 0);
+                var pv = await _productService.GetActiveVariantByIdAsync(productVariantId);
 
                 if (pv == null) return RedirectToAction("Index", "Home");
 
@@ -136,10 +165,7 @@ namespace HuflitShopCore.Controllers
             }
 
             // Fallback: Home/Index.cshtml truyền ProductId.
-            var variant = await _context.ProductVariants
-                .Where(pv => pv.ProductId == id && pv.IsActive && pv.StockQuantity > 0)
-                .OrderBy(pv => pv.StockQuantity)
-                .FirstOrDefaultAsync();
+            var variant = await _productService.GetFirstActiveVariantByProductIdAsync(id);
 
             if (variant == null)
                 return RedirectToAction("Index", "Home");
@@ -154,18 +180,14 @@ namespace HuflitShopCore.Controllers
         {
             if (!string.IsNullOrWhiteSpace(productVariantId))
             {
-                var pv = await _context.ProductVariants
-                    .FirstOrDefaultAsync(x => x.Id == productVariantId && x.IsActive && x.StockQuantity > 0);
+                var pv = await _productService.GetActiveVariantByIdAsync(productVariantId);
 
                 if (pv == null) return RedirectToAction("Index", "Home");
 
                 return RedirectToAction("Checkout", "Order", new { buyNowVariantId = pv.Id, buyNowQty = Math.Max(1, quantity) });
             }
 
-            var variant = await _context.ProductVariants
-                .Where(pv => pv.ProductId == id && pv.IsActive && pv.StockQuantity > 0)
-                .OrderBy(pv => pv.StockQuantity)
-                .FirstOrDefaultAsync();
+            var variant = await _productService.GetFirstActiveVariantByProductIdAsync(id);
 
             if (variant == null)
                 return RedirectToAction("Index", "Home");
@@ -176,10 +198,7 @@ namespace HuflitShopCore.Controllers
         [HttpGet]
         public async Task<IActionResult> BuyNow(string id)
         {
-            var variant = await _context.ProductVariants
-                .Where(pv => pv.ProductId == id && pv.IsActive && pv.StockQuantity > 0)
-                .OrderBy(pv => pv.StockQuantity)
-                .FirstOrDefaultAsync();
+            var variant = await _productService.GetFirstActiveVariantByProductIdAsync(id);
 
             if (variant == null)
                 return RedirectToAction("Index", "Home");
@@ -219,32 +238,45 @@ namespace HuflitShopCore.Controllers
             var cartKeyUserId = isAuth ? userId : null;
             var cartKeySessionId = isAuth ? null : guestCartId;
 
-            var existing = await _context.Carts.FirstOrDefaultAsync(c =>
-                c.ProductVariantId == productVariantId &&
-                c.UserId == cartKeyUserId &&
-                c.SessionId == cartKeySessionId);
-
-            if (existing != null)
-            {
-                existing.Quantity += delta;
-                _context.Carts.Update(existing);
-            }
-            else
-            {
-                var cart = new Cart
-                {
-                    Id = System.Guid.NewGuid().ToString(),
-                    ProductVariantId = productVariantId,
-                    Quantity = delta,
-                    UserId = cartKeyUserId,
-                    SessionId = cartKeySessionId,
-                    CreatedAt = System.DateTime.UtcNow
+            await _cartService.AddOrUpdateCartItemAsync(cartKeyUserId, cartKeySessionId, productVariantId, delta);
+        }
+        [HttpGet]
+        public async Task<IActionResult> SearchSuggestions(string term)
+        {
+            var products = await _productService.GetSearchSuggestionsAsync(term);
+            var result = products.Select(p => {
+                var defaultImage = p.ProductImages?.OrderBy(i => i.ImageOrder).FirstOrDefault();
+                var imageUrl = HuflitShopCore.Helpers.ImageRouteHelper.Resolve(defaultImage?.PublicId);
+                return new {
+                    id = p.Id,
+                    name = p.ProductName,
+                    price = p.CurrentPrice.ToString("N0") + "₫",
+                    imageUrl = imageUrl
                 };
+            }).ToList();
 
-                _context.Carts.Add(cart);
-            }
+            return Json(result);
+        }
 
-            await _context.SaveChangesAsync();
+        private async Task PopulateFilterViewBagAsync(
+            decimal? minPrice, 
+            decimal? maxPrice, 
+            string? trademark, 
+            string? sizeId, 
+            string? colorId, 
+            string? sortBy)
+        {
+            ViewBag.Categories = await _categoryService.GetCategoriesForCatalogAsync();
+            ViewBag.Trademarks = await _productService.GetDistinctTrademarksAsync();
+            ViewBag.Sizes = await _productService.GetAllSizesAsync();
+            ViewBag.Colors = await _productService.GetAllColorsAsync();
+
+            ViewBag.MinPrice = minPrice;
+            ViewBag.MaxPrice = maxPrice;
+            ViewBag.Trademark = trademark;
+            ViewBag.SizeId = sizeId;
+            ViewBag.ColorId = colorId;
+            ViewBag.SortBy = sortBy;
         }
     }
 }

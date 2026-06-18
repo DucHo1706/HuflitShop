@@ -63,5 +63,27 @@ namespace HuflitShopCore.Services
             _context.Users.Add(user);
             return await _context.SaveChangesAsync() > 0;
         }
+
+        public async Task<AppUser?> GetUserByIdAsync(string id)
+        {
+            return await _context.Users
+                .Include(u => u.Addresses)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.Id == id);
+        }
+
+        public async Task<bool> UpdateProfileAsync(string id, string fullName, string phoneNumber, int? gender, DateTime? dateOfBirth)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null) return false;
+
+            user.FullName = fullName;
+            user.PhoneNumber = phoneNumber;
+            user.Gender = gender;
+            user.DateOfBirth = dateOfBirth;
+
+            _context.Users.Update(user);
+            return await _context.SaveChangesAsync() > 0;
+        }
     }
 }

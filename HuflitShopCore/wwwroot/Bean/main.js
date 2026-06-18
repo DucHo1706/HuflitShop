@@ -846,3 +846,14 @@ beanComprare.Compare.init();
 $(document).ready(function(){
 	beanComprare.Compare.compareProduct();
 });
+
+function awe_lazyloadImage() {
+	if (typeof LazyLoad !== 'undefined') {
+		var lazyLoadInstance = new LazyLoad({
+			elements_selector: ".lazyload",
+			load_delay: 0
+		});
+	} else {
+		console.warn("LazyLoad library is not loaded.");
+	}
+} window.awe_lazyloadImage=awe_lazyloadImage;

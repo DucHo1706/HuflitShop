@@ -1,34 +1,42 @@
-﻿@model HuflitShopCore.DTOs.LoginDTO
+@model HuflitShopCore.DTOs.LoginDTO
 @{
     Layout = "_LayoutLogin";
-    ViewData["Title"] = "Login";
+    ViewData["Title"] = "Đăng nhập";
 }
 
+<h1 class="auth-form-box__title">Đăng nhập</h1>
+<p class="auth-form-box__sub">Chào mừng bạn trở lại Huflit Shop!</p>
 
-<form method="post" class="form-login" id="form-login">
-    <div asp-validation-summary="All" class="text-danger"></div>
-    <div class="form-group form-input">
-        <input asp-for="Email" type="text" placeholder="Email đăng nhập" />
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="auth-alert">
+        <div asp-validation-summary="All"></div>
+    </div>
+}
+
+<form method="post" id="form-login">
+    @Html.AntiForgeryToken()
+    <div class="auth-field">
+        <label>Email đăng nhập</label>
+        <input asp-for="Email" type="email" placeholder="example@email.com" autocomplete="email" />
         <span asp-validation-for="Email" class="text-danger"></span>
     </div>
-    <div class="form-group form-input">
-        <input asp-for="Password" type="password" placeholder="Mật khẩu" />
+    <div class="auth-field">
+        <label>Mật khẩu</label>
+        <input asp-for="Password" type="password" placeholder="••••••••" autocomplete="current-password" />
         <span asp-validation-for="Password" class="text-danger"></span>
     </div>
-    <div class="form-group form-check">
-        <label class="form-check-label">
-            <input class="form-check-input" asp-for="RememberMe" /> Ghi nhớ đăng nhập
+
+    <div class="auth-options">
+        <label>
+            <input type="checkbox" asp-for="RememberMe" /> Ghi nhớ tôi
         </label>
+        <a asp-controller="Login" asp-action="ForgotPassword">Quên mật khẩu?</a>
     </div>
 
-    <div class="form-group form-button">
-        <input type="submit" id="login" class="form-submit" value="Đăng nhập" />
-    </div>
+    <button type="submit" class="auth-submit">Đăng nhập</button>
 </form>
 
-<div class="form-group sugget-text">
-    <div class="text">Bạn chưa có tài khoản?</div>
-    <div class="link register-link">
-        <a asp-controller="Login" asp-action="Register">Đăng ký</a>
-    </div>
-</div>
+<p class="auth-switch">
+    Chưa có tài khoản? <a asp-controller="Login" asp-action="Register">Đăng ký ngay</a>
+</p>

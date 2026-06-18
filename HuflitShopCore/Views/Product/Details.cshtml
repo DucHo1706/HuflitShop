@@ -1,6 +1,4 @@
 @model HuflitShopCore.Models.Product
-@using Microsoft.EntityFrameworkCore
-@inject HuflitShopCore.Data.AppDbContext _context
 @inject Microsoft.Extensions.Configuration.IConfiguration Configuration
 @{
     Layout = "_Layout";
@@ -8,265 +6,20 @@
     var product = Model;
     var cloudName = Configuration["CloudinarySettings:CloudName"] ?? "Tên_Cloud_Của_Bạn";
 
-    var variants = product == null
+    var variants = product?.ProductVariants == null
         ? Enumerable.Empty<HuflitShopCore.Models.ProductVariant>()
-        : _context.ProductVariants
-            .Include(pv => pv.Size)
-            .Include(pv => pv.Color)
-            .Where(pv => pv.ProductId == product.Id && pv.IsActive && pv.StockQuantity > 0)
+        : product.ProductVariants
+            .Where(pv => pv.IsActive && pv.StockQuantity > 0)
             .ToList();
 
-    var images = product == null
+    var images = product?.ProductImages == null
         ? new List<HuflitShopCore.Models.ProductImage>()
-        : _context.ProductImages
-            .Where(img => img.ProductId == product.Id)
+        : product.ProductImages
             .OrderBy(img => img.ImageOrder)
             .ToList();
 
-    var mainImageUrl = "/Client/img/default-product.jpg";
-    if (images.Any())
-    {
-        var firstImg = images.First();
-        mainImageUrl = string.IsNullOrEmpty(firstImg.AssetVersion)
-            ? firstImg.PublicId
-            : "https://res.cloudinary.com/" + cloudName + "/image/upload/v" + firstImg.AssetVersion + "/" + firstImg.PublicId + ".jpg";
-    }
+    var mainImageUrl = HuflitShopCore.Helpers.ImageRouteHelper.Resolve(images.FirstOrDefault()?.PublicId);
 }
-
-<style>
-    body {
-        background-color: #f5f5f5 !important;
-    }
-    .details-container {
-        max-width: 1200px;
-        margin: 2rem auto;
-        padding: 0 1rem;
-    }
-    .product-main-card {
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        padding: 2rem;
-        margin-bottom: 2rem;
-    }
-    /* Image Gallery Styles */
-    .gallery-main-img {
-        width: 100%;
-        border-radius: 8px;
-        overflow: hidden;
-        border: 1px solid #eaeaea;
-        background-color: #fcfcfc;
-        position: relative;
-        padding-top: 110%; /* Fashion-ratio portrait aspect ratio */
-    }
-    .gallery-main-img img {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.3s;
-    }
-    .gallery-main-img img:hover {
-        transform: scale(1.03);
-    }
-    .gallery-thumbnails {
-        display: flex;
-        gap: 0.5rem;
-        margin-top: 1rem;
-        overflow-x: auto;
-        padding-bottom: 5px;
-    }
-    .gallery-thumb {
-        width: 70px;
-        height: 70px;
-        border-radius: 4px;
-        border: 2px solid transparent;
-        overflow: hidden;
-        cursor: pointer;
-        flex-shrink: 0;
-        opacity: 0.7;
-        transition: all 0.2s;
-    }
-    .gallery-thumb.active, .gallery-thumb:hover {
-        border-color: #2563eb;
-        opacity: 1;
-    }
-    .gallery-thumb img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    /* Product Specs & Selections */
-    .product-breadcrumb {
-        font-size: 0.9rem;
-        color: #6b7280;
-        margin-bottom: 1rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-    .product-breadcrumb a {
-        color: #2563eb;
-        text-decoration: none;
-    }
-    .product-title {
-        font-size: 1.6rem;
-        font-weight: 700;
-        color: #1f2937;
-        margin-bottom: 1rem;
-    }
-    .price-box {
-        background-color: #eff6ff;
-        border-radius: 8px;
-        padding: 1.5rem;
-        margin-bottom: 1.5rem;
-        display: flex;
-        align-items: baseline;
-        gap: 1.5rem;
-    }
-    .price-label {
-        font-size: 0.9rem;
-        color: #4b5563;
-        font-weight: 600;
-    }
-    .price-current {
-        font-size: 2.2rem;
-        font-weight: 700;
-        color: #ef4444;
-    }
-    .price-current::after {
-        content: " đ";
-        font-size: 1.2rem;
-        font-weight: 600;
-    }
-
-    /* Selections buttons */
-    .selector-label {
-        font-weight: 600;
-        color: #374151;
-        width: 100px;
-        flex-shrink: 0;
-        font-size: 0.95rem;
-    }
-    .selector-group {
-        display: flex;
-        align-items: center;
-        margin-bottom: 1.25rem;
-    }
-    .pill-btn {
-        background: white;
-        border: 1px solid #d1d5db;
-        border-radius: 4px;
-        padding: 6px 16px;
-        font-size: 0.9rem;
-        font-weight: 500;
-        color: #374151;
-        cursor: pointer;
-        transition: all 0.2s;
-        margin-right: 0.5rem;
-        margin-bottom: 0.5rem;
-    }
-    .pill-btn:hover {
-        border-color: #2563eb;
-        color: #2563eb;
-    }
-    .pill-btn.active {
-        border-color: #2563eb;
-        background-color: #eff6ff;
-        color: #2563eb;
-        font-weight: 600;
-        box-shadow: 0 0 0 1px #2563eb;
-    }
-
-    /* Quantity increment style */
-    .qty-btn {
-        background-color: white;
-        border: 1px solid #d1d5db;
-        width: 36px;
-        height: 36px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-    .qty-btn:hover {
-        background-color: #f3f4f6;
-    }
-    .qty-input {
-        width: 60px;
-        height: 36px;
-        text-align: center;
-        border-top: 1px solid #d1d5db;
-        border-bottom: 1px solid #d1d5db;
-        border-left: none;
-        border-right: none;
-        font-weight: 600;
-        outline: none;
-    }
-
-    /* Primary Action Buttons */
-    .btn-action-cart {
-        background-color: #eff6ff !important;
-        border: 2px solid #2563eb !important;
-        color: #2563eb !important;
-        font-weight: 600;
-        padding: 0.85rem 2rem;
-        border-radius: 6px;
-        transition: all 0.2s;
-    }
-    .btn-action-cart:hover {
-        background-color: #2563eb !important;
-        color: white !important;
-    }
-    .btn-action-buy {
-        background-color: #2563eb !important;
-        border: 2px solid #2563eb !important;
-        color: white !important;
-        font-weight: 600;
-        padding: 0.85rem 2rem;
-        border-radius: 6px;
-        transition: all 0.2s;
-    }
-    .btn-action-buy:hover {
-        background-color: #1d4ed8 !important;
-        border-color: #1d4ed8 !important;
-    }
-    
-    /* Product Info Card */
-    .product-info-card {
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        padding: 2rem;
-    }
-    .info-header {
-        font-size: 1.2rem;
-        font-weight: 700;
-        color: #1f2937;
-        margin-bottom: 1rem;
-        border-bottom: 1px solid #f3f4f6;
-        padding-bottom: 0.5rem;
-    }
-    .info-table td {
-        padding: 0.5rem 0;
-        font-size: 0.95rem;
-    }
-    .info-label {
-        color: #6b7280;
-        width: 150px;
-        font-weight: 500;
-    }
-    .info-val {
-        color: #1f2937;
-        font-weight: 600;
-    }
-</style>
-
 <div class="details-container">
     <!-- Breadcrumb -->
     <div class="product-breadcrumb">
@@ -278,6 +31,25 @@
         <span>&gt;</span>
         <span class="text-dark">@product?.ProductName</span>
     </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert" style="border-radius: 6px; margin-bottom: 1.5rem;">
+            <i class="fas fa-check-circle mr-2"></i>@TempData["SuccessMessage"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert" style="border-radius: 6px; margin-bottom: 1.5rem;">
+            <i class="fas fa-exclamation-circle mr-2"></i>@TempData["ErrorMessage"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
 
     <!-- Main Section -->
     <div class="product-main-card">
@@ -293,10 +65,7 @@
                     <div class="gallery-thumbnails">
                         @for (var i = 0; i < images.Count; i++)
                         {
-                            var img = images[i];
-                            var imgUrl = string.IsNullOrEmpty(img.AssetVersion)
-                                ? img.PublicId
-                                : "https://res.cloudinary.com/" + cloudName + "/image/upload/v" + img.AssetVersion + "/" + img.PublicId + ".jpg";
+                            var imgUrl = HuflitShopCore.Helpers.ImageRouteHelper.Resolve(images[i].PublicId);
                             <div class="gallery-thumb @(i == 0 ? "active" : "")" onclick="setMainImage('@imgUrl', this)">
                                 <img src="@imgUrl" alt="Thumbnail" />
                             </div>
@@ -435,9 +204,235 @@
             @(string.IsNullOrWhiteSpace(product?.Description) ? "Hiện chưa có thông tin mô tả chi tiết cho sản phẩm này." : product.Description)
         </div>
     </div>
+
+    <!-- Reviews Section -->
+    @{
+        var reviewsList = ViewBag.Reviews as List<HuflitShopCore.Models.Reviews> ?? new List<HuflitShopCore.Models.Reviews>();
+        var star5Count = reviewsList.Count(r => r.RatingStars == 5);
+        var star4Count = reviewsList.Count(r => r.RatingStars == 4);
+        var star3Count = reviewsList.Count(r => r.RatingStars == 3);
+        var star2Count = reviewsList.Count(r => r.RatingStars == 2);
+        var star1Count = reviewsList.Count(r => r.RatingStars == 1);
+    }
+    <div class="reviews-card">
+        <h3 class="info-header mb-4"><i class="fas fa-comments mr-2 text-primary"></i>Đánh giá từ khách hàng</h3>
+        
+        <!-- Summary Dashboard -->
+        <div class="rating-summary-box">
+            <div class="average-score">
+                <h2>@ViewBag.AverageStars</h2>
+                <div class="star-display my-1">
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        if (i <= Math.Round((double)(ViewBag.AverageStars ?? 0.0)))
+                        {
+                            <i class="fas fa-star"></i>
+                        }
+                        else
+                        {
+                            <i class="far fa-star text-muted"></i>
+                        }
+                    }
+                </div>
+                <div class="text-muted" style="font-size: 0.9rem;">@ViewBag.TotalReviews đánh giá</div>
+            </div>
+            
+            <div class="rating-distribution">
+                @{
+                    int total = ViewBag.TotalReviews > 0 ? ViewBag.TotalReviews : 1;
+                    int pct5 = (star5Count * 100) / total;
+                    int pct4 = (star4Count * 100) / total;
+                    int pct3 = (star3Count * 100) / total;
+                    int pct2 = (star2Count * 100) / total;
+                    int pct1 = (star1Count * 100) / total;
+                }
+                <div class="distribution-row">
+                    <span class="distribution-label">5 sao</span>
+                    <div class="distribution-bar-bg">
+                        <div class="distribution-bar-fill" style="width: @pct5%;"></div>
+                    </div>
+                    <span class="distribution-count">@star5Count</span>
+                </div>
+                <div class="distribution-row">
+                    <span class="distribution-label">4 sao</span>
+                    <div class="distribution-bar-bg">
+                        <div class="distribution-bar-fill" style="width: @pct4%;"></div>
+                    </div>
+                    <span class="distribution-count">@star4Count</span>
+                </div>
+                <div class="distribution-row">
+                    <span class="distribution-label">3 sao</span>
+                    <div class="distribution-bar-bg">
+                        <div class="distribution-bar-fill" style="width: @pct3%;"></div>
+                    </div>
+                    <span class="distribution-count">@star3Count</span>
+                </div>
+                <div class="distribution-row">
+                    <span class="distribution-label">2 sao</span>
+                    <div class="distribution-bar-bg">
+                        <div class="distribution-bar-fill" style="width: @pct2%;"></div>
+                    </div>
+                    <span class="distribution-count">@star2Count</span>
+                </div>
+                <div class="distribution-row">
+                    <span class="distribution-label">1 sao</span>
+                    <div class="distribution-bar-bg">
+                        <div class="distribution-bar-fill" style="width: @pct1%;"></div>
+                    </div>
+                    <span class="distribution-count">@star1Count</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Review Form -->
+        @if (User.Identity != null && User.Identity.IsAuthenticated)
+        {
+            <div class="write-review-section">
+                <h4 style="font-size: 1.1rem; font-weight: 700; color: #1f2937;" class="mb-3">
+                    <i class="fas fa-pen-fancy mr-2 text-primary"></i>Viết đánh giá của bạn
+                </h4>
+                
+                <form asp-controller="Product" asp-action="PostReview" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="productId" value="@product?.Id" />
+                    <input type="hidden" name="ratingStars" id="ratingStarsInput" value="5" />
+                    
+                    <div class="mb-3">
+                        <label class="form-label d-block text-muted font-weight-bold" style="font-size: 0.9rem;">Mức độ hài lòng của bạn:</label>
+                        <div class="star-rating-input" id="starRatingSelector">
+                            <i class="fas fa-star active" data-value="1"></i>
+                            <i class="fas fa-star active" data-value="2"></i>
+                            <i class="fas fa-star active" data-value="3"></i>
+                            <i class="fas fa-star active" data-value="4"></i>
+                            <i class="fas fa-star active" data-value="5"></i>
+                        </div>
+                        <span class="ml-3 text-warning font-weight-bold" id="starRatingLabel" style="font-size: 1rem; vertical-align: middle;">Tuyệt vời</span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="reviewComment" class="form-label text-muted font-weight-bold" style="font-size: 0.9rem;">Chia sẻ trải nghiệm về sản phẩm:</label>
+                        <textarea class="review-textarea" name="reviewComment" id="reviewComment" rows="4" placeholder="Nhập đánh giá chi tiết của bạn về chất lượng sản phẩm, dịch vụ giao hàng..." required></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary font-weight-bold" style="border-radius: 6px; padding: 0.6rem 2rem;">
+                        Gửi Đánh Giá
+                    </button>
+                </form>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info mt-4" style="border-radius: 8px;">
+                <i class="fas fa-info-circle mr-2"></i>Bạn cần <a asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@Context.Request.Path" class="font-weight-bold text-primary text-decoration-underline">Đăng nhập</a> để viết đánh giá cho sản phẩm này.
+            </div>
+        }
+
+        <!-- Show Review List -->
+        <div class="reviews-list">
+            <h4 style="font-size: 1.15rem; font-weight: 700; color: #1f2937;" class="mb-4">
+                Tất cả đánh giá (@ViewBag.TotalReviews)
+            </h4>
+            
+            @if (!reviewsList.Any())
+            {
+                <div class="text-center py-5 text-muted">
+                    <i class="far fa-comments fa-3x mb-3 text-light"></i>
+                    <p class="mb-0">Chưa có đánh giá nào cho sản phẩm này. Hãy là người đầu tiên đánh giá!</p>
+                </div>
+            }
+            else
+            {
+                foreach (var r in reviewsList)
+                {
+                    var firstChar = string.IsNullOrEmpty(r.User?.FullName) ? "K" : r.User.FullName.Substring(0, 1).ToUpper();
+                    <div class="review-item">
+                        <div class="d-flex align-items-start gap-3">
+                            <div class="review-user-avatar">
+                                @firstChar
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="review-user-name">@(r.User?.FullName ?? "Khách hàng")</div>
+                                <div class="review-meta d-flex flex-wrap align-items-center gap-2">
+                                    <span class="text-warning">
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            if (i <= r.RatingStars)
+                                            {
+                                                <i class="fas fa-star"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="far fa-star text-muted"></i>
+                                            }
+                                        }
+                                    </span>
+                                    <span class="text-muted">Gửi ngày: @r.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                                    @if (r.ProductVariant != null)
+                                    {
+                                        <span class="text-secondary">
+                                            | Phân loại: 
+                                            @(r.ProductVariant.Color?.ColorName ?? "Mặc định") - @(r.ProductVariant.Size?.SizeName ?? "Mặc định")
+                                        </span>
+                                    }
+                                </div>
+                                <div class="review-comment mt-2 text-dark font-weight-normal" style="font-size: 0.98rem;">
+                                    @r.GetCommentText()
+                                </div>
+                                <div class="review-actions mt-2 d-flex align-items-center gap-3">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary vote-btn" data-review-id="@r.Id" style="font-size: 0.8rem; border-radius: 20px; padding: 0.2rem 0.75rem; display: inline-flex; align-items: center; gap: 4px;">
+                                        <i class="far fa-thumbs-up"></i> Hữu ích (<span class="vote-count">@r.GetHelpfulVotes()</span>)
+                                    </button>
+                                </div>
+                                
+                                @if (!string.IsNullOrEmpty(r.GetAdminReply()))
+                                {
+                                    <div class="admin-reply-box mt-3 p-3 rounded border-left border-primary" style="background-color: #f0f4f8; margin-left: 2rem; border-left-width: 4px !important;">
+                                        <div class="font-weight-bold text-primary mb-1" style="font-size: 0.9rem;">
+                                            <i class="fas fa-reply fa-flip-both mr-1"></i> Tracy Shop trả lời:
+                                        </div>
+                                        <div class="text-dark" style="font-size: 0.95rem;">
+                                            @r.GetAdminReply()
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
 </div>
 
 <script>
+    // AJAX voting for reviews
+    $(document).ready(function() {
+        $(document).on('click', '.vote-btn', function() {
+            var btn = $(this);
+            var reviewId = btn.data('review-id');
+            if (btn.hasClass('disabled')) return;
+
+            btn.addClass('disabled');
+            $.ajax({
+                url: '/Product/VoteReview',
+                type: 'POST',
+                data: { reviewId: reviewId },
+                success: function(response) {
+                    if (response.success) {
+                        btn.find('.vote-count').text(response.votes);
+                        btn.removeClass('btn-outline-secondary').addClass('btn-primary text-white');
+                        btn.find('i').removeClass('far').addClass('fas');
+                    } else {
+                        btn.removeClass('disabled');
+                    }
+                },
+                error: function() {
+                    btn.removeClass('disabled');
+                }
+            });
+        });
+    });
+
     const variants = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
         variants.Select(v => new { v.Id, v.SizeId, v.ColorId, v.AdditionalPrice }).ToList()
     ));
@@ -530,6 +525,60 @@
 
         const firstColor = document.querySelector('#colorPillContainer .pill-btn');
         if (firstColor) firstColor.click();
+
+        // Star rating selector handler
+        const stars = document.querySelectorAll('#starRatingSelector i');
+        const ratingInput = document.getElementById('ratingStarsInput');
+        const ratingLabel = document.getElementById('starRatingLabel');
+        
+        if (stars.length && ratingInput && ratingLabel) {
+            const labels = {
+                1: 'Tệ',
+                2: 'Tạm ổn',
+                3: 'Bình thường',
+                4: 'Rất tốt',
+                5: 'Tuyệt vời'
+            };
+
+            stars.forEach(star => {
+                star.addEventListener('click', function() {
+                    const val = parseInt(this.getAttribute('data-value'));
+                    ratingInput.value = val;
+                    ratingLabel.textContent = labels[val] || '';
+                    
+                    // Update classes for active stars
+                    stars.forEach(s => {
+                        const sVal = parseInt(s.getAttribute('data-value'));
+                        if (sVal <= val) {
+                            s.classList.remove('far', 'text-muted');
+                            s.classList.add('fas', 'active');
+                        } else {
+                            s.classList.remove('fas', 'active');
+                            s.classList.add('far', 'text-muted');
+                        }
+                    });
+                });
+                
+                // Hover effect
+                star.addEventListener('mouseover', function() {
+                    const val = parseInt(this.getAttribute('data-value'));
+                    stars.forEach(s => {
+                        const sVal = parseInt(s.getAttribute('data-value'));
+                        if (sVal <= val) {
+                            s.style.color = '#fbbf24';
+                        } else {
+                            s.style.color = '#d1d5db';
+                        }
+                    });
+                });
+                
+                star.addEventListener('mouseout', function() {
+                    stars.forEach(s => {
+                        s.removeAttribute('style');
+                    });
+                });
+            });
+        }
     });
 </script>
 

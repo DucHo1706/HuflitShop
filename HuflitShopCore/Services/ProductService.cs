@@ -21,17 +21,20 @@ namespace HuflitShopCore.Services
         // Phương thức hiện có (hoặc tương tự) mà GetAllProductsAsync() sẽ gọi
         public async Task<List<ProductDTO>> GetAllProductsAsync()
         {
-            // Đây là một placeholder. Triển khai thực tế sẽ ánh xạ Product sang ProductDTO
             return await _context.Products
                 .Include(p => p.Category)
-                .Where(p => !p.IsDeleted)
                 .Select(p => new ProductDTO
                 {
                     Id = p.Id,
                     ProductName = p.ProductName,
-                    CategoryName = p.Category.CategoryName,
-                    Trademark = p.Trademark
-                    // ... các thuộc tính khác
+                    CategoryId = p.CategoryId,
+                    CategoryName = p.Category != null ? p.Category.CategoryName : string.Empty,
+                    CurrentPrice = p.CurrentPrice,
+                    ManufactureYear = p.ManufactureYear,
+                    Origin = p.Origin,
+                    Trademark = p.Trademark,
+                    Description = p.Description,
+                    IsDeleted = p.IsDeleted
                 })
                 .ToListAsync();
         }
@@ -191,6 +194,169 @@ namespace HuflitShopCore.Services
                 .ToListAsync();
 
             return products;
+        }
+
+        public async Task<(List<Product> Products, int TotalProducts)> GetCatalogProductsAsync(
+            string? categoryId, 
+            string? search, 
+            int page, 
+            int pageSize,
+            decimal? minPrice = null, 
+            decimal? maxPrice = null, 
+            string? trademark = null, 
+            string? sizeId = null, 
+            string? colorId = null, 
+            string? sortBy = null)
+        {
+            var query = _context.Products
+                .Include(p => p.ProductImages)
+                .Include(p => p.ProductVariants)
+                .Where(p => !p.IsDeleted)
+                .AsNoTracking();
+
+            if (!string.IsNullOrEmpty(categoryId))
+            {
+                query = query.Where(p => p.CategoryId == categoryId);
+            }
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                search = search.Trim().ToLower();
+                query = query.Where(p => p.ProductName.ToLower().Contains(search) || 
+                                         (p.Trademark != null && p.Trademark.ToLower().Contains(search)));
+            }
+
+            if (minPrice.HasValue)
+            {
+                query = query.Where(p => p.CurrentPrice >= minPrice.Value);
+            }
+
+            if (maxPrice.HasValue)
+            {
+                query = query.Where(p => p.CurrentPrice <= maxPrice.Value);
+            }
+
+            if (!string.IsNullOrEmpty(trademark))
+            {
+                query = query.Where(p => p.Trademark == trademark);
+            }
+
+            if (!string.IsNullOrEmpty(sizeId))
+            {
+                query = query.Where(p => p.ProductVariants.Any(pv => pv.SizeId == sizeId && pv.IsActive && pv.StockQuantity > 0));
+            }
+
+            if (!string.IsNullOrEmpty(colorId))
+            {
+                query = query.Where(p => p.ProductVariants.Any(pv => pv.ColorId == colorId && pv.IsActive && pv.StockQuantity > 0));
+            }
+
+            if (!string.IsNullOrEmpty(sortBy))
+            {
+                switch (sortBy.ToLower())
+                {
+                    case "price_asc":
+                        query = query.OrderBy(p => p.CurrentPrice);
+                        break;
+                    case "price_desc":
+                        query = query.OrderByDescending(p => p.CurrentPrice);
+                        break;
+                    case "newest":
+                        query = query.OrderByDescending(p => p.CreatedAt);
+                        break;
+                    case "popular":
+                        query = query.OrderByDescending(p => p.ViewCount);
+                        break;
+                    default:
+                        query = query.OrderByDescending(p => p.CreatedAt);
+                        break;
+                }
+            }
+            else
+            {
+                query = query.OrderByDescending(p => p.CreatedAt);
+            }
+
+            int totalProducts = await query.CountAsync();
+            int totalPages = (int)Math.Ceiling((double)totalProducts / pageSize);
+            if (page < 1) page = 1;
+            if (page > totalPages && totalPages > 0) page = totalPages;
+
+            var products = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (products, totalProducts);
+        }
+
+        public async Task<Product?> GetProductDetailsAsync(string id)
+        {
+            return await _context.Products
+                .Include(p => p.Category)
+                .Include(p => p.ProductVariants).ThenInclude(pv => pv.Size)
+                .Include(p => p.ProductVariants).ThenInclude(pv => pv.Color)
+                .Include(p => p.ProductImages)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.Id == id);
+        }
+
+        public async Task<ProductVariant?> GetActiveVariantByIdAsync(string id)
+        {
+            return await _context.ProductVariants
+                .FirstOrDefaultAsync(x => x.Id == id && x.IsActive && x.StockQuantity > 0);
+        }
+
+        public async Task<ProductVariant?> GetFirstActiveVariantByProductIdAsync(string productId)
+        {
+            return await _context.ProductVariants
+                .Where(pv => pv.ProductId == productId && pv.IsActive && pv.StockQuantity > 0)
+                .OrderBy(pv => pv.StockQuantity)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<List<Product>> GetSuggestedProductsAsync(int limit = 4)
+        {
+            return await _context.Products
+                .Include(p => p.ProductImages)
+                .Where(p => !p.IsDeleted)
+                .OrderByDescending(p => p.ViewCount)
+                .Take(limit)
+                .AsNoTracking()
+                .ToListAsync();
+        }
+
+        public async Task<List<string>> GetDistinctTrademarksAsync()
+        {
+            return await _context.Products
+                .Where(p => !p.IsDeleted && !string.IsNullOrEmpty(p.Trademark))
+                .Select(p => p.Trademark!)
+                .Distinct()
+                .ToListAsync();
+        }
+
+        public async Task<List<Size>> GetAllSizesAsync()
+        {
+            return await _context.Sizes.ToListAsync();
+        }
+
+        public async Task<List<Color>> GetAllColorsAsync()
+        {
+            return await _context.Colors.ToListAsync();
+        }
+
+        public async Task<List<Product>> GetSearchSuggestionsAsync(string term, int limit = 6)
+        {
+            if (string.IsNullOrWhiteSpace(term)) return new List<Product>();
+
+            term = term.ToLower();
+            return await _context.Products
+                .Include(p => p.ProductImages)
+                .Where(p => !p.IsDeleted && p.ProductName.ToLower().Contains(term))
+                .OrderByDescending(p => p.ViewCount)
+                .Take(limit)
+                .AsNoTracking()
+                .ToListAsync();
         }
     }
 }

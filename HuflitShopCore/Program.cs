@@ -1,6 +1,7 @@
 using HuflitShopCore.Data;
 using HuflitShopCore.Models;
 using HuflitShopCore.Services;
+using HuflitShopCore.Hubs;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,6 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddSignalR();
 
 // 2. Cấu hình DbContext kết nối SQL Server
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -28,6 +30,8 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.Cookie.Name = "HuflitShopAuth";
     });
 builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<CartService>();
+builder.Services.AddScoped<VnPayService>();
 builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<ColorService>();
 builder.Services.AddScoped<SizeService>();
@@ -36,14 +40,19 @@ builder.Services.AddScoped<EmployeeService>();
 builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<ProductVariantService>(); 
 builder.Services.AddScoped<ProductImageService>();
+builder.Services.AddScoped<PhotoService>();
 builder.Services.AddScoped<SupplierService>();
 builder.Services.AddScoped<StockReceiptService>();
 builder.Services.AddScoped<PromotionService>();
 builder.Services.AddScoped<OrderService>();
 builder.Services.AddScoped<ReviewService>();
 builder.Services.AddScoped<ReportService>();
+builder.Services.AddScoped<ChatService>();
 
 var app = builder.Build();
+
+// Initialize ImageRouteHelper
+HuflitShopCore.Helpers.ImageRouteHelper.Initialize(app.Environment.WebRootPath);
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -59,6 +68,8 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication(); 
 app.UseAuthorization();
+
+app.MapHub<ChatHub>("/chatHub");
 
 app.MapControllerRoute(
     name: "areas",

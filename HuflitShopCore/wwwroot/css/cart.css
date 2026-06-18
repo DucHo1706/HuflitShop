@@ -1,0 +1,114 @@
+/* =============================================================
+   CART.CSS – Cart, Checkout, Order pages
+   HuflitShop Premium Fashion
+   ============================================================= */
+
+/* ==========================================
+   CART PAGE
+   ========================================== */
+.cart-container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+.cart-card {
+    border: 1px solid var(--border) !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+}
+.cart-summary-bar {
+    border: 1px solid var(--border) !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+}
+.cart-table th {
+    border-top: none;
+    border-bottom: 2px solid var(--border) !important;
+    color: var(--slate);
+    font-weight: 500;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+}
+.cart-row td {
+    vertical-align: middle;
+    padding: 1.5rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+}
+.cart-prod-img {
+    width: 80px; height: 85px;
+    border-radius: 6px !important;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+}
+.cart-prod-img img { width: 100%; height: 100%; object-fit: cover; }
+.cart-prod-name { font-weight: 600; color: var(--dark); font-size: 0.95rem; }
+.cart-variant-tag {
+    background-color: var(--slate-light) !important;
+    color: var(--dark-muted) !important;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 0.8rem;
+    padding: 2px 8px;
+}
+.cart-qty-btn { border-radius: 4px !important; }
+.cart-qty-input { border-radius: 4px !important; }
+.btn-delete-cart:hover { color: var(--primary) !important; }
+.cart-total-price { font-weight: 700; color: var(--primary); font-size: 1.1rem; }
+
+/* ==========================================
+   CHECKOUT PAGE
+   ========================================== */
+.address-section {
+    border-top: 3px solid var(--primary) !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+    border-left: 1px solid var(--border) !important;
+    border-right: 1px solid var(--border) !important;
+    border-bottom: 1px solid var(--border) !important;
+    overflow: hidden;
+}
+.address-section-header { color: var(--primary) !important; }
+.product-section, .payment-section, .summary-section {
+    border: 1px solid var(--border) !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+    overflow: hidden;
+}
+.payment-option-card { border-radius: 8px !important; }
+.payment-option-card:hover { border-color: var(--primary) !important; }
+.payment-option-card.selected {
+    border-color: var(--primary) !important;
+    background-color: var(--primary-light) !important;
+}
+.payment-option-card input[type="radio"] { accent-color: var(--primary) !important; }
+
+/* Checkout summary prices */
+.checkout-item-price { font-weight: 600; color: var(--dark); }
+.checkout-total { font-size: 1.25rem; font-weight: 800; color: var(--primary); }
+.checkout-discount { color: #16a34a; font-weight: 600; }
+
+/* Voucher input */
+.voucher-input-group .form-control { border-radius: 6px 0 0 6px !important; }
+.voucher-input-group .btn { border-radius: 0 6px 6px 0 !important; }
+
+/* ==========================================
+   PROFILE & ORDER HISTORY
+   ========================================== */
+.profile-section-card {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 12px !important;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    padding: 28px;
+    margin-bottom: 24px;
+}
+.order-status-badge {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 4px;
+}
+.order-status-badge--pending { background: #fef9c3; color: #854d0e; }
+.order-status-badge--processing { background: #dbeafe; color: #1d4ed8; }
+.order-status-badge--shipped { background: #d1fae5; color: #065f46; }
+.order-status-badge--completed { background: #dcfce7; color: #166534; }
+.order-status-badge--cancelled { background: #fee2e2; color: #991b1b; }

@@ -3,156 +3,119 @@
     ViewData["Title"] = "Về chúng tôi - HUFLIT SHOP";
 }
 
-<style>
-    body {
-        background-color: #f8f9fa;
-    }
-    .about-header {
-        background: linear-gradient(135deg, #1e3a8a, #2563eb);
-        color: white;
-        padding: 5rem 0 3rem 0;
-        text-align: center;
-        margin-bottom: 2rem;
-    }
-    .about-header h2 {
-        font-weight: 700;
-        font-size: 2.25rem;
-    }
-    .about-header a {
-        color: #bfdbfe;
-        text-decoration: none;
-        font-weight: 500;
-    }
-    .about-section {
-        padding: 3rem 0;
-    }
-    .about-section-header {
-        color: #2563eb;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        margin-bottom: 10px;
-    }
-    .about-title {
-        font-weight: 800;
-        color: #1f2937;
-        margin-bottom: 1.5rem;
-    }
-    .about-text p {
-        color: #4b5563;
-        font-size: 1.05rem;
-        line-height: 1.8;
-        margin-bottom: 1.25rem;
-    }
-    .about-img-box {
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        border: 1px solid #e5e7eb;
-    }
-    .about-img-box img {
-        width: 100%;
-        height: auto;
-        display: block;
-    }
-    .feature-card {
-        border: none;
-        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-        border-radius: 12px;
-        transition: all 0.3s;
-        background: white;
-        padding: 1.5rem;
-        height: 100%;
-    }
-    .feature-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
-        border-color: #2563eb;
-    }
-    .feature-card img {
-        border-radius: 8px;
-        margin-bottom: 1rem;
-    }
-    .feature-title {
-        font-weight: 700;
-        color: #1f2937;
-        margin-bottom: 0.75rem;
-    }
-</style>
-
-<!-- Page Header Start -->
-<div class="about-header">
+@* ── Page Header ── *@
+<div class="hs-page-header">
     <div class="container">
-        <h2>Về chúng tôi</h2>
-        <div class="mt-2">
+        <h2 class="hs-page-header__title">Về Chúng Tôi</h2>
+        <div class="hs-page-header__breadcrumb">
             <a asp-controller="Home" asp-action="Index">Trang chủ</a>
-            <span class="mx-2 text-white-50">&gt;</span>
-            <span class="text-white">Giới thiệu</span>
+            <span>&rsaquo;</span>
+            <span>Giới thiệu</span>
         </div>
     </div>
 </div>
-<!-- Page Header End -->
 
-<!-- Set Start -->
-<div class="container mb-5">
-    <div class="row align-items-stretch">
-        <div class="col-md-4 mb-4">
-            <div class="feature-card">
-                <img class="w-100" src="~/Client/img/set-1.jpg" alt="Váy Đầm Thiết Kế" />
-                <h4 class="feature-title text-center mt-3">Váy Đầm Thiết Kế</h4>
-                <p class="text-muted text-center" style="font-size:0.95rem; line-height: 1.6;">
-                    Tuyển chọn đầm tiệc, đầm xoè nhẹ nhàng mang lại vẻ thanh lịch và kiêu sa tối đa cho người mặc.
-                </p>
+@* ── Brand Story ── *@
+<section style="padding: 80px 0; background: #fff;">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-5 mb-lg-0">
+                <div class="hs-about__img-grid">
+                    <div class="hs-about__img-main">
+                        <img src="/Client/img/about.png" alt="Về HUFLIT SHOP">
+                    </div>
+                    <div class="hs-about__img-accent">
+                        <img src="/Client/img/fashion-2.jpg" alt="Huflit Shop Fashion">
+                    </div>
+                </div>
             </div>
-        </div>
-        <div class="col-md-4 mb-4">
-            <div class="feature-card">
-                <img class="w-100" src="~/Client/img/set-2.jpg" alt="Set Đồ Năng Động" />
-                <h4 class="feature-title text-center mt-3">Set Đồ Năng Động</h4>
-                <p class="text-muted text-center" style="font-size:0.95rem; line-height: 1.6;">
-                    Sự kết hợp khoẻ khoắn của các mẫu blazer và chân váy giúp các cô gái tự tin trong học tập và dạo phố.
-                </p>
-            </div>
-        </div>
-        <div class="col-md-4 mb-4">
-            <div class="feature-card">
-                <img class="w-100" src="~/Client/img/set-3.jpg" alt="Thời Trang Công Sở" />
-                <h4 class="feature-title text-center mt-3">Thời Trang Công Sở</h4>
-                <p class="text-muted text-center" style="font-size:0.95rem; line-height: 1.6;">
-                    Áo sơ mi lụa tơ tằm kết hợp quần tây thời thượng nâng tầm phong cách chuyên nghiệp nơi công sở.
-                </p>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- Set End -->
-
-<!-- About Start -->
-<div class="container about-section">
-    <div class="row align-items-center">
-        <div class="col-lg-6 mb-4">
-            <div class="about-img-box">
-                <img src="~/Client/img/about.png" alt="Về HUFLIT SHOP">
-            </div>
-        </div>
-        <div class="col-lg-6 mb-4">
-            <div class="pl-lg-4">
-                <div class="about-section-header">Giới thiệu cửa hàng</div>
-                <h2 class="about-title">HUFLIT SHOP - Đồng hành cùng phong cách và sự tự tin của bạn</h2>
-                <div class="about-text">
-                    <p>
+            <div class="col-lg-6">
+                <div class="hs-about__content">
+                    <p class="hs-about__sub">Câu chuyện thương hiệu</p>
+                    <h2 class="hs-about__title">HUFLIT SHOP<br>Đồng hành cùng phong cách</h2>
+                    <div class="hs-about__divider"></div>
+                    <p class="hs-about__desc">
                         Với mong muốn mang đến những sản phẩm thời trang thiết kế chất lượng nhất, HUFLIT SHOP tự hào đồng hành cùng phái đẹp trên con đường tìm kiếm sự tự tin và phong thái riêng của bản thân.
                     </p>
-                    <p>
-                        Mỗi dòng sản phẩm của chúng tôi từ đầm tiệc đến trang phục công sở đều được chọn lọc chất liệu kỹ lưỡng, đo may cẩn thận từng chi tiết và đảm bảo form dáng thoải mái, tôn vẻ quyến rũ tự nhiên của người phụ nữ Việt Nam.
+                    <p class="hs-about__desc">
+                        Mỗi dòng sản phẩm của chúng tôi từ đầm tiệc đến trang phục công sở đều được chọn lọc chất liệu kỹ lưỡng, đo may cẩn thận từng chi tiết và đảm bảo form dáng thoải mái, tôn vẻ quyến rũ tự nhiên.
                     </p>
-                    <p>
-                        Sự tin yêu và hài lòng của khách hàng là động lực to lớn giúp HUFLIT SHOP tiếp tục sáng tạo và ra mắt nhiều bộ sưu tập bắt kịp xu hướng thời trang quốc tế.
-                    </p>
-                    <a class="btn btn-primary px-4 py-2 mt-2" asp-controller="Product" asp-action="Product" style="border-radius:30px; font-weight:600;">Xem sản phẩm ngay</a>
+                    <ul class="hs-about__list">
+                        <li><i class="fas fa-check-circle"></i> Thiết kế độc quyền, cập nhật xu hướng mỗi mùa</li>
+                        <li><i class="fas fa-check-circle"></i> Chất liệu vải cao cấp, thấm hút và giữ form tốt</li>
+                        <li><i class="fas fa-check-circle"></i> Tư vấn size tận tâm, hỗ trợ 24/7</li>
+                        <li><i class="fas fa-check-circle"></i> Đổi trả linh hoạt, giao hàng nhanh toàn quốc</li>
+                    </ul>
+                    <a class="hs-btn hs-btn--primary" asp-controller="Product" asp-action="Product">Xem sản phẩm ngay</a>
                 </div>
             </div>
         </div>
     </div>
+</section>
+
+@* ── Stats Strip ── *@
+<div class="hs-promo-strip" style="padding: 52px 0;">
+    <div class="container">
+        <div class="hs-promo-strip__inner" style="justify-content: space-evenly;">
+            <div class="hs-promo-strip__item" style="flex-direction:column; text-align:center; gap:6px;">
+                <span style="font-size:2.4rem;font-weight:800;color:#2563eb;line-height:1;">5,000+</span>
+                <strong>Khách hàng hài lòng</strong>
+            </div>
+            <div class="hs-promo-strip__item" style="flex-direction:column; text-align:center; gap:6px;">
+                <span style="font-size:2.4rem;font-weight:800;color:#2563eb;line-height:1;">200+</span>
+                <strong>Mẫu thiết kế mỗi năm</strong>
+            </div>
+            <div class="hs-promo-strip__item" style="flex-direction:column; text-align:center; gap:6px;">
+                <span style="font-size:2.4rem;font-weight:800;color:#2563eb;line-height:1;">63</span>
+                <strong>Tỉnh thành giao hàng</strong>
+            </div>
+            <div class="hs-promo-strip__item" style="flex-direction:column; text-align:center; gap:6px;">
+                <span style="font-size:2.4rem;font-weight:800;color:#2563eb;line-height:1;">4.9★</span>
+                <strong>Đánh giá trung bình</strong>
+            </div>
+        </div>
+    </div>
 </div>
-<!-- About End -->
+
+@* ── Collections Grid ── *@
+<section style="padding: 80px 0; background:#f8fafc;">
+    <div class="container">
+        <div class="hs-section-head">
+            <h2 class="hs-section-head__title">Bộ Sưu Tập Của Chúng Tôi</h2>
+            <div class="hs-section-head__line"></div>
+            <p class="hs-section-head__desc">Mỗi thiết kế là một câu chuyện về sự tinh tế và nữ tính</p>
+        </div>
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div style="border-radius:12px;overflow:hidden;background:#fff;box-shadow:0 2px 16px rgba(0,0,0,0.06);">
+                    <img src="/Client/img/set-1.jpg" alt="Váy Đầm Thiết Kế" style="width:100%;height:260px;object-fit:cover;display:block;">
+                    <div style="padding:20px 22px 24px;">
+                        <h4 style="font-size:1rem;font-weight:700;color:#0f172a;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Váy Đầm Thiết Kế</h4>
+                        <p style="font-size:0.88rem;color:#64748b;line-height:1.65;margin-bottom:16px;">Đầm tiệc, đầm xòe nhẹ nhàng mang lại vẻ thanh lịch và kiêu sa tối đa.</p>
+                        <a asp-controller="Product" asp-action="Product" style="font-size:0.78rem;font-weight:700;color:#2563eb;letter-spacing:0.1em;text-transform:uppercase;text-decoration:none;">Khám phá →</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div style="border-radius:12px;overflow:hidden;background:#fff;box-shadow:0 2px 16px rgba(0,0,0,0.06);">
+                    <img src="/Client/img/set-2.jpg" alt="Set Đồ Năng Động" style="width:100%;height:260px;object-fit:cover;display:block;">
+                    <div style="padding:20px 22px 24px;">
+                        <h4 style="font-size:1rem;font-weight:700;color:#0f172a;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Set Đồ Năng Động</h4>
+                        <p style="font-size:0.88rem;color:#64748b;line-height:1.65;margin-bottom:16px;">Sự kết hợp khoẻ khoắn giúp bạn tự tin trong học tập và dạo phố.</p>
+                        <a asp-controller="Product" asp-action="Product" style="font-size:0.78rem;font-weight:700;color:#2563eb;letter-spacing:0.1em;text-transform:uppercase;text-decoration:none;">Khám phá →</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div style="border-radius:12px;overflow:hidden;background:#fff;box-shadow:0 2px 16px rgba(0,0,0,0.06);">
+                    <img src="/Client/img/set-3.jpg" alt="Thời Trang Công Sở" style="width:100%;height:260px;object-fit:cover;display:block;">
+                    <div style="padding:20px 22px 24px;">
+                        <h4 style="font-size:1rem;font-weight:700;color:#0f172a;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Thời Trang Công Sở</h4>
+                        <p style="font-size:0.88rem;color:#64748b;line-height:1.65;margin-bottom:16px;">Áo sơ mi lụa, quần tây thời thượng nâng tầm phong cách chuyên nghiệp.</p>
+                        <a asp-controller="Product" asp-action="Product" style="font-size:0.78rem;font-weight:700;color:#2563eb;letter-spacing:0.1em;text-transform:uppercase;text-decoration:none;">Khám phá →</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

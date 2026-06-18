@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "html-anything": {
+      "source": "clockless-org/html-anything",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "2b44cb8c6b5cb80bf1abb644708b58a09dbf546ec273a15b4886135a6a2b5091"
+    }
+  }
+}

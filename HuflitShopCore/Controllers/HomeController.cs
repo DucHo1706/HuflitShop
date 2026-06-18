@@ -10,9 +10,9 @@ namespace HuflitShopCore.Controllers
     public class HomeController : Controller
     {
         private readonly AppDbContext _context;
-        private readonly Microsoft.Extensions.Configuration.IConfiguration _configuration;
+        private readonly IConfiguration _configuration;
 
-        public HomeController(AppDbContext context, Microsoft.Extensions.Configuration.IConfiguration configuration)
+        public HomeController(AppDbContext context, IConfiguration configuration)
         {
             _context = context;
             _configuration = configuration;
@@ -20,10 +20,11 @@ namespace HuflitShopCore.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var cloudName = _configuration["CloudinarySettings:CloudName"] ?? "Tên_Cloud_Của_Bạn";
+            var cloudName = _configuration["Cloudinary:CloudName"] ?? _configuration["CloudinarySettings:CloudName"] ?? "dsamboqwp";
 
             // Lấy 8 sản phẩm mới nhất, bao gồm ảnh Thumbnail và tổng số lượng tồn từ các biến thể
             var products = await _context.Products
+                .AsNoTracking()
                 .Where(p => p.IsDeleted == false)
                 .OrderByDescending(p => p.CreatedAt)
                 .Take(8)

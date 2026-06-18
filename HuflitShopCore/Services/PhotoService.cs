@@ -12,11 +12,10 @@ namespace HuflitShopCore.Services
 
         public PhotoService(IConfiguration config)
         {
-            var acc = new Account(
-                config["CloudinarySettings:CloudName"],
-                config["CloudinarySettings:ApiKey"],
-                config["CloudinarySettings:ApiSecret"]
-            );
+            var cloudName = config["Cloudinary:CloudName"] ?? config["CloudinarySettings:CloudName"];
+            var apiKey = config["Cloudinary:ApiKey"] ?? config["CloudinarySettings:ApiKey"];
+            var apiSecret = config["Cloudinary:ApiSecret"] ?? config["CloudinarySettings:ApiSecret"];
+            var acc = new Account(cloudName, apiKey, apiSecret);
             _cloudinary = new Cloudinary(acc);
         }
 

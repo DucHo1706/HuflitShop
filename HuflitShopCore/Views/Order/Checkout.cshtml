@@ -9,9 +9,6 @@
 
 <!-- Custom styles for Shopee Checkout page -->
 <style>
-    body {
-        background-color: #f5f5f5 !important;
-    }
     .checkout-container {
         max-width: 1200px;
         margin: 2rem auto;
@@ -328,7 +325,10 @@
                     
                     <!-- Voucher Input Box -->
                     <div class="mb-4 mt-3">
-                        <label class="form-label font-weight-bold text-dark" style="font-size: 0.9rem; display: block; margin-bottom: 5px;">Mã giảm giá (Voucher)</label>
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label class="form-label font-weight-bold text-dark mb-0" style="font-size: 0.9rem;">Mã giảm giá (Voucher)</label>
+                            <a href="javascript:void(0)" class="text-primary font-weight-bold" id="btnOpenVoucherModal" style="font-size: 0.85rem; text-decoration: none;"><i class="fas fa-ticket-alt mr-1"></i>Chọn Voucher</a>
+                        </div>
                         <div class="input-group">
                             <input type="text" id="voucherCodeInput" class="form-control" placeholder="Nhập mã..." style="border-radius: 4px 0 0 4px; text-transform: uppercase;" />
                             <div class="input-group-append">
@@ -357,6 +357,160 @@
         </div>
     </form>
 </div>
+
+<!-- Voucher Selection Modal -->
+<div class="modal fade" id="voucherModal" tabindex="-1" role="dialog" aria-labelledby="voucherModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content" style="border-radius: 12px; border: none; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);">
+            <div class="modal-header" style="background-color: #0f172a; color: white; border-top-left-radius: 12px; border-top-right-radius: 12px; padding: 15px 20px;">
+                <h5 class="modal-title font-weight-bold" id="voucherModalLabel"><i class="fas fa-wallet mr-2"></i>Kho Voucher của bạn</h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="opacity: 0.8; outline: none; border: none; background: none; font-size: 1.5rem;">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" style="background-color: #f8fafc; max-height: 450px; overflow-y: auto; padding: 20px;">
+                <div id="voucherModalLoading" class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="sr-only">Đang tải...</span>
+                    </div>
+                    <p class="text-muted mt-2 mb-0" style="font-size: 0.9rem;">Đang tìm kiếm voucher khả dụng...</p>
+                </div>
+                <div id="voucherListContainer">
+                    <!-- Dynamic Voucher Tickets will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Voucher Ticket styling */
+    .voucher-ticket {
+        display: flex;
+        background: #fff;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 15px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        position: relative;
+        transition: all 0.2s ease;
+    }
+    .voucher-ticket:hover:not(.disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px -2px rgba(0,0,0,0.1);
+        border-color: #cbd5e1;
+    }
+    .voucher-ticket::before, .voucher-ticket::after {
+        content: '';
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        background: #f8fafc; /* match modal body bg */
+        border-radius: 50%;
+        left: 28%;
+        z-index: 10;
+        border: 1px solid #e2e8f0;
+    }
+    .voucher-ticket::before {
+        top: -9px;
+    }
+    .voucher-ticket::after {
+        bottom: -9px;
+    }
+    .voucher-left {
+        width: 30%;
+        background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        font-weight: bold;
+        text-align: center;
+        padding: 12px;
+        border-right: 1px dashed #cbd5e1;
+    }
+    .voucher-left i {
+        font-size: 1.5rem;
+        margin-bottom: 5px;
+    }
+    .voucher-left .promo-badge {
+        font-size: 0.8rem;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 2px 6px;
+        border-radius: 4px;
+        margin-top: 5px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        max-width: 90%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .voucher-right {
+        width: 70%;
+        padding: 15px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    .voucher-title {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 4px;
+        line-height: 1.3;
+    }
+    .voucher-subtitle {
+        font-size: 0.8rem;
+        color: #64748b;
+        margin-bottom: 8px;
+    }
+    .voucher-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 8px;
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+    .voucher-expiry {
+        font-size: 0.75rem;
+        color: #94a3b8;
+    }
+    
+    /* Disabled voucher ticket state */
+    .voucher-ticket.disabled {
+        opacity: 0.7;
+        background: #f1f5f9;
+    }
+    .voucher-ticket.disabled .voucher-left {
+        background: linear-gradient(135deg, #64748b 0%, #94a3b8 100%);
+    }
+    .voucher-ticket.disabled .voucher-title {
+        color: #64748b;
+    }
+    
+    .btn-apply-voucher {
+        font-size: 0.8rem;
+        font-weight: 700;
+        padding: 4px 12px;
+        border-radius: 4px;
+        border: none;
+        background-color: #2563eb;
+        color: white;
+        transition: all 0.2s;
+    }
+    .btn-apply-voucher:hover:not(:disabled) {
+        background-color: #1d4ed8;
+    }
+    .btn-apply-voucher:disabled {
+        background-color: #cbd5e1;
+        color: #64748b;
+        cursor: not-allowed;
+    }
+</style>
 
 @section Scripts {
     <!-- Simple script to handle Payment selector CSS toggles -->
@@ -402,6 +556,85 @@
             var finalPaySpan = document.getElementById("finalPayVal");
             
             var orderTotal = @total;
+
+            // Voucher Modal Handler
+            var btnOpenModal = document.getElementById("btnOpenVoucherModal");
+            var voucherModal = $("#voucherModal"); // jQuery trigger for Bootstrap modal
+            var voucherContainer = document.getElementById("voucherListContainer");
+            var loadingSpinner = document.getElementById("voucherModalLoading");
+
+            btnOpenModal.addEventListener("click", function() {
+                loadingSpinner.style.display = "block";
+                voucherContainer.innerHTML = "";
+                voucherModal.modal("show");
+
+                $.ajax({
+                    url: "/Order/GetAvailableVouchers",
+                    type: "GET",
+                    data: {
+                        orderTotal: orderTotal
+                    },
+                    success: function(vouchers) {
+                        loadingSpinner.style.display = "none";
+                        if (!vouchers || vouchers.length === 0) {
+                            voucherContainer.innerHTML = "<div class='text-center py-4 text-muted'><i class='fas fa-info-circle mr-1'></i>Hiện không có chương trình khuyến mãi nào khả dụng.</div>";
+                            return;
+                        }
+
+                        var html = "";
+                        vouchers.forEach(function(v) {
+                            var statusClass = v.isApplicable ? "" : "disabled";
+                            var disabledAttr = v.isApplicable ? "" : "disabled";
+                            var icon = v.discountType === "Percent" ? "fa-percentage" : "fa-money-bill-wave";
+                            
+                            var statusBadge = "";
+                            if (v.isApplicable) {
+                                statusBadge = "<span class='badge bg-success text-white font-weight-bold mb-1'>Đủ điều kiện</span>";
+                            } else {
+                                if (v.message.indexOf("Mua thêm") !== -1) {
+                                    statusBadge = "<span class='badge bg-warning text-dark font-weight-bold mb-1'>" + v.message + "</span>";
+                                } else {
+                                    statusBadge = "<span class='badge bg-danger text-white font-weight-bold mb-1'>" + v.message + "</span>";
+                                }
+                            }
+
+                            html += "<div class='voucher-ticket " + statusClass + "'>" +
+                                    "  <div class='voucher-left'>" +
+                                    "    <i class='fas " + icon + "'></i>" +
+                                    "    <span class='promo-badge' title='" + v.promoCode + "'>" + v.promoCode + "</span>" +
+                                    "  </div>" +
+                                    "  <div class='voucher-right'>" +
+                                    "    <div>" +
+                                    "      <div class='voucher-title'>" + v.description + "</div>" +
+                                    "      <div class='voucher-subtitle'>" + statusBadge + "</div>" +
+                                    "    </div>" +
+                                    "    <div class='voucher-footer'>" +
+                                    "      <div class='voucher-expiry'><i class='far fa-clock mr-1'></i>Hạn: " + v.endDateFormatted + "</div>" +
+                                    "      <button class='btn-apply-voucher btn-apply-click' data-code='" + v.promoCode + "' " + disabledAttr + ">Áp dụng</button>" +
+                                    "    </div>" +
+                                    "  </div>" +
+                                    "</div>";
+                        });
+
+                        voucherContainer.innerHTML = html;
+
+                        // Bind click events on the newly generated buttons
+                        var applyButtons = voucherContainer.querySelectorAll(".btn-apply-click");
+                        applyButtons.forEach(function(btn) {
+                            btn.addEventListener("click", function() {
+                                var code = this.getAttribute("data-code");
+                                voucherInput.value = code;
+                                voucherModal.modal("hide");
+                                btnApply.click(); // Trigger apply action
+                            });
+                        });
+                    },
+                    error: function() {
+                        loadingSpinner.style.display = "none";
+                        voucherContainer.innerHTML = "<div class='text-center py-4 text-danger'><i class='fas fa-exclamation-circle mr-1'></i>Không thể tải danh sách voucher.</div>";
+                    }
+                });
+            });
 
             btnApply.addEventListener("click", function() {
                 var code = voucherInput.value.trim();

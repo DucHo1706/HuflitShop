@@ -1,0 +1,257 @@
+/* =============================================================
+   AUTH.CSS – Login, Register, ForgotPassword, ResetPassword
+   HuflitShop Premium Fashion – Royal Blue brand
+   ============================================================= */
+
+:root {
+    --primary: #2563eb;
+    --primary-hover: #1d4ed8;
+    --dark: #0f172a;
+    --slate: #64748b;
+    --border: #e2e8f0;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: 'Outfit', sans-serif;
+    background-color: #f8fafc;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ── Auth Page Shell ── */
+.auth-shell {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Left decorative panel */
+.auth-shell__panel {
+    display: none;
+    flex: 0 0 45%;
+    background: linear-gradient(160deg, var(--dark) 0%, #1e3a8a 100%);
+    position: relative;
+    overflow: hidden;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 60px;
+}
+
+.auth-shell__panel-bg {
+    position: absolute;
+    inset: 0;
+    background-image: url('/Client/img/fashion-3.jpg');
+    background-size: cover;
+    background-position: center;
+    opacity: 0.15;
+}
+.auth-shell__panel-content {
+    position: relative;
+    z-index: 2;
+    color: #ffffff;
+    text-align: center;
+}
+.auth-shell__panel-logo {
+    max-height: 48px;
+    width: auto;
+    filter: brightness(0) invert(1);
+    margin-bottom: 48px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+.auth-shell__panel-title {
+    font-size: 2.2rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    line-height: 1.15;
+    margin-bottom: 20px;
+}
+.auth-shell__panel-desc {
+    font-size: 0.95rem;
+    color: rgba(255,255,255,0.65);
+    line-height: 1.8;
+    max-width: 320px;
+    margin: 0 auto;
+}
+.auth-shell__panel-quote {
+    margin-top: 48px;
+    border-left: 3px solid var(--primary);
+    padding-left: 18px;
+    text-align: left;
+    max-width: 320px;
+}
+.auth-shell__panel-quote p {
+    font-size: 0.9rem;
+    font-style: italic;
+    color: rgba(255,255,255,0.75);
+    margin-bottom: 8px;
+}
+.auth-shell__panel-quote span {
+    font-size: 0.78rem;
+    color: var(--primary);
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+/* Right form area */
+.auth-shell__form {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 32px;
+    background: #ffffff;
+}
+.auth-form-box {
+    width: 100%;
+    max-width: 420px;
+}
+.auth-form-box__mobile-logo {
+    display: block;
+    text-align: center;
+    margin-bottom: 36px;
+}
+.auth-form-box__mobile-logo img {
+    max-height: 42px;
+    width: auto;
+}
+.auth-form-box__title {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--dark);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+}
+.auth-form-box__sub {
+    font-size: 0.88rem;
+    color: var(--slate);
+    margin-bottom: 32px;
+}
+
+/* Form elements */
+.auth-field {
+    position: relative;
+    margin-bottom: 18px;
+}
+.auth-field label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--slate);
+    margin-bottom: 6px;
+}
+.auth-field input {
+    display: block;
+    width: 100%;
+    height: 48px;
+    padding: 0 16px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.95rem;
+    color: var(--dark);
+    background: #f8fafc;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.auth-field input:focus {
+    border-color: var(--primary);
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+}
+.auth-field .text-danger {
+    font-size: 0.8rem;
+    margin-top: 4px;
+    display: block;
+}
+
+/* Remember + forgot row */
+.auth-options {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    font-size: 0.85rem;
+}
+.auth-options label {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--slate);
+    cursor: pointer;
+    font-weight: 500;
+}
+.auth-options a {
+    color: var(--primary);
+    font-weight: 600;
+    text-decoration: none;
+}
+.auth-options a:hover { text-decoration: underline; }
+
+/* Submit button */
+.auth-submit {
+    display: block;
+    width: 100%;
+    height: 50px;
+    background: var(--primary);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.22s;
+    text-decoration: none;
+    text-align: center;
+    line-height: 50px;
+}
+.auth-submit:hover {
+    background: var(--primary-hover);
+    color: #ffffff;
+    text-decoration: none;
+}
+
+/* Bottom link */
+.auth-switch {
+    text-align: center;
+    margin-top: 24px;
+    font-size: 0.88rem;
+    color: var(--slate);
+}
+.auth-switch a {
+    color: var(--primary);
+    font-weight: 700;
+    text-decoration: none;
+    margin-left: 4px;
+}
+.auth-switch a:hover { text-decoration: underline; }
+
+/* Validation alert */
+.auth-alert {
+    background: #fef2f2;
+    border: 1px solid #fca5a5;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    font-size: 0.85rem;
+    color: #dc2626;
+}
+.auth-alert ul { margin: 0; padding-left: 18px; }
+
+/* Responsive */
+@media (min-width: 992px) {
+    .auth-shell__panel { display: flex; }
+    .auth-form-box__mobile-logo { display: none; }
+}

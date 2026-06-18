@@ -9,6 +9,8 @@ namespace HuflitShopCore.DTOs
         public string ProductName { get; set; } = string.Empty;
         public int Rate { get; set; }
         public string Content { get; set; } = string.Empty;
+        public string AdminReply { get; set; } = string.Empty;
+        public int HelpfulVotes { get; set; }
         public DateTime CreatedAt { get; set; }
         public string ProductId { get; set; } = string.Empty;
     }

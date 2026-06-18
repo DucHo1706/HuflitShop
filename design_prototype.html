@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Huflit Shop - Bản mẫu thiết kế cao cấp</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap 4.3.1 CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <!-- Font Awesome 5.15.4 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <!-- Swiper CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Swiper/4.5.1/css/swiper.min.css">
+
+    <style>
+        :root {
+            --primary: #2563eb;          /* Royal Blue */
+            --primary-hover: #1d4ed8;    /* Royal Blue Hover */
+            --primary-light: #eff6ff;    /* Royal Blue Light */
+            --dark: #0f172a;             /* Deep Ocean Navy */
+            --dark-muted: #1e293b;
+            --slate: #64748b;            /* Slate Gray */
+            --slate-light: #f8fafc;      /* Slate Light */
+            --border: #e2e8f0;
+            --radius-sm: 0px;
+            --transition: all 0.25s ease-in-out;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            color: #1e293b;
+            background-color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--dark);
+        }
+
+        a {
+            color: var(--primary);
+            transition: var(--transition);
+        }
+        a:hover {
+            color: var(--primary-hover);
+            text-decoration: none;
+        }
+
+        /* -----------------------------------------
+           HEADER & NAVIGATION
+           ----------------------------------------- */
+        header.header {
+            background-color: var(--dark) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .main-header {
+            padding: 12px 0;
+        }
+
+        .header-logo .logo-text {
+            color: #ffffff;
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .header-logo .logo-text span {
+            color: var(--primary);
+        }
+
+        .nav_new_menu {
+            display: flex;
+            align-items: center;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            gap: 4px;
+        }
+        
+        .nav-item .nav-link {
+            color: #ffffff !important;
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            padding: 8px 16px !important;
+            border-bottom: 2px solid transparent;
+            transition: var(--transition);
+        }
+        .nav-item .nav-link:hover,
+        .nav-item.active .nav-link {
+            color: var(--primary) !important;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        /* Dropdown Account */
+        .nav-item.dropdown {
+            position: relative;
+        }
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            margin-top: -2px !important; /* Overlaps with toggle to prevent hover gap issues */
+            right: 0;
+            left: auto;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+            border-radius: 0px;
+            background-color: #ffffff;
+            padding: 6px 0;
+            min-width: 170px;
+            display: none;
+            z-index: 1050;
+        }
+        .dropdown:hover .dropdown-menu {
+            display: block;
+        }
+        .dropdown-item {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 10px 18px;
+            font-weight: 500;
+            color: var(--dark) !important;
+            transition: var(--transition);
+        }
+        .dropdown-item:hover {
+            background-color: var(--slate-light);
+            color: var(--primary) !important;
+        }
+
+        /* Header Icons */
+        .header-right {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+        .box-icon {
+            color: #ffffff !important;
+            font-size: 18px;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .box-icon:hover {
+            color: var(--primary) !important;
+        }
+        .box-icon .count_item {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            background-color: var(--primary);
+            color: #ffffff;
+            font-size: 10px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            border: 1px solid var(--dark);
+        }
+
+        /* -----------------------------------------
+           HERO SLIDER
+           ----------------------------------------- */
+        .section_slider {
+            position: relative;
+            background-color: #000;
+        }
+        .swiper-slide {
+            position: relative;
+            height: 520px;
+        }
+        .swiper-slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.75;
+        }
+        .slider-text {
+            position: absolute;
+            top: 50%;
+            left: 10%;
+            transform: translateY(-50%);
+            color: #ffffff;
+            max-width: 550px;
+            z-index: 10;
+        }
+        .slider-text h2.title {
+            font-size: 3rem;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 15px;
+            color: #ffffff;
+        }
+        .slider-text .content {
+            font-size: 1.5rem;
+            font-weight: 300;
+            margin-bottom: 10px;
+        }
+        .slider-text .content span {
+            color: var(--primary);
+            font-weight: 600;
+        }
+        .slider-text .content_2 {
+            font-size: 0.95rem;
+            opacity: 0.85;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        /* Premium Buttons */
+        .theme-btn {
+            background-color: var(--primary) !important;
+            color: #ffffff !important;
+            border: 1px solid var(--primary) !important;
+            border-radius: 0px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 600;
+            padding: 12px 28px;
+            font-size: 13px;
+            display: inline-block;
+            transition: var(--transition);
+        }
+        .theme-btn:hover {
+            background-color: var(--primary-hover) !important;
+            border-color: var(--primary-hover) !important;
+        }
+
+        .btn-style-three {
+            background-color: #ffffff !important;
+            border: 1px solid var(--primary) !important;
+            color: var(--primary) !important;
+        }
+        .btn-style-three:hover {
+            background-color: var(--primary) !important;
+            color: #ffffff !important;
+        }
+
+        /* -----------------------------------------
+           COLLECTIONS
+           ----------------------------------------- */
+        .section_project {
+            padding: 5rem 0;
+            background-color: #ffffff;
+        }
+        .section-title {
+            text-align: center;
+            margin-bottom: 3.5rem;
+        }
+        .section-title .sub_title {
+            font-size: 13px;
+            color: var(--primary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            margin-bottom: 8px;
+        }
+        .section-title h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            position: relative;
+            padding-bottom: 15px;
+        }
+        .section-title h2::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 2px;
+            background-color: var(--primary);
+        }
+
+        .item_project {
+            border: none;
+            background: none;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .item_project img {
+            width: 100%;
+            height: 280px;
+            object-fit: cover;
+            border-radius: 0px;
+            transition: transform 0.5s;
+        }
+        .item_project:hover img {
+            transform: scale(1.03);
+        }
+        .blog_content {
+            padding: 20px 10px 0 10px;
+        }
+        .blog_content h3 a {
+            color: var(--dark);
+            font-size: 16px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .blog_content p {
+            color: var(--slate);
+            font-size: 14px;
+            margin-top: 8px;
+            line-height: 1.5;
+        }
+
+        /* -----------------------------------------
+           PRODUCT GRID & HOVER OVERLAY
+           ----------------------------------------- */
+        .section_product_tab {
+            padding: 5rem 0;
+            background-color: var(--slate-light);
+        }
+        .item_product_main {
+            background-color: #ffffff;
+            border-radius: 0px;
+            text-align: center;
+            margin-bottom: 30px;
+            transition: var(--transition);
+        }
+        .product-thumbnail {
+            position: relative;
+            overflow: hidden;
+            background-color: #ffffff;
+        }
+        .product-thumbnail img {
+            width: 100%;
+            height: 320px;
+            object-fit: cover;
+            transition: transform 0.4s;
+        }
+        .item_product_main:hover .product-thumbnail img {
+            transform: scale(1.04);
+        }
+        .product-thumbnail .badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background-color: var(--primary);
+            color: #ffffff;
+            font-size: 9px;
+            font-weight: 600;
+            padding: 4px 8px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            border-radius: 0px;
+            z-index: 5;
+        }
+
+        /* Overlay */
+        .catalog-overlay {
+            position: absolute;
+            bottom: -65px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 8px;
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(4px);
+            transition: bottom 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            z-index: 10;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+        }
+        .item_product_main:hover .catalog-overlay {
+            bottom: 0;
+        }
+
+        .catalog-overlay a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            padding: 8px 14px;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+
+        /* Button "Xem" (Outline) */
+        .catalog-overlay a.btn-xem {
+            background-color: #ffffff;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        .catalog-overlay a.btn-xem:hover {
+            background-color: var(--primary);
+            color: #ffffff;
+        }
+
+        /* Button "Mua ngay" (Solid) */
+        .catalog-overlay a.btn-mua {
+            background-color: var(--primary);
+            color: #ffffff;
+            border: 1px solid var(--primary);
+        }
+        .catalog-overlay a.btn-mua:hover {
+            background-color: var(--primary-hover);
+            border-color: var(--primary-hover);
+        }
+
+        .product-info {
+            padding: 15px 10px;
+        }
+        .product-name a {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--dark);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .product-price-cart {
+            margin-top: 5px;
+        }
+        .product-price-cart .price {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        /* -----------------------------------------
+           FEEDBACK
+           ----------------------------------------- */
+        .section_feedback {
+            padding: 5rem 0;
+            background-color: #ffffff;
+        }
+        .banner_feedback img {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            border-radius: 0px;
+        }
+        .feedback-item {
+            border: 1px solid var(--border);
+            padding: 2.5rem;
+            margin-top: 20px;
+        }
+        .star-rating {
+            color: #fbbf24;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        .block-content {
+            font-size: 15px;
+            color: var(--slate);
+            line-height: 1.8;
+            font-style: italic;
+            margin-bottom: 25px;
+        }
+        .author-detail {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .author-detail .avatar img {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .author-content b {
+            display: block;
+            font-size: 14px;
+            color: var(--dark);
+        }
+        .author-content span {
+            font-size: 12px;
+            color: var(--slate);
+        }
+
+        /* -----------------------------------------
+           FOOTER
+           ----------------------------------------- */
+        footer.footer {
+            background-color: var(--dark) !important;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            color: #cbd5e1;
+            padding: 4rem 0 2rem 0;
+        }
+        .logo-footer .logo-text {
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 15px;
+        }
+        .logo-footer .logo-text span {
+            color: var(--primary);
+        }
+        .info_foo_content {
+            color: #94a3b8;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .list_footer {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            margin-bottom: 12px;
+        }
+        .list_footer i {
+            color: var(--primary);
+        }
+
+        .footer-click h4.title-menu {
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 700;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 8px;
+            margin-bottom: 20px;
+        }
+        .footer-click .list-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .footer-click .li_menu {
+            margin-bottom: 10px;
+        }
+        .footer-click .li_menu a {
+            color: #94a3b8;
+            font-size: 14px;
+            transition: var(--transition);
+        }
+        .footer-click .li_menu a:hover {
+            color: var(--primary);
+            text-decoration: underline;
+        }
+
+        .block-payment h4.title-menu {
+            color: #ffffff;
+            font-size: 15px;
+            margin-bottom: 15px;
+        }
+        .content-mailchimp {
+            color: #94a3b8;
+            font-size: 13px;
+            display: block;
+            margin-bottom: 15px;
+        }
+        .newsletter-form {
+            display: flex;
+        }
+        .newsletter-form input {
+            background-color: var(--dark-muted);
+            border: 1px solid #334155;
+            border-radius: 0px;
+            color: #ffffff;
+            padding: 8px 15px;
+            font-size: 14px;
+            flex-grow: 1;
+            outline: none;
+        }
+        .newsletter-form button {
+            background-color: var(--primary);
+            color: #ffffff;
+            border: none;
+            padding: 8px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .newsletter-form button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .bg-footer-bottom {
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+        }
+        .listmenu_footer {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            gap: 15px;
+        }
+        .listmenu_footer a {
+            color: #94a3b8;
+            font-size: 13px;
+        }
+        .listmenu_footer a:hover {
+            color: var(--primary);
+        }
+        .fot_copyright {
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        .social {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .social a {
+            width: 36px;
+            height: 36px;
+            border: 1px solid #334155;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+            transition: var(--transition);
+        }
+        .social a:hover {
+            color: #ffffff;
+            border-color: var(--primary);
+            background-color: var(--primary);
+        }
+
+        /* Brands Section */
+        .section_brands {
+            padding: 2.5rem 0;
+            background-color: #ffffff;
+            border-top: 1px solid #e2e8f0;
+        }
+        .section_brands img {
+            max-height: 30px;
+            filter: grayscale(1);
+            opacity: 0.6;
+            transition: var(--transition);
+        }
+        .section_brands img:hover {
+            filter: none;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. HEADER -->
+    <header class="header">
+        <div class="main-header">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-lg-2 col-md-4 col-4 header-logo">
+                        <a href="#" class="logo-text">HUFLIT<span>SHOP</span></a>
+                    </div>
+                    <div class="col-lg-8 d-none d-lg-block">
+                        <ul class="nav_new_menu justify-content-center">
+                            <li class="nav-item active">
+                                <a class="nav-link" href="#">Trang chủ</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#">Sản phẩm</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#">Về chúng tôi</a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="userDropdown">
+                                    <i class="far fa-user mr-1"></i> Khách hàng Test
+                                </a>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item" href="#">Trang cá nhân</a>
+                                    <a class="dropdown-item" href="#">Lịch sử đơn hàng</a>
+                                    <a class="dropdown-item text-danger border-top mt-2 pt-2" href="#">Đăng xuất</a>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-lg-2 col-md-8 col-8 header-right">
+                        <div class="box-icon" title="Tìm kiếm">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <div class="box-icon" title="Yêu thích">
+                            <i class="far fa-heart"></i>
+                        </div>
+                        <div class="box-icon" title="Giỏ hàng">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span class="count_item">2</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 2. HERO SLIDER -->
+    <div class="section_slider">
+        <div class="swiper-container">
+            <div class="swiper-wrapper">
+                <div class="swiper-slide">
+                    <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1200&q=80" alt="Slider Image">
+                    <div class="slider-text">
+                        <h2 class="title">KIẾN TẠO PHONG CÁCH</h2>
+                        <div class="content">Cùng <span>HUFLIT SHOP</span></div>
+                        <p class="content_2">
+                            Tôn vinh nét quyến rũ tự nhiên, thanh lịch và hiện đại qua từng bộ sưu tập thời trang nữ thiết kế cao cấp của chúng tôi.
+                        </p>
+                        <a href="#" class="theme-btn">Mua sắm ngay</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. COLLECTIONS -->
+    <section class="section_project">
+        <div class="container">
+            <div class="section-title">
+                <div class="sub_title">Bộ sưu tập thu hút</div>
+                <h2>Xu Hướng Thời Trang Nữ</h2>
+            </div>
+            <div class="row">
+                <div class="col-md-4 col-12">
+                    <div class="item_project">
+                        <img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=600&q=80" alt="Váy Đầm Thiết Kế">
+                        <div class="blog_content">
+                            <h3><a href="#">Váy Đầm Thiết Kế</a></h3>
+                            <p>Những thiết kế váy đầm xòe, ôm dáng cực kỳ quyến rũ, tôn vinh vóc dáng yêu kiều của bạn.</p>
+                            <a href="#" class="theme-btn btn-style-three mt-3 w-100 justify-content-center py-2" style="font-size:0.9rem;">Khám phá ngay</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 col-12">
+                    <div class="item_project">
+                        <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=600&q=80" alt="Set Đồ Năng Động">
+                        <div class="blog_content">
+                            <h3><a href="#">Set Đồ Năng Động</a></h3>
+                            <p>Sự kết hợp thoải mái giữa áo thun, chân váy và vest giúp bạn năng động suốt ngày dài.</p>
+                            <a href="#" class="theme-btn btn-style-three mt-3 w-100 justify-content-center py-2" style="font-size:0.9rem;">Khám phá ngay</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 col-12">
+                    <div class="item_project">
+                        <img src="https://images.unsplash.com/photo-1485230895905-ec40ba36b9bc?auto=format&fit=crop&w=600&q=80" alt="Thời Trang Công Sở">
+                        <div class="blog_content">
+                            <h3><a href="#">Thời Trang Công Sở</a></h3>
+                            <p>Lịch lãm, trang nhã nhưng vẫn giữ được nét nữ tính cuốn hút với áo sơ mi lụa và blazer.</p>
+                            <a href="#" class="theme-btn btn-style-three mt-3 w-100 justify-content-center py-2" style="font-size:0.9rem;">Khám phá ngay</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. PRODUCT TAB -->
+    <section class="section_product_tab">
+        <div class="container">
+            <div class="section-title">
+                <div class="sub_title">Sản phẩm của chúng tôi</div>
+                <h2>Sản Phẩm Mới Nhất</h2>
+            </div>
+            <div class="row">
+                <!-- Product 1 -->
+                <div class="col-xl-3 col-lg-3 col-md-4 col-6">
+                    <div class="item_product_main">
+                        <div class="product-thumbnail">
+                            <span class="badge">Hot</span>
+                            <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=500&q=80" alt="Sản phẩm 1">
+                            <div class="catalog-overlay">
+                                <a href="#" class="btn-xem"><i class="fas fa-eye"></i>Xem</a>
+                                <a href="#" class="btn-mua"><i class="fas fa-shopping-bag"></i>Mua ngay</a>
+                            </div>
+                        </div>
+                        <div class="product-info">
+                            <h3 class="product-name"><a href="#">Áo Trễ Vai Hoa Nhí</a></h3>
+                            <div class="product-price-cart">
+                                <span class="price">135,000₫</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Product 2 -->
+                <div class="col-xl-3 col-lg-3 col-md-4 col-6">
+                    <div class="item_product_main">
+                        <div class="product-thumbnail">
+                            <span class="badge">Hot</span>
+                            <img src="https://images.unsplash.com/photo-1554412930-e1c8d415b3c4?auto=format&fit=crop&w=500&q=80" alt="Sản phẩm 2">
+                            <div class="catalog-overlay">
+                                <a href="#" class="btn-xem"><i class="fas fa-eye"></i>Xem</a>
+                                <a href="#" class="btn-mua"><i class="fas fa-shopping-bag"></i>Mua ngay</a>
+                            </div>
+                        </div>
+                        <div class="product-info">
+                            <h3 class="product-name"><a href="#">Đầm Dự Tiệc Trắng</a></h3>
+                            <div class="product-price-cart">
+                                <span class="price">450,000₫</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Product 3 -->
+                <div class="col-xl-3 col-lg-3 col-md-4 col-6">
+                    <div class="item_product_main">
+                        <div class="product-thumbnail">
+                            <span class="badge">Hot</span>
+                            <img src="https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=500&q=80" alt="Sản phẩm 3">
+                            <div class="catalog-overlay">
+                                <a href="#" class="btn-xem"><i class="fas fa-eye"></i>Xem</a>
+                                <a href="#" class="btn-mua"><i class="fas fa-shopping-bag"></i>Mua ngay</a>
+                            </div>
+                        </div>
+                        <div class="product-info">
+                            <h3 class="product-name"><a href="#">Set Vest Công Sở Cao Cấp</a></h3>
+                            <div class="product-price-cart">
+                                <span class="price">680,000₫</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Product 4 -->
+                <div class="col-xl-3 col-lg-3 col-md-4 col-6">
+                    <div class="item_product_main">
+                        <div class="product-thumbnail">
+                            <span class="badge">Hot</span>
+                            <img src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=500&q=80" alt="Sản phẩm 4">
+                            <div class="catalog-overlay">
+                                <a href="#" class="btn-xem"><i class="fas fa-eye"></i>Xem</a>
+                                <a href="#" class="btn-mua"><i class="fas fa-shopping-bag"></i>Mua ngay</a>
+                            </div>
+                        </div>
+                        <div class="product-info">
+                            <h3 class="product-name"><a href="#">Chân Váy Xoè Xám</a></h3>
+                            <div class="product-price-cart">
+                                <span class="price">220,000₫</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. FEEDBACK -->
+    <section class="section_feedback">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-5 mb-4 mb-lg-0">
+                    <img src="https://images.unsplash.com/photo-1534452208601-4f58d937088c?auto=format&fit=crop&w=600&q=80" class="banner_feedback" alt="Feedback Image">
+                </div>
+                <div class="col-lg-7 pl-lg-5">
+                    <div class="section-title text-left mb-4">
+                        <div class="sub_title" style="text-align: left;">Phản hồi từ khách hàng</div>
+                        <h2 style="padding-bottom:10px; margin-bottom: 0;">Khách Hàng Nói Gì Về Chúng Tôi?</h2>
+                    </div>
+                    <div class="feedback-item">
+                        <div class="star-rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="block-content">
+                            "Đồ của Huflit Shop thiết kế rất sang trọng và tôn dáng. Vải mặc rất thoải mái, mịn mát da. Tôi đã mua 3 lần và lần nào cũng cực kỳ ưng ý!"
+                        </div>
+                        <div class="author-detail">
+                            <div class="avatar">
+                                <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&q=80" alt="Avatar">
+                            </div>
+                            <div class="author-content">
+                                <b>Nguyễn Thảo</b>
+                                <span>Nhân viên văn phòng – Hà Nội</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 6. PARTNER BRANDS -->
+    <section class="section_brands">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-4 mb-3 mb-lg-0">
+                    <h5 class="font-weight-bold text-dark mb-1">Phương thức thanh toán</h5>
+                    <p class="text-muted small mb-0">Hỗ trợ đa dạng phương thức thanh toán an toàn, bảo mật cao.</p>
+                </div>
+                <div class="col-lg-8">
+                    <div class="d-flex flex-wrap justify-content-start justify-content-lg-end align-items-center gap-4">
+                        <img src="https://bizweb.dktcdn.net/100/601/974/themes/1047016/assets/img_brand_1.jpg?1776407985038" alt="Partner 1">
+                        <img src="https://bizweb.dktcdn.net/100/601/974/themes/1047016/assets/img_brand_2.jpg?1776407985038" alt="Partner 2">
+                        <img src="https://bizweb.dktcdn.net/100/601/974/themes/1047016/assets/img_brand_3.jpg?1776407985038" alt="Partner 3">
+                        <img src="https://bizweb.dktcdn.net/100/601/974/themes/1047016/assets/img_brand_4.jpg?1776407985038" alt="Partner 4">
+                        <img src="https://bizweb.dktcdn.net/100/601/974/themes/1047016/assets/img_brand_5.jpg?1776407985038" alt="Partner 5">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 7. FOOTER -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 col-md-12 mb-4 mb-lg-0">
+                    <div class="logo-footer">
+                        <a href="#" class="logo-text">HUFLIT<span>SHOP</span></a>
+                    </div>
+                    <p class="info_foo_content">
+                        Huflit Shop - Đơn vị cung cấp <b>thời trang thiết kế nữ cao cấp</b> hàng đầu, cam kết uy tín, chất lượng và phong cách hiện đại cho phái đẹp.
+                    </p>
+                    <div class="list_footer">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>828 Sư Vạn Hạnh, Phường 13, Quận 10, TP. Hồ Chí Minh</span>
+                    </div>
+                    <div class="list_footer">
+                        <i class="fas fa-phone-alt"></i>
+                        <span>0947 653 170</span>
+                    </div>
+                    <div class="list_footer">
+                        <i class="fas fa-envelope"></i>
+                        <span>contact@huflitshop.vn</span>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-4 col-6 mb-4 mb-lg-0 footer-click">
+                    <h4 class="title-menu">Chính sách</h4>
+                    <ul class="list-menu">
+                        <li class="li_menu"><a href="#">Giới thiệu chung</a></li>
+                        <li class="li_menu"><a href="#">Liên hệ chúng tôi</a></li>
+                        <li class="li_menu"><a href="#">Chính sách thành viên</a></li>
+                        <li class="li_menu"><a href="#">Chính sách đổi trả</a></li>
+                        <li class="li_menu"><a href="#">Chính sách bảo mật</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-2 col-md-4 col-6 mb-4 mb-lg-0 footer-click">
+                    <h4 class="title-menu">Sản phẩm nổi bật</h4>
+                    <ul class="list-menu">
+                        <li class="li_menu"><a href="#">Váy Đầm Thiết Kế</a></li>
+                        <li class="li_menu"><a href="#">Set Đồ Năng Động</a></li>
+                        <li class="li_menu"><a href="#">Thời Trang Công Sở</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4 col-md-4 mb-4 mb-lg-0">
+                    <div class="block-payment">
+                        <h4 class="title-menu">Đăng ký nhận tin</h4>
+                        <span class="content-mailchimp">Đăng ký để nhận thật nhiều ưu đãi từ HUFLIT SHOP</span>
+                        <form class="newsletter-form mt-2">
+                            <input type="email" placeholder="Nhập địa chỉ email của bạn" required>
+                            <button type="submit">Đăng ký</button>
+                        </form>
+                    </div>
+                    <div class="social">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-tiktok"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-footer-bottom copyright d-flex flex-wrap justify-content-between align-items-center">
+                <div class="fot_copyright">
+                    © Bản quyền thuộc về <b>Huflit Shop</b> | All Rights Reserved
+                </div>
+                <ul class="listmenu_footer">
+                    <li><a href="#">Trung tâm hỗ trợ</a></li>
+                    <li><a href="#">Điều khoản sử dụng</a></li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JS Scripts -->
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Swiper/4.5.1/js/swiper.min.js"></script>
+
+</body>
+</html>

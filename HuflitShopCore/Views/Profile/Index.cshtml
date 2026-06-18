@@ -1,0 +1,376 @@
+@model HuflitShopCore.Models.AppUser
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Trang cá nhân";
+    var orders = ViewBag.Orders as List<HuflitShopCore.DTOs.OrderDTO> ?? new List<HuflitShopCore.DTOs.OrderDTO>();
+    var firstChar = string.IsNullOrEmpty(Model.FullName) ? "U" : Model.FullName.Substring(0, 1).ToUpper();
+}
+
+<style>
+    body {
+        background-color: #f5f5f5 !important;
+    }
+    .profile-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+    .profile-sidebar {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        padding: 2rem 1.5rem;
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+    .profile-avatar-circle {
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        color: white;
+        font-size: 2.2rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+    }
+    .profile-name {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 0.25rem;
+    }
+    .profile-email {
+        font-size: 0.9rem;
+        color: #6b7280;
+        margin-bottom: 1.5rem;
+    }
+    .profile-menu {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        text-align: left;
+    }
+    .profile-menu-item {
+        margin-bottom: 0.5rem;
+    }
+    .profile-menu-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        width: 100%;
+        padding: 0.75rem 1rem;
+        background: transparent;
+        border: none;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #4b5563;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .profile-menu-btn:hover {
+        background-color: #f3f4f6;
+        color: #2563eb;
+    }
+    .profile-menu-btn.active {
+        background-color: #eff6ff;
+        color: #2563eb;
+    }
+    .profile-content-card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        padding: 2.5rem 2rem;
+        min-height: 400px;
+    }
+    .tab-pane {
+        display: none;
+    }
+    .tab-pane.active {
+        display: block;
+    }
+    .form-group-custom {
+        margin-bottom: 1.5rem;
+    }
+    .form-group-custom label {
+        display: block;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #4b5563;
+        margin-bottom: 0.5rem;
+    }
+    .form-control-custom {
+        width: 100%;
+        padding: 0.65rem 0.85rem;
+        font-size: 0.95rem;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        outline: none;
+        transition: all 0.2s;
+    }
+    .form-control-custom:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+    .form-control-custom:disabled {
+        background-color: #f3f4f6;
+        color: #9ca3af;
+        cursor: not-allowed;
+    }
+    
+    /* Order table styling */
+    .table-responsive-custom {
+        overflow-x: auto;
+    }
+    .order-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.95rem;
+    }
+    .order-table th {
+        background-color: #f9fafb;
+        color: #4b5563;
+        font-weight: 600;
+        text-align: left;
+        padding: 0.85rem 1rem;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    .order-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #f3f4f6;
+        vertical-align: middle;
+    }
+    .badge-status {
+        display: inline-block;
+        padding: 0.25rem 0.65rem;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    .badge-status-pending { background-color: #fef3c7; color: #d97706; }
+    .badge-status-packing { background-color: #e0f2fe; color: #0284c7; }
+    .badge-status-shipping { background-color: #dbeafe; color: #2563eb; }
+    .badge-status-completed { background-color: #dcfce7; color: #16a34a; }
+    .badge-status-cancelled { background-color: #fee2e2; color: #dc2626; }
+    .badge-status-refunded { background-color: #f3e8ff; color: #7c3aed; } /* 5: Yêu cầu hoàn tiền */
+    
+    .badge-payment-paid { background-color: #dcfce7; color: #16a34a; font-size: 0.8rem; font-weight: 600; padding: 0.25rem 0.5rem; border-radius: 4px; }
+    .badge-payment-unpaid { background-color: #fee2e2; color: #dc2626; font-size: 0.8rem; font-weight: 600; padding: 0.25rem 0.5rem; border-radius: 4px; }
+</style>
+
+<div class="profile-container">
+    <!-- Feedback Alerts -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert" style="border-radius: 6px; margin-bottom: 1.5rem;">
+            <i class="fas fa-check-circle mr-2"></i>@TempData["SuccessMessage"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert" style="border-radius: 6px; margin-bottom: 1.5rem;">
+            <i class="fas fa-exclamation-circle mr-2"></i>@TempData["ErrorMessage"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
+
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-lg-3 col-md-4">
+            <div class="profile-sidebar">
+                <div class="profile-avatar-circle">@firstChar</div>
+                <div class="profile-name">@Model.FullName</div>
+                <div class="profile-email">@Model.Email</div>
+                
+                <ul class="profile-menu">
+                    <li class="profile-menu-item">
+                        <button type="button" class="profile-menu-btn active" id="tabBtnAccount" onclick="switchTab('account')">
+                            <i class="fas fa-user-cog"></i>Thông tin tài khoản
+                        </button>
+                    </li>
+                    <li class="profile-menu-item">
+                        <button type="button" class="profile-menu-btn" id="tabBtnOrders" onclick="switchTab('orders')">
+                            <i class="fas fa-history"></i>Lịch sử mua hàng
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content Card -->
+        <div class="col-lg-9 col-md-8">
+            <div class="profile-content-card">
+                <!-- Tab: Account Info -->
+                <div class="tab-pane active" id="tabContentAccount">
+                    <h3 class="mb-4 pb-2 border-bottom" style="font-weight: 700; color: #1f2937;">
+                        <i class="fas fa-user mr-2 text-primary"></i>Thông tin tài khoản
+                    </h3>
+                    
+                    <form asp-controller="Profile" asp-action="UpdateProfile" method="post">
+                        @Html.AntiForgeryToken()
+                        <div class="row">
+                            <div class="col-md-6 form-group-custom">
+                                <label>Họ và tên</label>
+                                <input type="text" name="fullName" value="@Model.FullName" class="form-control-custom" required />
+                            </div>
+                            <div class="col-md-6 form-group-custom">
+                                <label>Địa chỉ Email (Không thể thay đổi)</label>
+                                <input type="email" value="@Model.Email" class="form-control-custom" disabled />
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 form-group-custom">
+                                <label>Số điện thoại</label>
+                                <input type="text" name="phoneNumber" value="@Model.PhoneNumber" class="form-control-custom" />
+                            </div>
+                            <div class="col-md-6 form-group-custom">
+                                <label>Giới tính</label>
+                                <select name="gender" class="form-control-custom">
+                                    <option value="1" selected="@(Model.Gender == 1)">Nam</option>
+                                    <option value="0" selected="@(Model.Gender == 0)">Nữ</option>
+                                    <option value="2" selected="@(Model.Gender == 2)">Khác</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 form-group-custom">
+                                <label>Ngày sinh</label>
+                                <input type="date" name="dateOfBirth" value="@(Model.DateOfBirth?.ToString("yyyy-MM-dd"))" class="form-control-custom" />
+                            </div>
+                            <div class="col-md-6 form-group-custom">
+                                <label>Ngày tham gia hệ thống</label>
+                                <input type="text" value="@Model.JoinedDate.ToString("dd/MM/yyyy")" class="form-control-custom" disabled />
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary font-weight-bold mt-2" style="border-radius: 6px; padding: 0.65rem 2.5rem;">
+                            Cập Nhật Thông Tin
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Tab: Order History -->
+                <div class="tab-pane" id="tabContentOrders">
+                    <h3 class="mb-4 pb-2 border-bottom" style="font-weight: 700; color: #1f2937;">
+                        <i class="fas fa-shopping-bag mr-2 text-primary"></i>Lịch sử mua hàng
+                    </h3>
+                    
+                    @if (!orders.Any())
+                    {
+                        <div class="text-center py-5 text-muted">
+                            <i class="fas fa-box-open fa-3x mb-3 text-light"></i>
+                            <p class="mb-0">Bạn chưa đặt đơn hàng nào trên hệ thống.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive-custom">
+                            <table class="order-table">
+                                <thead>
+                                    <tr>
+                                        <th>Mã đơn hàng</th>
+                                        <th>Ngày mua</th>
+                                        <th>Tổng tiền</th>
+                                        <th>Thanh toán</th>
+                                        <th>Trạng thái</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var o in orders)
+                                    {
+                                        <tr>
+                                            <td style="font-weight: 600; color: #2563eb;">#@o.Id.Substring(0, 8).ToUpper()</td>
+                                            <td>@o.OrderDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                            <td style="font-weight: 700; color: #ef4444;">@o.FinalAmount.ToString("N0") đ</td>
+                                            <td>
+                                                @if (o.PaymentStatus == 1)
+                                                {
+                                                    <span class="badge-payment-paid"><i class="fas fa-check-circle mr-1"></i>Đã thanh toán</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge-payment-unpaid"><i class="fas fa-clock mr-1"></i>Chưa thanh toán</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (o.OrderStatus == 0)
+                                                {
+                                                    <span class="badge-status badge-status-pending">Chờ duyệt</span>
+                                                }
+                                                else if (o.OrderStatus == 1)
+                                                {
+                                                    <span class="badge-status badge-status-packing">Đóng gói</span>
+                                                }
+                                                else if (o.OrderStatus == 2)
+                                                {
+                                                    <span class="badge-status badge-status-shipping">Đang giao</span>
+                                                }
+                                                else if (o.OrderStatus == 3)
+                                                {
+                                                    <span class="badge-status badge-status-completed">Hoàn thành</span>
+                                                }
+                                                else if (o.OrderStatus == 4)
+                                                {
+                                                    <span class="badge-status badge-status-cancelled">Đã hủy</span>
+                                                }
+                                                else if (o.OrderStatus == 5)
+                                                {
+                                                    <span class="badge-status badge-status-refunded">Yêu cầu hoàn tiền</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <div class="d-flex gap-2">
+                                                    <a class="btn btn-sm btn-outline-primary" style="border-radius:4px; font-weight:600;" href="@Url.Action("OrderDetail", "Profile", new { id = o.Id })">
+                                                        Chi tiết
+                                                    </a>
+                                                    @if (o.OrderStatus == 0)
+                                                    {
+                                                        <form asp-controller="Profile" asp-action="CancelOrder" asp-route-id="@o.Id" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn hủy đơn hàng này?')">
+                                                            @Html.AntiForgeryToken()
+                                                            <button type="submit" class="btn btn-sm btn-outline-danger" style="border-radius:4px; font-weight:600;">
+                                                                Hủy đơn
+                                                            </button>
+                                                        </form>
+                                                    }
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function switchTab(tabName) {
+        // Toggle active button style
+        document.querySelectorAll('.profile-menu-btn').forEach(btn => btn.classList.remove('active'));
+        // Toggle active tab content
+        document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+        
+        if (tabName === 'account') {
+            document.getElementById('tabBtnAccount').classList.add('active');
+            document.getElementById('tabContentAccount').classList.add('active');
+        } else if (tabName === 'orders') {
+            document.getElementById('tabBtnOrders').classList.add('active');
+            document.getElementById('tabContentOrders').classList.add('active');
+        }
+    }
+</script>

@@ -36,5 +36,43 @@ namespace HuflitShopCore.Models
         public virtual AppUser User { get; set; }
 
         public virtual ICollection<ReviewImage> ReviewImages { get; set; }
+
+        public string GetCommentText()
+        {
+            if (string.IsNullOrEmpty(ReviewComment)) return string.Empty;
+            var parts = ReviewComment.Split("|||", StringSplitOptions.None);
+            return parts[0].Trim();
+        }
+
+        public string GetAdminReply()
+        {
+            if (string.IsNullOrEmpty(ReviewComment)) return string.Empty;
+            var parts = ReviewComment.Split("|||", StringSplitOptions.None);
+            foreach (var part in parts)
+            {
+                if (part.StartsWith("REPLY:", StringComparison.OrdinalIgnoreCase))
+                {
+                    return part.Substring(6).Trim();
+                }
+            }
+            return string.Empty;
+        }
+
+        public int GetHelpfulVotes()
+        {
+            if (string.IsNullOrEmpty(ReviewComment)) return 0;
+            var parts = ReviewComment.Split("|||", StringSplitOptions.None);
+            foreach (var part in parts)
+            {
+                if (part.StartsWith("VOTES:", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (int.TryParse(part.Substring(6).Trim(), out int votes))
+                    {
+                        return votes;
+                    }
+                }
+            }
+            return 0;
+        }
     }
 }

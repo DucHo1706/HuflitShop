@@ -1,4 +1,4 @@
-﻿using HuflitShopCore.Services;
+using HuflitShopCore.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -17,10 +17,8 @@ namespace HuflitShopCore.Areas.Admin.Controllers
 
         public async Task<IActionResult> Index()
         {
-            // Tùy theo cách bạn lưu trữ Identity, nếu có Claim "RoleId" thì lấy, không thì lấy ClaimTypes.Role mặc định.
-            string roleId = User.FindFirstValue("RoleId") ?? User.FindFirstValue(ClaimTypes.Role) ?? "1"; 
-            
-            var dashboardData = await _reportService.GetDashboardDataAsync(roleId);
+            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+            var dashboardData = await _reportService.GetDashboardDataAsync(userId);
             
             return View(dashboardData);
         }

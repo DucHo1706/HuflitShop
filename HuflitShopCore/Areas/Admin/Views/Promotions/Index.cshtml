@@ -1,4 +1,4 @@
-﻿@model IEnumerable<HuflitShopCore.DTOs.PromotionDTO>
+@model IEnumerable<HuflitShopCore.DTOs.PromotionDTO>
 @{
     ViewData["Title"] = "Quản lý khuyến mãi";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
@@ -18,11 +18,13 @@
                 <thead class="thead-dark">
                     <tr>
                         <th>Mã KM</th>
-                        <th>Mức giảm giá</th>
-                        <th>Ngày bắt đầu</th>
-                        <th>Ngày kết thúc</th>
+                        <th>Loại & Mức giảm</th>
+                        <th>Đơn tối thiểu</th>
+                        <th>Giảm tối đa</th>
+                        <th>Đã dùng / Giới hạn</th>
+                        <th>Thời gian áp dụng</th>
                         <th>Trạng thái</th>
-                        <th style="width: 150px;" class="text-center">Hành động</th>
+                        <th style="width: 100px;" class="text-center">Hành động</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -31,20 +33,43 @@
                         foreach (var item in Model)
                         {
                             <tr>
-                                <td><span class="badge bg-info text-white">@item.PromoCode</span></td>
+                                <td><span class="badge bg-info text-white font-weight-bold" style="font-size: 0.95rem;">@item.PromoCode</span></td>
                                 <td>
-                                    @if(item.DiscountType == "Percent") {
+                                    @if(string.Equals(item.DiscountType, "Percent", StringComparison.OrdinalIgnoreCase)) {
                                         <span class="font-weight-bold text-danger">@item.DiscountValue.ToString("0.##")%</span>
                                     } else {
-                                        <span class="font-weight-bold text-danger">@item.DiscountValue.ToString("N0") VNĐ</span>
+                                        <span class="font-weight-bold text-danger">@item.DiscountValue.ToString("N0") đ</span>
                                     }
                                 </td>
-                                <td>@item.StartDate.ToString("dd/MM/yyyy HH:mm")</td>
-                                <td>@item.EndDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>
+                                    <span class="text-dark">@item.MinOrderAmount.ToString("N0") đ</span>
+                                </td>
+                                <td>
+                                    @if(string.Equals(item.DiscountType, "Percent", StringComparison.OrdinalIgnoreCase) && item.MaxDiscountAmount.HasValue) {
+                                        <span class="text-dark">@item.MaxDiscountAmount.Value.ToString("N0") đ</span>
+                                    } else {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td>
+                                    <span class="font-weight-bold text-primary">@item.UsedCount</span> / 
+                                    @(item.UsageLimit.HasValue ? item.UsageLimit.Value.ToString() : "∞")
+                                </td>
+                                <td>
+                                    <small class="d-block text-muted">Từ: @item.StartDate.ToString("dd/MM/yyyy HH:mm")</small>
+                                    <small class="d-block text-muted">Đến: @item.EndDate.ToString("dd/MM/yyyy HH:mm")</small>
+                                </td>
                                 <td>
                                     @if (item.IsOngoing)
                                     {
-                                        <span class="badge bg-success text-white">Đang áp dụng</span>
+                                        @if (item.UsageLimit.HasValue && item.UsedCount >= item.UsageLimit.Value)
+                                        {
+                                            <span class="badge bg-danger text-white">Hết lượt dùng</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success text-white">Đang áp dụng</span>
+                                        }
                                     }
                                     else if (item.StartDate > DateTime.Now && item.IsActive)
                                     {
@@ -52,7 +77,7 @@
                                     }
                                     else
                                     {
-                                        <span class="badge bg-secondary text-white">Đã ngưng / Kết thúc</span>
+                                        <span class="badge bg-secondary text-white">Đã kết thúc / Tắt</span>
                                     }
                                 </td>
                                 <td class="text-center">

@@ -1,0 +1,828 @@
+/* ==========================================
+   HUFLIT SHOP - ROYAL BLUE & DEEP NAVY PREMIUM AESTHETIC
+   ========================================== */
+
+:root {
+    --primary: #2563eb;          /* Royal Blue */
+    --primary-hover: #1d4ed8;    /* Royal Blue Hover */
+    --primary-light: #eff6ff;    /* Royal Blue Light */
+    --primary-border: #2563eb;
+    
+    --dark: #0f172a;             /* Deep Ocean Navy */
+    --dark-muted: #1e293b;
+    --slate: #64748b;            /* Slate Gray */
+    --slate-light: #f8fafc;      /* Slate Light */
+    --bg-body: #ffffff;
+    --border: #e2e8f0;
+    --price: #ef4444;            /* Red for price callouts */
+    
+    --radius-sm: 0px; /* Sharp premium look */
+    --radius-md: 0px;
+    --radius-lg: 0px;
+    
+    --transition: all 0.25s ease-in-out;
+}
+
+/* Global Elements & Fonts */
+body {
+    background-color: var(--bg-body) !important;
+    font-family: 'Outfit', sans-serif !important;
+    color: #1e293b;
+    -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+    font-family: 'Outfit', sans-serif !important;
+    font-weight: 600;
+    color: var(--dark);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+a {
+    color: var(--primary);
+    transition: var(--transition);
+}
+a:hover {
+    color: var(--primary-hover);
+    text-decoration: none;
+}
+
+/* Bootstrap 5 Spacing/Gap Utilities Backport for Bootstrap 4 */
+.gap-1 { gap: 0.25rem !important; }
+.gap-2 { gap: 0.5rem !important; }
+.gap-3 { gap: 1rem !important; }
+.gap-4 { gap: 1.5rem !important; }
+.gap-5 { gap: 3rem !important; }
+.gap-x-1 { column-gap: 0.25rem !important; }
+.gap-x-2 { column-gap: 0.5rem !important; }
+.gap-x-3 { column-gap: 1rem !important; }
+.gap-y-1 { row-gap: 0.25rem !important; }
+.gap-y-2 { row-gap: 0.5rem !important; }
+.gap-y-3 { row-gap: 1rem !important; }
+
+/* ==========================================
+   HEADER & NAVIGATION (DEEP NAVY & ROYAL BLUE ACCENT)
+   ========================================== */
+header.header {
+    background-color: var(--dark) !important; /* Deep Ocean Navy */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 1000 !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+    transition: var(--transition) !important;
+}
+
+/* Hide legacy topbar */
+.topbarhea {
+    display: none !important;
+}
+
+/* Main header */
+.main-header {
+    padding: 12px 0 !important;
+}
+header.header.hea-index:not(.hSticky) .main-header {
+    margin-top: 0 !important;
+}
+
+/* Header Logo styling */
+.header-logo .logo-wrapper {
+    display: inline-block !important;
+    background: transparent !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+}
+.logo-wrapper img {
+    max-height: 34px !important;
+    width: auto !important;
+}
+
+/* Navigation menu */
+.nav_new_menu {
+    display: flex !important;
+    align-items: center !important;
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    gap: 4px !important;
+    flex-direction: row !important;
+}
+.nav_new_menu > li {
+    list-style: none !important;
+    list-style-type: none !important;
+}
+.nav_new_menu > li > a {
+    color: #ffffff !important; /* White links */
+    font-weight: 600 !important;
+    font-size: 13px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.08em !important;
+    padding: 8px 16px !important;
+    border-radius: 0px !important;
+    background: transparent !important;
+}
+.nav_new_menu > li > a:hover,
+.nav_new_menu > li.active > a {
+    color: var(--primary) !important; /* Royal Blue */
+    border-bottom: 2px solid var(--primary) !important;
+}
+
+/* Fix Dropdown Positioning context */
+.nav_new_menu .dropdown {
+    position: relative !important;
+}
+.nav_new_menu .dropdown-menu {
+    position: absolute !important;
+    top: 100% !important;
+    margin-top: -2px !important; /* Overlaps with toggle to prevent hover gap issues */
+    left: auto !important;
+    right: 0 !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05) !important;
+    border-radius: 0px !important;
+    background-color: #ffffff !important;
+    padding: 6px 0 !important;
+    min-width: 160px !important;
+    display: none;
+    z-index: 1050 !important;
+}
+.nav_new_menu .dropdown:hover .dropdown-menu,
+.nav_new_menu .dropdown.show .dropdown-menu,
+.nav_new_menu .dropdown.open .dropdown-menu,
+.nav_new_menu .dropdown-menu.show {
+    display: block !important;
+}
+.nav_new_menu .dropdown-item {
+    font-size: 13px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    padding: 10px 18px !important;
+    font-weight: 500 !important;
+    color: var(--dark) !important;
+}
+.nav_new_menu .dropdown-item:hover {
+    background-color: var(--slate-light) !important;
+    color: var(--primary) !important;
+}
+
+/* Header Action Icons */
+.header-right {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 12px !important;
+}
+.box-icon {
+    background-color: transparent !important;
+    color: #ffffff !important; /* White icons on navy */
+    width: 36px !important;
+    height: 36px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    position: relative !important;
+    cursor: pointer !important;
+}
+.box-icon:hover {
+    color: var(--primary) !important; /* Royal Blue hover */
+}
+.box-icon .js-wishlist-count,
+.box-icon .count_item {
+    position: absolute !important;
+    top: -5px !important;
+    right: -5px !important;
+    background-color: var(--primary) !important; /* Royal Blue count badges */
+    color: #ffffff !important;
+    border: 1px solid var(--dark) !important;
+    border-radius: 50% !important;
+    width: 18px !important;
+    height: 18px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+}
+
+/* ==========================================
+   HOMEPAGE HERO & TEXT OVERRIDES
+   ========================================== */
+.section_slider {
+    position: relative !important;
+    background-color: #000000 !important;
+    margin-bottom: 3rem;
+}
+.swiper-slide {
+    position: relative !important;
+    height: 520px !important;
+}
+.swiper-slide img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    opacity: 0.75 !important;
+}
+.slider-text {
+    position: absolute !important;
+    top: 50% !important;
+    left: 10% !important;
+    transform: translateY(-50%) !important;
+    color: #ffffff !important;
+    max-width: 550px !important;
+    z-index: 10 !important;
+}
+.slider-text h2.title {
+    font-size: 3rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.05em !important;
+    text-transform: uppercase !important;
+    color: #ffffff !important;
+    margin-bottom: 15px !important;
+}
+.slider-text .content {
+    font-size: 1.5rem !important;
+    letter-spacing: 0.02em !important;
+    margin-bottom: 10px !important;
+}
+.slider-text .content span {
+    color: var(--primary) !important;
+    font-weight: 600 !important;
+    text-decoration: none !important;
+}
+
+/* Premium Buttons (Royal Blue / Sharp Corner) */
+.theme-btn, .btn-primary, .btn-checkout-shopee, .shopee-btn-primary {
+    background-color: var(--primary) !important;
+    color: #ffffff !important;
+    border: 1px solid var(--primary) !important;
+    border-radius: 0px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.1em !important;
+    font-weight: 600 !important;
+    padding: 12px 28px !important;
+    font-size: 13px !important;
+    transition: var(--transition) !important;
+}
+.theme-btn:hover, .btn-primary:hover, .btn-checkout-shopee:hover, .shopee-btn-primary:hover {
+    background-color: var(--primary-hover) !important;
+    color: #ffffff !important;
+    border-color: var(--primary-hover) !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+/* Outline style buttons */
+.btn-style-three, .btn-action-cart {
+    background-color: #ffffff !important;
+    border: 1px solid var(--primary) !important;
+    color: var(--primary) !important;
+}
+.btn-style-three:hover, .btn-action-cart:hover {
+    background-color: var(--primary) !important;
+    color: #ffffff !important;
+    border-color: var(--primary) !important;
+}
+
+/* About segment layout */
+.section_about {
+    background-color: #ffffff;
+    padding: 5rem 0 !important;
+}
+.box_thong_so li::before {
+    color: var(--primary) !important;
+}
+
+/* ==========================================
+   PRODUCT CARD COMPONENT (ELISE MINIMALIST STYLE)
+   ========================================== */
+.item_product_main, .catalog-item, .suggested-card {
+    background: #ffffff !important;
+    border: none !important; /* Borderless */
+    border-radius: 0px !important;
+    box-shadow: none !important; /* No shadows */
+    text-align: center !important; /* Centered texts */
+    padding: 0 0 20px 0 !important;
+}
+.item_product_main:hover, .catalog-item:hover, .suggested-card:hover {
+    transform: none !important;
+    box-shadow: none !important;
+}
+.product-thumbnail, .catalog-img, .suggested-img-box {
+    background-color: #f8fafc !important;
+    border-radius: 0px !important;
+    width: 100% !important;
+    height: 360px !important; /* Premium cropped 3:4 proportion height */
+    overflow: hidden !important;
+    position: relative !important;
+}
+.product-thumbnail img, .catalog-img img, .suggested-img-box img {
+    border-radius: 0px !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    transition: transform 0.5s ease !important;
+}
+.item_product_main:hover .product-thumbnail img, 
+.catalog-item:hover .catalog-img img, 
+.suggested-card:hover .suggested-img-box img {
+    transform: scale(1.06) !important;
+}
+.product-thumbnail .badge {
+    background-color: var(--primary) !important;
+    border-radius: 0px !important;
+    font-size: 9px !important;
+    letter-spacing: 0.05em !important;
+    position: absolute !important;
+    top: 12px !important;
+    left: 12px !important;
+    z-index: 10 !important;
+    padding: 4px 8px !important;
+}
+
+/* Style Hover Overlay for Product Cards */
+.product-thumbnail, .catalog-img {
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+.catalog-overlay {
+    position: absolute !important;
+    bottom: -65px !important; /* Starts hidden below */
+    left: 0 !important;
+    width: 100% !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 12px 8px !important;
+    background: rgba(255, 255, 255, 0.94) !important;
+    backdrop-filter: blur(4px) !important;
+    transition: bottom 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+    z-index: 100 !important;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.05) !important;
+}
+
+/* Show on hover of parent cards */
+.item_product_main:hover .catalog-overlay,
+.catalog-item:hover .catalog-overlay {
+    bottom: 0 !important;
+}
+
+/* Base button styles inside overlay */
+.catalog-overlay a,
+.catalog-overlay button {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 0px !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.08em !important;
+    padding: 8px 14px !important;
+    text-decoration: none !important;
+    transition: all 0.2s ease-in-out !important;
+    cursor: pointer !important;
+    white-space: nowrap !important;
+}
+
+/* Button 1 ("Xem" - Outline style) */
+.catalog-overlay a:first-child,
+.catalog-overlay button:first-child {
+    background: #ffffff !important;
+    color: var(--primary) !important;
+    border: 1px solid var(--primary) !important;
+}
+.catalog-overlay a:first-child:hover,
+.catalog-overlay button:first-child:hover {
+    background: var(--primary) !important;
+    color: #ffffff !important;
+}
+
+/* Button 2 ("Mua ngay" - Solid style) */
+.catalog-overlay a:last-child,
+.catalog-overlay button:last-child {
+    background: var(--primary) !important;
+    color: #ffffff !important;
+    border: 1px solid var(--primary) !important;
+}
+.catalog-overlay a:last-child:hover,
+.catalog-overlay button:last-child:hover {
+    background: var(--primary-hover) !important;
+    color: #ffffff !important;
+    border-color: var(--primary-hover) !important;
+}
+
+/* Icons inside the overlay buttons */
+.catalog-overlay a i,
+.catalog-overlay button i {
+    font-size: 11px !important;
+    margin-right: 5px !important;
+}
+
+.product-info, .catalog-body, .suggested-body {
+    padding: 12px 6px !important;
+    text-align: center !important;
+}
+.product-name a, .catalog-title, .suggested-name {
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    color: var(--dark) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.04em !important;
+    height: 1.6rem !important;
+    line-height: 1.6 !important;
+    margin-bottom: 6px !important;
+}
+.product-price-cart, .catalog-price-row {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 12px !important;
+}
+.product-price-cart .price, .catalog-price, .suggested-price {
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    color: var(--primary) !important; /* Royal Blue color for price */
+}
+
+/* Hide product button on desktop, show only on mobile (under 768px) */
+@media (min-width: 769px) {
+    .product-button {
+        display: none !important;
+    }
+}
+@media (max-width: 768px) {
+    .product-button {
+        display: block !important;
+        margin-top: 10px !important;
+    }
+    .btn-cart {
+        background-color: #ffffff !important;
+        color: var(--primary) !important;
+        border: 1px solid var(--primary) !important;
+        border-radius: 0px !important;
+        font-size: 11px !important;
+        font-weight: 600 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.05em !important;
+        padding: 8px 12px !important;
+        width: 100% !important;
+        transition: all 0.2s ease-in-out !important;
+    }
+    .btn-cart:hover {
+        background-color: var(--primary) !important;
+        color: #ffffff !important;
+    }
+}
+.catalog-btn-cart {
+    background-color: #ffffff !important;
+    color: var(--primary) !important;
+    border: 1px solid var(--primary) !important;
+    border-radius: 0px !important;
+}
+.catalog-btn-cart:hover {
+    background-color: var(--primary) !important;
+    color: #ffffff !important;
+}
+
+/* ==========================================
+   COLLECTIONS / WHY CHOOSE US
+   ========================================== */
+.item_project {
+    border-radius: 0px !important;
+    border: none !important;
+    box-shadow: none !important;
+    text-align: center !important;
+}
+.item_project img {
+    border-radius: 0px !important;
+}
+.blog_content h3 a {
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    color: var(--dark) !important;
+}
+.section_choose {
+    background-color: #ffffff !important;
+}
+.box_img_choose img {
+    border-radius: 0px !important;
+    box-shadow: none !important;
+}
+.why-feature-list-wrap {
+    border-left: 2px solid var(--primary) !important;
+}
+
+/* ==========================================
+   FEEDBACK & TESTIMONIALS
+   ========================================== */
+.feedback-item {
+    border-radius: 0px !important;
+    box-shadow: none !important;
+    border: 1px solid var(--border) !important;
+}
+.star-rating {
+    color: #fbbf24 !important; /* Yellow stars for feedback */
+}
+.banner_feedback img {
+    border-radius: 0px !important;
+    box-shadow: none !important;
+}
+
+/* ==========================================
+   PREMIUM DARK NAVY FOOTER
+   ========================================== */
+footer.footer {
+    background-color: var(--dark) !important; /* Deep Ocean Navy */
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+    color: #cbd5e1 !important; /* Light text */
+    padding: 4rem 0 2rem 0 !important;
+}
+.info_foo_content {
+    color: #94a3b8 !important;
+}
+.list_footer {
+    color: #cbd5e1 !important;
+}
+.list_footer svg path {
+    fill: #cbd5e1 !important;
+}
+.social a img {
+    filter: brightness(0) invert(1) !important; /* Make social logos white */
+    opacity: 0.8 !important;
+}
+.social a:hover img {
+    opacity: 1 !important;
+    filter: none !important;
+}
+
+.footer-click h4.title-menu {
+    color: #ffffff !important;
+    border-bottom: 2px solid var(--primary) !important; /* Royal Blue underline */
+}
+.footer-click .li_menu a {
+    color: #94a3b8 !important;
+}
+.footer-click .li_menu a:hover {
+    color: var(--primary) !important;
+    text-decoration: underline !important;
+}
+.block-payment h4.title-menu {
+    color: #ffffff !important;
+}
+.content-mailchimp {
+    color: #94a3b8 !important;
+}
+.newsletter-form input {
+    background-color: var(--dark-muted) !important;
+    border: 1px solid #334155 !important;
+    border-radius: 0px !important;
+    color: #ffffff !important;
+}
+.newsletter-form input:focus {
+    border-color: var(--primary) !important;
+    box-shadow: none !important;
+}
+.newsletter-form button {
+    background-color: var(--primary) !important;
+    color: #ffffff !important;
+    border-radius: 0px !important;
+}
+.newsletter-form button:hover {
+    background-color: var(--primary-hover) !important;
+}
+
+.bg-footer-bottom {
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+.listmenu_footer a {
+    color: #94a3b8 !important;
+}
+.listmenu_footer a:hover {
+    color: var(--primary) !important;
+}
+.fot_copyright {
+    color: #64748b !important;
+}
+.backtop {
+    background-color: var(--primary) !important;
+    border-radius: 0px !important;
+}
+.backtop:hover {
+    background-color: var(--primary-hover) !important;
+}
+
+/* ==========================================
+   GLOBAL FORM INPUT SOFTNESS
+   ========================================== */
+.form-control,
+input[type="text"]:not(.auto-search),
+input[type="email"]:not(.auto-search),
+input[type="password"]:not(.auto-search),
+input[type="number"],
+input[type="tel"],
+textarea,
+select {
+    border-radius: 6px !important;
+}
+.btn { border-radius: 6px !important; }
+.nav_new_menu > li > a { border-radius: 0 !important; }
+
+/* NOTE: Product, Cart, and Homepage styles are in separate files:
+   - /css/product.css  (catalog, details, reviews)
+   - /css/cart.css     (cart, checkout, profile)
+   - /css/home.css     (homepage hs-* BEM components)
+   - /css/auth.css     (login, register)
+*/
+
+/* ==========================================
+   POPUP SEARCH (HEADER FUNCTIONALITY)
+   ========================================== */
+.popup-search {
+    position: fixed;
+    top: 0 !important;
+    left: 0;
+    right: 0;
+    background: #ffffff !important;
+    z-index: 99999 !important;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    transform: translateY(-100%);
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    opacity: 0;
+    visibility: hidden;
+    height: 105px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+@media (max-width: 991px) {
+    .popup-search {
+        height: 100px;
+    }
+}
+.popup-search.active {
+    transform: translateY(0%);
+    opacity: 1;
+    visibility: visible;
+}
+.popup-search .search-header {
+    width: 500px;
+}
+@media (max-width: 991px) {
+    .popup-search .search-header {
+        width: calc(100% - 100px);
+    }
+}
+.popup-search .close-popup-search {
+    margin-left: 20px;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.popup-search .close-popup-search svg {
+    width: 20px;
+    height: 20px;
+    fill: var(--dark);
+    transition: var(--transition);
+}
+.popup-search .close-popup-search:hover svg {
+    fill: var(--primary);
+    transform: rotate(90deg);
+}
+.popup-search .header_tim_kiem {
+    position: relative;
+    width: 100%;
+}
+.popup-search .header_tim_kiem form.search-bar {
+    margin-bottom: 0px;
+    position: relative;
+    width: 100%;
+    background: transparent;
+}
+.popup-search .header_tim_kiem form.search-bar input {
+    height: 48px;
+    line-height: 48px;
+    margin: 0px;
+    background: #ffffff;
+    border: 1px solid var(--border);
+    padding-left: 20px;
+    border-radius: 0px !important;
+    padding-right: 50px;
+    width: 100%;
+    font-size: 14px;
+    color: var(--dark);
+    transition: var(--transition);
+}
+.popup-search .header_tim_kiem form.search-bar input:focus {
+    border-color: var(--primary);
+    outline: none;
+}
+.popup-search .header_tim_kiem form.search-bar .icon-fallback-text {
+    width: 40px;
+    height: 40px;
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    padding: 0px;
+    display: flex;
+    background: transparent;
+    border: none;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    color: var(--dark);
+}
+.popup-search .header_tim_kiem form.search-bar .icon-fallback-text svg {
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
+    transition: var(--transition);
+}
+.popup-search .header_tim_kiem form.search-bar .icon-fallback-text:hover svg {
+    color: var(--primary);
+}
+
+/* ==========================================
+   AUTO-SUGGESTIONS POPUP LIST
+   ========================================== */
+.search-suggestions-box {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #ffffff;
+    border: 1px solid var(--border);
+    z-index: 100000;
+    max-height: 400px;
+    overflow-y: auto;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    margin-top: 5px;
+}
+.suggestion-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    border-bottom: 1px solid var(--border);
+    transition: var(--transition);
+    text-decoration: none !important;
+}
+.suggestion-item:hover {
+    background-color: var(--slate-light);
+}
+.suggestion-img {
+    width: 45px;
+    height: 60px;
+    object-fit: cover;
+    margin-right: 15px;
+    background-color: #f8fafc;
+}
+.suggestion-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+}
+.suggestion-name {
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    color: var(--dark) !important;
+    margin-bottom: 4px !important;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    height: auto !important;
+}
+.suggestion-price {
+    font-size: 12px;
+    color: var(--primary);
+    font-weight: 700;
+}
+.suggestion-view-all {
+    display: block;
+    padding: 12px;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--primary) !important;
+    border-top: 1px solid var(--border);
+    background-color: var(--primary-light);
+    transition: var(--transition);
+}
+.suggestion-view-all:hover {
+    background-color: var(--primary);
+    color: #ffffff !important;
+}
+
+
+

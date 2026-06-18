@@ -1,0 +1,529 @@
+@{
+    ViewData["Title"] = "Trung tâm Chăm sóc Khách hàng";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+    var sessions = ViewBag.Sessions as List<HuflitShopCore.Services.ChatSessionSummaryDTO> ?? new List<HuflitShopCore.Services.ChatSessionSummaryDTO>();
+    var activeSessionId = ViewBag.ActiveSessionId as string;
+    var activeUserId = ViewBag.ActiveUserId as string;
+    var activeCustomerName = ViewBag.ActiveCustomerName as string;
+    var activeCustomerAvatar = ViewBag.ActiveCustomerAvatar as string ?? "/Client/img/default-user.jpg";
+}
+
+<link href="/Admin/css/chat.css" rel="stylesheet" />
+
+<style>
+    /* Custom overrides for luxury theme on top of chat.css */
+    .chat-app {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.01);
+        overflow: hidden;
+        height: calc(100vh - 180px);
+        min-height: 550px;
+        position: relative;
+    }
+    
+    .chat-app .people-list {
+        background-color: #f8fafc;
+        border-right: 1px solid #e2e8f0;
+        height: 100%;
+        overflow-y: auto;
+        padding: 0 !important;
+    }
+
+    .people-list .search {
+        padding: 1.25rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .people-list .chat-list {
+        padding: 0;
+        margin: 0;
+    }
+
+    .people-list .chat-list li {
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid #f1f5f9;
+        border-radius: 0 !important;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .people-list .chat-list li:hover {
+        background-color: #f1f5f9 !important;
+    }
+
+    .people-list .chat-list li.active {
+        background-color: #e0f2fe !important;
+        border-left: 4px solid #1e40af;
+    }
+
+    .people-list .chat-list li img {
+        width: 42px;
+        height: 42px;
+        object-fit: cover;
+        border: 2px solid #ffffff;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .people-list .about {
+        padding-left: 0 !important;
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+        flex: 1;
+        min-width: 0;
+    }
+
+    .people-list .about .name {
+        font-weight: 600;
+        color: #0f172a;
+        font-size: 0.92rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .people-list .about .status {
+        font-size: 0.78rem;
+        color: #64748b;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .chat-app .chat {
+        margin-left: 280px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        background: #ffffff;
+    }
+
+    .chat .chat-header {
+        padding: 1rem 1.5rem !important;
+        border-bottom: 1px solid #e2e8f0 !important;
+        background-color: #ffffff;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .chat .chat-header img {
+        width: 40px;
+        height: 40px;
+        object-fit: cover;
+        border-radius: 50%;
+    }
+
+    .chat .chat-header .chat-about {
+        padding-left: 0 !important;
+    }
+
+    .chat .chat-header .chat-about h6 {
+        font-weight: 600;
+        color: #0f172a;
+        margin: 0;
+    }
+
+    .chat .chat-history {
+        padding: 1.5rem !important;
+        flex: 1;
+        overflow-y: auto;
+        background-color: #f8fafc;
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+    }
+
+    .chat-history ul {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin: 0;
+        padding: 0;
+    }
+
+    .chat-history .message-item {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        max-width: 75%;
+    }
+
+    /* Khách nhắn (User) */
+    .chat-history .message-item.received-msg {
+        align-self: flex-start;
+        align-items: flex-start;
+    }
+
+    /* Admin nhắn (Admin) */
+    .chat-history .message-item.sent-msg {
+        align-self: flex-end;
+        align-items: flex-end;
+    }
+
+    .chat-history .message-data {
+        font-size: 0.75rem;
+        color: #94a3b8;
+        margin-bottom: 0.25rem;
+    }
+
+    .chat-history .message {
+        padding: 0.65rem 1rem !important;
+        font-size: 0.9rem !important;
+        border-radius: 12px !important;
+        line-height: 1.4 !important;
+        word-break: break-word;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+    }
+
+    /* Ghi đè màu tin nhắn */
+    .chat-history .my-message {
+        background-color: #f1f5f9 !important;
+        color: #1e293b !important;
+        border-top-left-radius: 2px !important;
+    }
+
+    .chat-history .other-message {
+        background-color: #1e40af !important; /* Xanh hoàng gia cho Admin */
+        color: #ffffff !important;
+        border-top-right-radius: 2px !important;
+        text-align: left !important;
+    }
+
+    .chat-history .message:after {
+        display: none !important;
+    }
+
+    .chat .chat-message {
+        padding: 1rem 1.5rem !important;
+        border-top: 1px solid #e2e8f0;
+        background: #ffffff;
+    }
+
+    .chat-message .input-group {
+        background-color: #f8fafc;
+        border: 1px solid #cbd5e1;
+        border-radius: 24px;
+        padding: 3px 6px 3px 16px;
+        display: flex;
+        align-items: center;
+    }
+
+    .chat-message .input-group input {
+        border: none !important;
+        background: transparent !important;
+        padding: 0.5rem 0 !important;
+        font-size: 0.92rem;
+        outline: none !important;
+        flex: 1;
+    }
+
+    .chat-message .input-group .btn-send {
+        background-color: #1e40af !important;
+        border: none !important;
+        color: white !important;
+        border-radius: 50% !important;
+        width: 36px;
+        height: 36px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 !important;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .chat-message .input-group .btn-send:hover {
+        background-color: #1d4ed8 !important;
+        transform: scale(1.05);
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4 mt-4">
+        <h1 class="h3 mb-0 text-gray-800">Chăm sóc khách hàng trực tuyến</h1>
+    </div>
+
+    <div class="chat-app">
+        <!-- Cột trái: Danh sách các phiên chat -->
+        <div id="plist" class="people-list">
+            <div class="search">
+                <input type="text" id="searchClients" class="form-control form-control-sm" placeholder="Tìm kiếm khách hàng...">
+            </div>
+            <ul class="list-unstyled chat-list mt-2" id="chatListContainer">
+                @if (sessions.Any())
+                {
+                    foreach (var session in sessions)
+                    {
+                        bool isActive = session.SessionId == activeSessionId;
+                        <li class="@(isActive ? "active" : "")" 
+                            data-session-id="@session.SessionId" 
+                            data-user-id="@session.UserId"
+                            data-customer-name="@session.CustomerName"
+                            data-customer-avatar="@session.CustomerAvatar"
+                            onclick="selectSession(this)">
+                            
+                            <img src="@session.CustomerAvatar" alt="avatar">
+                            <div class="about">
+                                <div class="name">@session.CustomerName</div>
+                                <div class="status">
+                                    <span class="preview-text">@session.LastMessageContent</span>
+                                    <small class="time text-muted">@session.LastMessageTime.ToString("HH:mm")</small>
+                                </div>
+                            </div>
+                        </li>
+                    }
+                }
+                else
+                {
+                    <li class="text-center text-muted py-4" id="emptySessionMsg">Chưa có cuộc hội thoại nào</li>
+                }
+            </ul>
+        </div>
+
+        <!-- Cột phải: Khung chat thời gian thực -->
+        <div class="chat">
+            <!-- Hộp Chat thật sự (ẩn/hiện động qua CSS để tránh lỗi null reference) -->
+            <div id="activeChatArea" style="display: @(string.IsNullOrEmpty(activeSessionId) ? "none" : "flex"); flex-direction: column; height: 100%;">
+                <div class="chat-header clearfix">
+                    <img id="activeAvatar" src="@activeCustomerAvatar" alt="avatar">
+                    <div class="chat-about">
+                        <h6 id="activeTitle">@activeCustomerName</h6>
+                        <small class="text-success"><i class="fas fa-circle font-size-8"></i> Trực tuyến</small>
+                    </div>
+                </div>
+                
+                <div class="chat-history">
+                    <ul id="chatMessageList" class="m-b-0">
+                        <!-- Tin nhắn tải động qua AJAX/SignalR -->
+                    </ul>
+                </div>
+                
+                <div class="chat-message clearfix">
+                    <div class="input-group">
+                        <input type="text" id="chatInputMessage" placeholder="Nhập tin nhắn phản hồi..." onkeypress="handleKeyPress(event)">
+                        <button class="btn btn-send" id="btnSendChat" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Màn hình chờ khi chưa chọn cuộc hội thoại -->
+            <div id="chatPlaceholderArea" class="h-100 d-flex flex-column align-items-center justify-content-center text-muted" style="display: @(string.IsNullOrEmpty(activeSessionId) ? "flex" : "none") !important;">
+                <i class="fas fa-comments fa-3x mb-3 text-gray-300"></i>
+                <h5>Chọn một cuộc hội thoại để bắt đầu hỗ trợ</h5>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- Script SignalR -->
+    <script src="/lib/signalr/dist/browser/signalr.min.js"></script>
+    <script>
+        var activeSessionId = '@activeSessionId';
+        var activeUserId = '@activeUserId';
+
+        // 1. Kết nối SignalR Hub
+        var connection = new signalR.HubConnectionBuilder()
+            .withUrl("/chatHub")
+            .build();
+
+        connection.start().then(function () {
+            console.log("SignalR Connected to ChatHub!");
+        }).catch(function (err) {
+            return console.error(err.toString());
+        });
+
+        // 2. Lắng nghe tin nhắn gửi từ cả User hoặc Admin
+        connection.on("ReceiveAdminMessage", function (data) {
+            // Cập nhật dòng preview tin nhắn cuối ở cột danh sách bên trái
+            updateSidebarItem(data);
+
+            // Bật thông báo âm thanh nếu tin nhắn được gửi từ User
+            if (data.senderType === 'User') {
+                playNotificationSound();
+            }
+
+            // Nếu đang mở đúng khung chat của SessionId đó thì hiển thị tin nhắn ngay lập tức
+            if (activeSessionId === data.sessionId) {
+                appendMessage(data.senderType, data.messageContent, data.sentAt);
+                scrollToBottom();
+            }
+        });
+
+        // 3. Hàm chuyển đổi khung chat khi click vào danh sách bên trái
+        function selectSession(element) {
+            // Thay đổi giao diện active
+            document.querySelectorAll('#chatListContainer li').forEach(li => li.classList.remove('active'));
+            element.classList.add('active');
+
+            activeSessionId = element.getAttribute('data-session-id');
+            activeUserId = element.getAttribute('data-user-id');
+            var customerName = element.getAttribute('data-customer-name');
+            var customerAvatar = element.getAttribute('data-customer-avatar');
+
+            // Ẩn màn hình chờ và hiển thị khung chat thực sự
+            document.getElementById('activeChatArea').style.display = 'flex';
+            document.getElementById('chatPlaceholderArea').style.setProperty('display', 'none', 'important');
+
+            // Cập nhật thông tin Header
+            document.getElementById('activeTitle').innerText = customerName;
+            document.getElementById('activeAvatar').src = customerAvatar;
+
+            // Load lịch sử tin nhắn
+            loadChatHistory(activeSessionId);
+        }
+
+        // Tải lịch sử chat
+        function loadChatHistory(sessionId) {
+            fetch(`/Admin/Messages/GetChatHistory?sessionId=${sessionId}`)
+                .then(res => res.json())
+                .then(messages => {
+                    var container = document.getElementById('chatMessageList');
+                    container.innerHTML = ''; 
+
+                    messages.forEach(m => {
+                        appendMessage(m.senderType, m.messageContent, m.sentAt);
+                    });
+
+                    scrollToBottom();
+                })
+                .catch(err => console.error("Lỗi khi lấy lịch sử chat: ", err));
+        }
+
+        // Append tin nhắn vào khung chat
+        function appendMessage(senderType, content, time) {
+            var container = document.getElementById('chatMessageList');
+            if (!container) return;
+
+            var li = document.createElement('li');
+            li.className = 'message-item ' + (senderType === 'User' ? 'received-msg' : 'sent-msg');
+
+            var timeDiv = document.createElement('div');
+            timeDiv.className = 'message-data';
+            timeDiv.innerHTML = `<span class="message-data-time">${time}</span>`;
+
+            var contentDiv = document.createElement('div');
+            contentDiv.className = 'message ' + (senderType === 'User' ? 'my-message' : 'other-message');
+            contentDiv.innerText = content;
+
+            li.appendChild(timeDiv);
+            li.appendChild(contentDiv);
+            container.appendChild(li);
+        }
+
+        // Gửi tin nhắn
+        function sendMessage() {
+            var input = document.getElementById('chatInputMessage');
+            var messageText = input.value.trim();
+            if (!messageText || !activeUserId) return;
+
+            // Gọi hàm trên Hub
+            connection.invoke("SendMessageToUser", activeUserId, messageText)
+                .then(function() {
+                    input.value = ''; // Xóa text đã nhập
+                })
+                .catch(function (err) {
+                    return console.error(err.toString());
+                });
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        function scrollToBottom() {
+            var historyContainer = document.querySelector('.chat-history');
+            if (historyContainer) {
+                historyContainer.scrollTop = historyContainer.scrollHeight;
+            }
+        }
+
+        // Cập nhật preview tin nhắn ở thanh sidebar bên trái và đẩy lên đầu list
+        function updateSidebarItem(data) {
+            var li = document.querySelector(`#chatListContainer li[data-session-id="${data.sessionId}"]`);
+            var listContainer = document.getElementById('chatListContainer');
+            
+            // Xóa dòng thông báo trống nếu có
+            var emptyMsg = document.getElementById('emptySessionMsg');
+            if (emptyMsg) {
+                emptyMsg.remove();
+            }
+
+            if (li) {
+                // Cập nhật text xem trước
+                li.querySelector('.preview-text').innerText = data.messageContent;
+                li.querySelector('.time').innerText = data.sentAt;
+                
+                // Đẩy dòng này lên đầu danh sách
+                listContainer.insertBefore(li, listContainer.firstChild);
+            } else {
+                // Tạo mới dòng khách hàng nếu chưa có trong danh sách hiện tại
+                var newLi = document.createElement('li');
+                newLi.setAttribute('data-session-id', data.sessionId);
+                newLi.setAttribute('data-user-id', data.userId);
+                newLi.setAttribute('data-customer-name', data.customerName);
+                newLi.setAttribute('data-customer-avatar', data.customerAvatar);
+                newLi.onclick = function() { selectSession(this); };
+                
+                newLi.innerHTML = `
+                    <img src="${data.customerAvatar}" alt="avatar">
+                    <div class="about">
+                        <div class="name">${data.customerName}</div>
+                        <div class="status">
+                            <span class="preview-text">${data.messageContent}</span>
+                            <small class="time text-muted">${data.sentAt}</small>
+                        </div>
+                    </div>
+                `;
+                
+                listContainer.insertBefore(newLi, listContainer.firstChild);
+            }
+        }
+
+        // Hàm phát âm thanh thông báo
+        function playNotificationSound() {
+            try {
+                // Tạo nhanh một AudioContext để bíp bíp nhẹ nhàng (không cần file âm thanh vật lý)
+                var context = new (window.AudioContext || window.webkitAudioContext)();
+                var osc = context.createOscillator();
+                var gain = context.createGain();
+                osc.type = "sine";
+                osc.frequency.value = 523.25; // Nốt Đô (C5) tinh tế
+                gain.gain.setValueAtTime(0.08, context.currentTime); // Âm lượng nhẹ nhàng
+                osc.connect(gain);
+                gain.connect(context.destination);
+                osc.start();
+                osc.stop(context.currentTime + 0.15); // Phát trong 0.15 giây
+            } catch (e) {
+                console.log("Audio notification failed or blocked: ", e);
+            }
+        }
+
+        // Tìm kiếm khách hàng trong list bên trái
+        document.getElementById('searchClients')?.addEventListener('input', function(e) {
+            var search = e.target.value.toLowerCase().trim();
+            document.querySelectorAll('#chatListContainer li').forEach(li => {
+                var name = li.querySelector('.name').innerText.toLowerCase();
+                if (name.includes(search)) {
+                    li.style.display = 'flex';
+                } else {
+                    li.style.display = 'none';
+                }
+            });
+        });
+
+        if (activeSessionId) {
+            loadChatHistory(activeSessionId);
+        }
+    </script>
+}

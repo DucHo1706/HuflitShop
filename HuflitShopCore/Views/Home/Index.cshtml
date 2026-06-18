@@ -5,317 +5,275 @@
 
 <h1 class="d-none">Huflit Shop - Thời trang nữ thiết kế cao cấp</h1>
 
-<!-- 1. Slider Section -->
-<div class="section_slider">
-    <div class="swiper-container">
-        <div class="swiper-wrapper">
-            <div class="swiper-slide">
-                <img src="~/Bean/slider_1.jpg" alt="Huflit Shop Slider">
-                <div class="thumb-slider-text">
-                    <div class="slider-text">
-                        <h2 class="title">KIẾN TẠO PHONG CÁCH</h2>
-                        <div class="content">Cùng <span>Huflit Shop</span></div>
-                        <div class="content_2">
-                            Tôn vinh nét quyến rũ tự nhiên, thanh lịch và hiện đại qua từng bộ sưu tập thời trang nữ thiết kế cao cấp của chúng tôi.
-                        </div>
-                        <a asp-controller="Product" asp-action="Product" class="theme-btn btn-style-two">Mua Sắm Ngay</a>
-                    </div>
-                </div>
-            </div>
+@* ── SECTION 1: HERO BANNER ── *@
+<section class="hs-hero">
+    <div class="hs-hero__slide" style="background-image: url('/Client/img/fashion-3.jpg');">
+        <div class="hs-hero__overlay"></div>
+        <div class="hs-hero__content">
+            <p class="hs-hero__sub">Bộ sưu tập 2025</p>
+            <h2 class="hs-hero__title">KIẾN TẠO<br>PHONG CÁCH</h2>
+            <p class="hs-hero__desc">Tôn vinh nét quyến rũ tự nhiên, thanh lịch qua từng thiết kế nữ cao cấp độc quyền của chúng tôi.</p>
+            <a asp-controller="Product" asp-action="Product" class="hs-btn hs-btn--white">Khám phá ngay</a>
         </div>
-        <!-- Add Pagination & Nav Buttons if multiple slides -->
-        <div class="swiper-button-prev"></div>
-        <div class="swiper-button-next"></div>
-        <div class="swiper-pagination"></div>
     </div>
-</div>
+</section>
 
-<!-- 2. About Section -->
-<section class="section_about">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-lg-6 mb-5 mb-lg-0">
-                <div class="img-box10">
-                    <div class="img1">
-                        <img src="~/Bean/section_about_product_2.jpg" alt="Huflit Shop Studio" class="img-fluid">
-                    </div>
-                    <div class="img2">
-                        <img src="~/Bean/section_about_product_1.jpg" alt="Huflit Shop Fashion" class="img-fluid">
-                    </div>
-                    <div class="img3">
-                        <img src="~/Client/img/set-1.jpg" alt="Huflit Shop Model" class="img-fluid">
-                    </div>
-                </div>
+@* ── SECTION 2: 4-COLUMN CATEGORY BANNERS ── *@
+<section class="hs-cats">
+    <div class="container-fluid px-0">
+        <div class="row no-gutters">
+            <div class="col-6 col-md-3">
+                <a asp-controller="Product" asp-action="Product" class="hs-cat-card">
+                    <img src="/Client/img/signup-1.jpg" alt="Váy Đầm" loading="lazy">
+                    <div class="hs-cat-card__label">Váy Đầm</div>
+                </a>
             </div>
-            <div class="col-lg-6">
-                <div class="product-content pl-lg-4">
-                    <div class="section-title-about">
-                        <div class="sub_title">Chúng tôi là ai?</div>
-                        <h2>Về Huflit Shop</h2>
-                    </div>
-                    <div class="desc">
-                        Huflit Shop chuyên thiết kế và cung cấp thời trang nữ cao cấp với phong cách tinh tế, thanh lịch và luôn dẫn đầu xu hướng. Chúng tôi cam kết sử dụng chất liệu vải tuyển chọn tốt nhất kết hợp cùng những đường may tỉ mỉ của những thợ lành nghề, mang lại cho phái đẹp sự tự tin, tỏa sáng.
-                    </div>
-                    <ul class="box_thong_so">
-                        <li>
-                            <h3>Thiết kế độc quyền và luôn cập nhật xu hướng mới nhất.</h3>
-                        </li>
-                        <li>
-                            <h3>Chất liệu vải thân thiện với làn da, thoáng mát và giữ form.</h3>
-                        </li>
-                        <li>
-                            <h3>Dịch vụ tư vấn tận tâm giúp bạn chọn size vừa vặn nhất.</h3>
-                        </li>
-                        <li>
-                            <h3>Đổi trả hàng linh hoạt và giao hàng nhanh chóng toàn quốc.</h3>
-                        </li>
-                    </ul>
-                    <div class="box-contact">
-                        <a asp-controller="About" asp-action="About" class="theme-btn btn-style-three">Xem chi tiết</a>
-                        <div class="btn_contact-phone">
-                            <a class="icon_phone" href="tel:+84947653170">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="20px" height="20px">
-                                    <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 0 0-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 1 3 1.24 3 1.99 3 11.38 10.62 19 20 19c.73 0 .99-.51.99-.99v-1.63c0-.55-.45-.99-.98-.99z"/>
-                                </svg>
-                            </a>
-                            <div class="box-contact-phone-info">
-                                <span>Gọi điện tư vấn!</span>
-                                <a href="tel:+84947653170">0947 653 170</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div class="col-6 col-md-3">
+                <a asp-controller="Product" asp-action="Product" class="hs-cat-card">
+                    <img src="/Client/img/signup-2.jpg" alt="Set Trang Phục" loading="lazy">
+                    <div class="hs-cat-card__label">Set Trang Phục</div>
+                </a>
+            </div>
+            <div class="col-6 col-md-3">
+                <a asp-controller="Product" asp-action="Product" class="hs-cat-card">
+                    <img src="/Client/img/signup-3.jpg" alt="Thời Trang Công Sở" loading="lazy">
+                    <div class="hs-cat-card__label">Thời Trang Công Sở</div>
+                </a>
+            </div>
+            <div class="col-6 col-md-3">
+                <a asp-controller="Product" asp-action="Product" class="hs-cat-card">
+                    <img src="/Client/img/signup-4.jpg" alt="Thời Trang Dạo Phố" loading="lazy">
+                    <div class="hs-cat-card__label">Thời Trang Dạo Phố</div>
+                </a>
             </div>
         </div>
     </div>
 </section>
 
-<!-- 3. Dynamic Products Section -->
-<section class="section_product_tab">
+@* ── SECTION 3: PRODUCT GRID ── *@
+<section class="hs-products">
     <div class="container">
-        <div class="section-title-tab">
-            <h2><a asp-controller="Product" asp-action="Product">Sản Phẩm Mới Nhất</a></h2>
-            <div class="desc">
-                Cập nhật các thiết kế thời trang nữ mới nhất của shop. Hãy chọn cho mình bộ cánh ưng ý để khẳng định phong cách bản thân ngay hôm nay!
-            </div>
+        <div class="hs-section-head">
+            <h2 class="hs-section-head__title">Sản Phẩm Mới Nhất</h2>
+            <div class="hs-section-head__line"></div>
+            <p class="hs-section-head__desc">Cập nhật liên tục các thiết kế thời trang nữ mới nhất, phong cách nhất</p>
         </div>
+
         <div class="row">
             @if (Model != null)
             {
                 foreach (var pro in Model)
                 {
                     <div class="col-xl-3 col-lg-3 col-md-4 col-6 mb-4">
-                        <div class="item_product_main">
-                            <form asp-action="AddCart" asp-controller="Product" method="post" class="variants product-action item-product-main duration-300">
-                                @Html.AntiForgeryToken()
-                                <input type="hidden" name="id" value="@pro.Id" />
-                                <div class="product-thumbnail">
-                                    <a class="image_thumb" asp-controller="Product" asp-action="Details" asp-route-id="@pro.Id">
-                                        @if (string.IsNullOrEmpty(pro.ImageDefault) || pro.ImageDefault.Contains("Tên_Cloud_Của_Bạn"))
-                                        {
-                                            <img src="~/Client/img/default-product.jpg" alt="@pro.Name">
-                                        }
-                                        else
-                                        {
-                                            <img src="@pro.ImageDefault" alt="@pro.Name">
-                                        }
+                        <div class="hs-product-card">
+                            <div class="hs-product-card__thumb">
+                                <a asp-controller="Product" asp-action="Details" asp-route-id="@pro.Id">
+                                    <img src="@HuflitShopCore.Helpers.ImageRouteHelper.Resolve(pro.ImageDefault)" alt="@pro.Name" loading="lazy">
+                                </a>
+                                @if (pro.Count <= 0)
+                                {
+                                    <span class="hs-product-card__badge hs-product-card__badge--sold">Hết hàng</span>
+                                }
+                                else
+                                {
+                                    <span class="hs-product-card__badge">Mới</span>
+                                }
+                                <div class="hs-product-card__actions">
+                                    <a asp-controller="Product" asp-action="Details" asp-route-id="@pro.Id" class="hs-product-card__action-btn hs-product-card__action-btn--outline">
+                                        <i class="fas fa-eye"></i> Xem
                                     </a>
-                                    <div class="badge">Hot</div>
-                                    <a asp-controller="Product" asp-action="Details" asp-route-id="@pro.Id" class="btn-views" title="Xem chi tiết">
-                                        <i class="fas fa-eye text-primary"></i>
-                                    </a>
+                                    @if (pro.Count > 0)
+                                    {
+                                        <a asp-controller="Product" asp-action="BuyNow" asp-route-id="@pro.Id" class="hs-product-card__action-btn hs-product-card__action-btn--solid">
+                                            <i class="fas fa-shopping-bag"></i> Mua ngay
+                                        </a>
+                                    }
                                 </div>
-                                <div class="product-info">
-                                    <h3 class="product-name">
-                                        <a asp-controller="Product" asp-action="Details" asp-route-id="@pro.Id">@pro.Name</a>
-                                    </h3>
-                                    <div class="product-price-cart">
-                                        <span class="price">@pro.Price.ToString("N0")₫</span>
-                                    </div>
-                                    <div class="product-button">
-                                        @if (pro.Count > 0)
-                                        {
-                                            <button class="btn-cart" type="submit">Thêm vào giỏ</button>
-                                        }
-                                        else
-                                        {
-                                            <button class="btn-cart" type="button" disabled style="background-color: #cbd5e1 !important; color: #64748b !important; cursor: not-allowed;">Hết hàng</button>
-                                        }
-                                    </div>
-                                </div>
-                            </form>
+                            </div>
+                            <div class="hs-product-card__body">
+                                <h3 class="hs-product-card__name">
+                                    <a asp-controller="Product" asp-action="Details" asp-route-id="@pro.Id">@pro.Name</a>
+                                </h3>
+                                <div class="hs-product-card__price">@pro.Price.ToString("N0")₫</div>
+                            </div>
                         </div>
                     </div>
                 }
             }
+            else
+            {
+                <div class="col-12 text-center py-5">
+                    <p class="text-muted">Không có sản phẩm nào để hiển thị.</p>
+                </div>
+            }
+        </div>
+
+        <div class="text-center mt-2 mb-4">
+            <a asp-controller="Product" asp-action="Product" class="hs-btn hs-btn--outline">Xem tất cả sản phẩm</a>
         </div>
     </div>
 </section>
 
-<!-- 4. Collections Section -->
-<section class="section_project">
+@* ── SECTION 4: PROMO STRIP (Navy background) ── *@
+<section class="hs-promo-strip">
     <div class="container">
-        <div class="section-title-project text-center mb-5">
-            <div class="sub_title">Bộ sưu tập thu hút</div>
-            <h2>Xu Hướng Thời Trang Nữ</h2>
-        </div>
-        <div class="row">
-            <div class="col-md-4 col-12 mb-4">
-                <div class="item_project">
-                    <a class="image-blog" asp-controller="Product" asp-action="Product">
-                        <img src="~/Client/img/set-1.jpg" alt="Váy Đầm Thiết Kế" class="img-fluid w-100" style="height: 250px; object-fit: cover;">
-                    </a>
-                    <div class="blog_content">
-                        <h3><a asp-controller="Product" asp-action="Product">Váy Đầm Thiết Kế</a></h3>
-                        <p>Những thiết kế váy đầm xòe, ôm dáng cực kỳ quyến rũ, tôn vinh vóc dáng yêu kiều của bạn.</p>
-                        <a asp-controller="Product" asp-action="Product" class="theme-btn btn-style-three mt-3 w-100 justify-content-center py-2" style="font-size:0.9rem;">Khám phá ngay</a>
-                    </div>
+        <div class="hs-promo-strip__inner">
+            <div class="hs-promo-strip__item">
+                <i class="fas fa-medal"></i>
+                <div>
+                    <strong>Thiết Kế Độc Quyền</strong>
+                    <span>Phong cách dẫn đầu xu hướng</span>
                 </div>
             </div>
-            <div class="col-md-4 col-12 mb-4">
-                <div class="item_project">
-                    <a class="image-blog" asp-controller="Product" asp-action="Product">
-                        <img src="~/Client/img/set-2.jpg" alt="Set Đồ Năng Động" class="img-fluid w-100" style="height: 250px; object-fit: cover;">
-                    </a>
-                    <div class="blog_content">
-                        <h3><a asp-controller="Product" asp-action="Product">Set Đồ Năng Động</a></h3>
-                        <p>Sự kết hợp thoải mái giữa áo thun, chân váy và vest giúp bạn năng động suốt ngày dài.</p>
-                        <a asp-controller="Product" asp-action="Product" class="theme-btn btn-style-three mt-3 w-100 justify-content-center py-2" style="font-size:0.9rem;">Khám phá ngay</a>
-                    </div>
+            <div class="hs-promo-strip__item">
+                <i class="fas fa-gem"></i>
+                <div>
+                    <strong>Chất Liệu Cao Cấp</strong>
+                    <span>Vải tuyển chọn, thấm hút tốt</span>
                 </div>
             </div>
-            <div class="col-md-4 col-12 mb-4">
-                <div class="item_project">
-                    <a class="image-blog" asp-controller="Product" asp-action="Product">
-                        <img src="~/Client/img/set-3.jpg" alt="Thời Trang Công Sở" class="img-fluid w-100" style="height: 250px; object-fit: cover;">
-                    </a>
-                    <div class="blog_content">
-                        <h3><a asp-controller="Product" asp-action="Product">Thời Trang Công Sở</a></h3>
-                        <p>Lịch lãm, trang nhã nhưng vẫn giữ được nét nữ tính cuốn hút với áo sơ mi lụa và blazer.</p>
-                        <a asp-controller="Product" asp-action="Product" class="theme-btn btn-style-three mt-3 w-100 justify-content-center py-2" style="font-size:0.9rem;">Khám phá ngay</a>
-                    </div>
+            <div class="hs-promo-strip__item">
+                <i class="fas fa-shipping-fast"></i>
+                <div>
+                    <strong>Giao Hàng Toàn Quốc</strong>
+                    <span>Nhanh chóng, an toàn, tiện lợi</span>
+                </div>
+            </div>
+            <div class="hs-promo-strip__item">
+                <i class="fas fa-undo-alt"></i>
+                <div>
+                    <strong>Đổi Trả Linh Hoạt</strong>
+                    <span>7 ngày đổi trả miễn phí</span>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- 5. Why Choose Us Section -->
-<section class="section_choose">
+@* ── SECTION 5: ABOUT US ── *@
+<section class="hs-about">
     <div class="container">
         <div class="row align-items-center">
             <div class="col-lg-6 mb-5 mb-lg-0">
-                <div class="box_img_choose">
-                    <img src="~/Client/img/signup-1.jpg" alt="Fashion Design Studio">
+                <div class="hs-about__img-grid">
+                    <div class="hs-about__img-main">
+                        <img src="/Client/img/fashion-2.jpg" alt="Huflit Shop Studio">
+                    </div>
+                    <div class="hs-about__img-accent">
+                        <img src="/Client/img/sanpham-1.jpg" alt="Huflit Shop Fashion">
+                    </div>
                 </div>
             </div>
             <div class="col-lg-6">
-                <div class="section-title-choose pl-lg-4">
-                    <div class="sub_title">Tại sao chọn Huflit Shop</div>
-                    <h2>Định Hình Phong Cách Riêng Cho Bạn</h2>
-                    <div class="desc">
-                        Mỗi thiết kế từ Huflit Shop đều được tạo dựng với khát vọng tôn lên vẻ tự tin và quý phái của mỗi cô gái, giúp nàng luôn là tâm điểm trong mọi cuộc gặp gỡ.
-                    </div>
-                    <ul class="why-feature-list">
-                        <li class="why-feature-list-wrap">
-                            <div class="why-feature-list-details">
-                                <h3 class="feature-title"><span class="number">01</span> Thiết kế độc quyền</h3>
-                                <p class="feature-text">Đội ngũ stylist thiết kế độc quyền, dẫn đầu xu hướng thời trang công sở và dạo phố cao cấp.</p>
-                            </div>
-                        </li>
-                        <li class="why-feature-list-wrap">
-                            <div class="why-feature-list-details">
-                                <h3 class="feature-title"><span class="number">02</span> Chất liệu chọn lọc</h3>
-                                <p class="feature-text">Cam kết 100% sử dụng vải cao cấp mát mịn, thấm hút tốt, không phai màu hay sờn chỉ.</p>
-                            </div>
-                        </li>
-                        <li class="why-feature-list-wrap">
-                            <div class="why-feature-list-details">
-                                <h3 class="feature-title"><span class="number">03</span> May đo chuẩn xác</h3>
-                                <p class="feature-text">Sản phẩm được gia công kỹ lưỡng từng đường kim mũi chỉ, chuẩn form tôn dáng chuẩn xác nhất.</p>
-                            </div>
-                        </li>
+                <div class="hs-about__content">
+                    <p class="hs-about__sub">Chúng tôi là ai?</p>
+                    <h2 class="hs-about__title">Về Huflit Shop</h2>
+                    <div class="hs-about__divider"></div>
+                    <p class="hs-about__desc">
+                        Huflit Shop chuyên thiết kế và cung cấp thời trang nữ cao cấp với phong cách tinh tế, thanh lịch và luôn dẫn đầu xu hướng. Chúng tôi cam kết sử dụng chất liệu vải tuyển chọn tốt nhất kết hợp cùng những đường may tỉ mỉ, mang lại sự tự tin và tỏa sáng.
+                    </p>
+                    <ul class="hs-about__list">
+                        <li><i class="fas fa-check-circle"></i> Thiết kế độc quyền, cập nhật xu hướng liên tục</li>
+                        <li><i class="fas fa-check-circle"></i> Chất liệu vải thân thiện da, thoáng mát, giữ form</li>
+                        <li><i class="fas fa-check-circle"></i> Tư vấn size tận tâm, hỗ trợ 24/7</li>
+                        <li><i class="fas fa-check-circle"></i> Đổi trả linh hoạt, giao hàng nhanh toàn quốc</li>
                     </ul>
+                    <a asp-controller="About" asp-action="About" class="hs-btn hs-btn--primary">Tìm hiểu thêm</a>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- 6. Testimonials Section -->
-<section class="section_feedback">
+@* ── SECTION 6: LOOKBOOK (Split full-width panels) ── *@
+<section class="hs-lookbook">
+    <div class="row no-gutters">
+        <div class="col-md-6">
+            <a asp-controller="Product" asp-action="Product" class="hs-lookbook__panel" style="background-image: url('/Client/img/fashion-1.jpg');">
+                <div class="hs-lookbook__overlay"></div>
+                <div class="hs-lookbook__text">
+                    <span>Váy Đầm &amp; Đầm Thiết Kế</span>
+                    <strong>Khám phá ngay &rarr;</strong>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6">
+            <a asp-controller="Product" asp-action="Product" class="hs-lookbook__panel" style="background-image: url('/Client/img/signup-2.jpg');">
+                <div class="hs-lookbook__overlay"></div>
+                <div class="hs-lookbook__text">
+                    <span>Set Đồ &amp; Trang Phục Công Sở</span>
+                    <strong>Khám phá ngay &rarr;</strong>
+                </div>
+            </a>
+        </div>
+    </div>
+</section>
+
+@* ── SECTION 7: TESTIMONIALS ── *@
+<section class="hs-testimonials">
     <div class="container">
-        <div class="row align-items-center">
-            <div class="col-lg-5 mb-5 mb-lg-0">
-                <div class="banner_feedback">
-                    <img src="~/Client/img/signup-2.jpg" alt="Customer Banner">
-                </div>
-            </div>
-            <div class="col-lg-7 pl-lg-5">
-                <div class="section-title-feedback">
-                    <div class="sub_title">Phản hồi từ khách hàng</div>
-                    <h2>Khách Hàng Nói Gì Về Chúng Tôi?</h2>
-                </div>
-                <div class="swiper-container swiper_feedback">
-                    <div class="swiper-wrapper">
-                        <div class="swiper-slide">
-                            <div class="feedback-item">
-                                <span class="star-rating"></span>
-                                <div class="block-content">
-                                    "Đồ của Huflit Shop thiết kế rất sang trọng và tôn dáng. Vải mặc rất thoải mái, mịn mát da. Tôi đã mua 3 lần và lần nào cũng cực kỳ ưng ý!"
-                                </div>
-                                <div class="author-detail">
-                                    <div class="avatar">
-                                        <img src="~/Client/img/default-user.jpg" alt="Nguyễn Thảo – Hà Nội">
-                                    </div>
-                                    <div class="author-content">
-                                        <b>Nguyễn Thảo – Hà Nội</b>
-                                        <span>Nhân viên văn phòng</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="swiper-slide">
-                            <div class="feedback-item">
-                                <span class="star-rating"></span>
-                                <div class="block-content">
-                                    "Tôi rất thích form đầm dự tiệc ở đây. Nhân viên tư vấn nhiệt tình, ship hàng nhanh và được kiểm tra hàng thoải mái trước khi nhận."
-                                </div>
-                                <div class="author-detail">
-                                    <div class="avatar">
-                                        <img src="~/Client/img/default-user.jpg" alt="Lê Giang – TP.HCM">
-                                    </div>
-                                    <div class="author-content">
-                                        <b>Lê Giang – TP.HCM</b>
-                                        <span>Kinh doanh tự do</span>
-                                    </div>
-                                </div>
+        <div class="hs-section-head">
+            <h2 class="hs-section-head__title">Khách Hàng Nói Gì</h2>
+            <div class="hs-section-head__line"></div>
+        </div>
+        <div class="swiper-container hs-review-swiper">
+            <div class="swiper-wrapper">
+                <div class="swiper-slide">
+                    <div class="hs-review-card">
+                        <div class="hs-review-card__stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                        <p class="hs-review-card__text">"Đồ của Huflit Shop thiết kế rất sang trọng và tôn dáng. Vải mặc rất thoải mái, mịn mát da. Tôi đã mua 3 lần và lần nào cũng cực kỳ ưng ý!"</p>
+                        <div class="hs-review-card__author">
+                            <img src="/Client/img/default-user.jpg" alt="Nguyễn Thảo">
+                            <div>
+                                <strong>Nguyễn Thảo</strong>
+                                <span>Hà Nội · Nhân viên văn phòng</span>
                             </div>
                         </div>
                     </div>
-                    <div class="swiper-pagination mt-4"></div>
+                </div>
+                <div class="swiper-slide">
+                    <div class="hs-review-card">
+                        <div class="hs-review-card__stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                        <p class="hs-review-card__text">"Tôi rất thích form đầm dự tiệc ở đây. Nhân viên tư vấn nhiệt tình, ship hàng nhanh và được kiểm tra hàng thoải mái trước khi nhận."</p>
+                        <div class="hs-review-card__author">
+                            <img src="/Client/img/default-user.jpg" alt="Lê Giang">
+                            <div>
+                                <strong>Lê Giang</strong>
+                                <span>TP.HCM · Kinh doanh tự do</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="swiper-slide">
+                    <div class="hs-review-card">
+                        <div class="hs-review-card__stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                        <p class="hs-review-card__text">"Mua áo blazer công sở tặng bạn gái. Chất vải dày dặn, đường may sắc sảo, được tặng thêm hộp thiệp xinh xắn. Rất đáng tiền!"</p>
+                        <div class="hs-review-card__author">
+                            <img src="/Client/img/default-user.jpg" alt="Trần Minh">
+                            <div>
+                                <strong>Trần Minh</strong>
+                                <span>Đà Nẵng · Kỹ sư phần mềm</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
+            <div class="swiper-pagination hs-review-swiper__pagination"></div>
         </div>
     </div>
 </section>
 
-<!-- 7. Partner Brands Section -->
-<section class="section_brands" style="padding: 40px 0; background-color: #ffffff; border-top: 1px solid #e2e8f0;">
+@* ── SECTION 8: PAYMENT METHODS ── *@
+<section class="hs-payments">
     <div class="container">
-        <div class="row align-items-center">
-            <div class="col-lg-4 mb-4 mb-lg-0">
-                <h5 class="font-weight-bold text-dark mb-1">Phương thức thanh toán</h5>
-                <p class="text-muted small mb-0">Hỗ trợ đa dạng phương thức thanh toán an toàn, bảo mật cao.</p>
-            </div>
-            <div class="col-lg-8">
-                <div class="d-flex flex-wrap justify-content-start justify-content-lg-end align-items-center gap-4">
-                    <img src="https://bizweb.dktcdn.net/100/601/974/themes/1047016/assets/img_brand_1.jpg?1776407985038" alt="Partner 1" style="max-height: 40px; filter: grayscale(1); opacity: 0.7; transition: all 0.3s;" onmouseover="this.style.filter='none'; this.style.opacity='1'" onmouseout="this.style.filter='grayscale(1)'; this.style.opacity='0.7'">
-                    <img src="https://bizweb.dktcdn.net/100/601/974/themes/1047016/assets/img_brand_2.jpg?1776407985038" alt="Partner 2" style="max-height: 40px; filter: grayscale(1); opacity: 0.7; transition: all 0.3s;" onmouseover="this.style.filter='none'; this.style.opacity='1'" onmouseout="this.style.filter='grayscale(1)'; this.style.opacity='0.7'">
-                    <img src="https://bizweb.dktcdn.net/100/601/974/themes/1047016/assets/img_brand_3.jpg?1776407985038" alt="Partner 3" style="max-height: 40px; filter: grayscale(1); opacity: 0.7; transition: all 0.3s;" onmouseover="this.style.filter='none'; this.style.opacity='1'" onmouseout="this.style.filter='grayscale(1)'; this.style.opacity='0.7'">
-                    <img src="https://bizweb.dktcdn.net/100/601/974/themes/1047016/assets/img_brand_4.jpg?1776407985038" alt="Partner 4" style="max-height: 40px; filter: grayscale(1); opacity: 0.7; transition: all 0.3s;" onmouseover="this.style.filter='none'; this.style.opacity='1'" onmouseout="this.style.filter='grayscale(1)'; this.style.opacity='0.7'">
-                    <img src="https://bizweb.dktcdn.net/100/601/974/themes/1047016/assets/img_brand_5.jpg?1776407985038" alt="Partner 5" style="max-height: 40px; filter: grayscale(1); opacity: 0.7; transition: all 0.3s;" onmouseover="this.style.filter='none'; this.style.opacity='1'" onmouseout="this.style.filter='grayscale(1)'; this.style.opacity='0.7'">
-                </div>
+        <div class="hs-payments__inner">
+            <span class="hs-payments__label">Chấp nhận thanh toán:</span>
+            <div class="hs-payments__logos">
+                <img src="https://bizweb.dktcdn.net/100/601/974/themes/1047016/assets/img_brand_1.jpg?1776407985038" alt="Visa">
+                <img src="https://bizweb.dktcdn.net/100/601/974/themes/1047016/assets/img_brand_2.jpg?1776407985038" alt="Mastercard">
+                <img src="https://bizweb.dktcdn.net/100/601/974/themes/1047016/assets/img_brand_3.jpg?1776407985038" alt="JCB">
+                <img src="https://bizweb.dktcdn.net/100/601/974/themes/1047016/assets/img_brand_4.jpg?1776407985038" alt="Momo">
+                <img src="https://bizweb.dktcdn.net/100/601/974/themes/1047016/assets/img_brand_5.jpg?1776407985038" alt="ZaloPay">
             </div>
         </div>
     </div>
@@ -323,38 +281,17 @@
 
 @section Scripts {
     <script>
-        $(document).ready(function() {
-            // Khởi tạo Swiper Slider trang chủ
-            var swiperSlider = new Swiper('.section_slider .swiper-container', {
-                speed: 1000,
-                spaceBetween: 0,
-                effect: 'fade',
-                autoplay: {
-                    delay: 5000,
-                    disableOnInteraction: false,
-                },
-                pagination: {
-                    el: '.section_slider .swiper-pagination',
-                    clickable: true,
-                },
-                navigation: {
-                    nextEl: '.section_slider .swiper-button-next',
-                    prevEl: '.section_slider .swiper-button-prev',
-                }
-            });
-
-            // Khởi tạo Swiper Feedback của khách hàng
-            var swiperFeedback = new Swiper('.swiper_feedback', {
+        $(document).ready(function () {
+            new Swiper('.hs-review-swiper', {
                 slidesPerView: 1,
-                spaceBetween: 20,
+                spaceBetween: 24,
                 grabCursor: true,
-                autoplay: {
-                    delay: 6000,
-                    disableOnInteraction: false,
-                },
-                pagination: {
-                    el: '.swiper_feedback .swiper-pagination',
-                    clickable: true,
+                loop: true,
+                autoplay: { delay: 5000, disableOnInteraction: false },
+                pagination: { el: '.hs-review-swiper__pagination', clickable: true },
+                breakpoints: {
+                    768: { slidesPerView: 2 },
+                    1024: { slidesPerView: 3 }
                 }
             });
         });

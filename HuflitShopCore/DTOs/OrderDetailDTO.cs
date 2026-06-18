@@ -15,5 +15,7 @@ namespace HuflitShopCore.DTOs
         
         public decimal TotalPrice => Quantity * PurchasedPrice;
         public string FullProductName => $"{ProductNameSnapshot} - {ColorNameSnapshot} - {SizeNameSnapshot}";
+        public string? ProductImageUrl { get; set; }
+        public string? ProductId { get; set; }
     }
 }

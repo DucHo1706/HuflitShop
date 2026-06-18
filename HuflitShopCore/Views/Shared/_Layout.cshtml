@@ -1,4 +1,4 @@
-@inject HuflitShopCore.Data.AppDbContext _context
+@inject HuflitShopCore.Services.CartService CartService
 @using System.Security.Claims
 @{
     var isAuth = User.Identity != null && User.Identity.IsAuthenticated;
@@ -6,22 +6,16 @@
     string? guestCartId = Context.Request.Cookies["GuestCartId"];
     
     int cartCount = 0;
-    if (_context != null)
+    if (CartService != null)
     {
-        if (isAuth && !string.IsNullOrEmpty(userId))
-        {
-            cartCount = _context.Carts.Where(c => c.UserId == userId).Sum(c => c.Quantity);
-        }
-        else if (!string.IsNullOrEmpty(guestCartId))
-        {
-            cartCount = _context.Carts.Where(c => c.SessionId == guestCartId).Sum(c => c.Quantity);
-        }
+        cartCount = await CartService.GetCartCountAsync(userId, guestCartId);
     }
 
     bool isEmployeeOrAdmin = false;
-    if (isAuth && !string.IsNullOrEmpty(userId) && _context != null)
+    if (isAuth)
     {
-        isEmployeeOrAdmin = _context.UserRoles.Any(r => r.UserId == userId);
+        var role = User.FindFirst(ClaimTypes.Role)?.Value;
+        isEmployeeOrAdmin = role == "Admin" || role == "Employee";
     }
 
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
@@ -43,168 +37,27 @@
     <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Sapo Template Stylesheets (No legacy heritage) -->
-    <link href="~/Bean/bootstrap-4-3-min.css" rel="stylesheet">
-
-    <!-- Sapo Template Stylesheets -->
-    <link href="~/Bean/main.scss.css" rel="stylesheet" type="text/css" media="all">
-    @if (isHome)
-    {
-        <!-- Premium Homepage Stylesheet -->
-        <link href="~/css/homepage.css" rel="stylesheet" />
-    }
-    else
-    {
-        <!-- Sapo Homepage Stylesheet (Legacy) -->
-        <link href="~/Bean/index.scss.css" rel="stylesheet" type="text/css" media="all">
-    }
+    <!-- Core Stylesheets (CDNs for absolute reliability) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Swiper/4.5.1/css/swiper.min.css">
     <link rel="stylesheet" href="~/Bean/aos_anima.css">
-    <link href="~/Bean/quickviews_popup_cart.scss.css" rel="stylesheet" type="text/css" media="all">
-    <link href="~/lib/font-awesome/css/all.min.css" rel="stylesheet">
+    
+    <!-- Custom Stylesheets (split by page domain) -->
     <link href="~/css/chat.css" rel="stylesheet" />
+    <link href="~/css/modern-custom.css" rel="stylesheet" />
+    <link href="~/css/home.css" rel="stylesheet" />
+    <link href="~/css/product.css" rel="stylesheet" />
+    <link href="~/css/cart.css" rel="stylesheet" />
 
-    <style>
-        :root {
-            --mainColor: #2563eb;
-            --subColor: #1e293b;
-            --textColor: #334155;
-            --hover: #1d4ed8;
-            --colorContact: #2563eb;
-            --price: #ef4444;
-            --bgFoot: #0f172a;
-            --rotate-letter: 8deg;
-            --icon-size: 107px;
-        }
-        body, h1, h2, h3, h4, h5, h6, a, p, span, label, input, select, button, textarea {
-            font-family: 'Outfit', sans-serif !important;
-        }
-        footer.footer {
-            background-color: #0f172a !important;
-        }
-        .dropdown-menu {
-            border-radius: 8px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        }
-        .box_top_hea.dropdown:hover .dropdown-menu {
-            display: block;
-        }
-        .language-select .dropdown:hover .dropdown-menu {
-            display: block;
-        }
-        header.header.hea-index:not(.hSticky) .main-header {
-            margin-top: 15px !important;
-        }
-        .nav_new_menu .dropdown:hover .dropdown-menu {
-            display: block !important;
-        }
-        .nav_new_menu .dropdown-menu {
-            position: absolute !important;
-            margin-top: 0 !important;
-            border: 1px solid rgba(0,0,0,0.08) !important;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.12) !important;
-            border-radius: 8px !important;
-            padding: 8px 0 !important;
-            min-width: 170px !important;
-            background-color: #ffffff !important;
-            left: auto !important;
-            right: 0 !important;
-            display: none;
-            z-index: 1050 !important;
-        }
-        .nav_new_menu .dropdown-item {
-            display: block !important;
-            width: 100% !important;
-            padding: 10px 20px !important;
-            clear: both !important;
-            font-weight: 500 !important;
-            color: #334155 !important;
-            text-align: left !important;
-            white-space: nowrap !important;
-            background-color: transparent !important;
-            border: 0 !important;
-            font-size: 14px !important;
-            text-transform: none !important;
-            letter-spacing: normal !important;
-            height: auto !important;
-            line-height: 1.5 !important;
-            transition: all 0.2s !important;
-        }
-        .nav_new_menu .dropdown-item:hover {
-            color: #2563eb !important;
-            background-color: #f1f5f9 !important;
-            text-decoration: none !important;
-        }
-        .nav_new_menu .dropdown-item i {
-            width: 18px !important;
-            text-align: center !important;
-            margin-right: 8px !important;
-            color: #64748b !important;
-        }
-        .nav_new_menu .dropdown-item:hover i {
-            color: #2563eb !important;
-        }
-        /* Disable pseudo-elements added by Sapo template for nested items */
-        .nav_new_menu .dropdown-item::before,
-        .nav_new_menu .dropdown-item::after {
-            display: none !important;
-            content: none !important;
-        }
-    </style>
+
 </head>
 
 <body>
     <div class="bodywrap">
         <!-- Nav Bar Start -->
         <header class="header @headerClass">
-            <div class="topbarhea" bis_skin_checked="1">
-                <div class="container" bis_skin_checked="1">
-                    <div class="box-topbar" bis_skin_checked="1">
-                        <div class="row " bis_skin_checked="1">
-                            <div class="col-lg-7 col-md-7 col-sm-12 col-xs-12 col-12 d-none d-md-block" bis_skin_checked="1">
-                                <div class="box_text_hi" bis_skin_checked="1">
-                                    <div class="box_text_item" bis_skin_checked="1">
-                                        <span>Chào mừng bạn đến với Huflit Shop</span>
-                                    </div>
-                                    <div class="box_text_item" title="0947 653 170" bis_skin_checked="1">
-                                        <a href="tel:+84947653170" title="0947 653 170" class="opaci_href"></a>
-                                        <div class="img_top" bis_skin_checked="1">
-                                            <img width="36" height="36" src="/Bean/icon_topbar_2.png" alt="Huflit Shop" class="lazyload loaded" data-was-processed="true">
-                                        </div>
-                                        <span class="bold">0947 653 170</span>
-                                    </div>
-                                </div>
-                            </div>
-                        <div class="col-lg-5 col-md-5 col-sm-12 col-xs-12 col-12 text-hea-right" bis_skin_checked="1">
-                            <div class="language-select" bis_skin_checked="1">
-                                <button class="btn btn-outline-secondary dropdown-toggle d-flex align-items-center gap-2" type="button" id="languageDropdown">
-                                    <img src="~/Bean/vn.png" alt="Vietnam Flag"> VI
-                                </button>
-                                <ul class="dropdown-menu" aria-labelledby="languageDropdown">
-                                    <li>
-                                        <a class="dropdown-item" href="#" data-lang="vi">
-                                            <img src="~/Bean/vn.png" alt="Vietnam Flag" class="flag-icon"> Tiếng Việt
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="#" data-lang="en">
-                                            <img src="~/Bean/en.png" alt="UK Flag" class="flag-icon"> English
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
-                            
-                            <div class="box_top_hea" bis_skin_checked="1">
-                                <a href="/About/About" title="Hệ thống chi nhánh" class="opaci_href"></a>
-                                <div class="img_top" bis_skin_checked="1">
-                                    <img width="36" height="36" src="~/Bean/icon_topbar_3.png" alt="Huflit Shop" class="lazyload loaded" data-was-processed="true">
-                                </div>
-                                <span class="sub-text">Hệ thống chi nhánh</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+
         
         <div class="main-header" bis_skin_checked="1">
             <div class="container" bis_skin_checked="1">
@@ -212,8 +65,8 @@
                     <div class="row align-items-center" bis_skin_checked="1">
                         <div class="col-lg-2 col-md-8 col-5 header-logo" bis_skin_checked="1">
                             <a asp-controller="Home" asp-action="Index" class="logo-wrapper" title="Huflit Shop">
-                            <img src="~/Client/img/logo-shop.png" alt="Huflit Shop" style="max-height: 50px; width: auto;" class="lazyload loaded" data-was-processed="true">
-                        </a>
+                                <img src="~/Client/img/logo-shop-footer.png" alt="Huflit Shop" style="max-height: 38px; width: auto;" class="lazyload loaded" data-was-processed="true">
+                            </a>
                         </div>
                         <div class="col-lg-8 col-md-12 col-12" bis_skin_checked="1">
                             <div class="header-menu" bis_skin_checked="1">
@@ -255,10 +108,7 @@
                                                     }
                                                 </ul>
                                             </div>
-                                            <div class="control-menu" bis_skin_checked="1">
-                                                <a href="#" id="prev" class="unactive"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path fill="#fff" d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l192 192c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 278.6 86.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-192 192z"></path></svg></a>
-                                                <a href="#" id="next"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path fill="#fff" d="M342.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L274.7 256 105.4 86.6c-12.5-12.5-12.5-32.8 0-45.3s-32.8-12.5-45.3 0l192 192z"></path></svg></a>
-                                            </div>
+
                                         </div>
                                     </div>
                                 </div>
@@ -289,7 +139,9 @@
                             <div class="sudes-header-cart header-action_cart" bis_skin_checked="1">
                                 <a class="a-hea" href="/Cart/Cart" aria-label="Giỏ hàng" title="Giỏ hàng">
                                     <span class="box-icon">
-                                        <i class="fas fa-shopping-cart" style="font-size: 24px; color: var(--mainColor);"></i>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cart3" viewBox="0 0 16 16">
+                                            <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .49.598l-1 5a.5.5 0 0 1-.465.401l-9.397.472L4.415 11H13a.5.5 0 0 1 0 1H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5zM3.102 4l.84 4.479 9.144-.459L13.89 4H3.102zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                                        </svg>
                                         @if (cartCount > 0)
                                         {
                                             <span class="count_item count_item_pr">@cartCount</span>
@@ -301,7 +153,7 @@
                                     </span>
                                 </a>
                             </div>
-                            <button class="menu-icon md-hidden" aria-label="Menu" id="btn-menu-mobile" title="Menu">
+                            <button class="menu-icon d-lg-none" aria-label="Menu" id="btn-menu-mobile" title="Menu">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
                                     <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"></path>
                                 </svg>
@@ -324,6 +176,7 @@
                             <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"></path>
                         </svg>
                     </button>
+                    <div class="search-suggestions-box d-none"></div>
                 </form>
             </div>
         </div>
@@ -356,7 +209,7 @@
     <div id="fb-root"></div>
     *@
     <!-- Footer Start -->
-    <footer class="footer" style="background-image:url('https://bizweb.dktcdn.net/100/601/974/themes/1047016/assets/bg_footer.jpg?1776407985038')">
+    <footer class="footer">
         <div class="container" bis_skin_checked="1">
             <div class="mid-footer" bis_skin_checked="1">
                 <div class="row" bis_skin_checked="1">
@@ -627,9 +480,79 @@
             $this.text(formattedDate);
 
         });
+
+        // Search popup and suggestions auto-search
+        $(document).ready(function() {
+            $(document).on('click', '.close-popup-search', function () {
+                $('.popup-search').removeClass('active');
+                $('body').removeClass('search-active');
+                $('.search-suggestions-box').addClass('d-none').empty();
+            });
+
+            var searchTimeout = null;
+            $('.auto-search').on('input', function() {
+                var query = $(this).val().trim();
+                var suggestionsBox = $('.search-suggestions-box');
+
+                if (searchTimeout) clearTimeout(searchTimeout);
+
+                if (query.length < 2) {
+                    suggestionsBox.addClass('d-none').empty();
+                    return;
+                }
+
+                searchTimeout = setTimeout(function() {
+                    $.ajax({
+                        url: '/Product/SearchSuggestions',
+                        type: 'GET',
+                        data: { term: query },
+                        success: function(data) {
+                            suggestionsBox.empty();
+                            if (data && data.length > 0) {
+                                $.each(data, function(index, item) {
+                                    var suggestionHtml = `
+                                        <a href="/Product/Details/${item.id}" class="suggestion-item">
+                                            <img src="${item.imageUrl}" class="suggestion-img" alt="${item.name}" />
+                                            <div class="suggestion-info">
+                                                <span class="suggestion-name">${item.name}</span>
+                                                <span class="suggestion-price">${item.price}</span>
+                                            </div>
+                                        </a>
+                                    `;
+                                    suggestionsBox.append(suggestionHtml);
+                                });
+
+                                // View all results link
+                                var viewAllUrl = `/Product/Search?search=${encodeURIComponent(query)}`;
+                                suggestionsBox.append(`
+                                    <a href="${viewAllUrl}" class="suggestion-view-all">
+                                        Xem tất cả kết quả cho "${query}"
+                                    </a>
+                                `);
+
+                                suggestionsBox.removeClass('d-none');
+                            } else {
+                                suggestionsBox.addClass('d-none');
+                            }
+                        },
+                        error: function() {
+                            suggestionsBox.addClass('d-none');
+                        }
+                    });
+                }, 250);
+            });
+
+            // Close suggestion box when clicking outside search area
+            $(document).on('click', function(e) {
+                if (!$(e.target).closest('.header_tim_kiem').length) {
+                    $('.search-suggestions-box').addClass('d-none');
+                }
+            });
+        });
     </script>
 
     @RenderSection("Scripts", required: false)
 
+    @await Html.PartialAsync("_ChatWidgetPartial")
 </body>
 </html>

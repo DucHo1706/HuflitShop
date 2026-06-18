@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using HuflitShopCore.Data;
 using HuflitShopCore.DTOs;
 using HuflitShopCore.Models;
+using HuflitShopCore.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,11 +13,11 @@ namespace HuflitShopCore.Controllers
 {
     public class CartController : Controller
     {
-        private readonly AppDbContext _context;
+        private readonly CartService _cartService;
 
-        public CartController(AppDbContext context)
+        public CartController(CartService cartService)
         {
-            _context = context;
+            _cartService = cartService;
         }
 
         public async Task<IActionResult> Cart()
@@ -26,20 +27,7 @@ namespace HuflitShopCore.Controllers
 
             var guestCartId = isAuth ? null : Request.Cookies["GuestCartId"];
 
-            var itemsQuery = _context.Carts
-                .Include(c => c.ProductVariant)
-                    .ThenInclude(pv => pv.Product)
-                .Include(c => c.ProductVariant)
-                    .ThenInclude(pv => pv.Size)
-                .Include(c => c.ProductVariant)
-                    .ThenInclude(pv => pv.Color)
-                .Where(c =>
-                    c.UserId == userId &&
-                    c.SessionId == guestCartId);
-
-            var items = await itemsQuery
-                .OrderByDescending(c => c.CreatedAt)
-                .ToListAsync();
+            var items = await _cartService.GetCartItemsAsync(userId, guestCartId);
 
             var cartDtos = items.Select(c => new CartItemViewModel
             {
@@ -62,13 +50,7 @@ namespace HuflitShopCore.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateQuantity(string cartId, int quantity)
         {
-            var item = await _context.Carts.FirstOrDefaultAsync(c => c.Id == cartId);
-            if (item == null) return RedirectToAction("Cart");
-
-            item.Quantity = Math.Max(1, quantity);
-            _context.Carts.Update(item);
-            await _context.SaveChangesAsync();
-
+            await _cartService.UpdateQuantityAsync(cartId, quantity);
             return RedirectToAction("Cart");
         }
 
@@ -76,12 +58,7 @@ namespace HuflitShopCore.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Remove(string cartId)
         {
-            var item = await _context.Carts.FirstOrDefaultAsync(c => c.Id == cartId);
-            if (item == null) return RedirectToAction("Cart");
-
-            _context.Carts.Remove(item);
-            await _context.SaveChangesAsync();
-
+            await _cartService.RemoveCartItemAsync(cartId);
             return RedirectToAction("Cart");
         }
 

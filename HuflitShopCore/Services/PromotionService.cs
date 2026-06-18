@@ -109,5 +109,38 @@ namespace HuflitShopCore.Services
             await _context.SaveChangesAsync();
             return true;
         }
+
+        public async Task<Promotion?> ValidatePromoCodeAsync(string promoCode, decimal orderTotal)
+        {
+            if (string.IsNullOrWhiteSpace(promoCode)) return null;
+
+            return await _context.Promotions
+                .FirstOrDefaultAsync(p => p.PromoCode == promoCode && p.IsActive);
+        }
+
+        public decimal CalculateDiscount(Promotion promo, decimal orderTotal)
+        {
+            decimal discount = 0;
+            if (string.Equals(promo.DiscountType, "Percent", StringComparison.OrdinalIgnoreCase) || 
+                string.Equals(promo.DiscountType, "Percentage", StringComparison.OrdinalIgnoreCase))
+            {
+                discount = orderTotal * (promo.DiscountValue / 100);
+                if (promo.MaxDiscountAmount.HasValue && discount > promo.MaxDiscountAmount.Value)
+                {
+                    discount = promo.MaxDiscountAmount.Value;
+                }
+            }
+            else
+            {
+                discount = promo.DiscountValue;
+            }
+
+            if (discount > orderTotal)
+            {
+                discount = orderTotal;
+            }
+
+            return discount;
+        }
     }
 }

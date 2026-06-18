@@ -1,75 +1,83 @@
 @{
     Layout = "_Layout";
-    ViewData["Title"] = "Đặt hàng thành công";
+    ViewData["Title"] = ViewBag.PaymentSuccess == false ? "Đặt hàng thất bại" : "Đặt hàng thành công";
 }
 
-<div class="page-header mb-0">
+<div style="padding: 80px 0; background: #f8fafc; min-height: 60vh;">
     <div class="container">
-        <div class="row">
-            <div class="col-12">
-                <h2 class="wow fadeInDown" data-wow-delay="0.5s">Đặt hàng thành công</h2>
-            </div>
-            <div class="col-12 wow fadeInUp" data-wow-delay="0.5s">
-                <a asp-controller="Home" asp-action="Index">Home</a>
-                <a asp-controller="Order" asp-action="Success" asp-route-id="@ViewBag.OrderId">Thành công</a>
-            </div>
-        </div>
-    </div>
-</div>
+        <div class="row justify-content-center">
+            <div class="col-lg-7 col-md-10">
 
-<div class="container" style="margin-top: 2rem;">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            @if (ViewBag.PaymentSuccess == null)
-            {
-                <div class="alert alert-success" role="alert">
-                    🎉 Đơn hàng của bạn đã được đặt thành công. Phương thức thanh toán: <strong>@ViewBag.PaymentMethodName</strong>.
-                </div>
-            }
-            else if (ViewBag.PaymentSuccess == true)
-            {
-                <div class="alert alert-success" role="alert">
-                    🎉 Thanh toán trực tuyến thành công qua VNPAY! Đơn hàng của bạn đang được xử lý.
-                </div>
-            }
-            else
-            {
-                <div class="alert alert-danger" role="alert">
-                    ❌ Thanh toán trực tuyến qua VNPAY thất bại hoặc đã bị hủy. Đơn hàng này đã bị hủy bỏ tự động. Vui lòng thử lại.
-                </div>
-            }
-
-            <div class="card">
-                <div class="card-body">
-                    <h4 class="mb-3">Thông tin đơn</h4>
-
-                    <div class="row">
-                        <div class="col-md-6 mb-2">
-                            <strong>Mã đơn hàng:</strong>
-                            <div>@ViewBag.OrderId</div>
+                @if (ViewBag.PaymentSuccess == false)
+                {
+                    @* ── Failure State ── *@
+                    <div style="text-align:center;margin-bottom:36px;">
+                        <div style="width:80px;height:80px;background:#fef2f2;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
+                            <i class="fas fa-times" style="font-size:2rem;color:#ef4444;"></i>
                         </div>
-                        <div class="col-md-6 mb-2">
-                            <strong>Tổng thanh toán:</strong>
-                            <div>@String.Format("{0:0,0}", (decimal)ViewBag.FinalAmount)</div>
+                        <h2 style="font-size:1.6rem;font-weight:800;color:#0f172a;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:10px;">Thanh toán thất bại</h2>
+                        <p style="color:#64748b;font-size:0.95rem;">Thanh toán qua VNPAY không thành công. Đơn hàng đã bị hủy tự động. Vui lòng thử lại.</p>
+                    </div>
+                    <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
+                        <a asp-controller="Home" asp-action="Index" class="hs-btn hs-btn--outline">Về trang chủ</a>
+                        <a asp-controller="Product" asp-action="Product" class="hs-btn hs-btn--primary">Tiếp tục mua sắm</a>
+                    </div>
+                }
+                else
+                {
+                    @* ── Success State ── *@
+                    <div style="text-align:center;margin-bottom:40px;">
+                        <div style="width:80px;height:80px;background:#eff6ff;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
+                            <i class="fas fa-check" style="font-size:2rem;color:#2563eb;"></i>
                         </div>
-                        <div class="col-12 mt-3">
-                            <strong>Địa chỉ giao hàng:</strong>
-                            <div>
-                                @ViewBag.ShippingCity
-                                , @ViewBag.ShippingDistrict
-                                <br />
-                                @ViewBag.ShippingAddress
+                        <h2 style="font-size:1.6rem;font-weight:800;color:#0f172a;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:10px;">Đặt hàng thành công!</h2>
+                        <p style="color:#64748b;font-size:0.95rem;max-width:420px;margin:0 auto;">
+                            @if (ViewBag.PaymentSuccess == true)
+                            {
+                                <text>Thanh toán VNPAY thành công. Đơn hàng đang được xử lý.</text>
+                            }
+                            else
+                            {
+                                <text>Cảm ơn bạn đã mua sắm! Đơn hàng của bạn sẽ được xử lý sớm nhất.</text>
+                            }
+                        </p>
+                    </div>
+
+                    @* Order Info Card *@
+                    <div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(0,0,0,0.06);padding:32px;margin-bottom:28px;">
+                        <h4 style="font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#64748b;margin-bottom:20px;border-bottom:1px solid #e2e8f0;padding-bottom:14px;">
+                            Thông tin đơn hàng
+                        </h4>
+                        <div class="row">
+                            <div class="col-sm-6 mb-4">
+                                <div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#94a3b8;margin-bottom:6px;">Mã đơn hàng</div>
+                                <div style="font-size:0.96rem;font-weight:600;color:#0f172a;word-break:break-all;">@ViewBag.OrderId</div>
+                            </div>
+                            <div class="col-sm-6 mb-4">
+                                <div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#94a3b8;margin-bottom:6px;">Phương thức thanh toán</div>
+                                <div style="font-size:0.96rem;font-weight:600;color:#0f172a;">@ViewBag.PaymentMethodName</div>
+                            </div>
+                            <div class="col-sm-6 mb-4">
+                                <div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#94a3b8;margin-bottom:6px;">Tổng thanh toán</div>
+                                <div style="font-size:1.3rem;font-weight:800;color:#2563eb;">@String.Format("{0:0,0}₫", (decimal)ViewBag.FinalAmount)</div>
+                            </div>
+                            <div class="col-sm-6 mb-4">
+                                <div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#94a3b8;margin-bottom:6px;">Địa chỉ giao hàng</div>
+                                <div style="font-size:0.92rem;color:#334155;line-height:1.5;">
+                                    @ViewBag.ShippingAddress<br>
+                                    @ViewBag.ShippingDistrict, @ViewBag.ShippingCity
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="mt-4 d-flex" style="gap: 1rem;">
-                        <a class="btn btn-primary" asp-controller="Home" asp-action="Index">Tiếp tục mua sắm</a>
-                        <a class="btn btn-success" asp-controller="Product" asp-action="Product">Xem sản phẩm</a>
+                    <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
+                        <a asp-controller="Profile" asp-action="Index" class="hs-btn hs-btn--outline">Xem đơn hàng của tôi</a>
+                        <a asp-controller="Product" asp-action="Product" class="hs-btn hs-btn--primary">Tiếp tục mua sắm</a>
                     </div>
-                </div>
+                }
+
             </div>
         </div>
     </div>
 </div>
-

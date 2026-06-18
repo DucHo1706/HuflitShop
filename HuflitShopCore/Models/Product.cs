@@ -41,5 +41,6 @@ namespace HuflitShopCore.Models
         [ForeignKey("CategoryId")]
         public virtual Category? Category { get; set; }
         public virtual ICollection<ProductVariant>? ProductVariants { get; set; }
+        public virtual ICollection<ProductImage>? ProductImages { get; set; }
     }
 }
