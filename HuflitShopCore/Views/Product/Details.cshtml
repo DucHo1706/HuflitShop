@@ -5,36 +5,208 @@
     ViewData["Title"] = Model?.ProductName ?? "Chi tiết sản phẩm";
     var product = Model;
     var cloudName = Configuration["CloudinarySettings:CloudName"] ?? "Tên_Cloud_Của_Bạn";
-
     var variants = product?.ProductVariants == null
-        ? Enumerable.Empty<HuflitShopCore.Models.ProductVariant>()
-        : product.ProductVariants
-            .Where(pv => pv.IsActive && pv.StockQuantity > 0)
-            .ToList();
-
+            ? Enumerable.Empty<HuflitShopCore.Models.ProductVariant>()
+            : product.ProductVariants.Where(pv => pv.IsActive).ToList();
     var images = product?.ProductImages == null
         ? new List<HuflitShopCore.Models.ProductImage>()
-        : product.ProductImages
-            .OrderBy(img => img.ImageOrder)
-            .ToList();
-
+        : product.ProductImages.OrderBy(img => img.ImageOrder).ToList();
     var mainImageUrl = HuflitShopCore.Helpers.ImageRouteHelper.Resolve(images.FirstOrDefault()?.PublicId);
 }
-<div class="details-container">
-    <!-- Breadcrumb -->
-    <div class="product-breadcrumb">
-        <a asp-controller="Home" asp-action="Index">Trang chủ</a>
-        <span>&gt;</span>
-        <a asp-controller="Product" asp-action="Product">Sản phẩm</a>
-        <span>&gt;</span>
-        <a asp-action="Category" asp-controller="Product" asp-route-id="@product?.CategoryId">@product?.Category?.CategoryName</a>
-        <span>&gt;</span>
-        <span class="text-dark">@product?.ProductName</span>
-    </div>
+
+<style>
+    :root {
+        --vibrantBlue: #2563eb;
+        --vibrantBlueHover: #1d4ed8;
+        --vibrantCyan: #06b6d4;
+        --oceanGradient: linear-gradient(135deg, #2563eb, #06b6d4);
+    }
+
+    .custom-accordion-btn:focus,
+    .custom-accordion-btn:active {
+        box-shadow: none !important;
+        outline: none !important;
+        text-decoration: none !important;
+    }
+
+    .custom-accordion-btn:hover {
+        color: var(--vibrantBlue) !important;
+        text-decoration: none !important;
+    }
+
+    .custom-accordion-btn .accordion-icon {
+        transition: transform 0.3s ease;
+        font-size: 0.9rem;
+    }
+
+    .custom-accordion-btn[aria-expanded="true"] .accordion-icon {
+        transform: rotate(45deg);
+        color: var(--vibrantBlue);
+    }
+
+    .breadcrumb a {
+        color: var(--vibrantBlue) !important;
+        transition: color 0.2s ease;
+    }
+
+        .breadcrumb a:hover {
+            color: var(--vibrantCyan) !important;
+            text-decoration: none;
+        }
+
+    .gallery-thumbnails-vertical {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        max-height: 600px;
+        overflow-y: auto;
+    }
+
+    .gallery-thumb-modern {
+        cursor: pointer;
+        border: 2px solid #e2e8f0;
+        transition: all 0.2s ease;
+        opacity: 0.7;
+    }
+
+        .gallery-thumb-modern.active, .gallery-thumb-modern:hover {
+            border-color: var(--vibrantBlue);
+            opacity: 1;
+            transform: scale(1.02);
+        }
+
+    .btn-color-swatch {
+        width: 38px;
+        height: 38px;
+        border-radius: 50% !important;
+        border: 2px solid #cbd5e1;
+        padding: 0;
+        cursor: pointer;
+        position: relative;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+        .btn-color-swatch:hover {
+            transform: scale(1.15);
+            border-color: var(--vibrantBlue);
+        }
+
+        .btn-color-swatch.active {
+            border-color: var(--vibrantBlue);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.35);
+            transform: scale(1.15);
+        }
+
+            .btn-color-swatch.active::after {
+                content: '';
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+                background-color: #fff;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+            }
+
+            .btn-color-swatch.active[style*="background-color: #ffffff"]::after,
+            .btn-color-swatch.active[style*="background-color: #FFFFFF"]::after,
+            .btn-color-swatch.active[style*="background-color: #f5f5dc"]::after,
+            .btn-color-swatch.active[style*="background-color: #F5F5DC"]::after {
+                background-color: #000;
+            }
+
+    .btn-size-pill {
+        background-color: #f1f5f9;
+        border: 2px solid #e2e8f0;
+        padding: 8px 24px;
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: #334155;
+        border-radius: 30px !important;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+        .btn-size-pill:hover {
+            background-color: #e2e8f0;
+            color: var(--vibrantBlue);
+            border-color: var(--vibrantBlue);
+        }
+
+        .btn-size-pill.active {
+            background: var(--oceanGradient) !important;
+            border-color: var(--vibrantBlue) !important;
+            color: #ffffff !important;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+    .qty-modern {
+        border-radius: 4px;
+        overflow: hidden;
+        transition: border-color 0.2s;
+    }
+
+        .qty-modern:focus-within {
+            border-color: var(--vibrantBlue) !important;
+        }
+
+    .btn-ocean-primary {
+        background: var(--oceanGradient) !important;
+        border: none !important;
+        color: #fff !important;
+        font-size: 1rem;
+        letter-spacing: 1px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2);
+    }
+
+        .btn-ocean-primary:hover {
+            background: linear-gradient(135deg, #1d4ed8, #0891b2) !important;
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35);
+            transform: translateY(-1px);
+        }
+
+    .btn-ocean-outline {
+        background-color: transparent !important;
+        border: 2px solid var(--vibrantBlue) !important;
+        color: var(--vibrantBlue) !important;
+        font-size: 1rem;
+        letter-spacing: 1px;
+        transition: all 0.3s ease;
+    }
+
+        .btn-ocean-outline:hover {
+            background: var(--vibrantBlue) !important;
+            color: #fff !important;
+            border-color: var(--vibrantBlue) !important;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        }
+
+    .text-gold-vibrant {
+        color: #f59e0b !important;
+    }
+
+    .star-rating-input i.active {
+        color: #f59e0b !important;
+    }
+</style>
+
+<div class="details-container py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb bg-transparent p-0 m-0 font-weight-bold" style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px;">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-muted">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Product" asp-action="Product" class="text-muted">Sản phẩm</a></li>
+            <li class="breadcrumb-item"><a asp-action="Category" asp-controller="Product" asp-route-id="@product?.CategoryId" class="text-muted">@product?.Category?.CategoryName</a></li>
+            <li class="breadcrumb-item active text-dark" aria-current="page">@product?.ProductName</li>
+        </ol>
+    </nav>
 
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="alert alert-success alert-dismissible fade show" role="alert" style="border-radius: 6px; margin-bottom: 1.5rem;">
+        <div class="alert alert-success alert-dismissible fade show shadow-sm rounded-0 border-0" role="alert">
             <i class="fas fa-check-circle mr-2"></i>@TempData["SuccessMessage"]
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
@@ -43,63 +215,62 @@
     }
     @if (TempData["ErrorMessage"] != null)
     {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert" style="border-radius: 6px; margin-bottom: 1.5rem;">
-            <i class="fas fa-exclamation-circle mr-2"></i>@TempData["ErrorMessage"]
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <div class="alert alert-dark alert-dismissible fade show shadow-sm rounded-0 border-0 text-white" role="alert" style="background-color: #1e293b;">
+            <i class="fas fa-exclamation-circle mr-2 text-danger"></i>@TempData["ErrorMessage"]
+            <button type="button" class="close text-white" data-dismiss="alert" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
             </button>
         </div>
     }
 
-    <!-- Main Section -->
-    <div class="product-main-card">
-        <div class="row">
-            <!-- Left image gallery -->
-            <div class="col-md-5">
-                <div class="gallery-main-img">
-                    <img src="@mainImageUrl" id="mainImage" alt="@product?.ProductName" />
-                </div>
-                
-                @if (images.Count > 1)
-                {
-                    <div class="gallery-thumbnails">
-                        @for (var i = 0; i < images.Count; i++)
+    <div class="row layout-high-contrast">
+        <div class="col-lg-7 mb-5">
+            <div class="position-sticky" style="top: 100px;">
+                <div class="row flex-column-reverse flex-md-row">
+                    <div class="col-md-2 mt-3 mt-md-0 gallery-thumbnails-vertical">
+                        @if (images.Count > 1)
                         {
-                            var imgUrl = HuflitShopCore.Helpers.ImageRouteHelper.Resolve(images[i].PublicId);
-                            <div class="gallery-thumb @(i == 0 ? "active" : "")" onclick="setMainImage('@imgUrl', this)">
-                                <img src="@imgUrl" alt="Thumbnail" />
-                            </div>
+                            @for (var i = 0; i < images.Count; i++)
+                            {
+                                var imgUrl = HuflitShopCore.Helpers.ImageRouteHelper.Resolve(images[i].PublicId);
+                                <div class="gallery-thumb-modern @(i == 0 ? "active" : "") mb-2 rounded shadow-sm" onclick="setMainImage('@imgUrl', this)">
+                                    <img src="@imgUrl" alt="Thumbnail @i" class="img-fluid rounded" />
+                                </div>
+                            }
                         }
                     </div>
-                }
+                    <div class="col-md-10">
+                        <div class="gallery-main-img-modern bg-light shadow-sm rounded">
+                            <img src="@mainImageUrl" id="mainImage" alt="@product?.ProductName" class="img-fluid w-100 rounded" />
+                        </div>
+                    </div>
+                </div>
             </div>
+        </div>
 
-            <!-- Right product actions -->
-            <div class="col-md-7">
-                <h1 class="product-title">@product?.ProductName</h1>
-                
-                <!-- Price Display box -->
-                <div class="price-box">
-                    <span class="price-label">Giá bán:</span>
-                    <span class="price-current" id="variantPrice">@((product?.CurrentPrice ?? 0).ToString("N0"))</span>
+        <div class="col-lg-5">
+            <div class="product-info-modern">
+                <h1 class="product-title font-weight-bolder text-dark mb-2" style="font-size: 2.2rem; letter-spacing: -0.5px;">@product?.ProductName</h1>
+
+                <div class="price-box-modern mb-4 pb-3 border-bottom">
+                    <span class="price-current text-danger font-weight-bold" id="variantPrice" style="font-size: 1.8rem;">@((product?.CurrentPrice ?? 0).ToString("N0"))₫</span>
                 </div>
 
                 @if (variants == null || !variants.Any())
                 {
-                    <div class="alert alert-warning font-weight-bold">
-                        <i class="fas fa-exclamation-triangle mr-2"></i>Sản phẩm hiện đang hết hàng hoặc chưa có biến thể sẵn sàng.
+                    <div class="alert alert-warning rounded-0 font-weight-bold">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>Sản phẩm hiện đang hết hàng.
                     </div>
                 }
                 else
                 {
-                    <!-- Hidden Select controls to keep existing form submit functionality -->
                     <select id="sizeSelect" style="display:none;" required>
                         @foreach (var s in variants.Select(v => v.Size).Where(x => x != null).GroupBy(x => x!.Id).Select(g => g.First()!))
                         {
                             <option value="@s.Id">@s.SizeName</option>
                         }
                     </select>
-                    
+
                     <select id="colorSelect" style="display:none;" required>
                         @foreach (var c in variants.Select(v => v.Color).Where(x => x != null).GroupBy(x => x!.Id).Select(g => g.First()!))
                         {
@@ -112,363 +283,261 @@
                         <input type="hidden" name="id" value="@product?.Id" />
                         <input type="hidden" name="productVariantId" id="productVariantId" />
 
-                        <!-- Size Pills selection -->
-                        <div class="selector-group">
-                            <span class="selector-label">Kích thước:</span>
-                            <div class="d-flex flex-wrap" id="sizePillContainer">
-                                @foreach (var s in variants.Select(v => v.Size).Where(x => x != null).GroupBy(x => x!.Id).Select(g => g.First()!))
-                                {
-                                    <button type="button" class="pill-btn" data-value="@s.Id" onclick="selectSizePill('@s.Id', this)">@s.SizeName</button>
-                                }
+                        <div class="selector-group-modern mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-uppercase font-weight-bold text-muted" style="font-size: 0.85rem; letter-spacing: 1px;">Màu sắc</span>
                             </div>
-                        </div>
-
-                        <!-- Color Pills selection -->
-                        <div class="selector-group">
-                            <span class="selector-label">Màu sắc:</span>
-                            <div class="d-flex flex-wrap" id="colorPillContainer">
+                            <div class="d-flex flex-wrap gap-3" id="colorPillContainer">
                                 @foreach (var c in variants.Select(v => v.Color).Where(x => x != null).GroupBy(x => x!.Id).Select(g => g.First()!))
                                 {
-                                    <button type="button" class="pill-btn" data-value="@c.Id" onclick="selectColorPill('@c.Id', this)">@c.ColorName</button>
+                                    string hexCode = !string.IsNullOrEmpty(c.HexCode) ? c.HexCode : "#cbd5e1";
+                                    <button type="button" class="btn-color-swatch" data-value="@c.Id" title="@c.ColorName" style="background-color: @hexCode;" onclick="selectColorPill('@c.Id', this)"></button>
                                 }
                             </div>
                         </div>
 
-                        <!-- Quantity counter -->
-                        <div class="selector-group mb-4">
-                            <span class="selector-label">Số lượng:</span>
-                            <div class="d-flex align-items-center">
-                                <button type="button" class="qty-btn" style="border-radius:4px 0 0 4px;" onclick="changeQty(-1)">-</button>
-                                <input type="text" name="quantity" id="qtyInput" value="1" readonly class="qty-input" />
-                                <button type="button" class="qty-btn" style="border-radius:0 4px 4px 0;" onclick="changeQty(1)">+</button>
+                        <div class="selector-group-modern mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-uppercase font-weight-bold text-muted" style="font-size: 0.85rem; letter-spacing: 1px;">Kích thước</span>
+                                <a href="#" class="text-decoration-underline text-muted small">Hướng dẫn chọn size</a>
+                            </div>
+                            <div class="d-flex flex-wrap gap-2" id="sizePillContainer">
+                                @foreach (var s in variants.Select(v => v.Size).Where(x => x != null).GroupBy(x => x!.Id).Select(g => g.First()!))
+                                {
+                                    <button type="button" class="btn-size-pill" data-value="@s.Id" onclick="selectSizePill('@s.Id', this)">@s.SizeName</button>
+                                }
                             </div>
                         </div>
 
-                        <!-- Add to Cart / Buy Now actions -->
-                        <div class="d-flex flex-wrap gap-3 mt-4">
-                            <button type="submit" class="btn btn-action-cart flex-fill py-3">
-                                <i class="fas fa-cart-plus mr-2"></i>Thêm Vào Giỏ Hàng
+                        <div class="selector-group-modern mb-5">
+                            <span class="text-uppercase font-weight-bold text-muted mb-2 d-block" style="font-size: 0.85rem; letter-spacing: 1px;">Số lượng</span>
+                            <div class="qty-modern d-inline-flex border border-secondary bg-white">
+                                <button type="button" class="btn bg-transparent rounded-0 border-0 px-3 font-weight-bold" onclick="changeQty(-1)">-</button>
+                                <input type="text" name="quantity" id="qtyInput" value="1" readonly class="form-control bg-transparent border-0 text-center font-weight-bold" style="width: 50px; box-shadow: none;" />
+                                <button type="button" class="btn bg-transparent rounded-0 border-0 px-3 font-weight-bold" onclick="changeQty(1)">+</button>
+                            </div>
+                        </div>
+
+                        <div class="d-flex flex-column gap-3 mb-4">
+                            <button type="submit" class="btn btn-ocean-primary btn-lg rounded-0 font-weight-bold text-uppercase py-3 w-100">
+                                Thêm Vào Giỏ Hàng
                             </button>
-                            <button type="button" class="btn btn-action-buy flex-fill py-3" onclick="submitBuyNow();">
-                                <i class="fas fa-shopping-bag mr-2"></i>Mua Ngay
+                            <button type="button" class="btn btn-ocean-outline btn-lg rounded-0 font-weight-bold text-uppercase py-3 w-100" onclick="submitBuyNow();">
+                                Mua Ngay
                             </button>
                         </div>
                     </form>
                 }
 
-                <div class="mt-4 pt-3 border-top">
-                    <a class="btn btn-outline-secondary w-100" asp-controller="Cart" asp-action="Cart" style="border-radius:6px;">
-                        <i class="fas fa-shopping-cart mr-2"></i>Đi Tới Giỏ Hàng Của Bạn
-                    </a>
+                <div class="accordion accordion-modern mt-5" id="productAccordion">
+                    <div class="bg-transparent border-0">
+                        <div class="bg-transparent border-0 px-0 py-2" id="headingOne">
+                            <h2 class="mb-0">
+                                <button class="btn btn-link btn-block text-left text-dark font-weight-bolder text-decoration-none px-0 text-uppercase d-flex justify-content-between align-items-center custom-accordion-btn" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                    <span style="font-size: 1.1rem; letter-spacing: 0.5px;">Thông Tin & Chất Liệu</span>
+                                    <span class="accordion-icon"><i class="fas fa-plus"></i></span>
+                                </button>
+                            </h2>
+                        </div>
+                        <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#productAccordion">
+                            <div class="px-0 pt-2 pb-4 text-muted border-0">
+
+                                <div class="mb-4">
+                                    <div class="row">
+                                        <div class="col-sm-6 mb-2">
+                                            <span class="text-muted">Danh mục:</span>
+                                            <strong class="text-dark ml-2">@product?.Category?.CategoryName</strong>
+                                        </div>
+                                        @if (!string.IsNullOrEmpty(product?.Trademark))
+                                        {
+                                            <div class="col-sm-6 mb-2">
+                                                <span class="text-muted">Thương hiệu:</span>
+                                                <strong class="text-dark ml-2">@product.Trademark</strong>
+                                            </div>
+                                        }
+                                        @if (!string.IsNullOrEmpty(product?.Origin))
+                                        {
+                                            <div class="col-sm-6 mb-2 mt-2 mt-sm-0">
+                                                <span class="text-muted">Xuất xứ:</span>
+                                                <strong class="text-dark ml-2">@product.Origin</strong>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+
+                                <div class="description-content text-dark" style="line-height: 1.8; font-size: 0.95rem; white-space: pre-line;">
+                                    @(string.IsNullOrWhiteSpace(product?.Description) ? "Hiện chưa có thông tin chi tiết." : product.Description)
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
             </div>
         </div>
     </div>
 
-    <!-- Product Description Details -->
-    <div class="product-info-card">
-        <h3 class="info-header"><i class="fas fa-file-alt mr-2 text-primary"></i>Thông tin chi tiết</h3>
-        
-        <table class="info-table mb-4" style="width: 100%; max-width: 600px;">
-            <tbody>
-                <tr>
-                    <td class="info-label">Danh mục:</td>
-                    <td class="info-val">@product?.Category?.CategoryName</td>
-                </tr>
-                @if (!string.IsNullOrEmpty(product?.Trademark))
-                {
-                    <tr>
-                        <td class="info-label">Thương hiệu:</td>
-                        <td class="info-val">@product.Trademark</td>
-                    </tr>
-                }
-                @if (!string.IsNullOrEmpty(product?.Origin))
-                {
-                    <tr>
-                        <td class="info-label">Xuất xứ:</td>
-                        <td class="info-val">@product.Origin</td>
-                    </tr>
-                }
-                @if (product?.ManufactureYear > 0)
-                {
-                    <tr>
-                        <td class="info-label">Năm sản xuất:</td>
-                        <td class="info-val">@product.ManufactureYear</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+    <hr class="my-5 border-dark" style="opacity: 0.1;">
 
-        <h3 class="info-header mt-4"><i class="fas fa-book-open mr-2 text-primary"></i>Mô tả sản phẩm</h3>
-        <div class="text-dark pt-2" style="font-size: 1.05rem; line-height: 1.7; white-space: pre-line;">
-            @(string.IsNullOrWhiteSpace(product?.Description) ? "Hiện chưa có thông tin mô tả chi tiết cho sản phẩm này." : product.Description)
-        </div>
-    </div>
-
-    <!-- Reviews Section -->
     @{
         var reviewsList = ViewBag.Reviews as List<HuflitShopCore.Models.Reviews> ?? new List<HuflitShopCore.Models.Reviews>();
-        var star5Count = reviewsList.Count(r => r.RatingStars == 5);
-        var star4Count = reviewsList.Count(r => r.RatingStars == 4);
-        var star3Count = reviewsList.Count(r => r.RatingStars == 3);
-        var star2Count = reviewsList.Count(r => r.RatingStars == 2);
-        var star1Count = reviewsList.Count(r => r.RatingStars == 1);
     }
-    <div class="reviews-card">
-        <h3 class="info-header mb-4"><i class="fas fa-comments mr-2 text-primary"></i>Đánh giá từ khách hàng</h3>
-        
-        <!-- Summary Dashboard -->
-        <div class="rating-summary-box">
-            <div class="average-score">
-                <h2>@ViewBag.AverageStars</h2>
-                <div class="star-display my-1">
-                    @for (int i = 1; i <= 5; i++)
-                    {
-                        if (i <= Math.Round((double)(ViewBag.AverageStars ?? 0.0)))
+    <div class="row mt-5">
+        <div class="col-lg-4 mb-4 mb-lg-0">
+            <h2 class="font-weight-bold text-uppercase mb-4">Đánh giá</h2>
+            <div class="d-flex align-items-center mb-3">
+                <h1 class="font-weight-bolder display-4 mb-0 mr-3 text-dark">@(ViewBag.AverageStars ?? "0.0")</h1>
+                <div>
+                    <div class="text-gold-vibrant mb-1" style="font-size: 1.2rem;">
+                        @for (int i = 1; i <= 5; i++)
                         {
-                            <i class="fas fa-star"></i>
+                            <i class="@(i <= Math.Round((double)(ViewBag.AverageStars ?? 0.0)) ? "fas fa-star" : "far fa-star")"></i>
                         }
-                        else
-                        {
-                            <i class="far fa-star text-muted"></i>
-                        }
-                    }
-                </div>
-                <div class="text-muted" style="font-size: 0.9rem;">@ViewBag.TotalReviews đánh giá</div>
-            </div>
-            
-            <div class="rating-distribution">
-                @{
-                    int total = ViewBag.TotalReviews > 0 ? ViewBag.TotalReviews : 1;
-                    int pct5 = (star5Count * 100) / total;
-                    int pct4 = (star4Count * 100) / total;
-                    int pct3 = (star3Count * 100) / total;
-                    int pct2 = (star2Count * 100) / total;
-                    int pct1 = (star1Count * 100) / total;
-                }
-                <div class="distribution-row">
-                    <span class="distribution-label">5 sao</span>
-                    <div class="distribution-bar-bg">
-                        <div class="distribution-bar-fill" style="width: @pct5%;"></div>
                     </div>
-                    <span class="distribution-count">@star5Count</span>
-                </div>
-                <div class="distribution-row">
-                    <span class="distribution-label">4 sao</span>
-                    <div class="distribution-bar-bg">
-                        <div class="distribution-bar-fill" style="width: @pct4%;"></div>
-                    </div>
-                    <span class="distribution-count">@star4Count</span>
-                </div>
-                <div class="distribution-row">
-                    <span class="distribution-label">3 sao</span>
-                    <div class="distribution-bar-bg">
-                        <div class="distribution-bar-fill" style="width: @pct3%;"></div>
-                    </div>
-                    <span class="distribution-count">@star3Count</span>
-                </div>
-                <div class="distribution-row">
-                    <span class="distribution-label">2 sao</span>
-                    <div class="distribution-bar-bg">
-                        <div class="distribution-bar-fill" style="width: @pct2%;"></div>
-                    </div>
-                    <span class="distribution-count">@star2Count</span>
-                </div>
-                <div class="distribution-row">
-                    <span class="distribution-label">1 sao</span>
-                    <div class="distribution-bar-bg">
-                        <div class="distribution-bar-fill" style="width: @pct1%;"></div>
-                    </div>
-                    <span class="distribution-count">@star1Count</span>
+                    <span class="text-muted">Dựa trên @ViewBag.TotalReviews đánh giá</span>
                 </div>
             </div>
-        </div>
 
-        <!-- Add Review Form -->
-        @if (User.Identity != null && User.Identity.IsAuthenticated)
-        {
-            <div class="write-review-section">
-                <h4 style="font-size: 1.1rem; font-weight: 700; color: #1f2937;" class="mb-3">
-                    <i class="fas fa-pen-fancy mr-2 text-primary"></i>Viết đánh giá của bạn
-                </h4>
-                
-                <form asp-controller="Product" asp-action="PostReview" method="post">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" name="productId" value="@product?.Id" />
-                    <input type="hidden" name="ratingStars" id="ratingStarsInput" value="5" />
-                    
-                    <div class="mb-3">
-                        <label class="form-label d-block text-muted font-weight-bold" style="font-size: 0.9rem;">Mức độ hài lòng của bạn:</label>
-                        <div class="star-rating-input" id="starRatingSelector">
-                            <i class="fas fa-star active" data-value="1"></i>
-                            <i class="fas fa-star active" data-value="2"></i>
-                            <i class="fas fa-star active" data-value="3"></i>
-                            <i class="fas fa-star active" data-value="4"></i>
-                            <i class="fas fa-star active" data-value="5"></i>
-                        </div>
-                        <span class="ml-3 text-warning font-weight-bold" id="starRatingLabel" style="font-size: 1rem; vertical-align: middle;">Tuyệt vời</span>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="reviewComment" class="form-label text-muted font-weight-bold" style="font-size: 0.9rem;">Chia sẻ trải nghiệm về sản phẩm:</label>
-                        <textarea class="review-textarea" name="reviewComment" id="reviewComment" rows="4" placeholder="Nhập đánh giá chi tiết của bạn về chất lượng sản phẩm, dịch vụ giao hàng..." required></textarea>
-                    </div>
-                    
-                    <button type="submit" class="btn btn-primary font-weight-bold" style="border-radius: 6px; padding: 0.6rem 2rem;">
-                        Gửi Đánh Giá
-                    </button>
-                </form>
-            </div>
-        }
-        else
-        {
-            <div class="alert alert-info mt-4" style="border-radius: 8px;">
-                <i class="fas fa-info-circle mr-2"></i>Bạn cần <a asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@Context.Request.Path" class="font-weight-bold text-primary text-decoration-underline">Đăng nhập</a> để viết đánh giá cho sản phẩm này.
-            </div>
-        }
-
-        <!-- Show Review List -->
-        <div class="reviews-list">
-            <h4 style="font-size: 1.15rem; font-weight: 700; color: #1f2937;" class="mb-4">
-                Tất cả đánh giá (@ViewBag.TotalReviews)
-            </h4>
-            
-            @if (!reviewsList.Any())
+            @if (User.Identity != null && User.Identity.IsAuthenticated)
             {
-                <div class="text-center py-5 text-muted">
-                    <i class="far fa-comments fa-3x mb-3 text-light"></i>
-                    <p class="mb-0">Chưa có đánh giá nào cho sản phẩm này. Hãy là người đầu tiên đánh giá!</p>
+                <button class="btn btn-ocean-outline rounded-0 font-weight-bold text-uppercase mt-3 w-100" type="button" data-toggle="collapse" data-target="#reviewFormCollapse">
+                    Viết Đánh Giá
+                </button>
+                <div class="collapse mt-4" id="reviewFormCollapse">
+                    <div class="card card-body rounded-0 border-secondary bg-light p-4">
+                        <form asp-controller="Product" asp-action="PostReview" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="productId" value="@product?.Id" />
+                            <input type="hidden" name="ratingStars" id="ratingStarsInput" value="5" />
+
+                            <div class="mb-3 text-center">
+                                <div class="star-rating-input" id="starRatingSelector" style="font-size: 1.5rem; cursor: pointer;">
+                                    <i class="fas fa-star active text-gold-vibrant" data-value="1"></i>
+                                    <i class="fas fa-star active text-gold-vibrant" data-value="2"></i>
+                                    <i class="fas fa-star active text-gold-vibrant" data-value="3"></i>
+                                    <i class="fas fa-star active text-gold-vibrant" data-value="4"></i>
+                                    <i class="fas fa-star active text-gold-vibrant" data-value="5"></i>
+                                </div>
+                                <div class="mt-2 font-weight-bold text-uppercase text-gold-vibrant" id="starRatingLabel">Tuyệt vời</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <textarea class="form-control rounded-0 border-secondary" name="reviewComment" rows="4" placeholder="Chia sẻ cảm nhận của bạn..." required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-dark btn-block rounded-0 text-uppercase font-weight-bold">Gửi Đánh Giá</button>
+                        </form>
+                    </div>
                 </div>
             }
             else
             {
-                foreach (var r in reviewsList)
-                {
-                    var firstChar = string.IsNullOrEmpty(r.User?.FullName) ? "K" : r.User.FullName.Substring(0, 1).ToUpper();
-                    <div class="review-item">
-                        <div class="d-flex align-items-start gap-3">
-                            <div class="review-user-avatar">
-                                @firstChar
+                <a asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@Context.Request.Path" class="btn btn-ocean-outline rounded-0 font-weight-bold text-uppercase mt-3 w-100">
+                    Đăng nhập để đánh giá
+                </a>
+            }
+        </div>
+
+        <div class="col-lg-7 offset-lg-1">
+            @if (!reviewsList.Any())
+            {
+                <p class="text-muted font-italic mt-2">Chưa có đánh giá nào cho sản phẩm này.</p>
+            }
+            else
+            {
+                <div class="review-list-modern">
+                    @foreach (var r in reviewsList)
+                    {
+                        var firstChar = string.IsNullOrEmpty(r.User?.FullName) ? "K" : r.User.FullName.Substring(0, 1).ToUpper();
+                        <div class="py-4 border-bottom">
+                            <div class="d-flex justify-content-between mb-2">
+                                <div class="font-weight-bold text-uppercase text-dark">@(r.User?.FullName ?? "Khách hàng")</div>
+                                <span class="text-muted small">@r.CreatedAt.ToString("dd/MM/yyyy")</span>
                             </div>
-                            <div class="flex-grow-1">
-                                <div class="review-user-name">@(r.User?.FullName ?? "Khách hàng")</div>
-                                <div class="review-meta d-flex flex-wrap align-items-center gap-2">
-                                    <span class="text-warning">
-                                        @for (int i = 1; i <= 5; i++)
-                                        {
-                                            if (i <= r.RatingStars)
-                                            {
-                                                <i class="fas fa-star"></i>
-                                            }
-                                            else
-                                            {
-                                                <i class="far fa-star text-muted"></i>
-                                            }
-                                        }
-                                    </span>
-                                    <span class="text-muted">Gửi ngày: @r.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
-                                    @if (r.ProductVariant != null)
-                                    {
-                                        <span class="text-secondary">
-                                            | Phân loại: 
-                                            @(r.ProductVariant.Color?.ColorName ?? "Mặc định") - @(r.ProductVariant.Size?.SizeName ?? "Mặc định")
-                                        </span>
-                                    }
-                                </div>
-                                <div class="review-comment mt-2 text-dark font-weight-normal" style="font-size: 0.98rem;">
-                                    @r.GetCommentText()
-                                </div>
-                                <div class="review-actions mt-2 d-flex align-items-center gap-3">
-                                    <button type="button" class="btn btn-sm btn-outline-secondary vote-btn" data-review-id="@r.Id" style="font-size: 0.8rem; border-radius: 20px; padding: 0.2rem 0.75rem; display: inline-flex; align-items: center; gap: 4px;">
-                                        <i class="far fa-thumbs-up"></i> Hữu ích (<span class="vote-count">@r.GetHelpfulVotes()</span>)
-                                    </button>
-                                </div>
-                                
-                                @if (!string.IsNullOrEmpty(r.GetAdminReply()))
+                            <div class="text-gold-vibrant mb-2" style="font-size: 0.85rem;">
+                                @for (int i = 1; i <= 5; i++)
                                 {
-                                    <div class="admin-reply-box mt-3 p-3 rounded border-left border-primary" style="background-color: #f0f4f8; margin-left: 2rem; border-left-width: 4px !important;">
-                                        <div class="font-weight-bold text-primary mb-1" style="font-size: 0.9rem;">
-                                            <i class="fas fa-reply fa-flip-both mr-1"></i> Tracy Shop trả lời:
-                                        </div>
-                                        <div class="text-dark" style="font-size: 0.95rem;">
-                                            @r.GetAdminReply()
-                                        </div>
-                                    </div>
+                                    <i class="@(i <= r.RatingStars ? "fas fa-star" : "far fa-star")"></i>
                                 }
                             </div>
+                            @if (r.ProductVariant != null)
+                            {
+                                <div class="text-muted small mb-2 font-italic">
+                                    Phân loại: @(r.ProductVariant.Color?.ColorName ?? "") - @(r.ProductVariant.Size?.SizeName ?? "")
+                                </div>
+                            }
+                            <p class="text-dark mb-2" style="line-height: 1.6;">@r.GetCommentText()</p>
+
+                            <button type="button" class="btn btn-link text-muted p-0 text-decoration-none vote-btn small" data-review-id="@r.Id">
+                                <i class="far fa-thumbs-up"></i> Hữu ích (<span class="vote-count">@r.GetHelpfulVotes()</span>)
+                            </button>
+
+                            @if (!string.IsNullOrEmpty(r.GetAdminReply()))
+                            {
+                                <div class="mt-3 p-3 bg-light border-left border-primary">
+                                    <strong class="text-uppercase small d-block mb-1 text-primary">Huflit Shop:</strong>
+                                    <span class="text-muted" style="font-size: 0.9rem;">@r.GetAdminReply()</span>
+                                </div>
+                            }
                         </div>
-                    </div>
-                }
+                    }
+                </div>
             }
         </div>
     </div>
 </div>
-
 <script>
-    // AJAX voting for reviews
-    $(document).ready(function() {
-        $(document).on('click', '.vote-btn', function() {
+    $(document).ready(function () {
+        $(document).on('click', '.vote-btn', function () {
             var btn = $(this);
             var reviewId = btn.data('review-id');
             if (btn.hasClass('disabled')) return;
-
             btn.addClass('disabled');
             $.ajax({
-                url: '/Product/VoteReview',
-                type: 'POST',
-                data: { reviewId: reviewId },
-                success: function(response) {
+                url: '/Product/VoteReview', type: 'POST', data: { reviewId: reviewId },
+                success: function (response) {
                     if (response.success) {
                         btn.find('.vote-count').text(response.votes);
-                        btn.removeClass('btn-outline-secondary').addClass('btn-primary text-white');
+                        btn.removeClass('text-muted').addClass('text-primary font-weight-bold');
                         btn.find('i').removeClass('far').addClass('fas');
-                    } else {
-                        btn.removeClass('disabled');
-                    }
+                    } else { btn.removeClass('disabled'); }
                 },
-                error: function() {
-                    btn.removeClass('disabled');
-                }
+                error: function () { btn.removeClass('disabled'); }
             });
         });
     });
 
-    const variants = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
-        variants.Select(v => new { v.Id, v.SizeId, v.ColorId, v.AdditionalPrice }).ToList()
-    ));
+    // Ép kiểu JSON tĩnh xác định rõ thuộc tính, chống lỗi phân biệt chữ hoa/chữ thường
+    const productVariants = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(variants.Select(v => new
+        {
+            id = v.Id,
+            sizeId = v.SizeId,
+            colorId = v.ColorId,
+            price = v.AdditionalPrice ?? 0,
+            stock = v.StockQuantity
+        }).ToList()));
+
+    let currentSizeId = '';
+    let currentColorId = '';
 
     function setMainImage(url, el) {
         document.getElementById('mainImage').src = url;
-        const thumbs = document.querySelectorAll('.gallery-thumb');
+        const thumbs = document.querySelectorAll('.gallery-thumb-modern');
         thumbs.forEach(t => t.classList.remove('active'));
         el.classList.add('active');
     }
 
     function selectSizePill(val, el) {
-        // Toggle active style in UI
-        const pills = document.querySelectorAll('#sizePillContainer .pill-btn');
-        pills.forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('#sizePillContainer .btn-size-pill').forEach(p => p.classList.remove('active'));
         el.classList.add('active');
-
-        // Set backend hidden select value
-        const select = document.getElementById('sizeSelect');
-        if (select) {
-            select.value = val;
-        }
+        currentSizeId = String(val).trim().toLowerCase();
         syncVariant();
     }
 
     function selectColorPill(val, el) {
-        // Toggle active style in UI
-        const pills = document.querySelectorAll('#colorPillContainer .pill-btn');
-        pills.forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('#colorPillContainer .btn-color-swatch').forEach(p => p.classList.remove('active'));
         el.classList.add('active');
-
-        // Set backend hidden select value
-        const select = document.getElementById('colorSelect');
-        if (select) {
-            select.value = val;
-        }
+        currentColorId = String(val).trim().toLowerCase();
         syncVariant();
     }
 
@@ -481,105 +550,112 @@
     }
 
     function syncVariant() {
-        const sizeSelect = document.getElementById('sizeSelect');
-        const colorSelect = document.getElementById('colorSelect');
         const variantInput = document.getElementById('productVariantId');
+        const priceEl = document.getElementById('variantPrice');
+        const btnAddToCart = document.querySelector('.btn-ocean-primary');
+        const btnBuyNow = document.querySelector('.btn-ocean-outline');
 
-        const sizeId = sizeSelect?.value;
-        const colorId = colorSelect?.value;
+        // Chưa chọn đủ Size và Màu thì dừng
+        if (!currentSizeId || !currentColorId) return;
 
-        const match = variants.find(v => v.SizeId === sizeId && v.ColorId === colorId);
-        if (variantInput) {
-            variantInput.value = match ? match.Id : '';
-        }
+        // So sánh chuỗi an toàn tuyệt đối
+        const match = productVariants.find(v => 
+            String(v.sizeId).trim().toLowerCase() === currentSizeId && 
+            String(v.colorId).trim().toLowerCase() === currentColorId
+        );
 
-        // Calculate final price: product.CurrentPrice + AdditionalPrice
-        const base = @((product?.CurrentPrice ?? 0).ToString(System.Globalization.CultureInfo.InvariantCulture));
-        const additional = match && match.AdditionalPrice ? Number(match.AdditionalPrice) : 0;
-        const total = Number(base) + additional;
+        if (match) {
+            if (match.stock > 0) {
+                // TỒN TẠI & CÒN HÀNG
+                if (variantInput) variantInput.value = match.id;
+                
+                const basePrice = @((product?.CurrentPrice ?? 0).ToString(System.Globalization.CultureInfo.InvariantCulture));
+                const total = Number(basePrice) + Number(match.price);
+                
+                if (priceEl) {
+                    priceEl.textContent = total.toLocaleString('vi-VN') + '₫';
+                    priceEl.classList.add('text-danger');
+                    priceEl.classList.remove('text-muted');
+                }
 
-        const el = document.getElementById('variantPrice');
-        if (el) {
-            el.textContent = total.toLocaleString('vi-VN') + ' đ';
+                if (btnBuyNow) btnBuyNow.removeAttribute('disabled');
+                if (btnAddToCart) {
+                    btnAddToCart.removeAttribute('disabled');
+                    btnAddToCart.innerHTML = 'Thêm Vào Giỏ Hàng';
+                }
+            } else {
+                // TỒN TẠI NHƯNG HẾT HÀNG (Tồn kho <= 0)
+                if (variantInput) variantInput.value = '';
+                
+                if (priceEl) {
+                    priceEl.textContent = 'Phân loại này đã hết hàng';
+                    priceEl.classList.remove('text-danger');
+                    priceEl.classList.add('text-muted', 'font-italic');
+                }
+
+                if (btnBuyNow) btnBuyNow.setAttribute('disabled', 'true');
+                if (btnAddToCart) {
+                    btnAddToCart.setAttribute('disabled', 'true');
+                    btnAddToCart.innerHTML = '<i class="fas fa-box-open mr-2"></i>Tạm hết hàng';
+                }
+            }
+        } else {
+            // TỔ HỢP SIZE + MÀU NÀY KHÔNG TỒN TẠI TRONG DATABASE
+            if (variantInput) variantInput.value = '';
+            
+            if (priceEl) {
+                priceEl.textContent = 'Phân loại không khả dụng';
+                priceEl.classList.remove('text-danger');
+                priceEl.classList.add('text-muted', 'font-italic');
+            }
+
+            if (btnBuyNow) btnBuyNow.setAttribute('disabled', 'true');
+            if (btnAddToCart) {
+                btnAddToCart.setAttribute('disabled', 'true');
+                btnAddToCart.innerHTML = '<i class="fas fa-ban mr-2"></i>Không khả dụng';
+            }
         }
     }
 
     function submitBuyNow() {
         const form = document.getElementById('addToCartForm');
         const variantInput = document.getElementById('productVariantId');
-
+        
+        // Nếu user cố tình bấm khi Input ẩn bị trống
         if (!variantInput || !variantInput.value) {
-            alert('Vui lòng chọn đúng biến thể (Kích thước & Màu sắc).');
+            alert('Xin lỗi, tổ hợp Màu sắc và Kích thước này hiện đã hết hàng hoặc không khả dụng!');
             return;
         }
-
-        // Set form action to BuyNow and submit
+        
         form.action = '@Url.Action("BuyNow", "Product")';
         form.submit();
     }
 
-    // Auto-select first size and color pills on load
-    document.addEventListener("DOMContentLoaded", function() {
-        const firstSize = document.querySelector('#sizePillContainer .pill-btn');
+    document.addEventListener("DOMContentLoaded", function () {
+        // Tự động kích hoạt thuộc tính đầu tiên khi tải trang xong
+        const firstSize = document.querySelector('#sizePillContainer .btn-size-pill');
         if (firstSize) firstSize.click();
-
-        const firstColor = document.querySelector('#colorPillContainer .pill-btn');
+        const firstColor = document.querySelector('#colorPillContainer .btn-color-swatch');
         if (firstColor) firstColor.click();
 
-        // Star rating selector handler
+        // Xử lý ngôi sao đánh giá
         const stars = document.querySelectorAll('#starRatingSelector i');
         const ratingInput = document.getElementById('ratingStarsInput');
         const ratingLabel = document.getElementById('starRatingLabel');
-        
         if (stars.length && ratingInput && ratingLabel) {
-            const labels = {
-                1: 'Tệ',
-                2: 'Tạm ổn',
-                3: 'Bình thường',
-                4: 'Rất tốt',
-                5: 'Tuyệt vời'
-            };
-
+            const labels = { 1: 'Tệ', 2: 'Tạm ổn', 3: 'Bình thường', 4: 'Rất tốt', 5: 'Tuyệt vời' };
             stars.forEach(star => {
-                star.addEventListener('click', function() {
+                star.addEventListener('click', function () {
                     const val = parseInt(this.getAttribute('data-value'));
                     ratingInput.value = val;
                     ratingLabel.textContent = labels[val] || '';
-                    
-                    // Update classes for active stars
                     stars.forEach(s => {
                         const sVal = parseInt(s.getAttribute('data-value'));
-                        if (sVal <= val) {
-                            s.classList.remove('far', 'text-muted');
-                            s.classList.add('fas', 'active');
-                        } else {
-                            s.classList.remove('fas', 'active');
-                            s.classList.add('far', 'text-muted');
-                        }
-                    });
-                });
-                
-                // Hover effect
-                star.addEventListener('mouseover', function() {
-                    const val = parseInt(this.getAttribute('data-value'));
-                    stars.forEach(s => {
-                        const sVal = parseInt(s.getAttribute('data-value'));
-                        if (sVal <= val) {
-                            s.style.color = '#fbbf24';
-                        } else {
-                            s.style.color = '#d1d5db';
-                        }
-                    });
-                });
-                
-                star.addEventListener('mouseout', function() {
-                    stars.forEach(s => {
-                        s.removeAttribute('style');
+                        if (sVal <= val) { s.classList.replace('far', 'fas'); s.classList.add('text-gold-vibrant'); }
+                        else { s.classList.replace('fas', 'far'); s.classList.remove('text-gold-vibrant'); }
                     });
                 });
             });
         }
     });
 </script>
-
-

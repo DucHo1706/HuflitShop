@@ -48,7 +48,7 @@ namespace HuflitShopCore.Services
             var r = await _context.StockReceiveds
                 .Include(x => x.Supplier)
                 .FirstOrDefaultAsync(x => x.Id == id);
-                
+
             if (r == null) return null;
 
             return new StockReceiptDTO
@@ -71,70 +71,75 @@ namespace HuflitShopCore.Services
                 return (false, null, "Phiếu nhập phải có ít nhất một sản phẩm.");
             }
 
-            using var transaction = await _context.Database.BeginTransactionAsync();
-            try
+            var executionStrategy = _context.Database.CreateExecutionStrategy();
+
+            return await executionStrategy.ExecuteAsync(async () =>
             {
-                decimal totalCost = validDetails.Sum(d => d.Quantity * d.UnitPrice);
-
-                // 1. Tạo Phiếu nhập
-                var receipt = new StockReceived
+                using var transaction = await _context.Database.BeginTransactionAsync();
+                try
                 {
-                    Id = Guid.NewGuid().ToString(),
-                    SupplierId = dto.SupplierId,
-                    UserId = userId,
-                    ReceivedDate = DateTime.Now,
-                    TotalCost = totalCost
-                };
-                _context.StockReceiveds.Add(receipt);
+                    decimal totalCost = validDetails.Sum(d => d.Quantity * d.UnitPrice);
 
-                foreach (var item in validDetails)
-                {
-                    // 2. Tạo Chi tiết
-                    var detail = new StockReceivedDetail
+                    // 1. Tạo Phiếu nhập
+                    var receipt = new StockReceived
                     {
                         Id = Guid.NewGuid().ToString(),
-                        StockReceivedId = receipt.Id,
-                        ProductVariantId = item.ProductVariantId,
-                        Quantity = item.Quantity,
-                        UnitPrice = item.UnitPrice
+                        SupplierId = dto.SupplierId,
+                        UserId = userId,
+                        ReceivedDate = DateTime.Now,
+                        TotalCost = totalCost
                     };
-                    _context.StockReceivedDetails.Add(detail);
+                    _context.StockReceiveds.Add(receipt);
 
-                    // 3. Cập nhật tồn kho
-                    var variant = await _context.ProductVariants.FindAsync(item.ProductVariantId);
-                    if (variant != null)
+                    foreach (var item in validDetails)
                     {
-                        variant.StockQuantity += item.Quantity;
-                        _context.ProductVariants.Update(variant);
-
-                        // 4. Ghi log giao dịch kho
-                        _context.InventoryTransactions.Add(new InventoryTransaction
+                        // 2. Tạo Chi tiết
+                        var detail = new StockReceivedDetail
                         {
                             Id = Guid.NewGuid().ToString(),
+                            StockReceivedId = receipt.Id,
                             ProductVariantId = item.ProductVariantId,
-                            TransactionType = "IN",
-                            QuantityChange = item.Quantity,
-                            RemainingStock = variant.StockQuantity,
-                            TransactionDate = DateTime.Now,
-                            ReferenceId = receipt.Id,
-                            Note = $"Nhập kho từ phiếu: {receipt.Id}"
-                        });
+                            Quantity = item.Quantity,
+                            UnitPrice = item.UnitPrice
+                        };
+                        _context.StockReceivedDetails.Add(detail);
+
+                        // 3. Cập nhật tồn kho
+                        var variant = await _context.ProductVariants.FindAsync(item.ProductVariantId);
+                        if (variant != null)
+                        {
+                            variant.StockQuantity += item.Quantity;
+                            _context.ProductVariants.Update(variant);
+
+                            // 4. Ghi log giao dịch kho
+                            _context.InventoryTransactions.Add(new InventoryTransaction
+                            {
+                                Id = Guid.NewGuid().ToString(),
+                                ProductVariantId = item.ProductVariantId,
+                                TransactionType = "IN",
+                                QuantityChange = item.Quantity,
+                                RemainingStock = variant.StockQuantity,
+                                TransactionDate = DateTime.Now,
+                                ReferenceId = receipt.Id,
+                                Note = $"Nhập kho từ phiếu: {receipt.Id}"
+                            });
+                        }
                     }
+
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+
+                    return (true, receipt.Id, (string?)null);
                 }
-
-                await _context.SaveChangesAsync();
-                await transaction.CommitAsync();
-
-                return (true, receipt.Id, null);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex,
-                    "[StockReceipt] CreateReceiptWithBulkDetailsAsync failed. SupplierId={SupplierId}, UserId={UserId}, DetailsCount={DetailsCount}",
-                    dto?.SupplierId, userId, dto?.Details?.Count ?? 0);
-                await transaction.RollbackAsync();
-                return (false, null, "Đã xảy ra lỗi hệ thống khi tạo phiếu nhập.");
-            }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex,
+                        "[StockReceipt] CreateReceiptWithBulkDetailsAsync failed. SupplierId={SupplierId}, UserId={UserId}, DetailsCount={DetailsCount}",
+                        dto?.SupplierId, userId, dto?.Details?.Count ?? 0);
+                    await transaction.RollbackAsync();
+                    return (false, (string?)null, "Đã xảy ra lỗi hệ thống khi tạo phiếu nhập.");
+                }
+            });
         }
 
         public async Task<bool> AddBulkReceiptDetailsAsync(List<StockReceiptDetailDTO> details, string receiptId)
@@ -142,55 +147,60 @@ namespace HuflitShopCore.Services
             var validDetails = details.Where(d => d.Quantity > 0).ToList();
             if (!validDetails.Any()) return false;
 
-            using var transaction = await _context.Database.BeginTransactionAsync();
-            try
+            var executionStrategy = _context.Database.CreateExecutionStrategy();
+
+            return await executionStrategy.ExecuteAsync(async () =>
             {
-                var receipt = await _context.StockReceiveds.FindAsync(receiptId);
-                if (receipt == null) return false;
-
-                foreach (var dto in validDetails)
+                using var transaction = await _context.Database.BeginTransactionAsync();
+                try
                 {
-                    var detail = new StockReceivedDetail
+                    var receipt = await _context.StockReceiveds.FindAsync(receiptId);
+                    if (receipt == null) return false;
+
+                    foreach (var dto in validDetails)
                     {
-                        Id = Guid.NewGuid().ToString(),
-                        StockReceivedId = receiptId,
-                        ProductVariantId = dto.ProductVariantId,
-                        Quantity = dto.Quantity,
-                        UnitPrice = dto.UnitPrice
-                    };
-                    _context.StockReceivedDetails.Add(detail);
-
-                    receipt.TotalCost += (dto.Quantity * dto.UnitPrice);
-
-                    var variant = await _context.ProductVariants.FindAsync(dto.ProductVariantId);
-                    if (variant != null)
-                    {
-                        variant.StockQuantity += dto.Quantity;
-                        _context.ProductVariants.Update(variant);
-
-                        _context.InventoryTransactions.Add(new InventoryTransaction
+                        var detail = new StockReceivedDetail
                         {
                             Id = Guid.NewGuid().ToString(),
+                            StockReceivedId = receiptId,
                             ProductVariantId = dto.ProductVariantId,
-                            TransactionType = "IN",
-                            QuantityChange = dto.Quantity,
-                            RemainingStock = variant.StockQuantity,
-                            TransactionDate = DateTime.Now,
-                            ReferenceId = receiptId,
-                            Note = $"Nhập kho bổ sung từ phiếu: {receiptId}"
-                        });
-                    }
-                }
+                            Quantity = dto.Quantity,
+                            UnitPrice = dto.UnitPrice
+                        };
+                        _context.StockReceivedDetails.Add(detail);
 
-                await _context.SaveChangesAsync();
-                await transaction.CommitAsync();
-                return true;
-            }
-            catch
-            {
-                await transaction.RollbackAsync();
-                return false;
-            }
+                        receipt.TotalCost += (dto.Quantity * dto.UnitPrice);
+
+                        var variant = await _context.ProductVariants.FindAsync(dto.ProductVariantId);
+                        if (variant != null)
+                        {
+                            variant.StockQuantity += dto.Quantity;
+                            _context.ProductVariants.Update(variant);
+
+                            _context.InventoryTransactions.Add(new InventoryTransaction
+                            {
+                                Id = Guid.NewGuid().ToString(),
+                                ProductVariantId = dto.ProductVariantId,
+                                TransactionType = "IN",
+                                QuantityChange = dto.Quantity,
+                                RemainingStock = variant.StockQuantity,
+                                TransactionDate = DateTime.Now,
+                                ReferenceId = receiptId,
+                                Note = $"Nhập kho bổ sung từ phiếu: {receiptId}"
+                            });
+                        }
+                    }
+
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+                    return true;
+                }
+                catch
+                {
+                    await transaction.RollbackAsync();
+                    return false;
+                }
+            });
         }
 
         public async Task<List<StockReceiptDetailDTO>> GetDetailsByReceiptIdAsync(string receiptId)
@@ -201,13 +211,12 @@ namespace HuflitShopCore.Services
                 .Include(d => d.ProductVariant).ThenInclude(v => v.Size)
                 .Where(d => d.StockReceivedId == receiptId)
                 .ToListAsync();
-
-            return details.Select(d => new StockReceiptDetailDTO 
-            { 
-                Id = d.Id, 
-                StockReceiptId = d.StockReceivedId, 
-                ProductVariantId = d.ProductVariantId, 
-                Quantity = d.Quantity, 
+            return details.Select(d => new StockReceiptDetailDTO
+            {
+                Id = d.Id,
+                StockReceiptId = d.StockReceivedId,
+                ProductVariantId = d.ProductVariantId,
+                Quantity = d.Quantity,
                 UnitPrice = d.UnitPrice,
                 ProductName = $"{d.ProductVariant?.Product?.ProductName} - {d.ProductVariant?.Color?.ColorName} - {d.ProductVariant?.Size?.SizeName}"
             }).ToList();
