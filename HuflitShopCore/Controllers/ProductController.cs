@@ -151,59 +151,90 @@ namespace HuflitShopCore.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddCart(string id, string? productVariantId, int quantity = 1)
         {
-            // Shop hiện tại: AddCart/BuyNow có thể gửi kèm productVariantId.
-            // Nếu không có productVariantId thì fallback chọn biến thể còn hàng đầu tiên.
-
-            if (!string.IsNullOrWhiteSpace(productVariantId))
+            try
             {
-                var pv = await _productService.GetActiveVariantByIdAsync(productVariantId);
+                if (!string.IsNullOrWhiteSpace(productVariantId))
+                {
+                    var pv = await _productService.GetActiveVariantByIdAsync(productVariantId);
 
-                if (pv == null) return RedirectToAction("Index", "Home");
+                    if (pv == null) return RedirectToAction("Index", "Home");
 
-                await AddOrUpdateCartItemAsync(pv.Id, Math.Max(1, quantity));
+                    await AddOrUpdateCartItemAsync(pv.Id, Math.Max(1, quantity));
+                    return RedirectToAction("Cart", "Cart");
+                }
+
+                // Fallback: Home/Index.cshtml truyền ProductId.
+                var variant = await _productService.GetFirstActiveVariantByProductIdAsync(id);
+
+                if (variant == null)
+                    return RedirectToAction("Index", "Home");
+
+                await AddOrUpdateCartItemAsync(variant.Id, Math.Max(1, quantity));
                 return RedirectToAction("Cart", "Cart");
             }
-
-            // Fallback: Home/Index.cshtml truyền ProductId.
-            var variant = await _productService.GetFirstActiveVariantByProductIdAsync(id);
-
-            if (variant == null)
-                return RedirectToAction("Index", "Home");
-
-            await AddOrUpdateCartItemAsync(variant.Id, Math.Max(1, quantity));
-            return RedirectToAction("Cart", "Cart");
+            catch (System.Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction("Details", new { id = id });
+            }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> BuyNow(string id, string? productVariantId, int quantity = 1)
         {
-            if (!string.IsNullOrWhiteSpace(productVariantId))
+            try
             {
-                var pv = await _productService.GetActiveVariantByIdAsync(productVariantId);
+                if (!string.IsNullOrWhiteSpace(productVariantId))
+                {
+                    var pv = await _productService.GetActiveVariantByIdAsync(productVariantId);
 
-                if (pv == null) return RedirectToAction("Index", "Home");
+                    if (pv == null) return RedirectToAction("Index", "Home");
 
-                return RedirectToAction("Checkout", "Order", new { buyNowVariantId = pv.Id, buyNowQty = Math.Max(1, quantity) });
+                    if (pv.StockQuantity < quantity)
+                    {
+                        throw new System.InvalidOperationException($"Sản phẩm chỉ còn {pv.StockQuantity} sản phẩm trong kho.");
+                    }
+
+                    return RedirectToAction("Checkout", "Order", new { buyNowVariantId = pv.Id, buyNowQty = Math.Max(1, quantity) });
+                }
+
+                var variant = await _productService.GetFirstActiveVariantByProductIdAsync(id);
+
+                if (variant == null)
+                    return RedirectToAction("Index", "Home");
+
+                if (variant.StockQuantity < quantity)
+                {
+                    throw new System.InvalidOperationException($"Sản phẩm chỉ còn {variant.StockQuantity} sản phẩm trong kho.");
+                }
+
+                return RedirectToAction("Checkout", "Order", new { buyNowVariantId = variant.Id, buyNowQty = Math.Max(1, quantity) });
             }
-
-            var variant = await _productService.GetFirstActiveVariantByProductIdAsync(id);
-
-            if (variant == null)
-                return RedirectToAction("Index", "Home");
-
-            return RedirectToAction("Checkout", "Order", new { buyNowVariantId = variant.Id, buyNowQty = Math.Max(1, quantity) });
+            catch (System.Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction("Details", new { id = id });
+            }
         }
 
         [HttpGet]
         public async Task<IActionResult> BuyNow(string id)
         {
-            var variant = await _productService.GetFirstActiveVariantByProductIdAsync(id);
+            try
+            {
+                var variant = await _productService.GetFirstActiveVariantByProductIdAsync(id);
 
-            if (variant == null)
-                return RedirectToAction("Index", "Home");
+                if (variant == null)
+                    return RedirectToAction("Index", "Home");
 
-            return RedirectToAction("Checkout", "Order", new { buyNowVariantId = variant.Id, buyNowQty = 1 });
+                return RedirectToAction("Checkout", "Order", new { buyNowVariantId = variant.Id, buyNowQty = 1 });
+            }
+            catch (System.Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction("Details", new { id = id });
+            }
         }
 
         // Backward compatibility: nếu view cũ chỉ gửi mỗi ProductId.

@@ -74,8 +74,7 @@ namespace HuflitShopCore.Services
                     }
                     else
                     {
-                        order.OrderStatus = 4; // Hủy đơn
-                        await _orderService.UpdateOrderAsync(order);
+                        await _orderService.UpdateOrderStatusAsync(orderId, 4); // Hủy đơn và trả lại kho
                         return (orderId, false);
                     }
                 }

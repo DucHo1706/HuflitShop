@@ -46,14 +46,31 @@ namespace HuflitShopCore.Services
 
         public async Task AddOrUpdateCartItemAsync(string? userId, string? guestCartId, string productVariantId, int quantity)
         {
+            var variant = await _context.ProductVariants
+                .Include(pv => pv.Product)
+                .FirstOrDefaultAsync(pv => pv.Id == productVariantId);
+
+            if (variant == null) throw new InvalidOperationException("Biến thể sản phẩm không tồn tại.");
+
             var existing = await _context.Carts.FirstOrDefaultAsync(c =>
                 c.ProductVariantId == productVariantId &&
                 c.UserId == userId &&
                 c.SessionId == guestCartId);
 
+            int targetQuantity = quantity;
             if (existing != null)
             {
-                existing.Quantity += quantity;
+                targetQuantity += existing.Quantity;
+            }
+
+            if (variant.StockQuantity < targetQuantity)
+            {
+                throw new InvalidOperationException($"Không thể thêm số lượng đã chọn. Kho chỉ còn {variant.StockQuantity} sản phẩm (Giỏ hàng của bạn đang có {existing?.Quantity ?? 0} sản phẩm).");
+            }
+
+            if (existing != null)
+            {
+                existing.Quantity = targetQuantity;
                 _context.Carts.Update(existing);
             }
             else
@@ -75,8 +92,16 @@ namespace HuflitShopCore.Services
 
         public async Task<bool> UpdateQuantityAsync(string cartId, int quantity)
         {
-            var item = await _context.Carts.FirstOrDefaultAsync(c => c.Id == cartId);
+            var item = await _context.Carts
+                .Include(c => c.ProductVariant)
+                .FirstOrDefaultAsync(c => c.Id == cartId);
             if (item == null) return false;
+
+            var variant = item.ProductVariant;
+            if (variant != null && variant.StockQuantity < quantity)
+            {
+                throw new InvalidOperationException($"Số lượng yêu cầu ({quantity}) vượt quá tồn kho hiện tại ({variant.StockQuantity}).");
+            }
 
             item.Quantity = Math.Max(1, quantity);
             _context.Carts.Update(item);

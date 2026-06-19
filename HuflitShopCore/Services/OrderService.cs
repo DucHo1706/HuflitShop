@@ -93,11 +93,42 @@ namespace HuflitShopCore.Services
             var order = await _context.Orders.FindAsync(id);
             if (order == null) return false;
 
+            int oldStatus = order.OrderStatus;
+            if (oldStatus == status) return true;
+
             order.OrderStatus = status;
             // Nếu đơn hoàn thành (3), ta đánh dấu luôn là đã thanh toán (1)
             if (status == 3) order.PaymentStatus = 1;
             
             _context.Orders.Update(order);
+
+            // Nếu trạng thái chuyển thành Hủy (4) và trước đó không phải là Hủy (4)
+            if (status == 4 && oldStatus != 4)
+            {
+                var details = await _context.OrderDetails.Where(od => od.OrderId == id).ToListAsync();
+                foreach (var detail in details)
+                {
+                    var pv = await _context.ProductVariants.FindAsync(detail.ProductVariantId);
+                    if (pv != null)
+                    {
+                        pv.StockQuantity += detail.Quantity;
+                        _context.ProductVariants.Update(pv);
+
+                        _context.InventoryTransactions.Add(new InventoryTransaction
+                        {
+                            Id = Guid.NewGuid().ToString(),
+                            ProductVariantId = detail.ProductVariantId,
+                            TransactionType = "IN",
+                            QuantityChange = detail.Quantity,
+                            RemainingStock = pv.StockQuantity,
+                            TransactionDate = DateTime.Now,
+                            ReferenceId = id,
+                            Note = $"Hoàn kho do hủy đơn hàng: {id}"
+                        });
+                    }
+                }
+            }
+
             await _context.SaveChangesAsync();
             return true;
         }
@@ -226,6 +257,26 @@ namespace HuflitShopCore.Services
                 }
             }
 
+            // Check stock of all items first
+            foreach (var c in items)
+            {
+                var pv = await _context.ProductVariants
+                    .Include(x => x.Product)
+                    .Include(x => x.Size)
+                    .Include(x => x.Color)
+                    .FirstOrDefaultAsync(x => x.Id == c.ProductVariantId);
+
+                if (pv == null || !pv.IsActive)
+                {
+                    throw new InvalidOperationException("Sản phẩm không tồn tại hoặc đã ngừng kinh doanh.");
+                }
+
+                if (pv.StockQuantity < c.Quantity)
+                {
+                    throw new InvalidOperationException($"Sản phẩm '{pv.Product?.ProductName} - Màu: {pv.Color?.ColorName} - Size: {pv.Size?.SizeName}' chỉ còn {pv.StockQuantity} sản phẩm trong kho. Vui lòng giảm số lượng.");
+                }
+            }
+
             var finalAmount = orderTotal - discountAmount;
 
             var order = new Order
@@ -253,8 +304,32 @@ namespace HuflitShopCore.Services
 
             foreach (var c in items)
             {
-                var pv = c.ProductVariant;
-                var product = pv?.Product;
+                var pv = await _context.ProductVariants
+                    .Include(x => x.Product)
+                    .Include(x => x.Size)
+                    .Include(x => x.Color)
+                    .FirstOrDefaultAsync(x => x.Id == c.ProductVariantId);
+
+                if (pv == null) throw new InvalidOperationException("Biến thể sản phẩm không tồn tại.");
+
+                var product = pv.Product;
+
+                // Trừ tồn kho
+                pv.StockQuantity -= c.Quantity;
+                _context.ProductVariants.Update(pv);
+
+                // Ghi nhận lịch sử giao dịch kho
+                _context.InventoryTransactions.Add(new InventoryTransaction
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    ProductVariantId = c.ProductVariantId,
+                    TransactionType = "OUT",
+                    QuantityChange = -c.Quantity,
+                    RemainingStock = pv.StockQuantity,
+                    TransactionDate = DateTime.Now,
+                    ReferenceId = order.Id,
+                    Note = $"Xuất kho bán hàng cho Đơn hàng: {order.Id}"
+                });
 
                 var detail = new OrderDetail
                 {
@@ -264,8 +339,8 @@ namespace HuflitShopCore.Services
                     Quantity = c.Quantity,
                     PurchasedPrice = product?.CurrentPrice ?? 0,
                     ProductNameSnapshot = product?.ProductName ?? "",
-                    SizeNameSnapshot = pv?.Size?.SizeName ?? "",
-                    ColorNameSnapshot = pv?.Color?.ColorName ?? ""
+                    SizeNameSnapshot = pv.Size?.SizeName ?? "",
+                    ColorNameSnapshot = pv.Color?.ColorName ?? ""
                 };
 
                 _context.OrderDetails.Add(detail);
@@ -314,10 +389,7 @@ namespace HuflitShopCore.Services
 
             if (order == null || order.OrderStatus != 0) return false;
 
-            order.OrderStatus = 4; // 4: Hủy
-            _context.Orders.Update(order);
-            await _context.SaveChangesAsync();
-            return true;
+            return await UpdateOrderStatusAsync(orderId, 4);
         }
 
         public async Task<bool> RequestOrderRefundAsync(string orderId, string userId)

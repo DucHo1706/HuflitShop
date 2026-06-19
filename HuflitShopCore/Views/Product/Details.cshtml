@@ -9,7 +9,7 @@
     var variants = product?.ProductVariants == null
         ? Enumerable.Empty<HuflitShopCore.Models.ProductVariant>()
         : product.ProductVariants
-            .Where(pv => pv.IsActive && pv.StockQuantity > 0)
+            .Where(pv => pv.IsActive)
             .ToList();
 
     var images = product?.ProductImages == null
@@ -141,6 +141,7 @@
                                 <button type="button" class="qty-btn" style="border-radius:4px 0 0 4px;" onclick="changeQty(-1)">-</button>
                                 <input type="text" name="quantity" id="qtyInput" value="1" readonly class="qty-input" />
                                 <button type="button" class="qty-btn" style="border-radius:0 4px 4px 0;" onclick="changeQty(1)">+</button>
+                                <span id="stockIndicator" class="text-muted ml-3" style="font-size: 0.95rem; font-weight: 500;"></span>
                             </div>
                         </div>
 
@@ -404,6 +405,7 @@
     </div>
 </div>
 
+@section Scripts {
 <script>
     // AJAX voting for reviews
     $(document).ready(function() {
@@ -434,7 +436,7 @@
     });
 
     const variants = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
-        variants.Select(v => new { v.Id, v.SizeId, v.ColorId, v.AdditionalPrice }).ToList()
+        variants.Select(v => new { v.Id, v.SizeId, v.ColorId, v.AdditionalPrice, v.StockQuantity }).ToList()
     ));
 
     function setMainImage(url, el) {
@@ -475,8 +477,24 @@
     function changeQty(delta) {
         const input = document.getElementById('qtyInput');
         let val = parseInt(input.value) || 1;
+
+        // Find match to get stock quantity (support both PascalCase and camelCase)
+        const sizeSelect = document.getElementById('sizeSelect');
+        const colorSelect = document.getElementById('colorSelect');
+        const sizeId = sizeSelect?.value;
+        const colorId = colorSelect?.value;
+        const match = variants.find(v => (v.SizeId || v.sizeId) === sizeId && (v.ColorId || v.colorId) === colorId);
+
         val += delta;
         if (val < 1) val = 1;
+
+        if (match) {
+            const stock = match.StockQuantity !== undefined ? match.StockQuantity : (match.stockQuantity || 0);
+            if (val > stock) {
+                val = stock;
+                alert(`Số lượng chọn vượt quá số lượng trong kho (Tối đa: ${stock})`);
+            }
+        }
         input.value = val;
     }
 
@@ -488,14 +506,52 @@
         const sizeId = sizeSelect?.value;
         const colorId = colorSelect?.value;
 
-        const match = variants.find(v => v.SizeId === sizeId && v.ColorId === colorId);
+        const match = variants.find(v => (v.SizeId || v.sizeId) === sizeId && (v.ColorId || v.colorId) === colorId);
         if (variantInput) {
-            variantInput.value = match ? match.Id : '';
+            variantInput.value = match ? (match.Id || match.id) : '';
+        }
+
+        // Cập nhật tồn kho và giới hạn số lượng
+        const stockIndicator = document.getElementById('stockIndicator');
+        const qtyInput = document.getElementById('qtyInput');
+        const addToCartBtn = document.querySelector('.btn-action-cart');
+        const buyNowBtn = document.querySelector('.btn-action-buy');
+
+        if (match) {
+            const stock = match.StockQuantity !== undefined ? match.StockQuantity : (match.stockQuantity || 0);
+            if (stock > 0) {
+                if (stockIndicator) {
+                    stockIndicator.innerHTML = `<i class="fas fa-check-circle text-success mr-1"></i>Còn lại: <strong class="text-dark">${stock}</strong> sản phẩm`;
+                }
+                if (qtyInput) {
+                    let qty = parseInt(qtyInput.value) || 1;
+                    if (qty > stock) {
+                        qtyInput.value = stock;
+                    }
+                }
+                if (addToCartBtn) addToCartBtn.removeAttribute('disabled');
+                if (buyNowBtn) buyNowBtn.removeAttribute('disabled');
+            } else {
+                if (stockIndicator) {
+                    stockIndicator.innerHTML = `<i class="fas fa-exclamation-triangle text-danger mr-1"></i>Hết hàng`;
+                }
+                if (qtyInput) {
+                    qtyInput.value = 0;
+                }
+                if (addToCartBtn) addToCartBtn.setAttribute('disabled', 'disabled');
+                if (buyNowBtn) buyNowBtn.setAttribute('disabled', 'disabled');
+            }
+        } else {
+            if (stockIndicator) {
+                stockIndicator.innerHTML = `<i class="fas fa-times-circle text-danger mr-1"></i>Hết hàng`;
+            }
+            if (addToCartBtn) addToCartBtn.setAttribute('disabled', 'disabled');
+            if (buyNowBtn) buyNowBtn.setAttribute('disabled', 'disabled');
         }
 
         // Calculate final price: product.CurrentPrice + AdditionalPrice
         const base = @((product?.CurrentPrice ?? 0).ToString(System.Globalization.CultureInfo.InvariantCulture));
-        const additional = match && match.AdditionalPrice ? Number(match.AdditionalPrice) : 0;
+        const additional = match ? (match.AdditionalPrice !== undefined ? Number(match.AdditionalPrice) : Number(match.additionalPrice || 0)) : 0;
         const total = Number(base) + additional;
 
         const el = document.getElementById('variantPrice');
@@ -520,11 +576,15 @@
 
     // Auto-select first size and color pills on load
     document.addEventListener("DOMContentLoaded", function() {
-        const firstSize = document.querySelector('#sizePillContainer .pill-btn');
-        if (firstSize) firstSize.click();
+        try {
+            const firstSize = document.querySelector('#sizePillContainer .pill-btn');
+            if (firstSize) firstSize.click();
 
-        const firstColor = document.querySelector('#colorPillContainer .pill-btn');
-        if (firstColor) firstColor.click();
+            const firstColor = document.querySelector('#colorPillContainer .pill-btn');
+            if (firstColor) firstColor.click();
+        } catch (e) {
+            console.error("Auto-click variant pills failed: ", e);
+        }
 
         // Star rating selector handler
         const stars = document.querySelectorAll('#starRatingSelector i');
@@ -541,6 +601,9 @@
             };
 
             stars.forEach(star => {
+                // Ensure star has pointer cursor styling
+                star.style.cursor = 'pointer';
+
                 star.addEventListener('click', function() {
                     const val = parseInt(this.getAttribute('data-value'));
                     ratingInput.value = val;
@@ -581,5 +644,6 @@
         }
     });
 </script>
+}
 
 
