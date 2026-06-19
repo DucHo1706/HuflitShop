@@ -48,7 +48,7 @@ namespace HuflitShopCore.Services
             var r = await _context.StockReceiveds
                 .Include(x => x.Supplier)
                 .FirstOrDefaultAsync(x => x.Id == id);
-                
+
             if (r == null) return null;
 
             return new StockReceiptDTO
@@ -211,13 +211,12 @@ namespace HuflitShopCore.Services
                 .Include(d => d.ProductVariant).ThenInclude(v => v.Size)
                 .Where(d => d.StockReceivedId == receiptId)
                 .ToListAsync();
-
-            return details.Select(d => new StockReceiptDetailDTO 
-            { 
-                Id = d.Id, 
-                StockReceiptId = d.StockReceivedId, 
-                ProductVariantId = d.ProductVariantId, 
-                Quantity = d.Quantity, 
+            return details.Select(d => new StockReceiptDetailDTO
+            {
+                Id = d.Id,
+                StockReceiptId = d.StockReceivedId,
+                ProductVariantId = d.ProductVariantId,
+                Quantity = d.Quantity,
                 UnitPrice = d.UnitPrice,
                 ProductName = $"{d.ProductVariant?.Product?.ProductName} - {d.ProductVariant?.Color?.ColorName} - {d.ProductVariant?.Size?.SizeName}"
             }).ToList();
