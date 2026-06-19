@@ -208,81 +208,90 @@ namespace HuflitShopCore.Services
             string? colorId = null, 
             string? sortBy = null)
         {
-            var query = _context.Products
-                .Include(p => p.ProductImages)
-                .Include(p => p.ProductVariants)
-                .Where(p => !p.IsDeleted)
-                .AsNoTracking();
+            // Base query for counting (WITHOUT includes to prevent Cartesian explosion and heavy joins in count)
+            var baseQuery = _context.Products
+                .Where(p => !p.IsDeleted);
 
             if (!string.IsNullOrEmpty(categoryId))
             {
-                query = query.Where(p => p.CategoryId == categoryId);
+                baseQuery = baseQuery.Where(p => p.CategoryId == categoryId);
             }
 
             if (!string.IsNullOrEmpty(search))
             {
                 search = search.Trim().ToLower();
-                query = query.Where(p => p.ProductName.ToLower().Contains(search) || 
-                                         (p.Trademark != null && p.Trademark.ToLower().Contains(search)));
+                baseQuery = baseQuery.Where(p => p.ProductName.ToLower().Contains(search) || 
+                                                 (p.Trademark != null && p.Trademark.ToLower().Contains(search)));
             }
 
             if (minPrice.HasValue)
             {
-                query = query.Where(p => p.CurrentPrice >= minPrice.Value);
+                baseQuery = baseQuery.Where(p => p.CurrentPrice >= minPrice.Value);
             }
 
             if (maxPrice.HasValue)
             {
-                query = query.Where(p => p.CurrentPrice <= maxPrice.Value);
+                baseQuery = baseQuery.Where(p => p.CurrentPrice <= maxPrice.Value);
             }
 
             if (!string.IsNullOrEmpty(trademark))
             {
-                query = query.Where(p => p.Trademark == trademark);
+                baseQuery = baseQuery.Where(p => p.Trademark == trademark);
             }
 
             if (!string.IsNullOrEmpty(sizeId))
             {
-                query = query.Where(p => p.ProductVariants.Any(pv => pv.SizeId == sizeId && pv.IsActive && pv.StockQuantity > 0));
+                baseQuery = baseQuery.Where(p => p.ProductVariants.Any(pv => pv.SizeId == sizeId && pv.IsActive && pv.StockQuantity > 0));
             }
 
             if (!string.IsNullOrEmpty(colorId))
             {
-                query = query.Where(p => p.ProductVariants.Any(pv => pv.ColorId == colorId && pv.IsActive && pv.StockQuantity > 0));
+                baseQuery = baseQuery.Where(p => p.ProductVariants.Any(pv => pv.ColorId == colorId && pv.IsActive && pv.StockQuantity > 0));
             }
+
+            // Count query is extremely fast!
+            int totalProducts = await baseQuery.CountAsync();
+
+            // Paging math
+            int totalPages = (int)Math.Ceiling((double)totalProducts / pageSize);
+            if (page < 1) page = 1;
+            if (page > totalPages && totalPages > 0) page = totalPages;
+
+            // Base query for sorting and includes
+            var selectQuery = baseQuery;
 
             if (!string.IsNullOrEmpty(sortBy))
             {
                 switch (sortBy.ToLower())
                 {
                     case "price_asc":
-                        query = query.OrderBy(p => p.CurrentPrice);
+                        selectQuery = selectQuery.OrderBy(p => p.CurrentPrice);
                         break;
                     case "price_desc":
-                        query = query.OrderByDescending(p => p.CurrentPrice);
+                        selectQuery = selectQuery.OrderByDescending(p => p.CurrentPrice);
                         break;
                     case "newest":
-                        query = query.OrderByDescending(p => p.CreatedAt);
+                        selectQuery = selectQuery.OrderByDescending(p => p.CreatedAt);
                         break;
                     case "popular":
-                        query = query.OrderByDescending(p => p.ViewCount);
+                        selectQuery = selectQuery.OrderByDescending(p => p.ViewCount);
                         break;
                     default:
-                        query = query.OrderByDescending(p => p.CreatedAt);
+                        selectQuery = selectQuery.OrderByDescending(p => p.CreatedAt);
                         break;
                 }
             }
             else
             {
-                query = query.OrderByDescending(p => p.CreatedAt);
+                selectQuery = selectQuery.OrderByDescending(p => p.CreatedAt);
             }
 
-            int totalProducts = await query.CountAsync();
-            int totalPages = (int)Math.Ceiling((double)totalProducts / pageSize);
-            if (page < 1) page = 1;
-            if (page > totalPages && totalPages > 0) page = totalPages;
-
-            var products = await query
+            // Fetch actual page records using split query & no-tracking
+            var products = await selectQuery
+                .Include(p => p.ProductImages)
+                .Include(p => p.ProductVariants)
+                .AsSplitQuery() // Split query prevents Cartesian product explosion
+                .AsNoTracking()
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
@@ -297,6 +306,7 @@ namespace HuflitShopCore.Services
                 .Include(p => p.ProductVariants).ThenInclude(pv => pv.Size)
                 .Include(p => p.ProductVariants).ThenInclude(pv => pv.Color)
                 .Include(p => p.ProductImages)
+                .AsSplitQuery() // Split query prevents Cartesian product explosion
                 .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.Id == id);
         }

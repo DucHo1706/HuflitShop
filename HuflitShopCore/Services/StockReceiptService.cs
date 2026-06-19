@@ -28,6 +28,7 @@ namespace HuflitShopCore.Services
                 .Include(r => r.Supplier)
                 .Include(r => r.User)
                 .Include(r => r.StockReceivedDetails)
+                .AsNoTracking()
                 .OrderByDescending(r => r.ReceivedDate)
                 .ToListAsync();
 
@@ -209,6 +210,7 @@ namespace HuflitShopCore.Services
                 .Include(d => d.ProductVariant).ThenInclude(v => v.Product)
                 .Include(d => d.ProductVariant).ThenInclude(v => v.Color)
                 .Include(d => d.ProductVariant).ThenInclude(v => v.Size)
+                .AsNoTracking()
                 .Where(d => d.StockReceivedId == receiptId)
                 .ToListAsync();
             return details.Select(d => new StockReceiptDetailDTO
