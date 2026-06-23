@@ -1,4 +1,4 @@
-﻿@model HuflitShopCore.DTOs.ProductDTO
+@model HuflitShopCore.DTOs.ProductDTO
 @{
     ViewData["Title"] = "Sửa sản phẩm";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
@@ -25,7 +25,7 @@
                 </div>
                 <div class="form-group mb-3">
                     <label asp-for="CategoryId" class="control-label fw-bold">Chọn danh mục</label>
-                    <select asp-for="CategoryId" class="form-control" asp-items="ViewBag.CategoryList">
+                    <select asp-for="CategoryId" class="form-control select2-enable" asp-items="ViewBag.CategoryList">
                         <option value="">-- Chọn danh mục --</option>
                     </select>
                     <span asp-validation-for="CategoryId" class="text-danger"></span>

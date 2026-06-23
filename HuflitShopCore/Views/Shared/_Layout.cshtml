@@ -14,8 +14,8 @@
     bool isEmployeeOrAdmin = false;
     if (isAuth)
     {
-        var role = User.FindFirst(ClaimTypes.Role)?.Value;
-        isEmployeeOrAdmin = role == "Admin" || role == "Employee";
+        isEmployeeOrAdmin = User.IsInRole("1") || User.IsInRole("ROLE-ADMIN") || User.IsInRole("Admin") ||
+                            User.IsInRole("2") || User.IsInRole("ROLE-EMPLOYEE") || User.IsInRole("Employee");
     }
 
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString();

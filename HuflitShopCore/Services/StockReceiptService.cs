@@ -105,11 +105,32 @@ namespace HuflitShopCore.Services
                         };
                         _context.StockReceivedDetails.Add(detail);
 
-                        // 3. Cập nhật tồn kho
+                        // 3. Cập nhật tồn kho & Giá vốn bình quân (MAC)
                         var variant = await _context.ProductVariants.FindAsync(item.ProductVariantId);
                         if (variant != null)
                         {
-                            variant.StockQuantity += item.Quantity;
+                            int currentStock = variant.StockQuantity;
+                            decimal currentAvgCost = variant.AverageCostPrice;
+                            int receivedQty = item.Quantity;
+                            decimal receivedUnitPrice = item.UnitPrice;
+
+                            if (currentStock + receivedQty > 0)
+                            {
+                                if (currentStock <= 0)
+                                {
+                                    variant.AverageCostPrice = receivedUnitPrice;
+                                }
+                                else
+                                {
+                                    variant.AverageCostPrice = Math.Round(((currentStock * currentAvgCost) + (receivedQty * receivedUnitPrice)) / (currentStock + receivedQty), 2);
+                                }
+                            }
+                            else
+                            {
+                                variant.AverageCostPrice = 0;
+                            }
+
+                            variant.StockQuantity += receivedQty;
                             _context.ProductVariants.Update(variant);
 
                             // 4. Ghi log giao dịch kho
@@ -175,7 +196,28 @@ namespace HuflitShopCore.Services
                         var variant = await _context.ProductVariants.FindAsync(dto.ProductVariantId);
                         if (variant != null)
                         {
-                            variant.StockQuantity += dto.Quantity;
+                            int currentStock = variant.StockQuantity;
+                            decimal currentAvgCost = variant.AverageCostPrice;
+                            int receivedQty = dto.Quantity;
+                            decimal receivedUnitPrice = dto.UnitPrice;
+
+                            if (currentStock + receivedQty > 0)
+                            {
+                                if (currentStock <= 0)
+                                {
+                                    variant.AverageCostPrice = receivedUnitPrice;
+                                }
+                                else
+                                {
+                                    variant.AverageCostPrice = Math.Round(((currentStock * currentAvgCost) + (receivedQty * receivedUnitPrice)) / (currentStock + receivedQty), 2);
+                                }
+                            }
+                            else
+                            {
+                                variant.AverageCostPrice = 0;
+                            }
+
+                            variant.StockQuantity += receivedQty;
                             _context.ProductVariants.Update(variant);
 
                             _context.InventoryTransactions.Add(new InventoryTransaction

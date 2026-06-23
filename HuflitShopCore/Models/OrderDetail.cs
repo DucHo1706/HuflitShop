@@ -27,6 +27,10 @@ namespace HuflitShopCore.Models
         public decimal PurchasedPrice { get; set; }
 
         [Required]
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal CostPrice { get; set; } = 0;
+
+        [Required]
         [StringLength(255)]
         public string ProductNameSnapshot { get; set; }
 

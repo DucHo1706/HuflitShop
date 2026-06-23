@@ -23,13 +23,20 @@ namespace HuflitShopCore.Areas.Admin.Controllers
             int selectedYear = year ?? DateTime.Now.Year;
             ViewBag.SelectedYear = selectedYear;
 
-            // Fetch statistics from service
-            var monthlyRevenue = await _reportService.GetMonthlyRevenueAsync(selectedYear);
-            var quarterlyRevenue = await _reportService.GetQuarterlyRevenueAsync(selectedYear);
-            var seasonalRevenue = await _reportService.GetSeasonalRevenueAsync(selectedYear);
-            var topProducts = await _reportService.GetTopSellingProductsAsync(selectedYear, 5);
+            // Fetch base orders exactly once to prevent N+1 database queries!
+            var orders = await _reportService.GetBaseOrdersAsync(selectedYear);
+
+            // Fetch statistics calculations using CPU-only memory operations
+            var monthlyRevenue = _reportService.GetMonthlyRevenue(orders);
+            var quarterlyRevenue = _reportService.GetQuarterlyRevenue(orders);
+            var seasonalRevenue = _reportService.GetSeasonalRevenue(orders);
+            var topProducts = _reportService.GetTopSellingProducts(orders, 5);
+            
+            // Highly optimized GroupBy query (1 DB query)
             var yearlyComparison = await _reportService.GetYearlyComparisonAsync();
-            var isMock = await _reportService.IsUsingMockDataAsync();
+            
+            // If any order starts with "mock-", it means we are using mock data
+            bool isMock = orders.Any(o => o.Id != null && o.Id.StartsWith("mock-"));
 
             ViewBag.MonthlyRevenue = monthlyRevenue;
             ViewBag.QuarterlyRevenue = quarterlyRevenue;

@@ -26,10 +26,11 @@ namespace HuflitShopCore.Services
             var orders = await _context.Orders
                 .Include(o => o.User)
                 .Include(o => o.PaymentMethod)
+                .Include(o => o.OrderDetails) // Tải chi tiết đơn hàng (sản phẩm) để tìm kiếm/lọc nâng cao
                 .OrderByDescending(o => o.OrderDate)
                 .ToListAsync();
 
-            return orders.Select(o => MapToDTO(o)).ToList();
+            return orders.Select(o => MapToDTO(o, true)).ToList();
         }
 
         public async Task<List<OrderDTO>> GetPendingOrdersAsync()
@@ -37,11 +38,12 @@ namespace HuflitShopCore.Services
             var orders = await _context.Orders
                 .Include(o => o.User)
                 .Include(o => o.PaymentMethod)
+                .Include(o => o.OrderDetails) // Tải chi tiết đơn hàng (sản phẩm) để tìm kiếm/lọc nâng cao
                 .Where(o => o.OrderStatus == 0) // Lọc đơn "Chờ duyệt"
                 .OrderBy(o => o.OrderDate)
                 .ToListAsync();
 
-            return orders.Select(o => MapToDTO(o)).ToList();
+            return orders.Select(o => MapToDTO(o, true)).ToList();
         }
 
         public async Task<OrderDTO?> GetOrderByIdAsync(string id)
@@ -133,9 +135,9 @@ namespace HuflitShopCore.Services
             return true;
         }
 
-        private OrderDTO MapToDTO(Models.Order o)
+        private OrderDTO MapToDTO(Models.Order o, bool includeDetails = false)
         {
-            return new OrderDTO
+            var dto = new OrderDTO
             {
                 Id = o.Id,
                 UserId = o.UserId,
@@ -154,6 +156,23 @@ namespace HuflitShopCore.Services
                 ShippingCity = o.ShippingCity ?? string.Empty,
                 ShippingDistrict = o.ShippingDistrict ?? string.Empty
             };
+
+            if (includeDetails && o.OrderDetails != null)
+            {
+                dto.OrderDetails = o.OrderDetails.Select(od => new OrderDetailDTO
+                {
+                    Id = od.Id,
+                    OrderId = od.OrderId,
+                    ProductVariantId = od.ProductVariantId,
+                    Quantity = od.Quantity,
+                    PurchasedPrice = od.PurchasedPrice,
+                    ProductNameSnapshot = od.ProductNameSnapshot,
+                    SizeNameSnapshot = od.SizeNameSnapshot,
+                    ColorNameSnapshot = od.ColorNameSnapshot
+                }).ToList();
+            }
+
+            return dto;
         }
 
         public async Task EnsurePaymentMethodsSeededAsync()
@@ -338,6 +357,7 @@ namespace HuflitShopCore.Services
                     ProductVariantId = c.ProductVariantId,
                     Quantity = c.Quantity,
                     PurchasedPrice = product?.CurrentPrice ?? 0,
+                    CostPrice = pv.AverageCostPrice,
                     ProductNameSnapshot = product?.ProductName ?? "",
                     SizeNameSnapshot = pv.Size?.SizeName ?? "",
                     ColorNameSnapshot = pv.Color?.ColorName ?? ""
