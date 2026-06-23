@@ -3,103 +3,128 @@
     Layout = "_Layout";
     ViewData["Title"] = "Thanh toán đơn hàng";
 
-    decimal total = ViewBag.Total is decimal d ? d : 0;
+    decimal total = ViewBag.Total is decimal d ? d : 0m;
     var cartItems = ViewBag.CartItems as List<HuflitShopCore.Models.Cart> ?? new List<HuflitShopCore.Models.Cart>();
 }
 
-<!-- Custom styles for Shopee Checkout page -->
 <style>
+    :root {
+        --vibrantBlue: #2563eb;
+        --vibrantBlueHover: #1d4ed8;
+        --vibrantCyan: #06b6d4;
+        --oceanGradient: linear-gradient(135deg, #2563eb, #06b6d4);
+    }
+
     .checkout-container {
         max-width: 1200px;
         margin: 2rem auto;
         padding: 0 1rem;
     }
-    /* Progress steps */
+
+    /* Các Card thông tin (Minimalist & High-contrast) */
+    .checkout-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 0 !important;
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    }
+
+    .checkout-card-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--vibrantBlue);
+        font-size: 1.25rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid #f1f5f9;
+    }
+
+    /* Thanh tiến trình (Progress Steps) */
     .steps-container {
         display: flex;
         justify-content: space-between;
         align-items: center;
         background: white;
         padding: 1.5rem 2rem;
-        border-radius: 8px;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        border-radius: 0;
+        margin-bottom: 2rem;
+        border: 1px solid #e2e8f0;
+        border-top: 4px solid var(--vibrantBlue);
+        border-image: var(--oceanGradient) 1;
     }
+
     .step-item {
         display: flex;
         align-items: center;
         gap: 0.5rem;
-        font-weight: 500;
-        color: #bbb;
+        font-weight: 600;
+        color: #94a3b8;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+        letter-spacing: 0.5px;
     }
-    .step-item.active {
-        color: #2563eb;
-    }
-    .step-item.active .step-num {
-        background-color: #2563eb;
-        color: white;
-    }
+
+        .step-item.active {
+            color: var(--vibrantBlue);
+        }
+
+            .step-item.active .step-num {
+                background: var(--oceanGradient);
+                color: white;
+                border: none;
+                box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
+            }
+
     .step-num {
         display: flex;
         justify-content: center;
         align-items: center;
-        width: 24px;
-        height: 24px;
+        width: 26px;
+        height: 26px;
         border-radius: 50%;
-        background-color: #ddd;
-        color: #666;
-        font-size: 0.8rem;
-        font-weight: 600;
+        background-color: #f1f5f9;
+        color: #64748b;
+        font-size: 0.85rem;
+        font-weight: 700;
+        border: 1px solid #cbd5e1;
     }
-    
-    /* Shopee-style Delivery Address Section */
-    .address-section {
-        background: white;
-        border-radius: 8px;
-        padding: 2rem;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        border-top: 4px solid #2563eb; /* Blue top border */
+
+    /* Inputs đồng bộ */
+    .form-control-modern {
+        border-radius: 0 !important;
+        border: 1px solid #cbd5e1;
+        transition: border-color 0.2s;
     }
-    .address-section-header {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        color: #2563eb;
-        font-size: 1.25rem;
-        font-weight: 600;
-        margin-bottom: 1.5rem;
-    }
-    
-    /* Product list card */
-    .product-section {
-        background: white;
-        border-radius: 8px;
-        padding: 2rem;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    }
+
+        .form-control-modern:focus {
+            border-color: var(--vibrantBlue);
+            box-shadow: none;
+        }
+
+    /* Bảng Sản phẩm */
     .product-table th {
         border-top: none;
-        color: #888;
-        font-weight: 500;
+        color: #64748b;
+        font-weight: 600;
         font-size: 0.9rem;
+        text-transform: uppercase;
     }
+
     .product-row td {
         vertical-align: middle;
+        border-bottom: 1px solid #f1f5f9;
     }
-    
-    /* Payment selection */
-    .payment-section {
-        background: white;
-        border-radius: 8px;
-        padding: 2rem;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    }
+
+    /* Tùy chọn Thanh toán (Payment Options) */
     .payment-option-card {
-        border: 2px solid #ddd;
-        border-radius: 8px;
+        border: 2px solid #e2e8f0;
+        border-radius: 0 !important;
         padding: 1.25rem;
         cursor: pointer;
         display: flex;
@@ -107,58 +132,225 @@
         gap: 1rem;
         transition: all 0.2s;
         margin-bottom: 1rem;
-    }
-    .payment-option-card:hover {
-        border-color: #2563eb;
-    }
-    .payment-option-card.selected {
-        border-color: #2563eb;
-        background-color: #eff6ff;
-    }
-    .payment-option-card input[type="radio"] {
-        accent-color: #2563eb;
-        transform: scale(1.2);
+        background: #f8fafc;
     }
 
-    /* Summary Section */
+        .payment-option-card:hover {
+            border-color: var(--vibrantBlue);
+            background: #ffffff;
+        }
+
+        .payment-option-card.selected {
+            border-color: var(--vibrantBlue);
+            background-color: #f0f9ff;
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.1);
+        }
+
+    /* Nút Đặt Hàng (Đồng bộ btn-ocean-primary) */
+    .btn-ocean-primary {
+        background: var(--oceanGradient) !important;
+        border: none !important;
+        color: #fff !important;
+        font-size: 1.1rem;
+        letter-spacing: 1px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2);
+    }
+
+        .btn-ocean-primary:hover {
+            background: linear-gradient(135deg, #1d4ed8, #0891b2) !important;
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35);
+            transform: translateY(-1px);
+        }
+
+    .btn-ocean-outline {
+        background-color: transparent !important;
+        border: 2px solid var(--vibrantBlue) !important;
+        color: var(--vibrantBlue) !important;
+        font-size: 0.9rem;
+        font-weight: 700;
+        transition: all 0.3s ease;
+    }
+
+        .btn-ocean-outline:hover {
+            background: var(--vibrantBlue) !important;
+            color: #fff !important;
+        }
+
+    /* Khối Summary Sticky */
     .summary-section {
         background: white;
-        border-radius: 8px;
+        border-radius: 0;
         padding: 2rem;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         position: sticky;
-        top: 20px;
+        top: 100px;
+        border: 1px solid #e2e8f0;
+        border-top: 4px solid var(--vibrantBlue);
     }
-    .shopee-btn-primary {
-        background-color: #2563eb;
-        color: white;
-        font-size: 1.1rem;
-        font-weight: 600;
+
+    /* Voucher Ticket styling */
+    .voucher-ticket {
+        display: flex;
+        background: #fff;
+        border-radius: 0;
+        overflow: hidden;
+        margin-bottom: 15px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        position: relative;
+        transition: all 0.2s ease;
+    }
+
+        .voucher-ticket:hover:not(.disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px -2px rgba(0,0,0,0.1);
+            border-color: var(--vibrantBlue);
+        }
+
+        .voucher-ticket::before, .voucher-ticket::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background: #f8fafc;
+            border-radius: 50%;
+            left: 28%;
+            z-index: 10;
+            border: 1px solid #e2e8f0;
+        }
+
+        .voucher-ticket::before {
+            top: -9px;
+        }
+
+        .voucher-ticket::after {
+            bottom: -9px;
+        }
+
+    .voucher-left {
+        width: 30%;
+        background: var(--oceanGradient);
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        font-weight: bold;
+        text-align: center;
+        padding: 12px;
+        border-right: 1px dashed #cbd5e1;
+    }
+
+        .voucher-left i {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .voucher-left .promo-badge {
+            font-size: 0.8rem;
+            background: rgba(255, 255, 255, 0.25);
+            padding: 4px 8px;
+            border-radius: 0;
+            margin-top: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            max-width: 90%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+    .voucher-right {
+        width: 70%;
+        padding: 15px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .voucher-title {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 4px;
+        line-height: 1.4;
+    }
+
+    .voucher-subtitle {
+        font-size: 0.8rem;
+        color: #64748b;
+        margin-bottom: 8px;
+    }
+
+    .voucher-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 8px;
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+
+    .voucher-expiry {
+        font-size: 0.75rem;
+        color: #94a3b8;
+        font-weight: 500;
+    }
+
+    .voucher-ticket.disabled {
+        opacity: 0.7;
+        background: #f1f5f9;
+    }
+
+        .voucher-ticket.disabled .voucher-left {
+            background: linear-gradient(135deg, #64748b 0%, #94a3b8 100%);
+        }
+
+        .voucher-ticket.disabled .voucher-title {
+            color: #64748b;
+        }
+
+    .btn-apply-voucher {
+        font-size: 0.8rem;
+        font-weight: 700;
+        padding: 6px 14px;
+        border-radius: 0;
         border: none;
-        padding: 0.75rem;
-        border-radius: 4px;
-        width: 100%;
-        transition: all 0.2s;
-    }
-    .shopee-btn-primary:hover {
-        background-color: #1d4ed8;
+        background: var(--oceanGradient);
         color: white;
+        transition: all 0.2s;
+        text-transform: uppercase;
     }
+
+        .btn-apply-voucher:hover:not(:disabled) {
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .btn-apply-voucher:disabled {
+            background: #cbd5e1;
+            color: #64748b;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
 </style>
 
 <div class="checkout-container">
-    <!-- Progress Indicator -->
     <div class="steps-container">
-        <h4 class="mb-0 font-weight-bold text-dark"><i class="fas fa-shopping-cart text-primary mr-2"></i>Thanh toán</h4>
-        <div class="d-flex gap-4">
+        <h4 class="mb-0 font-weight-bolder text-dark text-uppercase" style="letter-spacing: 0.5px;">
+            <i class="fas fa-shopping-bag mr-2" style="color: var(--vibrantCyan);"></i>Thanh toán
+        </h4>
+        <div class="d-flex gap-4 d-none d-md-flex">
             <div class="step-item">
-                <span class="step-num">1</span> Giỏ hàng
+                <span class="step-num"><i class="fas fa-check"></i></span> Giỏ hàng
             </div>
             <div class="step-item active">
-                <span class="step-num">2</span> Thanh toán đơn hàng
+                <span class="step-num">2</span> Đặt hàng
             </div>
             <div class="step-item">
-                <span class="step-num">3</span> Đặt hàng thành công
+                <span class="step-num">3</span> Thành công
             </div>
         </div>
     </div>
@@ -168,62 +360,61 @@
         <input type="hidden" name="appliedPromoCode" id="appliedPromoCode" value="" />
         <input type="hidden" name="buyNowVariantId" value="@ViewBag.BuyNowVariantId" />
         <input type="hidden" name="buyNowQty" value="@ViewBag.BuyNowQty" />
-        
+
         <div class="row">
-            <!-- Left content -->
             <div class="col-lg-8">
-                <!-- 1. Address Section -->
-                <div class="address-section">
-                    <div class="address-section-header">
-                        <span>📍</span> Thông tin và địa chỉ nhận hàng
+                <div class="checkout-card">
+                    <div class="checkout-card-header">
+                        <i class="fas fa-map-marker-alt" style="color: var(--vibrantCyan);"></i> Thông tin nhận hàng
                     </div>
-                    
+
                     <div asp-validation-summary="All" class="text-danger mb-3 font-weight-bold"></div>
-                    
+
                     <div class="row">
                         <div class="col-md-6">
-                            <div class="form-group mb-3">
-                                <label for="shippingFullName" class="form-label font-weight-bold text-dark">Họ và tên người nhận</label>
-                                <input type="text" name="shippingFullName" id="shippingFullName" class="form-control form-control-lg" value="@(User.FindFirst("Name")?.Value)" placeholder="Nhập họ và tên người nhận..." style="border-radius: 6px;" required />
+                            <div class="form-group mb-4">
+                                <label for="shippingFullName" class="form-label font-weight-bold text-dark text-uppercase small">Họ và tên</label>
+                                <input type="text" name="shippingFullName" id="shippingFullName" class="form-control form-control-lg form-control-modern" value="@(User.FindFirst("Name")?.Value)" placeholder="Nhập họ và tên..." required />
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="form-group mb-3">
-                                <label for="shippingPhoneNumber" class="form-label font-weight-bold text-dark">Số điện thoại nhận hàng</label>
-                                <input type="text" name="shippingPhoneNumber" id="shippingPhoneNumber" class="form-control form-control-lg" value="@(User.FindFirst("Phone")?.Value)" placeholder="Nhập số điện thoại nhận hàng..." style="border-radius: 6px;" required />
+                            <div class="form-group mb-4">
+                                <label for="shippingPhoneNumber" class="form-label font-weight-bold text-dark text-uppercase small">Số điện thoại</label>
+                                <input type="text" name="shippingPhoneNumber" id="shippingPhoneNumber" class="form-control form-control-lg form-control-modern" value="@(User.FindFirst("Phone")?.Value)" placeholder="Nhập số điện thoại..." required />
                             </div>
                         </div>
                         <div class="col-md-12">
-                            <div class="form-group mb-3">
-                                <label asp-for="SpecificAddress" class="form-label font-weight-bold text-dark">Địa chỉ cụ thể (Số nhà, tên đường, phường/xã...)</label>
-                                <input asp-for="SpecificAddress" class="form-control form-control-lg" placeholder="VD: 828 Sư Vạn Hạnh, Phường 13" style="border-radius: 6px;" />
-                                <span asp-validation-for="SpecificAddress" class="text-danger"></span>
+                            <div class="form-group mb-4">
+                                <label asp-for="SpecificAddress" class="form-label font-weight-bold text-dark text-uppercase small">Địa chỉ cụ thể</label>
+                                <input asp-for="SpecificAddress" class="form-control form-control-lg form-control-modern" placeholder="Số nhà, Tên đường..." />
+                                <span asp-validation-for="SpecificAddress" class="text-danger small font-weight-bold mt-1"></span>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group mb-3">
-                                <label asp-for="City" class="form-label font-weight-bold text-dark">Tỉnh / Thành phố</label>
-                                <select asp-for="City" name="City" class="form-control form-control-lg billing_address_1" style="border-radius: 6px;" required>
+                                <label asp-for="City" class="form-label font-weight-bold text-dark text-uppercase small">Tỉnh / Thành phố</label>
+                                <select asp-for="City" name="City" class="form-control form-control-lg form-control-modern billing_address_1" required>
                                     <option value="">Chọn tỉnh / thành phố</option>
                                 </select>
-                                <span asp-validation-for="City" class="text-danger"></span>
+                                <span asp-validation-for="City" class="text-danger small font-weight-bold mt-1"></span>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group mb-3">
-                                <label asp-for="District" class="form-label font-weight-bold text-dark">Quận / Huyện</label>
-                                <select asp-for="District" name="District" class="form-control form-control-lg billing_address_2" style="border-radius: 6px;" required>
+                                <label asp-for="District" class="form-label font-weight-bold text-dark text-uppercase small">Quận / Huyện</label>
+                                <select asp-for="District" name="District" class="form-control form-control-lg form-control-modern billing_address_2" required>
                                     <option value="">Chọn quận / huyện</option>
                                 </select>
-                                <span asp-validation-for="District" class="text-danger"></span>
+                                <span asp-validation-for="District" class="text-danger small font-weight-bold mt-1"></span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- 2. Products Section -->
-                <div class="product-section">
-                    <h5 class="font-weight-bold text-dark mb-4"><i class="fas fa-box-open mr-2 text-warning"></i>Sản phẩm thanh toán</h5>
+                <div class="checkout-card">
+                    <div class="checkout-card-header">
+                        <i class="fas fa-box-open" style="color: var(--vibrantCyan);"></i> Sản phẩm thanh toán
+                    </div>
                     <div class="table-responsive">
                         <table class="table product-table mb-0">
                             <thead>
@@ -241,29 +432,28 @@
                                     {
                                         var prod = item.ProductVariant?.Product;
                                         <tr class="product-row">
-                                            <td class="pl-0">
+                                            <td class="pl-0 py-3">
                                                 <div class="d-flex align-items-center gap-3">
                                                     <div>
-                                                        <div class="font-weight-bold text-dark">@prod?.ProductName</div>
-                                                        <small class="text-muted">
-                                                            Phân loại: @item.ProductVariant?.Color?.ColorName, Size @item.ProductVariant?.Size?.SizeName
+                                                        <div class="font-weight-bold text-dark" style="font-size: 1.05rem;">@prod?.ProductName</div>
+                                                        <small class="text-muted font-italic">
+                                                            Phân loại: @item.ProductVariant?.Color?.ColorName - Size @item.ProductVariant?.Size?.SizeName
                                                         </small>
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td class="text-center align-middle">@((prod?.CurrentPrice ?? 0).ToString("N0")) đ</td>
-                                            <td class="text-center align-middle font-weight-bold">@item.Quantity</td>
-                                            <td class="text-right pr-0 align-middle font-weight-bold text-danger">
-                                                @(((prod?.CurrentPrice ?? 0) * item.Quantity).ToString("N0")) đ
+                                            <td class="text-center align-middle">@((prod?.CurrentPrice ?? 0m).ToString("N0")) đ</td>
+                                            <td class="text-center align-middle font-weight-bold" style="font-size: 1.1rem;">@item.Quantity</td>
+                                            <td class="text-right pr-0 align-middle font-weight-bold text-danger" style="font-size: 1.1rem;">
+                                                @(((prod?.CurrentPrice ?? 0m) * item.Quantity).ToString("N0")) đ
                                             </td>
                                         </tr>
-
                                     }
                                 }
                                 else
                                 {
                                     <tr>
-                                        <td colspan="4" class="text-center text-muted py-4">Không có sản phẩm nào trong giỏ hàng.</td>
+                                        <td colspan="4" class="text-center text-muted py-4 font-italic">Không có sản phẩm nào trong đơn hàng này.</td>
                                     </tr>
                                 }
                             </tbody>
@@ -271,21 +461,22 @@
                     </div>
                 </div>
 
-                <!-- 3. Payment Methods Section -->
-                <div class="payment-section">
-                    <h5 class="font-weight-bold text-dark mb-4"><i class="fas fa-credit-card mr-2 text-primary"></i>Phương thức thanh toán</h5>
-                    
+                <div class="checkout-card">
+                    <div class="checkout-card-header">
+                        <i class="fas fa-credit-card" style="color: var(--vibrantCyan);"></i> Phương thức thanh toán
+                    </div>
+
                     <div class="payment-option-card selected" onclick="selectPayment('pm-cod')">
                         <input type="radio" name="paymentMethodId" id="pmCOD" value="pm-cod" checked style="display:none;" />
                         <div class="d-flex align-items-center justify-content-between w-100">
                             <div class="d-flex align-items-center gap-3">
-                                <span style="font-size: 1.5rem;">💵</span>
+                                <div style="font-size: 1.8rem; color: #10b981;"><i class="fas fa-money-bill-wave"></i></div>
                                 <div>
-                                    <div class="font-weight-bold text-dark">Thanh toán khi nhận hàng (COD)</div>
-                                    <small class="text-muted">Thanh toán bằng tiền mặt khi shipper giao hàng tới nơi.</small>
+                                    <div class="font-weight-bold text-dark text-uppercase" style="font-size: 0.95rem;">Thanh toán khi nhận hàng (COD)</div>
+                                    <small class="text-muted">Thanh toán bằng tiền mặt khi shipper giao hàng.</small>
                                 </div>
                             </div>
-                            <div class="check-icon text-primary"><i class="fas fa-check-circle" style="font-size: 1.25rem;"></i></div>
+                            <div class="check-icon" style="color: var(--vibrantBlue);"><i class="fas fa-check-circle" style="font-size: 1.25rem;"></i></div>
                         </div>
                     </div>
 
@@ -293,10 +484,10 @@
                         <input type="radio" name="paymentMethodId" id="pmVNPay" value="pm-vnpay" style="display:none;" />
                         <div class="d-flex align-items-center justify-content-between w-100">
                             <div class="d-flex align-items-center gap-3">
-                                <span style="font-size: 1.5rem;">💳</span>
+                                <div style="font-size: 1.8rem; color: #0284c7;"><i class="fas fa-qrcode"></i></div>
                                 <div>
-                                    <div class="font-weight-bold text-dark">Thanh toán trực tuyến qua VNPAY</div>
-                                    <small class="text-muted">Thanh toán tức thì bằng ví điện tử, thẻ ATM nội địa hoặc QR Code.</small>
+                                    <div class="font-weight-bold text-dark text-uppercase" style="font-size: 0.95rem;">Thanh toán qua VNPAY</div>
+                                    <small class="text-muted">Thẻ ATM nội địa, QR Code hoặc Ví điện tử.</small>
                                 </div>
                             </div>
                             <div class="check-icon text-muted" style="display:none;"><i class="fas fa-check-circle" style="font-size: 1.25rem;"></i></div>
@@ -305,52 +496,52 @@
                 </div>
             </div>
 
-            <!-- Right content (Order Summary) -->
             <div class="col-lg-4">
                 <div class="summary-section">
-                    <h5 class="font-weight-bold text-dark mb-4 pb-2 border-bottom">Chi tiết thanh toán</h5>
-                    
+                    <h5 class="font-weight-bolder text-dark text-uppercase mb-4 pb-3 border-bottom" style="letter-spacing: 0.5px;">Chi tiết thanh toán</h5>
+
                     <div class="d-flex justify-content-between mb-3">
-                        <span class="text-muted">Tổng tiền hàng</span>
-                        <span class="font-weight-bold text-dark">@(total.ToString("N0")) đ</span>
+                        <span class="text-muted font-weight-bold">Tổng tiền hàng</span>
+                        <span class="font-weight-bold text-dark" style="font-size: 1.1rem;">@(total.ToString("N0")) đ</span>
                     </div>
                     <div class="d-flex justify-content-between mb-3">
-                        <span class="text-muted">Phí vận chuyển</span>
-                        <span class="text-dark">0 đ</span>
+                        <span class="text-muted font-weight-bold">Phí vận chuyển</span>
+                        <span class="text-dark font-weight-bold">0 đ</span>
                     </div>
                     <div class="d-flex justify-content-between mb-3">
-                        <span class="text-muted">Giảm giá voucher</span>
-                        <span class="text-success" id="discountVal">- 0 đ</span>
+                        <span class="text-muted font-weight-bold">Giảm giá voucher</span>
+                        <span class="font-weight-bold" id="discountVal" style="color: var(--vibrantBlue);">- 0 đ</span>
                     </div>
-                    
-                    <!-- Voucher Input Box -->
-                    <div class="mb-4 mt-3">
-                        <div class="d-flex justify-content-between align-items-center mb-1">
-                            <label class="form-label font-weight-bold text-dark mb-0" style="font-size: 0.9rem;">Mã giảm giá (Voucher)</label>
-                            <a href="javascript:void(0)" class="text-primary font-weight-bold" id="btnOpenVoucherModal" style="font-size: 0.85rem; text-decoration: none;"><i class="fas fa-ticket-alt mr-1"></i>Chọn Voucher</a>
+
+                    <div class="mb-4 mt-4 p-3 bg-light" style="border: 1px dashed #cbd5e1;">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label font-weight-bold text-dark mb-0 text-uppercase" style="font-size: 0.85rem;">Mã Voucher</label>
+                            <a href="javascript:void(0)" class="font-weight-bold" id="btnOpenVoucherModal" style="font-size: 0.85rem; color: var(--vibrantBlue); text-decoration: none;">
+                                <i class="fas fa-ticket-alt mr-1"></i>Chọn Voucher
+                            </a>
                         </div>
                         <div class="input-group">
-                            <input type="text" id="voucherCodeInput" class="form-control" placeholder="Nhập mã..." style="border-radius: 4px 0 0 4px; text-transform: uppercase;" />
-                            <div class="input-group-append">
-                                <button class="btn btn-primary" type="button" id="btnApplyVoucher" style="border-radius: 0 4px 4px 0; font-weight: 600; padding: 6px 15px;">Áp dụng</button>
+                            <input type="text" id="voucherCodeInput" class="form-control form-control-modern" placeholder="Nhập mã..." style="text-transform: uppercase; font-weight: bold" />
+                            <div class="input-group-append" style="padding-left:5px">
+                                <button class="btn btn-ocean-outline rounded-0 px-3" type="button" id="btnApplyVoucher">ÁP DỤNG</button>
                             </div>
                         </div>
-                        <div id="voucherMessage" class="mt-2" style="font-size: 0.85rem; font-weight: 500;"></div>
+                        <div id="voucherMessage" class="mt-2" style="font-size: 0.85rem; font-weight: 600;"></div>
                     </div>
-                    
-                    <hr class="my-4" />
-                    
-                    <div class="d-flex justify-content-between align-items-end mb-4">
-                        <span class="font-weight-bold text-dark" style="font-size: 1.1rem;">Tổng thanh toán</span>
-                        <span class="font-weight-bold text-primary" id="finalPayVal" style="color: #2563eb !important; font-size: 1.5rem;">@(total.ToString("N0")) đ</span>
+
+                    <hr class="my-4 border-secondary" style="opacity: 0.2;" />
+
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <span class="font-weight-bold text-dark text-uppercase">Tổng thanh toán</span>
+                        <span class="font-weight-bolder" id="finalPayVal" style="color: var(--vibrantBlue) !important; font-size: 1.8rem;">@(total.ToString("N0")) đ</span>
                     </div>
-                    
-                    <button type="submit" class="shopee-btn-primary py-3">
+
+                    <button type="submit" class="btn btn-ocean-primary btn-lg rounded-0 font-weight-bold text-uppercase py-3 w-100">
                         ĐẶT HÀNG NGAY
                     </button>
-                    
+
                     <div class="text-center mt-3">
-                        <small class="text-muted"><i class="fas fa-shield-alt text-success mr-1"></i>HuflitShop bảo đảm quyền lợi khách hàng 100%.</small>
+                        <small class="text-muted"><i class="fas fa-shield-alt mr-1" style="color: var(--vibrantCyan);"></i>HuflitShop bảo đảm quyền lợi khách hàng 100%.</small>
                     </div>
                 </div>
             </div>
@@ -358,168 +549,36 @@
     </form>
 </div>
 
-<!-- Voucher Selection Modal -->
 <div class="modal fade" id="voucherModal" tabindex="-1" role="dialog" aria-labelledby="voucherModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content" style="border-radius: 12px; border: none; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);">
-            <div class="modal-header" style="background-color: #0f172a; color: white; border-top-left-radius: 12px; border-top-right-radius: 12px; padding: 15px 20px;">
-                <h5 class="modal-title font-weight-bold" id="voucherModalLabel"><i class="fas fa-wallet mr-2"></i>Kho Voucher của bạn</h5>
-                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="opacity: 0.8; outline: none; border: none; background: none; font-size: 1.5rem;">
+        <div class="modal-content rounded-0 border-0 shadow-lg">
+            <div class="modal-header" style="background: var(--oceanGradient); color: white; padding: 15px 20px; border: none;">
+                <h5 class="modal-title font-weight-bold text-uppercase" id="voucherModalLabel" style="letter-spacing: 0.5px;"><i class="fas fa-wallet mr-2"></i>Kho Voucher của bạn</h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="opacity: 1; outline: none; border: none; background: none; text-shadow: none;">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body" style="background-color: #f8fafc; max-height: 450px; overflow-y: auto; padding: 20px;">
                 <div id="voucherModalLoading" class="text-center py-4">
-                    <div class="spinner-border text-primary" role="status">
+                    <div class="spinner-border" style="color: var(--vibrantCyan);" role="status">
                         <span class="sr-only">Đang tải...</span>
                     </div>
-                    <p class="text-muted mt-2 mb-0" style="font-size: 0.9rem;">Đang tìm kiếm voucher khả dụng...</p>
+                    <p class="text-muted mt-2 mb-0 font-weight-bold" style="font-size: 0.9rem;">Đang tìm kiếm voucher khả dụng...</p>
                 </div>
                 <div id="voucherListContainer">
-                    <!-- Dynamic Voucher Tickets will be loaded here -->
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<style>
-    /* Voucher Ticket styling */
-    .voucher-ticket {
-        display: flex;
-        background: #fff;
-        border-radius: 8px;
-        overflow: hidden;
-        margin-bottom: 15px;
-        border: 1px solid #e2e8f0;
-        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-        position: relative;
-        transition: all 0.2s ease;
-    }
-    .voucher-ticket:hover:not(.disabled) {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 12px -2px rgba(0,0,0,0.1);
-        border-color: #cbd5e1;
-    }
-    .voucher-ticket::before, .voucher-ticket::after {
-        content: '';
-        position: absolute;
-        width: 16px;
-        height: 16px;
-        background: #f8fafc; /* match modal body bg */
-        border-radius: 50%;
-        left: 28%;
-        z-index: 10;
-        border: 1px solid #e2e8f0;
-    }
-    .voucher-ticket::before {
-        top: -9px;
-    }
-    .voucher-ticket::after {
-        bottom: -9px;
-    }
-    .voucher-left {
-        width: 30%;
-        background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
-        color: #fff;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        font-weight: bold;
-        text-align: center;
-        padding: 12px;
-        border-right: 1px dashed #cbd5e1;
-    }
-    .voucher-left i {
-        font-size: 1.5rem;
-        margin-bottom: 5px;
-    }
-    .voucher-left .promo-badge {
-        font-size: 0.8rem;
-        background: rgba(255, 255, 255, 0.2);
-        padding: 2px 6px;
-        border-radius: 4px;
-        margin-top: 5px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        max-width: 90%;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-    .voucher-right {
-        width: 70%;
-        padding: 15px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-    }
-    .voucher-title {
-        font-size: 0.95rem;
-        font-weight: 700;
-        color: #0f172a;
-        margin-bottom: 4px;
-        line-height: 1.3;
-    }
-    .voucher-subtitle {
-        font-size: 0.8rem;
-        color: #64748b;
-        margin-bottom: 8px;
-    }
-    .voucher-footer {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-top: 8px;
-        flex-wrap: wrap;
-        gap: 5px;
-    }
-    .voucher-expiry {
-        font-size: 0.75rem;
-        color: #94a3b8;
-    }
-    
-    /* Disabled voucher ticket state */
-    .voucher-ticket.disabled {
-        opacity: 0.7;
-        background: #f1f5f9;
-    }
-    .voucher-ticket.disabled .voucher-left {
-        background: linear-gradient(135deg, #64748b 0%, #94a3b8 100%);
-    }
-    .voucher-ticket.disabled .voucher-title {
-        color: #64748b;
-    }
-    
-    .btn-apply-voucher {
-        font-size: 0.8rem;
-        font-weight: 700;
-        padding: 4px 12px;
-        border-radius: 4px;
-        border: none;
-        background-color: #2563eb;
-        color: white;
-        transition: all 0.2s;
-    }
-    .btn-apply-voucher:hover:not(:disabled) {
-        background-color: #1d4ed8;
-    }
-    .btn-apply-voucher:disabled {
-        background-color: #cbd5e1;
-        color: #64748b;
-        cursor: not-allowed;
-    }
-</style>
-
 @section Scripts {
-    <!-- Simple script to handle Payment selector CSS toggles -->
     <script>
         function selectPayment(val) {
             // Uncheck all
             document.getElementById('pmCOD').checked = false;
             document.getElementById('pmVNPay').checked = false;
-            
+
             // Check target
             if (val === 'pm-cod') {
                 document.getElementById('pmCOD').checked = true;
@@ -529,14 +588,14 @@
 
             // Toggle selected classes
             var cards = document.querySelectorAll('.payment-option-card');
-            cards.forEach(function(card, idx) {
+            cards.forEach(function (card, idx) {
                 var input = card.querySelector('input');
                 var checkIcon = card.querySelector('.check-icon');
                 if (input.checked) {
                     card.classList.add('selected');
                     checkIcon.style.display = 'block';
                     checkIcon.classList.remove('text-muted');
-                    checkIcon.classList.add('text-primary');
+                    checkIcon.style.color = 'var(--vibrantBlue)';
                 } else {
                     card.classList.remove('selected');
                     checkIcon.style.display = 'none';
@@ -546,16 +605,17 @@
     </script>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
+        document.addEventListener("DOMContentLoaded", function () {
             var btnApply = document.getElementById("btnApplyVoucher");
             var voucherInput = document.getElementById("voucherCodeInput");
             var msgDiv = document.getElementById("voucherMessage");
             var hiddenInput = document.getElementById("appliedPromoCode");
-            
+
             var discountValSpan = document.getElementById("discountVal");
             var finalPaySpan = document.getElementById("finalPayVal");
-            
-            var orderTotal = @total;
+
+            // Đảm bảo lấy giá trị orderTotal an toàn dưới dạng decimal -> js number
+            var orderTotal = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(total));
 
             // Voucher Modal Handler
             var btnOpenModal = document.getElementById("btnOpenVoucherModal");
@@ -563,7 +623,7 @@
             var voucherContainer = document.getElementById("voucherListContainer");
             var loadingSpinner = document.getElementById("voucherModalLoading");
 
-            btnOpenModal.addEventListener("click", function() {
+            btnOpenModal.addEventListener("click", function () {
                 loadingSpinner.style.display = "block";
                 voucherContainer.innerHTML = "";
                 voucherModal.modal("show");
@@ -574,54 +634,54 @@
                     data: {
                         orderTotal: orderTotal
                     },
-                    success: function(vouchers) {
+                    success: function (vouchers) {
                         loadingSpinner.style.display = "none";
                         if (!vouchers || vouchers.length === 0) {
-                            voucherContainer.innerHTML = "<div class='text-center py-4 text-muted'><i class='fas fa-info-circle mr-1'></i>Hiện không có chương trình khuyến mãi nào khả dụng.</div>";
+                            voucherContainer.innerHTML = "<div class='text-center py-4 text-muted font-weight-bold'><i class='fas fa-info-circle mr-1'></i>Hiện không có chương trình khuyến mãi nào khả dụng.</div>";
                             return;
                         }
 
                         var html = "";
-                        vouchers.forEach(function(v) {
+                        vouchers.forEach(function (v) {
                             var statusClass = v.isApplicable ? "" : "disabled";
                             var disabledAttr = v.isApplicable ? "" : "disabled";
                             var icon = v.discountType === "Percent" ? "fa-percentage" : "fa-money-bill-wave";
-                            
                             var statusBadge = "";
+
                             if (v.isApplicable) {
-                                statusBadge = "<span class='badge bg-success text-white font-weight-bold mb-1'>Đủ điều kiện</span>";
+                                statusBadge = "<span class='badge text-white font-weight-bold mb-1' style='background: #10b981; border-radius: 0;'>Đủ điều kiện</span>";
                             } else {
                                 if (v.message.indexOf("Mua thêm") !== -1) {
-                                    statusBadge = "<span class='badge bg-warning text-dark font-weight-bold mb-1'>" + v.message + "</span>";
+                                    statusBadge = "<span class='badge text-dark font-weight-bold mb-1' style='background: #f59e0b; border-radius: 0;'>" + v.message + "</span>";
                                 } else {
-                                    statusBadge = "<span class='badge bg-danger text-white font-weight-bold mb-1'>" + v.message + "</span>";
+                                    statusBadge = "<span class='badge text-white font-weight-bold mb-1' style='background: #ef4444; border-radius: 0;'>" + v.message + "</span>";
                                 }
                             }
 
                             html += "<div class='voucher-ticket " + statusClass + "'>" +
-                                    "  <div class='voucher-left'>" +
-                                    "    <i class='fas " + icon + "'></i>" +
-                                    "    <span class='promo-badge' title='" + v.promoCode + "'>" + v.promoCode + "</span>" +
-                                    "  </div>" +
-                                    "  <div class='voucher-right'>" +
-                                    "    <div>" +
-                                    "      <div class='voucher-title'>" + v.description + "</div>" +
-                                    "      <div class='voucher-subtitle'>" + statusBadge + "</div>" +
-                                    "    </div>" +
-                                    "    <div class='voucher-footer'>" +
-                                    "      <div class='voucher-expiry'><i class='far fa-clock mr-1'></i>Hạn: " + v.endDateFormatted + "</div>" +
-                                    "      <button class='btn-apply-voucher btn-apply-click' data-code='" + v.promoCode + "' " + disabledAttr + ">Áp dụng</button>" +
-                                    "    </div>" +
-                                    "  </div>" +
-                                    "</div>";
+                                "  <div class='voucher-left'>" +
+                                "    <i class='fas " + icon + "'></i>" +
+                                "    <span class='promo-badge' title='" + v.promoCode + "'>" + v.promoCode + "</span>" +
+                                "  </div>" +
+                                "  <div class='voucher-right'>" +
+                                "    <div>" +
+                                "      <div class='voucher-title'>" + v.description + "</div>" +
+                                "      <div class='voucher-subtitle'>" + statusBadge + "</div>" +
+                                "    </div>" +
+                                "    <div class='voucher-footer'>" +
+                                "      <div class='voucher-expiry'><i class='far fa-clock mr-1'></i>Hạn: " + v.endDateFormatted + "</div>" +
+                                "      <button class='btn-apply-voucher btn-apply-click' data-code='" + v.promoCode + "' " + disabledAttr + ">Áp dụng</button>" +
+                                "    </div>" +
+                                "  </div>" +
+                                "</div>";
                         });
 
                         voucherContainer.innerHTML = html;
 
                         // Bind click events on the newly generated buttons
                         var applyButtons = voucherContainer.querySelectorAll(".btn-apply-click");
-                        applyButtons.forEach(function(btn) {
-                            btn.addEventListener("click", function() {
+                        applyButtons.forEach(function (btn) {
+                            btn.addEventListener("click", function () {
                                 var code = this.getAttribute("data-code");
                                 voucherInput.value = code;
                                 voucherModal.modal("hide");
@@ -629,17 +689,17 @@
                             });
                         });
                     },
-                    error: function() {
+                    error: function () {
                         loadingSpinner.style.display = "none";
-                        voucherContainer.innerHTML = "<div class='text-center py-4 text-danger'><i class='fas fa-exclamation-circle mr-1'></i>Không thể tải danh sách voucher.</div>";
+                        voucherContainer.innerHTML = "<div class='text-center py-4 text-danger font-weight-bold'><i class='fas fa-exclamation-circle mr-1'></i>Không thể tải danh sách voucher.</div>";
                     }
                 });
             });
 
-            btnApply.addEventListener("click", function() {
+            btnApply.addEventListener("click", function () {
                 var code = voucherInput.value.trim();
                 if (!code) {
-                    msgDiv.innerHTML = "<span class='text-danger'>Vui lòng nhập mã giảm giá.</span>";
+                    msgDiv.innerHTML = "<span class='text-danger'><i class='fas fa-exclamation-circle mr-1'></i>Vui lòng nhập mã giảm giá.</span>";
                     return;
                 }
 
@@ -653,29 +713,28 @@
                     headers: {
                         "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
                     },
-                    success: function(res) {
+                    success: function (res) {
                         if (res.success) {
                             msgDiv.innerHTML = "<span class='text-success'><i class='fas fa-check-circle mr-1'></i>" + res.message + "</span>";
                             hiddenInput.value = code;
-                            
+
                             // Update values
                             discountValSpan.innerText = "- " + res.discount.toLocaleString("vi-VN") + " đ";
                             finalPaySpan.innerText = res.finalAmount.toLocaleString("vi-VN") + " đ";
                         } else {
                             msgDiv.innerHTML = "<span class='text-danger'><i class='fas fa-exclamation-circle mr-1'></i>" + res.message + "</span>";
                             hiddenInput.value = "";
-                            
+
                             // Reset values
                             discountValSpan.innerText = "- 0 đ";
                             finalPaySpan.innerText = orderTotal.toLocaleString("vi-VN") + " đ";
                         }
                     },
-                    error: function() {
-                        msgDiv.innerHTML = "<span class='text-danger'>Có lỗi xảy ra khi áp dụng mã giảm giá.</span>";
+                    error: function () {
+                        msgDiv.innerHTML = "<span class='text-danger'><i class='fas fa-times-circle mr-1'></i>Có lỗi xảy ra khi áp dụng mã giảm giá.</span>";
                     }
                 });
             });
         });
     </script>
 }
-

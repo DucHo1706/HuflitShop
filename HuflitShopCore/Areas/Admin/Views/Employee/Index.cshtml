@@ -4,65 +4,291 @@
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container-fluid">
-    <div class="d-sm-flex align-items-center justify-content-between mb-4 mt-4">
-        <h1 class="h3 mb-0 text-gray-800">Quản lý nhân viên</h1>
-        <a asp-action="Create" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-            <i class="fas fa-user-plus fa-sm text-white-50"></i> Thêm nhân viên
+<style>
+    /* Tổng quan Giao diện Admin */
+    .admin-container {
+        padding: 1.5rem;
+        background-color: #f8fafc;
+        min-height: calc(100vh - 60px);
+    }
+
+    .admin-page-title {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #0f172a;
+        margin-bottom: 0;
+        letter-spacing: -0.5px;
+    }
+
+    /* Thẻ bọc nội dung (Card) */
+    .admin-card {
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+        border: 1px solid #e2e8f0;
+        overflow: hidden;
+    }
+
+    .admin-card-header {
+        padding: 1.5rem 1.5rem 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #f1f5f9;
+        background-color: #ffffff;
+    }
+
+    /* Bảng dữ liệu hiện đại */
+    .table-admin {
+        width: 100%;
+        margin-bottom: 0;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+        .table-admin th {
+            background-color: #f8fafc;
+            color: #64748b;
+            font-weight: 700;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 1rem 1.5rem;
+            border-top: none;
+            border-bottom: 1px solid #e2e8f0;
+            white-space: nowrap;
+        }
+
+        .table-admin td {
+            padding: 1rem 1.5rem;
+            vertical-align: middle;
+            color: #334155;
+            font-size: 0.95rem;
+            border-bottom: 1px solid #f1f5f9;
+            font-weight: 500;
+        }
+
+        .table-admin tbody tr {
+            transition: background-color 0.2s ease;
+        }
+
+            .table-admin tbody tr:hover {
+                background-color: #f8fafc;
+            }
+
+            .table-admin tbody tr:last-child td {
+                border-bottom: none;
+            }
+
+    /* Nhãn trạng thái (Soft Badges) */
+    .badge-soft {
+        padding: 0.4rem 0.75rem;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.3px;
+        display: inline-block;
+    }
+
+    .badge-soft-success {
+        background-color: #dcfce7;
+        color: #16a34a;
+    }
+
+    .badge-soft-danger {
+        background-color: #fee2e2;
+        color: #dc2626;
+    }
+
+    /* Nút Thêm mới */
+    .btn-admin-primary {
+        background: linear-gradient(135deg, #2563eb, #06b6d4);
+        color: #ffffff;
+        border: none;
+        font-weight: 600;
+        font-size: 0.9rem;
+        padding: 0.6rem 1.25rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+    }
+
+        .btn-admin-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(37, 99, 235, 0.3);
+            color: #ffffff;
+            text-decoration: none;
+        }
+
+    /* Nút Thao tác (Action Buttons) - Dạng Icon mềm mại */
+    .action-btn-group {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .action-btn {
+        width: 34px;
+        height: 34px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        border: none;
+        transition: all 0.2s ease;
+        font-size: 0.9rem;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            text-decoration: none;
+        }
+
+        .action-btn.edit {
+            background-color: #fef9c3;
+            color: #d97706;
+        }
+
+            .action-btn.edit:hover {
+                background-color: #fde047;
+                color: #b45309;
+            }
+
+        .action-btn.info {
+            background-color: #e0f2fe;
+            color: #0284c7;
+        }
+
+            .action-btn.info:hover {
+                background-color: #bae6fd;
+                color: #0369a1;
+            }
+
+        .action-btn.location {
+            background-color: #f1f5f9;
+            color: #475569;
+        }
+
+            .action-btn.location:hover {
+                background-color: #e2e8f0;
+                color: #334155;
+            }
+
+        .action-btn.delete {
+            background-color: #fee2e2;
+            color: #dc2626;
+        }
+
+            .action-btn.delete:hover {
+                background-color: #fca5a5;
+                color: #b91c1c;
+            }
+
+    /* Dữ liệu trống */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+    }
+
+    .empty-state-icon {
+        font-size: 3rem;
+        color: #cbd5e1;
+        margin-bottom: 1rem;
+    }
+</style>
+
+<div class="admin-container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="admin-page-title">Quản lý nhân viên</h1>
+            <p class="text-muted small mb-0 mt-1">Danh sách tất cả nhân viên đang hoạt động trong hệ thống</p>
+        </div>
+        <a asp-action="Create" class="btn-admin-primary">
+            <i class="fas fa-user-plus"></i> Thêm nhân viên
         </a>
     </div>
 
-    <table class="table table-bordered table-striped">
-        <thead class="thead-dark">
-            <tr>
-                <th>Họ và tên</th>
-                <th>Giới tính</th>
-                <th>Ngày sinh</th>
-                <th>Địa chỉ</th>
-                <th>Trạng thái</th>
-                <th style="width: 180px;">Hành động</th>
-            </tr>
-        </thead>
-        <tbody>
-            @if (Model != null && Model.Any())
-            {
-                foreach (var item in Model)
-                {
+    <div class="admin-card">
+        <div class="table-responsive">
+            <table class="table-admin">
+                <thead>
                     <tr>
-                        <td>@item.FullName</td>
-                        <td>@item.GenderName</td>
-                        <td>@(item.DateOfBirth.HasValue ? item.DateOfBirth.Value.ToString("dd/MM/yyyy") : "---")</td>
-                        <td>@(string.IsNullOrEmpty(item.FullAddress) ? "---" : item.FullAddress)</td>
-                        <td>
-                            @if (item.IsActive)
-                            {
-                                <span class="badge bg-success text-white">Đang làm việc</span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-danger text-white">Đã nghỉ việc</span>
-                            }
-                        </td>
-                        <td>
-                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm" title="Sửa"><i class="fas fa-edit"></i></a>
-                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm text-white" title="Chi tiết"><i class="fas fa-info-circle"></i></a>
-                            <a asp-action="AddAddress" asp-route-id="@item.Id" class="btn btn-secondary btn-sm" title="Thêm địa chỉ"><i class="fas fa-map-marker-alt"></i></a>
-                            @if (item.IsActive)
-                            {
-                                <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn cho nhân viên này nghỉ việc?');">
-                                    <button type="submit" class="btn btn-danger btn-sm" title="Xóa"><i class="far fa-trash-alt"></i></button>
-                                </form>
-                            }
-                        </td>
+                        <th>Họ và tên</th>
+                        <th>Giới tính</th>
+                        <th>Ngày sinh</th>
+                        <th>Địa chỉ</th>
+                        <th class="text-center">Trạng thái</th>
+                        <th class="text-right">Hành động</th>
                     </tr>
-                }
-            }
-            else
-            {
-                <tr>
-                    <td colspan="6" class="text-center">Chưa có dữ liệu nhân viên</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td style="font-weight: 700; color: #0f172a;">@item.FullName</td>
+                                <td>@item.GenderName</td>
+                                <td>@(item.DateOfBirth.HasValue ? item.DateOfBirth.Value.ToString("dd/MM/yyyy") : "---")</td>
+                                <td>
+                                    <span class="text-truncate d-inline-block" style="max-width: 250px;" title="@item.FullAddress">
+                                        @(string.IsNullOrEmpty(item.FullAddress) ? "---" : item.FullAddress)
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    @if (item.IsActive)
+                                    {
+                                        <span class="badge-soft badge-soft-success">Đang làm việc</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge-soft badge-soft-danger">Đã nghỉ việc</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="action-btn-group justify-content-end">
+                                        <a asp-action="Details" asp-route-id="@item.Id" class="action-btn info" title="Xem chi tiết">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a asp-action="Edit" asp-route-id="@item.Id" class="action-btn edit" title="Chỉnh sửa thông tin">
+                                            <i class="fas fa-pen"></i>
+                                        </a>
+                                        <a asp-action="AddAddress" asp-route-id="@item.Id" class="action-btn location" title="Cập nhật địa chỉ">
+                                            <i class="fas fa-map-marker-alt"></i>
+                                        </a>
+                                        @if (item.IsActive)
+                                        {
+                                            <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="m-0" onsubmit="return confirm('Bạn có chắc chắn muốn cho nhân viên này nghỉ việc?');">
+                                                <button type="submit" class="action-btn delete" title="Cho nghỉ việc">
+                                                    <i class="fas fa-user-times"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6">
+                                <div class="empty-state">
+                                    <i class="fas fa-users empty-state-icon"></i>
+                                    <h5 class="font-weight-bold text-dark mb-2">Chưa có dữ liệu</h5>
+                                    <p class="text-muted mb-0">Hiện tại chưa có nhân viên nào được thêm vào hệ thống.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>

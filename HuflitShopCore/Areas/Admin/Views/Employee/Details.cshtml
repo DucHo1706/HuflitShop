@@ -2,45 +2,86 @@
 @{
     ViewData["Title"] = "Chi tiết nhân viên";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+    var firstChar = string.IsNullOrEmpty(Model.FullName) ? "U" : Model.FullName.Substring(0, 1).ToUpper();
 }
 
-<div class="container-fluid mt-4">
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Thông tin chi tiết nhân viên</h1>
+<style>
+    .admin-container { padding: 1.5rem; background-color: #f8fafc; min-height: calc(100vh - 60px); }
+    .admin-page-title { font-size: 1.5rem; font-weight: 800; color: #0f172a; margin-bottom: 0; letter-spacing: -0.5px; }
+    .admin-card { background: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; overflow: hidden; }
+    .admin-card-header { padding: 1.25rem 1.5rem; display: flex; align-items: center; border-bottom: 1px solid #f1f5f9; font-weight: 700; color: #1e293b; text-transform: uppercase; letter-spacing: 0.5px; }
+    .admin-card-body { padding: 2rem; }
+
+    .btn-admin-outline { background: #ffffff; border: 2px solid #cbd5e1; color: #475569; font-weight: 700; padding: 0.6rem 1.25rem; border-radius: 8px; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px; text-decoration: none; }
+    .btn-admin-outline:hover { background: #f8fafc; color: #0f172a; border-color: #94a3b8; text-decoration: none; }
+    .btn-admin-warning { background: linear-gradient(135deg, #f59e0b, #d97706); color: #ffffff; border: none; font-weight: 700; padding: 0.6rem 1.25rem; border-radius: 8px; transition: all 0.3s ease; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.2); display: inline-flex; align-items: center; gap: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px; text-decoration: none; }
+    .btn-admin-warning:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(245, 158, 11, 0.3); color: #ffffff; text-decoration: none; }
+
+    .info-group { margin-bottom: 1.5rem; }
+    .info-label { font-size: 0.85rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.4rem; display: block; }
+    .info-value { font-size: 1.05rem; font-weight: 600; color: #0f172a; background: #f8fafc; padding: 0.8rem 1rem; border-radius: 8px; border: 1px solid #e2e8f0; }
+
+    .profile-avatar { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #2563eb, #06b6d4); color: white; display: flex; justify-content: center; align-items: center; font-size: 2rem; font-weight: 800; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3); margin-right: 1.5rem; }
+
+    .badge-soft { padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.3px; display: inline-block; text-transform: uppercase; }
+    .badge-soft-success { background-color: #dcfce7; color: #16a34a; }
+    .badge-soft-danger { background-color: #fee2e2; color: #dc2626; }
+</style>
+
+<div class="admin-container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning btn-sm shadow-sm">
-                <i class="fas fa-edit fa-sm text-white-50"></i> Chỉnh sửa
+            <h1 class="admin-page-title">Hồ sơ nhân viên</h1>
+            <p class="text-muted small mb-0 mt-1">Thông tin chi tiết của @Model.FullName</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-action="Index" class="btn-admin-outline">
+                <i class="fas fa-arrow-left"></i> Quay lại
             </a>
-            <a asp-action="Index" class="btn btn-secondary btn-sm shadow-sm">
-                <i class="fas fa-arrow-left fa-sm text-white-50"></i> Quay lại
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn-admin-warning">
+                <i class="fas fa-edit"></i> Chỉnh sửa
             </a>
         </div>
     </div>
 
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Hồ sơ nhân viên: @Model.FullName</h6>
+    <div class="admin-card">
+        <div class="admin-card-header d-flex align-items-center">
+            <div class="profile-avatar">@firstChar</div>
+            <div>
+                <h4 class="mb-1 font-weight-bold text-dark" style="text-transform: none;">@Model.FullName</h4>
+                <div>
+                    @if (Model.IsActive)
+                    {
+                        <span class="badge-soft badge-soft-success"><i class="fas fa-check-circle mr-1"></i>Đang làm việc</span>
+                    }
+                    else
+                    {
+                        <span class="badge-soft badge-soft-danger"><i class="fas fa-times-circle mr-1"></i>Đã nghỉ việc</span>
+                    }
+                </div>
+            </div>
         </div>
-        <div class="card-body">
+        <div class="admin-card-body">
             <div class="row">
-                <div class="col-md-3 font-weight-bold">Họ và tên:</div>
-                <div class="col-md-9 mb-3">@Model.FullName</div>
-
-                <div class="col-md-3 font-weight-bold">Giới tính:</div>
-                <div class="col-md-9 mb-3">@Model.GenderName</div>
-
-                <div class="col-md-3 font-weight-bold">Ngày sinh:</div>
-                <div class="col-md-9 mb-3">@(Model.DateOfBirth.HasValue ? Model.DateOfBirth.Value.ToString("dd/MM/yyyy") : "---")</div>
-
-                <div class="col-md-3 font-weight-bold">Email:</div>
-                <div class="col-md-9 mb-3">@Model.Email</div>
-
-                <div class="col-md-3 font-weight-bold">Số điện thoại:</div>
-                <div class="col-md-9 mb-3">@(string.IsNullOrEmpty(Model.PhoneNumber) ? "---" : Model.PhoneNumber)</div>
-
-                <div class="col-md-3 font-weight-bold">Trạng thái:</div>
-                <div class="col-md-9 mb-3">
-                    @(Model.IsActive ? "Đang làm việc" : "Đã nghỉ việc")
+                <div class="col-md-6 info-group">
+                    <span class="info-label">Họ và tên</span>
+                    <div class="info-value">@Model.FullName</div>
+                </div>
+                <div class="col-md-6 info-group">
+                    <span class="info-label">Email liên hệ</span>
+                    <div class="info-value">@Model.Email</div>
+                </div>
+                <div class="col-md-4 info-group">
+                    <span class="info-label">Số điện thoại</span>
+                    <div class="info-value">@(string.IsNullOrEmpty(Model.PhoneNumber) ? "Chưa cập nhật" : Model.PhoneNumber)</div>
+                </div>
+                <div class="col-md-4 info-group">
+                    <span class="info-label">Giới tính</span>
+                    <div class="info-value">@Model.GenderName</div>
+                </div>
+                <div class="col-md-4 info-group">
+                    <span class="info-label">Ngày sinh</span>
+                    <div class="info-value">@(Model.DateOfBirth.HasValue ? Model.DateOfBirth.Value.ToString("dd/MM/yyyy") : "Chưa cập nhật")</div>
                 </div>
             </div>
         </div>

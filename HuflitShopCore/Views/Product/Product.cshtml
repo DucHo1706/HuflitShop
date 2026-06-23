@@ -7,12 +7,362 @@
     var cloudName = Configuration["CloudinarySettings:CloudName"] ?? "Tên_Cloud_Của_Bạn";
 }
 
+<style>
+    :root {
+        --vibrantBlue: #2563eb;
+        --vibrantBlueHover: #1d4ed8;
+        --vibrantCyan: #06b6d4;
+        --oceanGradient: linear-gradient(135deg, #2563eb, #06b6d4);
+        --dangerGradient: linear-gradient(135deg, #ef4444, #f43f5e);
+    }
+
+    .catalog-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .filter-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 3px !important;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05) !important;
+        border-top: 3px solid var(--vibrantBlue) !important;
+    }
+
+    .filter-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--vibrantBlue) !important;
+        font-size: 1.1rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 1.25rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid #f1f5f9 !important;
+        background: transparent !important;
+    }
+
+    .filter-link {
+        color: #64748b;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        display: block;
+        padding: 8px 0;
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+        .filter-link:hover, .filter-link.active {
+            color: var(--vibrantBlue) !important;
+            padding-left: 5px;
+        }
+
+    .form-check-label {
+        font-size: 0.95rem;
+        color: #475569;
+        font-weight: 500;
+        cursor: pointer;
+    }
+
+    .form-check-input:checked {
+        background-color: var(--vibrantBlue);
+        border-color: var(--vibrantBlue);
+    }
+
+    .btn-color-swatch {
+        width: 36px;
+        height: 36px;
+        border-radius: 50% !important;
+        border: 2px solid #cbd5e1;
+        padding: 0;
+        cursor: pointer;
+        position: relative;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .btn-color-swatch:hover {
+            transform: scale(1.15);
+            border-color: var(--vibrantBlue);
+        }
+
+        .btn-color-swatch.active {
+            border-color: var(--vibrantBlue);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.35);
+            transform: scale(1.15);
+        }
+
+            .btn-color-swatch.active::after {
+                content: '';
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+                background-color: #fff;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+            }
+
+            .btn-color-swatch.active[style*="background-color: #ffffff"]::after,
+            .btn-color-swatch.active[style*="background-color: #FFFFFF"]::after,
+            .btn-color-swatch.active[style*="background-color: #f5f5dc"]::after,
+            .btn-color-swatch.active[style*="background-color: #F5F5DC"]::after {
+                background-color: #000;
+            }
+
+    .btn-size-pill {
+        background-color: #f8fafc;
+        border: 2px solid #e2e8f0;
+        padding: 8px 16px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #334155;
+        border-radius: 30px !important;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-align: center;
+    }
+
+        .btn-size-pill:hover {
+            background-color: #e2e8f0;
+            color: var(--vibrantBlue);
+            border-color: var(--vibrantBlue);
+        }
+
+        .btn-size-pill.active {
+            background: var(--oceanGradient) !important;
+            border-color: var(--vibrantBlue) !important;
+            color: #ffffff !important;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+    .sort-bar {
+        background: #ffffff;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 15px !important;
+        padding: 1rem 1.5rem;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.02) !important;
+    }
+
+    .sort-btn {
+        background: transparent;
+        border: 2px solid #e2e8f0;
+        color: #64748b;
+        font-weight: 700;
+        padding: 6px 16px;
+        border-radius: 10px !important;
+        transition: all 0.2s ease;
+        font-size: 0.9rem;
+    }
+
+        .sort-btn:hover {
+            border-color: var(--vibrantBlue);
+            color: var(--vibrantBlue);
+        }
+
+        .sort-btn.active {
+            background: var(--oceanGradient) !important;
+            border-color: var(--vibrantBlue) !important;
+            color: #ffffff !important;
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
+        }
+
+    .sort-select {
+        border: 2px solid #e2e8f0;
+        border-radius: 10px !important;
+        padding: 6px 12px;
+        font-weight: 600;
+        color: #334155;
+        outline: none;
+        cursor: pointer;
+    }
+
+        .sort-select:focus {
+            border-color: var(--vibrantBlue);
+            background-color: #f0f9ff;
+        }
+
+    .catalog-item {
+        border: 1px solid #e2e8f0;
+        border-radius: 0 !important;
+        overflow: hidden;
+        background: #fff;
+        transition: all 0.3s ease;
+        margin-bottom: 2rem;
+        position: relative;
+    }
+
+        .catalog-item:hover {
+            box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+            border-color: var(--vibrantBlue);
+            transform: translateY(-3px);
+        }
+
+    .catalog-img {
+        position: relative;
+        overflow: hidden;
+        aspect-ratio: 3/4;
+        background: #f8fafc;
+        border: 1px thin solid #e2e8f0;
+        border-radius: 10px !important;
+    }
+
+        .catalog-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+    .catalog-item:hover .catalog-img img {
+        transform: scale(1.05);
+    }
+
+    .catalog-overlay {
+        position: absolute;
+        bottom: -50px;
+        left: 0;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        padding: 15px;
+        background: rgba(255,255,255,0.95);
+        transition: bottom 0.3s ease;
+    }
+
+    .catalog-item:hover .catalog-overlay {
+        bottom: 0;
+    }
+
+    .catalog-overlay a {
+        background: var(--oceanGradient);
+        color: #fff;
+        padding: 8px 15px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+
+        .catalog-overlay a:hover {
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.4);
+            transform: translateY(-2px);
+        }
+
+    .catalog-body {
+        padding: 1.5rem;
+        text-align: center;
+    }
+
+    .catalog-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 0.5rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .catalog-price-row {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .catalog-price {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: #ef4444;
+    }
+
+    .catalog-btn-cart {
+        background: transparent;
+        color: var(--vibrantBlue);
+        font-size: 1.2rem;
+        transition: all 0.2s;
+        cursor: pointer;
+    }
+
+        .catalog-btn-cart:hover {
+            color: var(--vibrantCyan);
+            transform: scale(1.2);
+        }
+
+    .btn-ocean-primary {
+        background: var(--oceanGradient) !important;
+        border: none !important;
+        color: #fff !important;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.3s ease;
+        border-radius: 0 !important;
+    }
+
+        .btn-ocean-primary:hover {
+            background: linear-gradient(135deg, #1d4ed8, #0891b2) !important;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+        }
+
+    .btn-ocean-outline {
+        background: transparent !important;
+        border: 2px solid #cbd5e1 !important;
+        color: #64748b !important;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+        border-radius: 0 !important;
+    }
+
+        .btn-ocean-outline:hover {
+            border-color: var(--vibrantBlue) !important;
+            color: var(--vibrantBlue) !important;
+            background: #f0f9ff !important;
+        }
+
+    .pagination .page-item.active .page-link {
+        background: var(--oceanGradient) !important;
+        border-color: var(--vibrantBlue) !important;
+        color: #fff !important;
+        box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
+    }
+
+    .pagination .page-link {
+        color: var(--vibrantBlue);
+        border-radius: 0 !important;
+        font-weight: 600;
+        border-color: #e2e8f0;
+        padding: 10px 18px;
+    }
+
+        .pagination .page-link:hover {
+            background: #f0f9ff;
+        }
+</style>
+
 <div class="catalog-container">
     <div class="row">
-        <!-- Sidebar filters -->
         <div class="col-lg-3">
             <form id="filterForm" method="get" action="@Url.Action((string)ViewBag.Action, "Product")" class="filter-sidebar-form">
-                <!-- Keep search and category ID to preserve state -->
                 @if (ViewBag.CategoryId != null)
                 {
                     <input type="hidden" name="id" value="@ViewBag.CategoryId" />
@@ -22,21 +372,20 @@
                     <input type="hidden" name="search" value="@ViewBag.Search" />
                 }
 
-                <!-- Category Filter Card -->
                 <div class="filter-card">
                     <div class="filter-header">
                         <i class="fas fa-list-ul"></i>
-                        <span>Tất cả danh mục</span>
+                        <span>Danh mục</span>
                     </div>
-                    <ul class="filter-list">
-                        <li class="filter-item">
+                    <ul class="list-unstyled m-0">
+                        <li class="mb-1">
                             <a href="@Url.Action("Product", "Product", new { search = ViewBag.Search })" class="filter-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Product" && ViewBag.CategoryId == null ? "active" : "")">
                                 Tất cả sản phẩm
                             </a>
                         </li>
                         @foreach (var cat in categories)
                         {
-                            <li class="filter-item">
+                            <li class="mb-1">
                                 <a href="@Url.Action("Category", "Product", new { id = cat.Id, search = ViewBag.Search })" class="filter-link @(ViewBag.CategoryId?.ToString() == cat.Id ? "active" : "")">
                                     @cat.CategoryName
                                 </a>
@@ -45,7 +394,6 @@
                     </ul>
                 </div>
 
-                <!-- Trademark Filter Card -->
                 @if (ViewBag.Trademarks != null && ((IEnumerable<string>)ViewBag.Trademarks).Any())
                 {
                     <div class="filter-card">
@@ -53,29 +401,28 @@
                             <i class="fas fa-tags"></i>
                             <span>Thương hiệu</span>
                         </div>
-                        <div class="filter-group">
-                            <div class="form-check mb-2">
+                        <div>
+                            <div class="form-check mb-3">
                                 <input class="form-check-input filter-checkbox" type="radio" name="trademark" id="brand_all" value="" @(string.IsNullOrEmpty(ViewBag.Trademark) ? "checked" : "") />
                                 <label class="form-check-label text-muted" for="brand_all">Tất cả thương hiệu</label>
                             </div>
                             @foreach (var brand in (IEnumerable<string>)ViewBag.Trademarks)
                             {
-                                <div class="form-check mb-2">
+                                <div class="form-check mb-3">
                                     <input class="form-check-input filter-checkbox" type="radio" name="trademark" id="brand_@brand" value="@brand" @(ViewBag.Trademark == brand ? "checked" : "") />
-                                    <label class="form-check-label" for="brand_@brand">@brand</label>
+                                    <label class="form-check-label font-weight-bold" for="brand_@brand">@brand</label>
                                 </div>
                             }
                         </div>
                     </div>
                 }
 
-                <!-- Price Range Filter Card -->
                 <div class="filter-card">
                     <div class="filter-header">
                         <i class="fas fa-dollar-sign"></i>
                         <span>Khoảng giá</span>
                     </div>
-                    <div class="filter-group">
+                    <div>
                         @{
                             var minPrice = ViewBag.MinPrice as decimal?;
                             var maxPrice = ViewBag.MaxPrice as decimal?;
@@ -87,41 +434,39 @@
                             else if (minPrice == 1000000 && maxPrice == null) priceVal = "above_1000";
                             else priceVal = "custom";
                         }
-                        <div class="form-check mb-2">
+                        <div class="form-check mb-3">
                             <input class="form-check-input price-radio" type="radio" name="priceRange" id="price_all" value="all" @(priceVal == "all" ? "checked" : "") onclick="setPriceFilter(null, null)" />
-                            <label class="form-check-label" for="price_all">Tất cả giá</label>
+                            <label class="form-check-label font-weight-bold" for="price_all">Tất cả giá</label>
                         </div>
-                        <div class="form-check mb-2">
+                        <div class="form-check mb-3">
                             <input class="form-check-input price-radio" type="radio" name="priceRange" id="price_under_300" value="under_300" @(priceVal == "under_300" ? "checked" : "") onclick="setPriceFilter(null, 300000)" />
-                            <label class="form-check-label" for="price_under_300">Dưới 300.000₫</label>
+                            <label class="form-check-label font-weight-bold" for="price_under_300">Dưới 300.000₫</label>
                         </div>
-                        <div class="form-check mb-2">
+                        <div class="form-check mb-3">
                             <input class="form-check-input price-radio" type="radio" name="priceRange" id="price_300_500" value="300_500" @(priceVal == "300_500" ? "checked" : "") onclick="setPriceFilter(300000, 500000)" />
-                            <label class="form-check-label" for="price_300_500">300.000₫ - 500.000₫</label>
+                            <label class="form-check-label font-weight-bold" for="price_300_500">300.000₫ - 500.000₫</label>
                         </div>
-                        <div class="form-check mb-2">
+                        <div class="form-check mb-3">
                             <input class="form-check-input price-radio" type="radio" name="priceRange" id="price_500_1000" value="500_1000" @(priceVal == "500_1000" ? "checked" : "") onclick="setPriceFilter(500000, 1000000)" />
-                            <label class="form-check-label" for="price_500_1000">500.000₫ - 1.000.000₫</label>
+                            <label class="form-check-label font-weight-bold" for="price_500_1000">500.000₫ - 1.000.000₫</label>
                         </div>
-                        <div class="form-check mb-2">
+                        <div class="form-check mb-3">
                             <input class="form-check-input price-radio" type="radio" name="priceRange" id="price_above_1000" value="above_1000" @(priceVal == "above_1000" ? "checked" : "") onclick="setPriceFilter(1000000, null)" />
-                            <label class="form-check-label" for="price_above_1000">Trên 1.000.000₫</label>
+                            <label class="form-check-label font-weight-bold" for="price_above_1000">Trên 1.000.000₫</label>
                         </div>
 
-                        <!-- Custom Price inputs -->
-                        <div class="mt-3">
-                            <label class="form-label text-muted font-weight-bold" style="font-size:0.8rem;">Tùy chọn khoảng giá:</label>
-                            <div class="d-flex align-items-center gap-2">
-                                <input type="number" name="minPrice" class="form-control form-control-sm price-input" id="priceMin" placeholder="Từ đ" value="@(ViewBag.MinPrice != null ? ((decimal)ViewBag.MinPrice).ToString("F0") : "")" style="border-radius:0px;" />
+                        <div class="mt-4 pt-3 border-top">
+                            <label class="form-label text-muted font-weight-bold text-uppercase mb-2" style="font-size:0.8rem;">Tùy chọn nhập giá:</label>
+                            <div class="d-flex align-items-center gap-2 mb-3">
+                                <input type="number" name="minPrice" class="form-control text-center font-weight-bold" id="priceMin" placeholder="TỪ" value="@(ViewBag.MinPrice != null ? ((decimal)ViewBag.MinPrice).ToString("F0") : "")" style="border-radius:0px; border-color: #cbd5e1;" />
                                 <span class="text-muted">-</span>
-                                <input type="number" name="maxPrice" class="form-control form-control-sm price-input" id="priceMax" placeholder="Đến đ" value="@(ViewBag.MaxPrice != null ? ((decimal)ViewBag.MaxPrice).ToString("F0") : "")" style="border-radius:0px;" />
+                                <input type="number" name="maxPrice" class="form-control text-center font-weight-bold" id="priceMax" placeholder="ĐẾN" value="@(ViewBag.MaxPrice != null ? ((decimal)ViewBag.MaxPrice).ToString("F0") : "")" style="border-radius:0px; border-color: #cbd5e1;" />
                             </div>
-                            <button type="submit" class="btn btn-primary btn-sm w-100 mt-2 py-2" style="border-radius:0px; font-size:11px;">Áp dụng</button>
+                            <button type="submit" class="btn btn-ocean-primary w-100 py-2" style="border-radius: 5px !important">Áp dụng</button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Sizes Filter Card -->
                 @if (ViewBag.Sizes != null && ((IEnumerable<HuflitShopCore.Models.Size>)ViewBag.Sizes).Any())
                 {
                     <div class="filter-card">
@@ -129,12 +474,12 @@
                             <i class="fas fa-ruler-combined"></i>
                             <span>Kích thước</span>
                         </div>
-                        <div class="filter-group">
-                            <div class="size-filter-grid">
-                                <div class="size-box @(string.IsNullOrEmpty(ViewBag.SizeId) ? "active" : "")" onclick="setSizeFilter('')">Tất cả</div>
+                        <div>
+                            <div class="d-flex flex-wrap gap-2">
+                                <div class="btn-size-pill @(string.IsNullOrEmpty(ViewBag.SizeId) ? "active" : "")" onclick="setSizeFilter('')">Tất cả</div>
                                 @foreach (var size in (IEnumerable<HuflitShopCore.Models.Size>)ViewBag.Sizes)
                                 {
-                                    <div class="size-box @(ViewBag.SizeId?.ToString() == size.Id ? "active" : "")" onclick="setSizeFilter('@size.Id')">@size.SizeName</div>
+                                    <div class="btn-size-pill @(ViewBag.SizeId?.ToString() == size.Id ? "active" : "")" onclick="setSizeFilter('@size.Id')">@size.SizeName</div>
                                 }
                             </div>
                             <input type="hidden" name="sizeId" id="sizeIdInput" value="@ViewBag.SizeId" />
@@ -142,7 +487,6 @@
                     </div>
                 }
 
-                <!-- Colors Filter Card -->
                 @if (ViewBag.Colors != null && ((IEnumerable<HuflitShopCore.Models.Color>)ViewBag.Colors).Any())
                 {
                     <div class="filter-card">
@@ -150,15 +494,15 @@
                             <i class="fas fa-palette"></i>
                             <span>Màu sắc</span>
                         </div>
-                        <div class="filter-group">
-                            <div class="color-filter-grid">
-                                <div class="color-circle-box @(string.IsNullOrEmpty(ViewBag.ColorId) ? "active" : "")" onclick="setColorFilter('')" title="Tất cả màu">
-                                    <span class="all-colors-icon">All</span>
+                        <div>
+                            <div class="d-flex flex-wrap gap-3">
+                                <div class="btn-color-swatch @(string.IsNullOrEmpty(ViewBag.ColorId) ? "active" : "")" onclick="setColorFilter('')" title="Tất cả màu" style="background: #f1f5f9;">
+                                    <span style="font-size: 0.65rem; font-weight: 800; color: #64748b;">ALL</span>
                                 </div>
                                 @foreach (var color in (IEnumerable<HuflitShopCore.Models.Color>)ViewBag.Colors)
                                 {
-                                    <div class="color-circle-box @(ViewBag.ColorId?.ToString() == color.Id ? "active" : "")" onclick="setColorFilter('@color.Id')" title="@color.ColorName">
-                                        <span class="color-circle" style="background-color: @(string.IsNullOrEmpty(color.HexCode) ? "#ccc" : color.HexCode);"></span>
+                                    string hexCode = !string.IsNullOrEmpty(color.HexCode) ? color.HexCode : "#cbd5e1";
+                                    <div class="btn-color-swatch @(ViewBag.ColorId?.ToString() == color.Id ? "active" : "")" onclick="setColorFilter('@color.Id')" title="@color.ColorName" style="background-color: @hexCode;">
                                     </div>
                                 }
                             </div>
@@ -167,41 +511,37 @@
                     </div>
                 }
 
-                <!-- Hidden Sort By Parameter -->
                 <input type="hidden" name="sortBy" id="sortByInput" value="@ViewBag.SortBy" />
 
-                <!-- Reset Filters Button -->
-                <a href="@Url.Action((string)ViewBag.Action, "Product", new { id = ViewBag.CategoryId, search = ViewBag.Search })" class="btn btn-secondary btn-sm w-100 py-2" style="border-radius:0px; font-size:11px;">
-                    <i class="fas fa-undo mr-1"></i> Xóa tất cả bộ lọc
+                <a href="@Url.Action((string)ViewBag.Action, "Product", new { id = ViewBag.CategoryId, search = ViewBag.Search })" class="btn btn-ocean-outline w-100 py-3 mb-5" style="border-radius: 3px !important">
+                    <i class="fas fa-undo mr-2"></i>Xóa tất cả bộ lọc
                 </a>
             </form>
         </div>
 
-        <!-- Main Product Catalog -->
         <div class="col-lg-9">
-            <!-- Sort Bar -->
             <div class="sort-bar">
-                <div class="sort-options">
-                    <span class="sort-label">Sắp xếp theo:</span>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <span class="text-muted font-weight-bold text-uppercase mr-2" style="font-size: 0.85rem;">Sắp xếp:</span>
                     <button type="button" class="sort-btn @(string.IsNullOrEmpty(ViewBag.SortBy) || ViewBag.SortBy == "popular" ? "active" : "")" onclick="changeSort('popular')">Phổ biến</button>
                     <button type="button" class="sort-btn @(ViewBag.SortBy == "newest" ? "active" : "")" onclick="changeSort('newest')">Mới nhất</button>
                 </div>
                 <div>
                     <select class="sort-select" onchange="changeSort(this.value)">
-                        <option value="">Chọn khoảng giá</option>
+                        <option value="">-- Mức giá --</option>
                         <option value="price_asc" selected="@(ViewBag.SortBy == "price_asc")">Giá: Thấp đến Cao</option>
                         <option value="price_desc" selected="@(ViewBag.SortBy == "price_desc")">Giá: Cao đến Thấp</option>
                     </select>
                 </div>
             </div>
 
-            <!-- Product Grid -->
             <div class="row" id="productGrid">
                 @if (Model == null || !Model.Any())
                 {
-                    <div class="col-12 text-center py-5">
-                        <div class="text-muted mb-3" style="font-size: 1.5rem;"><i class="fas fa-box-open mr-2"></i>Không tìm thấy sản phẩm nào</div>
-                        <a class="btn btn-primary" asp-action="Product" asp-controller="Product">Tải lại danh sách</a>
+                    <div class="col-12 text-center py-5 mt-5">
+                        <div class="text-muted mb-4" style="font-size: 3rem;"><i class="fas fa-box-open"></i></div>
+                        <h4 class="font-weight-bold text-dark mb-4">Không tìm thấy sản phẩm nào phù hợp</h4>
+                        <a class="btn btn-ocean-primary" asp-action="Product" asp-controller="Product">Tải lại danh sách</a>
                     </div>
                 }
                 else
@@ -209,43 +549,44 @@
                     foreach (var pro in Model)
                     {
                         var defaultImage = pro.ProductImages?
-                            .OrderBy(i => i.ImageOrder)
-                            .FirstOrDefault();
-
+                        .OrderBy(i => i.ImageOrder)
+                        .FirstOrDefault();
                         var imageUrl = HuflitShopCore.Helpers.ImageRouteHelper.Resolve(defaultImage?.PublicId);
 
                         var totalStock = pro.ProductVariants?
-                            .Sum(pv => pv.StockQuantity) ?? 0;
+                        .Sum(pv => pv.StockQuantity) ?? 0;
 
-                        <div class="col-md-4 col-6 product-card-wrapper" data-price="@pro.CurrentPrice">
+                        <div class="col-md-4 col-6 mb-4">
                             <div class="catalog-item">
                                 <div class="catalog-img">
                                     <img src="@imageUrl" alt="@pro.ProductName">
                                     <div class="catalog-overlay">
-                                        <a asp-controller="Product" asp-action="Details" asp-route-id="@pro.Id"><i class="fas fa-eye mr-1"></i>Xem</a>
+                                        <a asp-controller="Product" asp-action="Details" asp-route-id="@pro.Id"><i class="fas fa-eye mr-2"></i>Xem</a>
                                         @if (totalStock > 0)
                                         {
-                                            <a asp-controller="Product" asp-action="BuyNow" asp-route-id="@pro.Id"><i class="fas fa-shopping-bag mr-1"></i>Mua ngay</a>
+                                            <a asp-controller="Product" asp-action="BuyNow" asp-route-id="@pro.Id"><i class="fas fa-bolt mr-2"></i>Mua ngay</a>
                                         }
                                     </div>
                                 </div>
                                 <div class="catalog-body">
-                                    <h2 class="catalog-title">@pro.ProductName</h2>
-                                    <div class="catalog-price-row">
+                                    <h2 class="catalog-title">
+                                        <a asp-controller="Product" asp-action="Details" asp-route-id="@pro.Id" class="text-dark text-decoration-none">@pro.ProductName</a>
+                                    </h2>
+                                    <div class="catalog-price-row mt-3">
                                         <div class="catalog-price">@pro.CurrentPrice.ToString("N0")đ</div>
                                         @if (totalStock > 0)
                                         {
-                                            <form asp-action="AddCart" asp-controller="Product" method="post" class="d-inline">
+                                            <form asp-action="AddCart" asp-controller="Product" method="post" class="d-inline m-0 p-0">
                                                 @Html.AntiForgeryToken()
                                                 <input type="hidden" name="id" value="@pro.Id" />
-                                                <button type="submit" class="catalog-btn-cart border-0">
+                                                <button type="submit" class="catalog-btn-cart border-0" title="Thêm vào giỏ">
                                                     <i class="fas fa-cart-plus"></i>
                                                 </button>
                                             </form>
                                         }
                                         else
                                         {
-                                            <span class="badge bg-secondary text-white" style="font-size:0.7rem;">Hết</span>
+                                            <span class="badge text-white font-weight-bold" style="background: #94a3b8; padding: 5px 8px; border-radius: 0;">HẾT HÀNG</span>
                                         }
                                     </div>
                                 </div>
@@ -255,23 +596,22 @@
                 }
             </div>
 
-            <!-- Pagination -->
             @if (ViewBag.TotalPages > 1)
             {
-                <div class="d-flex justify-content-center mt-4 mb-4">
+                <div class="d-flex justify-content-center mt-5 mb-5">
                     <nav aria-label="Page navigation">
                         <ul class="pagination mb-0">
                             <li class="page-item @(ViewBag.CurrentPage == 1 ? "disabled" : "")">
-                                <a class="page-link" href="@Url.Action((string)ViewBag.Action, "Product", new { 
-                                    id = ViewBag.CategoryId, 
-                                    search = ViewBag.Search, 
-                                    minPrice = ViewBag.MinPrice, 
-                                    maxPrice = ViewBag.MaxPrice, 
-                                    trademark = ViewBag.Trademark, 
-                                    sizeId = ViewBag.SizeId, 
-                                    colorId = ViewBag.ColorId, 
-                                    sortBy = ViewBag.SortBy, 
-                                    page = ViewBag.CurrentPage - 1 
+                                <a class="page-link" href="@Url.Action((string)ViewBag.Action, "Product", new {
+                                    id = ViewBag.CategoryId,
+                                    search = ViewBag.Search,
+                                    minPrice = ViewBag.MinPrice,
+                                    maxPrice = ViewBag.MaxPrice,
+                                    trademark = ViewBag.Trademark,
+                                    sizeId = ViewBag.SizeId,
+                                    colorId = ViewBag.ColorId,
+                                    sortBy = ViewBag.SortBy,
+                                    page = ViewBag.CurrentPage - 1
                                 })" aria-label="Previous">
                                     <span aria-hidden="true">&laquo; Trở lại</span>
                                 </a>
@@ -279,30 +619,30 @@
                             @for (int i = 1; i <= ViewBag.TotalPages; i++)
                             {
                                 <li class="page-item @(ViewBag.CurrentPage == i ? "active" : "")">
-                                    <a class="page-link" href="@Url.Action((string)ViewBag.Action, "Product", new { 
-                                        id = ViewBag.CategoryId, 
-                                        search = ViewBag.Search, 
-                                        minPrice = ViewBag.MinPrice, 
-                                        maxPrice = ViewBag.MaxPrice, 
-                                        trademark = ViewBag.Trademark, 
-                                        sizeId = ViewBag.SizeId, 
-                                        colorId = ViewBag.ColorId, 
-                                        sortBy = ViewBag.SortBy, 
-                                        page = i 
-                                    })">@i</a>
+                                    <a class="page-link" href="@Url.Action((string)ViewBag.Action, "Product", new {
+                                        id = ViewBag.CategoryId,
+                                        search = ViewBag.Search,
+                                        minPrice = ViewBag.MinPrice,
+                                        maxPrice = ViewBag.MaxPrice,
+                                        trademark = ViewBag.Trademark,
+                                        sizeId = ViewBag.SizeId,
+                                        colorId = ViewBag.ColorId,
+                                        sortBy = ViewBag.SortBy,
+                                        page = i
+                                     })">@i</a>
                                 </li>
                             }
                             <li class="page-item @(ViewBag.CurrentPage == ViewBag.TotalPages ? "disabled" : "")">
-                                <a class="page-link" href="@Url.Action((string)ViewBag.Action, "Product", new { 
-                                    id = ViewBag.CategoryId, 
-                                    search = ViewBag.Search, 
-                                    minPrice = ViewBag.MinPrice, 
-                                    maxPrice = ViewBag.MaxPrice, 
-                                    trademark = ViewBag.Trademark, 
-                                    sizeId = ViewBag.SizeId, 
-                                    colorId = ViewBag.ColorId, 
-                                    sortBy = ViewBag.SortBy, 
-                                    page = ViewBag.CurrentPage + 1 
+                                <a class="page-link" href="@Url.Action((string)ViewBag.Action, "Product", new {
+                                    id = ViewBag.CategoryId,
+                                    search = ViewBag.Search,
+                                    minPrice = ViewBag.MinPrice,
+                                    maxPrice = ViewBag.MaxPrice,
+                                    trademark = ViewBag.Trademark,
+                                    sizeId = ViewBag.SizeId,
+                                    colorId = ViewBag.ColorId,
+                                    sortBy = ViewBag.SortBy,
+                                    page = ViewBag.CurrentPage + 1
                                 })" aria-label="Next">
                                     <span aria-hidden="true">Tiếp &raquo;</span>
                                 </a>
@@ -316,8 +656,8 @@
 </div>
 
 <script>
-    $(document).ready(function() {
-        $('.filter-checkbox').on('change', function() {
+    $(document).ready(function () {
+        $('.filter-checkbox').on('change', function () {
             $('#filterForm').submit();
         });
     });

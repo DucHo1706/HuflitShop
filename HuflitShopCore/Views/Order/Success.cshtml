@@ -3,77 +3,247 @@
     ViewData["Title"] = ViewBag.PaymentSuccess == false ? "Đặt hàng thất bại" : "Đặt hàng thành công";
 }
 
-<div style="padding: 80px 0; background: #f8fafc; min-height: 60vh;">
+<style>
+    :root {
+        --vibrantBlue: #2563eb;
+        --vibrantBlueHover: #1d4ed8;
+        --vibrantCyan: #06b6d4;
+        --oceanGradient: linear-gradient(135deg, #2563eb, #06b6d4);
+        --dangerGradient: linear-gradient(135deg, #ef4444, #f43f5e);
+    }
+
+    .success-container {
+        padding: 5rem 0;
+        background: #f8fafc;
+        min-height: 75vh;
+        display: flex;
+        align-items: center;
+    }
+
+    /* Thẻ trạng thái đơn hàng vuông vức, bóng đổ nhẹ */
+    .status-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 0;
+        padding: 3.5rem 3rem;
+        box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
+        border-top: 4px solid var(--vibrantBlue);
+    }
+
+        .status-card.failed {
+            border-top-color: #ef4444;
+        }
+
+    /* Icon trạng thái nổi bật với Gradient */
+    .icon-wrapper {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        font-size: 2.5rem;
+        color: #fff;
+    }
+
+    .icon-success {
+        background: var(--oceanGradient);
+        box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+    }
+
+    .icon-failed {
+        background: var(--dangerGradient);
+        box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+    }
+
+    .status-title {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: #0f172a;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.75rem;
+    }
+
+    .status-desc {
+        color: #64748b;
+        font-size: 1rem;
+        max-width: 480px;
+        margin: 0 auto 2.5rem;
+        line-height: 1.6;
+    }
+
+    /* Box thông tin đơn hàng */
+    .order-info-box {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        padding: 2rem;
+        margin-bottom: 2.5rem;
+        text-align: left;
+    }
+
+    .order-info-header {
+        font-size: 1rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--vibrantBlue);
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .info-label {
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #94a3b8;
+        margin-bottom: 0.4rem;
+    }
+
+    .info-value {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #0f172a;
+        word-break: break-word;
+    }
+
+    .info-value-price {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--vibrantBlue);
+    }
+
+    /* Các nút điều hướng đồng bộ với trang Checkout và Details */
+    .btn-ocean-primary {
+        background: var(--oceanGradient) !important;
+        border: none !important;
+        color: #fff !important;
+        font-size: 0.95rem;
+        letter-spacing: 1px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2);
+        padding: 0.9rem 1.8rem;
+    }
+
+        .btn-ocean-primary:hover {
+            background: linear-gradient(135deg, #1d4ed8, #0891b2) !important;
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35);
+            transform: translateY(-1px);
+        }
+
+    .btn-ocean-outline {
+        background-color: transparent !important;
+        border: 2px solid var(--vibrantBlue) !important;
+        color: var(--vibrantBlue) !important;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        padding: 0.9rem 1.8rem;
+    }
+
+        .btn-ocean-outline:hover {
+            background: var(--vibrantBlue) !important;
+            color: #fff !important;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        }
+
+    .btn-danger-primary {
+        background: var(--dangerGradient) !important;
+        border: none !important;
+        color: #fff !important;
+        font-size: 0.95rem;
+        letter-spacing: 1px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(239, 68, 68, 0.2);
+        padding: 0.9rem 1.8rem;
+    }
+
+        .btn-danger-primary:hover {
+            background: linear-gradient(135deg, #dc2626, #e11d48) !important;
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.35);
+            transform: translateY(-1px);
+        }
+</style>
+
+<div class="success-container">
     <div class="container">
         <div class="row justify-content-center">
-            <div class="col-lg-7 col-md-10">
+            <div class="col-lg-8 col-md-10 text-center">
 
                 @if (ViewBag.PaymentSuccess == false)
                 {
-                    @* ── Failure State ── *@
-                    <div style="text-align:center;margin-bottom:36px;">
-                        <div style="width:80px;height:80px;background:#fef2f2;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
-                            <i class="fas fa-times" style="font-size:2rem;color:#ef4444;"></i>
+                    @* ── TRẠNG THÁI THẤT BẠI ── *@
+                    <div class="status-card failed">
+                        <div class="icon-wrapper icon-failed">
+                            <i class="fas fa-times"></i>
                         </div>
-                        <h2 style="font-size:1.6rem;font-weight:800;color:#0f172a;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:10px;">Thanh toán thất bại</h2>
-                        <p style="color:#64748b;font-size:0.95rem;">Thanh toán qua VNPAY không thành công. Đơn hàng đã bị hủy tự động. Vui lòng thử lại.</p>
-                    </div>
-                    <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
-                        <a asp-controller="Home" asp-action="Index" class="hs-btn hs-btn--outline">Về trang chủ</a>
-                        <a asp-controller="Product" asp-action="Product" class="hs-btn hs-btn--primary">Tiếp tục mua sắm</a>
+                        <h2 class="status-title" style="color: #ef4444;">Thanh toán thất bại</h2>
+                        <p class="status-desc">
+                            Giao dịch qua VNPAY không thành công hoặc đã bị hủy. Đơn hàng của bạn đã bị hủy tự động trên hệ thống. Vui lòng kiểm tra lại số dư hoặc thử lại phương thức thanh toán khác.
+                        </p>
+
+                        <div class="d-flex justify-content-center gap-3 flex-wrap">
+                            <a asp-controller="Home" asp-action="Index" class="btn btn-ocean-outline rounded-0 font-weight-bold text-uppercase">Về trang chủ</a>
+                            <a asp-controller="Product" asp-action="Product" class="btn btn-danger-primary rounded-0 font-weight-bold text-uppercase">Tiếp tục mua sắm</a>
+                        </div>
                     </div>
                 }
                 else
                 {
-                    @* ── Success State ── *@
-                    <div style="text-align:center;margin-bottom:40px;">
-                        <div style="width:80px;height:80px;background:#eff6ff;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
-                            <i class="fas fa-check" style="font-size:2rem;color:#2563eb;"></i>
+                    @* ── TRẠNG THÁI THÀNH CÔNG ── *@
+                    <div class="status-card">
+                        <div class="icon-wrapper icon-success">
+                            <i class="fas fa-check"></i>
                         </div>
-                        <h2 style="font-size:1.6rem;font-weight:800;color:#0f172a;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:10px;">Đặt hàng thành công!</h2>
-                        <p style="color:#64748b;font-size:0.95rem;max-width:420px;margin:0 auto;">
+                        <h2 class="status-title">Đặt hàng thành công!</h2>
+                        <p class="status-desc">
                             @if (ViewBag.PaymentSuccess == true)
                             {
-                                <text>Thanh toán VNPAY thành công. Đơn hàng đang được xử lý.</text>
+                                <text>Thanh toán VNPAY thành công. Đơn hàng của bạn đã được ghi nhận và đang trong quá trình chuẩn bị.</text>
                             }
                             else
                             {
-                                <text>Cảm ơn bạn đã mua sắm! Đơn hàng của bạn sẽ được xử lý sớm nhất.</text>
+                                <text>Cảm ơn bạn đã mua sắm tại HuflitShop! Đơn hàng thanh toán khi nhận hàng (COD) của bạn sẽ được xử lý và giao đến bạn sớm nhất.</text>
                             }
                         </p>
-                    </div>
 
-                    @* Order Info Card *@
-                    <div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(0,0,0,0.06);padding:32px;margin-bottom:28px;">
-                        <h4 style="font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#64748b;margin-bottom:20px;border-bottom:1px solid #e2e8f0;padding-bottom:14px;">
-                            Thông tin đơn hàng
-                        </h4>
-                        <div class="row">
-                            <div class="col-sm-6 mb-4">
-                                <div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#94a3b8;margin-bottom:6px;">Mã đơn hàng</div>
-                                <div style="font-size:0.96rem;font-weight:600;color:#0f172a;word-break:break-all;">@ViewBag.OrderId</div>
+                        @* Thông tin đơn hàng *@
+                        <div class="order-info-box">
+                            <div class="order-info-header">
+                                <i class="fas fa-receipt" style="font-size: 1.2rem;"></i> Thông tin đơn hàng
                             </div>
-                            <div class="col-sm-6 mb-4">
-                                <div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#94a3b8;margin-bottom:6px;">Phương thức thanh toán</div>
-                                <div style="font-size:0.96rem;font-weight:600;color:#0f172a;">@ViewBag.PaymentMethodName</div>
-                            </div>
-                            <div class="col-sm-6 mb-4">
-                                <div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#94a3b8;margin-bottom:6px;">Tổng thanh toán</div>
-                                <div style="font-size:1.3rem;font-weight:800;color:#2563eb;">@String.Format("{0:0,0}₫", (decimal)ViewBag.FinalAmount)</div>
-                            </div>
-                            <div class="col-sm-6 mb-4">
-                                <div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#94a3b8;margin-bottom:6px;">Địa chỉ giao hàng</div>
-                                <div style="font-size:0.92rem;color:#334155;line-height:1.5;">
-                                    @ViewBag.ShippingAddress<br>
-                                    @ViewBag.ShippingDistrict, @ViewBag.ShippingCity
+                            <div class="row">
+                                <div class="col-sm-6 mb-4">
+                                    <div class="info-label">Mã đơn hàng</div>
+                                    <div class="info-value">@ViewBag.OrderId</div>
+                                </div>
+                                <div class="col-sm-6 mb-4">
+                                    <div class="info-label">Phương thức thanh toán</div>
+                                    <div class="info-value">@ViewBag.PaymentMethodName</div>
+                                </div>
+                                <div class="col-sm-6 mb-4 mb-sm-0">
+                                    <div class="info-label">Tổng thanh toán</div>
+                                    <div class="info-value-price">@String.Format("{0:0,0}₫", (decimal)ViewBag.FinalAmount)</div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="info-label">Địa chỉ giao hàng</div>
+                                    <div class="info-value" style="line-height: 1.5; font-size: 0.95rem;">
+                                        @ViewBag.ShippingAddress<br>
+                                        @ViewBag.ShippingDistrict, @ViewBag.ShippingCity
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
-                        <a asp-controller="Profile" asp-action="Index" class="hs-btn hs-btn--outline">Xem đơn hàng của tôi</a>
-                        <a asp-controller="Product" asp-action="Product" class="hs-btn hs-btn--primary">Tiếp tục mua sắm</a>
+                        <div class="d-flex justify-content-center gap-3 flex-wrap">
+                            <a asp-controller="Profile" asp-action="Index" class="btn btn-ocean-outline rounded-0 font-weight-bold text-uppercase">Đơn hàng của tôi</a>
+                            <a asp-controller="Product" asp-action="Product" class="btn btn-ocean-primary rounded-0 font-weight-bold text-uppercase">Tiếp tục mua sắm</a>
+                        </div>
                     </div>
                 }
 

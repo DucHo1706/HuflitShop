@@ -4,51 +4,188 @@
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container-fluid mt-4">
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Cập nhật địa chỉ nhân viên</h1>
-        <a asp-action="Index" class="btn btn-secondary btn-sm shadow-sm">
-            <i class="fas fa-arrow-left fa-sm text-white-50"></i> Quay lại
+<style>
+    .admin-container {
+        padding: 1.5rem;
+        background-color: #f8fafc;
+        min-height: calc(100vh - 60px);
+    }
+
+    .admin-page-title {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #0f172a;
+        margin-bottom: 0;
+        letter-spacing: -0.5px;
+    }
+
+    .admin-card {
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        border: 1px solid #e2e8f0;
+        overflow: hidden;
+        border-top: 4px solid #06b6d4;
+    }
+
+    .admin-card-header {
+        padding: 1.25rem 1.5rem;
+        display: flex;
+        align-items: center;
+        border-bottom: 1px solid #f1f5f9;
+        font-weight: 700;
+        color: #1e293b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .admin-card-body {
+        padding: 2rem;
+    }
+
+    .form-label-modern {
+        font-weight: 700;
+        color: #475569;
+        font-size: 0.85rem;
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: block;
+    }
+
+    .form-control-modern {
+        border-radius: 8px;
+        border: 1px solid #cbd5e1;
+        padding: 0.8rem 1rem;
+        font-size: 0.95rem;
+        color: #0f172a;
+        transition: all 0.2s ease;
+        background-color: #f8fafc;
+        width: 100%;
+    }
+
+        .form-control-modern:focus {
+            border-color: #06b6d4;
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
+            outline: none;
+        }
+
+    .btn-admin-primary {
+        background: linear-gradient(135deg, #2563eb, #06b6d4);
+        color: #ffffff;
+        border: none;
+        font-weight: 700;
+        font-size: 0.95rem;
+        padding: 0.8rem 1.5rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        text-transform: uppercase;
+        width: 100%;
+        justify-content: center;
+    }
+
+        .btn-admin-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(37, 99, 235, 0.3);
+            color: #ffffff;
+        }
+
+    .btn-admin-outline {
+        background: #ffffff;
+        border: 2px solid #cbd5e1;
+        color: #475569;
+        font-weight: 700;
+        font-size: 0.95rem;
+        padding: 0.8rem 1.5rem;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        text-transform: uppercase;
+        text-decoration: none;
+        width: 100%;
+    }
+
+        .btn-admin-outline:hover {
+            background: #f8fafc;
+            color: #0f172a;
+            border-color: #94a3b8;
+            text-decoration: none;
+        }
+</style>
+
+<div class="admin-container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="admin-page-title">Địa chỉ nhân viên</h1>
+            <p class="text-muted small mb-0 mt-1">Cập nhật thông tin nơi ở, liên hệ của nhân viên</p>
+        </div>
+        <a asp-action="Index" class="btn-admin-outline" style="width: auto;">
+            <i class="fas fa-arrow-left"></i> Quay lại
         </a>
     </div>
 
-    <div class="row">
-        <div class="col-md-6">
-            <form asp-action="AddAddress" asp-route-id="@ViewBag.UserId" method="post" class="card shadow p-4">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                <input type="hidden" asp-for="Id" />
-                <input type="hidden" asp-for="UserId" value="@ViewBag.UserId" />
-                
-                <div class="form-group mb-3">
-                    <label asp-for="City" class="control-label fw-bold">Tỉnh / Thành phố</label>
-                    <input asp-for="City" class="form-control" placeholder="Nhập tỉnh/thành phố..." />
-                    <span asp-validation-for="City" class="text-danger"></span>
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            <form asp-action="AddAddress" asp-route-id="@ViewBag.UserId" method="post" class="admin-card">
+                <div class="admin-card-header">
+                    <i class="fas fa-map-marked-alt text-info mr-2" style="font-size: 1.2rem;"></i> Biểu mẫu cập nhật
                 </div>
-                
-                <div class="form-group mb-3">
-                    <label asp-for="District" class="control-label fw-bold">Quận / Huyện</label>
-                    <input asp-for="District" class="form-control" placeholder="Nhập quận/huyện..." />
-                    <span asp-validation-for="District" class="text-danger"></span>
-                </div>
-                
-                <div class="form-group mb-3">
-                    <label asp-for="SpecificAddress" class="control-label fw-bold">Địa chỉ cụ thể</label>
-                    <input asp-for="SpecificAddress" class="form-control" placeholder="Nhập số nhà, tên đường, phường/xã..." />
-                    <span asp-validation-for="SpecificAddress" class="text-danger"></span>
-                </div>
-                
-                <div class="form-group mt-4">
-                    <button type="submit" class="btn btn-primary">Lưu địa chỉ</button>
-                    <a asp-action="Index" class="btn btn-secondary">Hủy</a>
-                </div>
+                <div class="admin-card-body">
+                    <div asp-validation-summary="ModelOnly" class="text-danger small font-weight-bold mb-3"></div>
+                    <input type="hidden" asp-for="Id" />
+                    <input type="hidden" asp-for="UserId" value="@ViewBag.UserId" />
 
-                @if (ViewBag.Message != null)
-                {
-                    <div class="alert mt-3 @(ViewBag.Message ? "alert-success" : "alert-danger")">
-                        @(ViewBag.Message ? "Cập nhật địa chỉ thành công." : "Cập nhật địa chỉ thất bại.")
+                    <div class="form-group mb-4">
+                        <label asp-for="City" class="form-label-modern">Tỉnh / Thành phố</label>
+                        <input asp-for="City" class="form-control-modern" placeholder="Nhập tỉnh/thành phố..." />
+                        <span asp-validation-for="City" class="text-danger small font-weight-bold mt-1 d-block"></span>
                     </div>
-                }
+
+                    <div class="form-group mb-4">
+                        <label asp-for="District" class="form-label-modern">Quận / Huyện</label>
+                        <input asp-for="District" class="form-control-modern" placeholder="Nhập quận/huyện..." />
+                        <span asp-validation-for="District" class="text-danger small font-weight-bold mt-1 d-block"></span>
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label asp-for="SpecificAddress" class="form-label-modern">Địa chỉ cụ thể</label>
+                        <textarea asp-for="SpecificAddress" class="form-control-modern" rows="3" placeholder="Nhập số nhà, tên đường, phường/xã..."></textarea>
+                        <span asp-validation-for="SpecificAddress" class="text-danger small font-weight-bold mt-1 d-block"></span>
+                    </div>
+
+                    @if (ViewBag.Message != null)
+                    {
+                        <div class="alert @(ViewBag.Message ? "alert-success" : "alert-danger") rounded font-weight-bold text-center border-0 mb-4 py-2">
+                            <i class="@(ViewBag.Message ? "fas fa-check-circle" : "fas fa-times-circle") mr-1"></i>
+                            @(ViewBag.Message ? "Cập nhật địa chỉ thành công." : "Cập nhật địa chỉ thất bại.")
+                        </div>
+                    }
+
+                    <div class="row">
+                        <div class="col-6">
+                            <a asp-action="Index" class="btn-admin-outline">Hủy bỏ</a>
+                        </div>
+                        <div class="col-6">
+                            <button type="submit" class="btn-admin-primary">Lưu địa chỉ</button>
+                        </div>
+                    </div>
+                </div>
             </form>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

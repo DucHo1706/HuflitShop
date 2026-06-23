@@ -7,16 +7,224 @@
     var cloudName = Configuration["CloudinarySettings:CloudName"] ?? "Tên_Cloud_Của_Bạn";
 
     var items = ViewBag.Items as IEnumerable<CartController.CartItemViewModel>;
-    decimal total = ViewBag.Total is decimal d ? d : 0;
+    decimal total = ViewBag.Total is decimal d ? d : 0m;
 }
+
+<style>
+    :root {
+        --vibrantBlue: #2563eb;
+        --vibrantBlueHover: #1d4ed8;
+        --vibrantCyan: #06b6d4;
+        --oceanGradient: linear-gradient(135deg, #2563eb, #06b6d4);
+        --dangerGradient: linear-gradient(135deg, #ef4444, #f43f5e);
+    }
+
+    .cart-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    /* Các Card thông tin (Minimalist & High-contrast) */
+    .cart-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 0 !important;
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        border-top: 4px solid var(--vibrantBlue);
+    }
+
+    /* Bảng Sản phẩm */
+    .cart-table th {
+        border-top: none;
+        color: #64748b;
+        font-weight: 700;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        border-bottom: 2px solid #f1f5f9;
+        padding-bottom: 1rem;
+        letter-spacing: 0.5px;
+    }
+
+    .cart-row td {
+        vertical-align: middle;
+        border-bottom: 1px solid #f1f5f9;
+        padding: 1.5rem 0;
+    }
+
+    .cart-prod-img {
+        width: 80px;
+        height: 100px;
+        border: 1px solid #e2e8f0;
+        background: #f8fafc;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+        .cart-prod-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+    /* Số lượng vuông vức */
+    .qty-modern {
+        border-radius: 0;
+        overflow: hidden;
+        transition: border-color 0.2s;
+        display: inline-flex;
+        border: 1px solid #cbd5e1;
+        background: #fff;
+    }
+
+        .qty-modern:focus-within {
+            border-color: var(--vibrantBlue) !important;
+        }
+
+        .qty-modern input {
+            width: 45px;
+            text-align: center;
+            border: none;
+            outline: none;
+            font-weight: 700;
+            background: transparent;
+            color: #0f172a;
+        }
+
+        .qty-modern button {
+            background: transparent;
+            border: none;
+            padding: 0.25rem 0.75rem;
+            font-weight: bold;
+            cursor: pointer;
+            color: #334155;
+            transition: background 0.2s;
+        }
+
+            .qty-modern button:hover {
+                color: var(--vibrantBlue);
+                background: #f1f5f9;
+            }
+
+    /* Nút Xóa */
+    .btn-delete-cart {
+        background: transparent;
+        border: none;
+        color: #94a3b8;
+        font-size: 1.2rem;
+        transition: all 0.2s ease;
+        padding: 8px;
+    }
+
+        .btn-delete-cart:hover {
+            transform: scale(1.1);
+            color: #ef4444;
+        }
+
+    /* Buttons Đồng bộ */
+    .btn-ocean-primary {
+        background: var(--oceanGradient) !important;
+        border: none !important;
+        color: #fff !important;
+        font-size: 1rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2);
+        padding: 0.8rem 2rem;
+        border-radius: 0;
+    }
+
+        .btn-ocean-primary:hover {
+            background: linear-gradient(135deg, #1d4ed8, #0891b2) !important;
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35);
+            transform: translateY(-1px);
+            color: #fff !important;
+            text-decoration: none;
+        }
+
+    .btn-ocean-outline {
+        background-color: transparent !important;
+        border: 2px solid var(--vibrantBlue) !important;
+        color: var(--vibrantBlue) !important;
+        font-size: 0.9rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+        padding: 0.8rem 1.5rem;
+        border-radius: 0;
+    }
+
+        .btn-ocean-outline:hover {
+            background: var(--vibrantBlue) !important;
+            color: #fff !important;
+            text-decoration: none;
+        }
+
+    /* Thanh thanh toán cuối trang (Sticky Bottom Bar) */
+    .cart-summary-bar {
+        position: sticky;
+        bottom: 0;
+        background: #fff;
+        padding: 1.5rem 2rem;
+        border: 1px solid #e2e8f0;
+        border-top: 4px solid var(--vibrantBlue);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 -10px 25px rgba(0,0,0,0.05);
+        z-index: 100;
+        margin-top: 2rem;
+    }
+
+    .cart-summary-total-label {
+        font-size: 1.1rem;
+        color: #64748b;
+        font-weight: 600;
+        margin-right: 15px;
+    }
+
+    .cart-summary-total-price {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: var(--vibrantBlue);
+    }
+
+    /* Responsive cho mobile */
+    @@media (max-width: 768px) {
+        .cart-summary-bar {
+            flex-direction: column;
+            gap: 1rem;
+            padding: 1rem;
+        }
+
+            .cart-summary-bar > div {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+        .btn-ocean-primary {
+            width: 100%;
+            text-align: center;
+        }
+    }
+</style>
+
 <div class="cart-container">
-    <h3 class="font-weight-bold text-dark mb-4"><i class="fas fa-shopping-cart text-primary mr-2"></i>Giỏ hàng của bạn</h3>
+    <h3 class="font-weight-bolder text-dark text-uppercase mb-4" style="letter-spacing: 0.5px;">
+        <i class="fas fa-shopping-bag mr-2" style="color: var(--vibrantCyan);"></i>Giỏ hàng của bạn
+    </h3>
 
     @if (TempData["ErrorMessage"] != null)
     {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert" style="border-radius: 6px; margin-bottom: 1.5rem;">
-            <i class="fas fa-exclamation-circle mr-2"></i>@TempData["ErrorMessage"]
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <div class="alert alert-dark alert-dismissible fade show shadow-sm rounded-0 border-0 text-white" role="alert" style="background-color: #1e293b;">
+            <i class="fas fa-exclamation-circle mr-2 text-danger"></i>@TempData["ErrorMessage"]
+            <button type="button" class="close text-white" data-dismiss="alert" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
             </button>
         </div>
@@ -25,8 +233,13 @@
     @if (items == null || !items.Any())
     {
         <div class="cart-card text-center py-5">
-            <div class="text-muted mb-4" style="font-size:1.5rem;"><i class="fas fa-shopping-basket mr-2 fa-lg text-primary"></i>Giỏ hàng của bạn đang trống</div>
-            <a class="btn btn-primary btn-lg" asp-controller="Product" asp-action="Product" style="border-radius: 20px;">Tiếp tục mua sắm</a>
+            <div class="mb-4" style="font-size: 4rem; color: #cbd5e1;">
+                <i class="fas fa-shopping-basket"></i>
+            </div>
+            <h4 class="text-dark font-weight-bold mb-4">Giỏ hàng của bạn đang trống</h4>
+            <a class="btn btn-ocean-primary text-uppercase" asp-controller="Product" asp-action="Product">
+                <i class="fas fa-arrow-left mr-2"></i>Tiếp tục mua sắm
+            </a>
         </div>
     }
     else
@@ -36,57 +249,63 @@
                 <table class="table cart-table mb-0">
                     <thead>
                         <tr>
-                            <th style="width: 45%;">Sản phẩm</th>
+                            <th class="pl-0" style="width: 45%;">Sản phẩm</th>
                             <th class="text-center">Đơn giá</th>
-                            <th class="text-center" style="width: 200px;">Số lượng</th>
-                            <th class="text-center">Số tiền</th>
-                            <th class="text-center" style="width: 80px;">Xoá</th>
+                            <th class="text-center" style="width: 150px;">Số lượng</th>
+                            <th class="text-right">Số tiền</th>
+                            <th class="text-center pr-0" style="width: 80px;">Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach (var item in items)
                         {
                             var pv = _context.ProductVariants
-                                .FirstOrDefault(v => v.Id == item.ProductVariantId);
+                            .FirstOrDefault(v => v.Id == item.ProductVariantId);
                             var defaultImage = pv != null
-                                ? _context.ProductImages
-                                    .Where(i => i.ProductId == pv.ProductId)
-                                    .OrderBy(i => i.ImageOrder)
-                                    .FirstOrDefault()
-                                : null;
+                            ? _context.ProductImages
+                            .Where(i => i.ProductId == pv.ProductId)
+                            .OrderBy(i => i.ImageOrder)
+                            .FirstOrDefault()
+                            : null;
 
                             var imageUrl = HuflitShopCore.Helpers.ImageRouteHelper.Resolve(defaultImage?.PublicId);
 
                             <tr class="cart-row">
-                                <td>
+                                <td class="pl-0">
                                     <div class="d-flex align-items-center gap-3">
                                         <div class="cart-prod-img">
                                             <img src="@imageUrl" alt="@item.ProductName" />
                                         </div>
                                         <div>
-                                            <div class="font-weight-bold text-dark">@item.ProductName</div>
-                                            <div class="cart-variant-tag">
-                                                Phân loại: @item.ColorName, Size @item.SizeName
+                                            <div class="font-weight-bold text-dark" style="font-size: 1.05rem; line-height: 1.4; margin-bottom: 4px;">
+                                                <a asp-controller="Product" asp-action="Details" asp-route-id="@pv?.ProductId" class="text-dark text-decoration-none">
+                                                    @item.ProductName
+                                                </a>
+                                            </div>
+                                            <div class="text-muted font-italic small">
+                                                Phân loại: @item.ColorName - Size @item.SizeName
                                             </div>
                                         </div>
                                     </div>
                                 </td>
-                                <td class="text-center cart-price-num">@item.Price.ToString("N0") đ</td>
+                                <td class="text-center">@item.Price.ToString("N0") đ</td>
                                 <td class="text-center">
-                                    <form asp-action="UpdateQuantity" asp-controller="Cart" method="post" id="qtyForm_@item.CartId" class="d-flex align-items-center justify-content-center">
+                                    <form asp-action="UpdateQuantity" asp-controller="Cart" method="post" id="qtyForm_@item.CartId" class="d-flex align-items-center justify-content-center m-0">
                                         @Html.AntiForgeryToken()
                                         <input type="hidden" name="cartId" value="@item.CartId" />
-                                        <button type="button" class="cart-qty-btn" style="border-radius: 4px 0 0 4px;" onclick="changeCartQty('@item.CartId', -1)">-</button>
-                                        <input type="text" name="quantity" id="qtyInput_@item.CartId" value="@item.Quantity" readonly class="cart-qty-input" />
-                                        <button type="button" class="cart-qty-btn" style="border-radius: 0 4px 4px 0;" onclick="changeCartQty('@item.CartId', 1)">+</button>
+                                        <div class="qty-modern">
+                                            <button type="button" onclick="changeCartQty('@item.CartId', -1)">-</button>
+                                            <input type="text" name="quantity" id="qtyInput_@item.CartId" value="@item.Quantity" readonly />
+                                            <button type="button" onclick="changeCartQty('@item.CartId', 1)">+</button>
+                                        </div>
                                     </form>
                                 </td>
-                                <td class="text-center cart-total-num">@item.LineTotal.ToString("N0") đ</td>
-                                <td class="text-center">
-                                    <form asp-action="Remove" asp-controller="Cart" method="post">
+                                <td class="text-right font-weight-bold text-danger" style="font-size: 1.1rem;">@item.LineTotal.ToString("N0") đ</td>
+                                <td class="text-center pr-0">
+                                    <form asp-action="Remove" asp-controller="Cart" method="post" class="m-0">
                                         @Html.AntiForgeryToken()
                                         <input type="hidden" name="cartId" value="@item.CartId" />
-                                        <button class="btn-delete-cart" type="submit">
+                                        <button class="btn-delete-cart" type="submit" title="Xóa sản phẩm">
                                             <i class="fas fa-trash-alt"></i>
                                         </button>
                                     </form>
@@ -101,17 +320,17 @@
         <!-- Sticky bar at bottom -->
         <div class="cart-summary-bar">
             <div>
-                <a class="btn btn-outline-secondary" asp-controller="Product" asp-action="Product" style="border-radius: 4px;">
-                    <i class="fas fa-arrow-left mr-2"></i>Tiếp tục mua sắm
+                <a class="btn btn-ocean-outline" asp-controller="Product" asp-action="Product">
+                    <i class="fas fa-arrow-left mr-2"></i>Mua thêm
                 </a>
             </div>
-            <div class="d-flex align-items-center gap-4">
-                <div class="cart-summary-price-box">
-                    <span class="cart-summary-total-label">Tổng thanh toán (@items.Sum(i => i.Quantity) sản phẩm):</span>
+            <div class="d-flex align-items-center flex-wrap justify-content-end gap-3" style="gap: 1.5rem !important;">
+                <div class="cart-summary-price-box d-flex align-items-center">
+                    <span class="cart-summary-total-label">Tổng thanh toán (<span class="text-dark">@items.Sum(i => i.Quantity)</span> sản phẩm):</span>
                     <span class="cart-summary-total-price">@total.ToString("N0") đ</span>
                 </div>
-                <a class="btn-checkout-shopee" asp-controller="Order" asp-action="Checkout">
-                    MUA HÀNG
+                <a class="btn btn-ocean-primary text-uppercase" asp-controller="Order" asp-action="Checkout">
+                    Thanh Toán Ngay
                 </a>
             </div>
         </div>
@@ -123,12 +342,16 @@
         const input = document.getElementById('qtyInput_' + cartId);
         let val = parseInt(input.value) || 1;
         val += delta;
+
+        // Không cho giảm xuống dưới 1
         if (val < 1) val = 1;
+
+        // Nếu giá trị không đổi thì không submit
+        if (val === parseInt(input.value)) return;
+
         input.value = val;
 
         // Auto submit form to save changes
         document.getElementById('qtyForm_' + cartId).submit();
     }
 </script>
-
-

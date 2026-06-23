@@ -4,96 +4,243 @@
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container-fluid mt-4">
-    <h1 class="h3 mb-2 text-gray-800">Thêm nhân viên mới</h1>
-    <p class="mb-4">Điền thông tin để tạo tài khoản cho nhân viên.</p>
+<style>
+    /* Tổng quan Giao diện Admin */
+    .admin-container {
+        padding: 1.5rem;
+        background-color: #f8fafc;
+        min-height: calc(100vh - 60px);
+    }
 
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Thông tin nhân viên</h6>
+    .admin-page-title {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #0f172a;
+        margin-bottom: 0;
+        letter-spacing: -0.5px;
+    }
+
+    /* Thẻ bọc nội dung (Card) */
+    .admin-card {
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+        border: 1px solid #e2e8f0;
+        overflow: hidden;
+    }
+
+    .admin-card-header {
+        padding: 1.25rem 1.5rem;
+        display: flex;
+        align-items: center;
+        border-bottom: 1px solid #f1f5f9;
+        background-color: #ffffff;
+        font-weight: 700;
+        color: #1e293b;
+        font-size: 1.05rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .admin-card-body {
+        padding: 1.5rem;
+    }
+
+    /* Form Inputs Hiện đại */
+    .form-label-modern {
+        font-weight: 700;
+        color: #475569;
+        font-size: 0.85rem;
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .form-control-modern {
+        border-radius: 8px;
+        border: 1px solid #cbd5e1;
+        padding: 0.7rem 1rem;
+        font-size: 0.95rem;
+        color: #0f172a;
+        transition: all 0.2s ease;
+        background-color: #f8fafc;
+    }
+
+    .form-control-modern:focus {
+        border-color: #2563eb;
+        background-color: #ffffff;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        outline: none;
+    }
+
+    /* Nút bấm (Buttons) */
+    .btn-admin-primary {
+        background: linear-gradient(135deg, #2563eb, #06b6d4);
+        color: #ffffff;
+        border: none;
+        font-weight: 700;
+        font-size: 0.95rem;
+        padding: 0.8rem 1.5rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .btn-admin-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(37, 99, 235, 0.3);
+        color: #ffffff;
+        text-decoration: none;
+    }
+
+    .btn-admin-outline {
+        background: #ffffff;
+        border: 2px solid #cbd5e1;
+        color: #475569;
+        font-weight: 700;
+        font-size: 0.95rem;
+        padding: 0.7rem 1.5rem;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        text-decoration: none;
+    }
+
+    .btn-admin-outline:hover {
+        background: #f8fafc;
+        color: #0f172a;
+        border-color: #94a3b8;
+        text-decoration: none;
+    }
+</style>
+
+<div class="admin-container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="admin-page-title">Thêm nhân viên mới</h1>
+            <p class="text-muted small mb-0 mt-1">Điền đầy đủ thông tin để cấp tài khoản cho nhân viên truy cập hệ thống</p>
         </div>
-        <div class="card-body">
-            <form asp-action="Create" method="post">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group mb-3">
-                            <label asp-for="FullName" class="control-label font-weight-bold"></label>
-                            <input asp-for="FullName" class="form-control" />
-                            <span asp-validation-for="FullName" class="text-danger"></span>
-                        </div>
-                        <div class="form-group mb-3">
-                            <label asp-for="Email" class="control-label font-weight-bold"></label>
-                            <input asp-for="Email" class="form-control" />
-                            <span asp-validation-for="Email" class="text-danger"></span>
-                        </div>
-                        <div class="form-group mb-3">
-                            <label asp-for="PhoneNumber" class="control-label font-weight-bold"></label>
-                            <input asp-for="PhoneNumber" class="form-control" />
-                            <span asp-validation-for="PhoneNumber" class="text-danger"></span>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group mb-3">
-                            <label asp-for="Password" class="control-label font-weight-bold"></label>
-                            <input asp-for="Password" class="form-control" />
-                            <span asp-validation-for="Password" class="text-danger"></span>
-                        </div>
-                        <div class="form-group mb-3">
-                            <label asp-for="ConfirmPassword" class="control-label font-weight-bold"></label>
-                            <input asp-for="ConfirmPassword" class="form-control" />
-                            <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
-                        </div>
-                        <div class="form-group mb-3">
-                            <label asp-for="DateOfBirth" class="control-label font-weight-bold"></label>
-                            <input asp-for="DateOfBirth" class="form-control" type="date" />
-                            <span asp-validation-for="DateOfBirth" class="text-danger"></span>
-                        </div>
-                        <div class="form-group mb-3">
-                            <label asp-for="Gender" class="control-label font-weight-bold"></label>
-                            <select asp-for="Gender" class="form-control">
-                                <option value="0">Nữ</option>
-                                <option value="1">Nam</option>
-                                <option value="2">Khác</option>
-                            </select>
-                            <span asp-validation-for="Gender" class="text-danger"></span>
-                        </div>
-                    </div>
-                </div>
-                <hr class="mt-4 mb-4" />
-                <h5 class="font-weight-bold text-primary mb-3">Địa chỉ nhân viên (Tùy chọn)</h5>
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="form-group mb-3">
-                            <label asp-for="City" class="control-label font-weight-bold">Tỉnh / Thành phố</label>
-                            <input asp-for="City" class="form-control" placeholder="Nhập tỉnh/thành phố..." />
-                            <span asp-validation-for="City" class="text-danger"></span>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="form-group mb-3">
-                            <label asp-for="District" class="control-label font-weight-bold">Quận / Huyện</label>
-                            <input asp-for="District" class="form-control" placeholder="Nhập quận/huyện..." />
-                            <span asp-validation-for="District" class="text-danger"></span>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="form-group mb-3">
-                            <label asp-for="SpecificAddress" class="control-label font-weight-bold">Địa chỉ cụ thể</label>
-                            <input asp-for="SpecificAddress" class="form-control" placeholder="Số nhà, tên đường..." />
-                            <span asp-validation-for="SpecificAddress" class="text-danger"></span>
-                        </div>
-                    </div>
-                </div>
-                <div class="form-group mt-4">
-                    <input type="submit" value="Tạo nhân viên" class="btn btn-primary" />
-                    <a asp-action="Index" class="btn btn-secondary">Hủy bỏ</a>
-                </div>
-            </form>
-        </div>
+        <a asp-action="Index" class="btn-admin-outline shadow-sm">
+            <i class="fas fa-arrow-left"></i> Quay lại
+        </a>
     </div>
+
+    <form asp-action="Create" method="post">
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded shadow-sm font-weight-bold border-0" style="background-color: #fee2e2; color: #dc2626;"></div>
+        }
+
+        <div class="row">
+            <div class="col-xl-8">
+                <div class="admin-card mb-4">
+                    <div class="admin-card-header">
+                        <i class="fas fa-id-card text-primary mr-2" style="font-size: 1.2rem;"></i> Thông tin cá nhân & Tài khoản
+                    </div>
+                    <div class="admin-card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label asp-for="FullName" class="form-label-modern"></label>
+                                <input asp-for="FullName" class="form-control-modern w-100" placeholder="Nhập họ và tên đầy đủ..." />
+                                <span asp-validation-for="FullName" class="text-danger small font-weight-bold mt-1 d-block"></span>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label asp-for="Email" class="form-label-modern"></label>
+                                <input asp-for="Email" class="form-control-modern w-100" placeholder="Nhập địa chỉ email..." />
+                                <span asp-validation-for="Email" class="text-danger small font-weight-bold mt-1 d-block"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <label asp-for="PhoneNumber" class="form-label-modern"></label>
+                                <input asp-for="PhoneNumber" class="form-control-modern w-100" placeholder="Nhập số điện thoại..." />
+                                <span asp-validation-for="PhoneNumber" class="text-danger small font-weight-bold mt-1 d-block"></span>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label asp-for="Gender" class="form-label-modern"></label>
+                                <select asp-for="Gender" class="form-control-modern w-100">
+                                    <option value="0">Nữ</option>
+                                    <option value="1">Nam</option>
+                                    <option value="2">Khác</option>
+                                </select>
+                                <span asp-validation-for="Gender" class="text-danger small font-weight-bold mt-1 d-block"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <label asp-for="DateOfBirth" class="form-label-modern"></label>
+                                <input asp-for="DateOfBirth" class="form-control-modern w-100" type="date" />
+                                <span asp-validation-for="DateOfBirth" class="text-danger small font-weight-bold mt-1 d-block"></span>
+                            </div>
+                        </div>
+
+                        <hr class="border-light my-3" />
+
+                        <div class="row mt-3">
+                            <div class="col-md-6 mb-4 mb-md-0">
+                                <label asp-for="Password" class="form-label-modern"></label>
+                                <input asp-for="Password" class="form-control-modern w-100" placeholder="Nhập mật khẩu..." type="password" />
+                                <span asp-validation-for="Password" class="text-danger small font-weight-bold mt-1 d-block"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="ConfirmPassword" class="form-label-modern"></label>
+                                <input asp-for="ConfirmPassword" class="form-control-modern w-100" placeholder="Nhập lại mật khẩu..." type="password" />
+                                <span asp-validation-for="ConfirmPassword" class="text-danger small font-weight-bold mt-1 d-block"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-4">
+                <div class="admin-card mb-4">
+                    <div class="admin-card-header">
+                        <i class="fas fa-map-marker-alt text-primary mr-2" style="font-size: 1.2rem;"></i> Địa chỉ liên hệ <span class="text-muted text-lowercase font-weight-normal ml-1" style="font-size: 0.85rem;">(Tùy chọn)</span>
+                    </div>
+                    <div class="admin-card-body">
+                        <div class="form-group mb-4">
+                            <label asp-for="City" class="form-label-modern">Tỉnh / Thành phố</label>
+                            <input asp-for="City" class="form-control-modern w-100" placeholder="Nhập tỉnh/thành phố..." />
+                            <span asp-validation-for="City" class="text-danger small font-weight-bold mt-1 d-block"></span>
+                        </div>
+
+                        <div class="form-group mb-4">
+                            <label asp-for="District" class="form-label-modern">Quận / Huyện</label>
+                            <input asp-for="District" class="form-control-modern w-100" placeholder="Nhập quận/huyện..." />
+                            <span asp-validation-for="District" class="text-danger small font-weight-bold mt-1 d-block"></span>
+                        </div>
+
+                        <div class="form-group mb-0">
+                            <label asp-for="SpecificAddress" class="form-label-modern">Địa chỉ cụ thể</label>
+                            <textarea asp-for="SpecificAddress" class="form-control-modern w-100" rows="3" placeholder="Số nhà, tên đường, phường/xã..."></textarea>
+                            <span asp-validation-for="SpecificAddress" class="text-danger small font-weight-bold mt-1 d-block"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-3 mt-2 mb-5 pb-4">
+            <a asp-action="Index" class="btn-admin-outline">
+                Hủy bỏ
+            </a>
+            <button type="submit" class="btn-admin-primary">
+                <i class="fas fa-save"></i> Tạo nhân viên
+            </button>
+        </div>
+    </form>
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }
