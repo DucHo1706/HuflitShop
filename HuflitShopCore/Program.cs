@@ -69,6 +69,37 @@ app.UseRouting();
 app.UseAuthentication(); 
 app.UseAuthorization();
 
+// Centralized authorization for Admin Area
+app.Use(async (context, next) =>
+{
+    var endpoint = context.GetEndpoint();
+    if (endpoint != null)
+    {
+        var area = endpoint.Metadata.GetMetadata<Microsoft.AspNetCore.Mvc.AreaAttribute>()?.RouteValue;
+        if (string.Equals(area, "Admin", StringComparison.OrdinalIgnoreCase))
+        {
+            var user = context.User;
+            if (user == null || user.Identity == null || !user.Identity.IsAuthenticated)
+            {
+                var returnUrl = context.Request.Path + context.Request.QueryString;
+                context.Response.Redirect("/Login/Login?returnUrl=" + System.Net.WebUtility.UrlEncode(returnUrl));
+                return;
+            }
+
+            bool hasAdminOrEmployeeRole = user.Claims
+                .Any(c => c.Type == System.Security.Claims.ClaimTypes.Role && 
+                          (c.Value == "1" || c.Value == "ROLE-ADMIN" || c.Value == "2" || c.Value == "ROLE-EMPLOYEE"));
+
+            if (!hasAdminOrEmployeeRole)
+            {
+                context.Response.Redirect("/Login/AccessDenied");
+                return;
+            }
+        }
+    }
+    await next();
+});
+
 app.MapHub<ChatHub>("/chatHub");
 
 app.MapControllerRoute(

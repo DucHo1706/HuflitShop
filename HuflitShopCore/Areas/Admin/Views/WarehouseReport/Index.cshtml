@@ -1,0 +1,936 @@
+@model HuflitShopCore.DTOs.WarehouseReportDTO
+@{
+    ViewData["Title"] = "Báo cáo Nhập - Xuất - Tồn";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<style>
+    /* Custom styles to override select2 to match premium Excel layout */
+    .select2-container--default .select2-selection--single {
+        border: 1px solid var(--excel-border) !important;
+        height: 31px !important;
+        border-radius: 4px !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 29px !important;
+        font-size: 12px !important;
+        color: #495057 !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 29px !important;
+    }
+    .select2-dropdown {
+        border: 1px solid var(--excel-navy-light) !important;
+        font-size: 12px !important;
+    }
+    
+    /* Modern layout for Bootstrap tabs */
+    .nav-tabs {
+        border-bottom: 2px solid var(--excel-border);
+    }
+    .nav-tabs .nav-link {
+        border: none;
+        border-bottom: 2px solid transparent;
+        color: #6c757d;
+        transition: all 0.2s ease;
+        font-size: 13px !important;
+        padding: 8px 16px;
+    }
+    .nav-tabs .nav-link.active {
+        border: none;
+        border-bottom: 2.5px solid var(--excel-navy-light) !important;
+        color: var(--excel-navy-light) !important;
+        background-color: transparent !important;
+    }
+    .nav-tabs .nav-link:hover {
+        border-bottom: 2.5px solid #dee2e6;
+        color: #495057;
+        background-color: transparent;
+    }
+</style>
+
+<!-- Premium CSS styling to clone the Excel BI Dashboard -->
+<style>
+    :root {
+        --excel-navy: #002d62;
+        --excel-navy-light: #134074;
+        --excel-bg-light: #f4f7f6;
+        --excel-border: #d2dbe5;
+        --excel-orange: #fd7e14;
+        --excel-green: #28a745;
+        --excel-red: #dc3545;
+        --excel-gray-text: #5a5c69;
+    }
+
+    .excel-dashboard {
+        font-family: 'Nunito', 'Outfit', sans-serif;
+        color: #333333;
+        background-color: #f8fafc;
+        padding-top: 10px;
+    }
+
+    /* Full width banner */
+    .excel-header {
+        background-color: var(--excel-navy);
+        color: white;
+        padding: 12px 20px;
+        border-radius: 4px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        margin-bottom: 15px;
+        font-size: 18px;
+        text-transform: uppercase;
+    }
+
+    /* Filter sidebar */
+    .excel-filter-card {
+        background-color: white;
+        border: 2px solid var(--excel-navy-light);
+        border-radius: 4px;
+        padding: 15px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+
+    .excel-filter-header {
+        background-color: var(--excel-navy-light);
+        color: white;
+        font-size: 13px;
+        font-weight: 700;
+        padding: 6px 10px;
+        border-radius: 2px;
+        margin-bottom: 15px;
+        text-transform: uppercase;
+    }
+
+    .excel-filter-card label {
+        font-size: 12px;
+        font-weight: 700;
+        margin-bottom: 4px;
+        color: #495057;
+    }
+
+    /* KPI Grid - 4 columns on normal screens, 8 on wide screens to prevent squishing */
+    .excel-kpi-row {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+    }
+
+    @@media (min-width: 1600px) {
+        .excel-kpi-row {
+            grid-template-columns: repeat(8, 1fr);
+        }
+    }
+
+    @@media (max-width: 1200px) {
+        .excel-kpi-row {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .excel-kpi-row {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .excel-kpi-row {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .excel-kpi-card {
+        background-color: white;
+        border: 1px solid var(--excel-border);
+        border-radius: 4px;
+        padding: 12px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 100px;
+    }
+
+    .excel-kpi-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 4px;
+    }
+
+    .excel-kpi-title {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--excel-gray-text);
+        white-space: nowrap;
+    }
+
+    .excel-kpi-icon {
+        font-size: 14px;
+        color: var(--excel-navy-light);
+    }
+
+    .excel-kpi-value {
+        font-size: 16px;
+        font-weight: 700;
+        color: #2c3e50;
+        margin: 4px 0;
+    }
+
+    .excel-kpi-mom {
+        font-size: 10px;
+        display: flex;
+        align-items: center;
+        margin-top: auto;
+    }
+
+    .text-excel-green {
+        color: var(--excel-green) !important;
+    }
+
+    .text-excel-red {
+        color: var(--excel-red) !important;
+    }
+
+    /* Charts */
+    .excel-chart-card {
+        background-color: white;
+        border: 1px solid var(--excel-border);
+        border-radius: 4px;
+        padding: 15px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        margin-bottom: 15px;
+    }
+
+    .excel-chart-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 12px;
+        border-bottom: 1px solid #eef2f5;
+        padding-bottom: 6px;
+    }
+
+    /* Tables */
+    .excel-table-card {
+        background-color: white;
+        border: 1px solid var(--excel-border);
+        border-radius: 4px;
+        padding: 15px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        height: 100%;
+    }
+
+    .excel-table-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--excel-navy-light);
+        margin-bottom: 12px;
+        border-bottom: 2px solid var(--excel-navy-light);
+        padding-bottom: 6px;
+    }
+
+    .excel-table {
+        font-size: 11.5px;
+        margin-bottom: 0;
+    }
+
+    .excel-table-container {
+        max-height: 320px;
+        overflow-y: auto;
+        overflow-x: auto;
+    }
+
+    .excel-table-container::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+
+    .excel-table-container::-webkit-scrollbar-thumb {
+        background-color: #cbd5e1;
+        border-radius: 3px;
+    }
+
+    .excel-table-container::-webkit-scrollbar-track {
+        background-color: transparent;
+    }
+
+    .excel-table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background-color: var(--excel-navy-light);
+        color: white;
+        font-weight: 700;
+        border: 1px solid var(--excel-border);
+        padding: 6px 8px;
+        vertical-align: middle;
+        text-align: center;
+    }
+
+    .excel-table tbody td {
+        border: 1px solid var(--excel-border);
+        padding: 6px 8px;
+        vertical-align: middle;
+    }
+
+    /* Guide & Quick Read at bottom */
+    .excel-guide-card {
+        background-color: white;
+        border: 1px solid var(--excel-border);
+        border-radius: 4px;
+        padding: 15px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        height: 100%;
+    }
+
+    .excel-guide-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--excel-navy-light);
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+    }
+
+    .excel-guide-item {
+        font-size: 11.5px;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: flex-start;
+    }
+
+    .excel-guide-number {
+        background-color: var(--excel-navy-light);
+        color: white;
+        font-size: 10px;
+        font-weight: 700;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 8px;
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+</style>
+
+<div class="container-fluid excel-dashboard pb-5">
+
+    <!-- Top Banner -->
+    <div class="excel-header">
+        <i class="fas fa-table mr-2"></i>Báo cáo quản trị nhập - xuất - tồn
+    </div>
+
+    <!-- First Row: Filters on Left, 8 KPIs on Right -->
+    <div class="row mb-3">
+        <!-- Vertical Filter Sidebar -->
+        <div class="col-lg-3 col-xl-2 mb-3">
+            <div class="excel-filter-card">
+                <div class="excel-filter-header"><i class="fas fa-filter mr-1"></i>Filter</div>
+                <form method="get" asp-action="Index">
+                    <div class="form-group mb-2">
+                        <label>Năm:</label>
+                        <select name="year" class="form-control form-control-sm">
+                            @for (int y = 2024; y <= DateTime.Now.Year + 1; y++)
+                            {
+                                <option value="@y" selected="@(y == Model.SelectedYear)">@y</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group mb-2">
+                        <label>Tháng:</label>
+                        <select name="month" class="form-control form-control-sm">
+                            @for (int m = 1; m <= 12; m++)
+                            {
+                                <option value="@m" selected="@(m == Model.SelectedMonth)">@m</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group mb-2">
+                        <label>Nhà cung cấp:</label>
+                        <select name="supplierId" class="form-control form-control-sm select2-filter">
+                            <option value="All" selected="@(Model?.SelectedSupplierId == "All")">All</option>
+                            @if (ViewBag.SuppliersList is List<HuflitShopCore.Models.Supplier> suppliersList)
+                            {
+                                foreach (var supplier in suppliersList)
+                                {
+                                    <option value="@supplier.Id" selected="@(Model?.SelectedSupplierId == supplier.Id)">@supplier.SupplierName</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group mb-2">
+                        <label>Tên sản phẩm:</label>
+                        <select name="productId" class="form-control form-control-sm select2-filter">
+                            <option value="All" selected="@(Model?.SelectedProductId == "All")">All</option>
+                            @if (ViewBag.ProductsList is List<HuflitShopCore.DTOs.ProductDTO> productsList)
+                            {
+                                foreach (var prod in productsList)
+                                {
+                                    <option value="@prod.Id" selected="@(Model?.SelectedProductId == prod.Id)">@prod.ProductName</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label>Nhóm sản phẩm:</label>
+                        <select name="categoryId" class="form-control form-control-sm select2-filter">
+                            <option value="All" selected="@(Model?.SelectedCategoryId == "All")">All</option>
+                            @if (ViewBag.CategoriesList is List<HuflitShopCore.DTOs.CategoryDTO> categoriesList)
+                            {
+                                foreach (var cat in categoriesList)
+                                {
+                                    <option value="@cat.Id" selected="@(Model?.SelectedCategoryId == cat.Id)">@cat.CategoryName</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-sm btn-primary btn-block font-weight-bold mb-2" style="background-color: var(--excel-navy);">
+                        <i class="fas fa-sync mr-1"></i> Lọc dữ liệu
+                    </button>
+                </form>
+
+                <!-- Data Seeder Utility for visual demo -->
+                <form method="post" asp-action="SeedData" class="mt-3 pt-3 border-top">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-xs btn-success btn-block font-weight-bold" style="font-size:11px;">
+                        <i class="fas fa-database mr-1"></i> Khởi tạo dữ liệu mẫu
+                    </button>
+                    <small class="text-muted d-block text-center mt-1" style="font-size:9.5px;">Click để nạp đơn hàng & nhập kho mẫu cho Tháng 3/2026</small>
+                </form>
+            </div>
+        </div>
+
+        <!-- 8 KPI Cards Grid -->
+        <div class="col-lg-9 col-xl-10 mb-3">
+            <div class="excel-kpi-row">
+                <!-- 1. Tồn kho đầu kỳ -->
+                <div class="excel-kpi-card">
+                    <div class="excel-kpi-header">
+                        <span class="excel-kpi-title">Tồn kho đầu kỳ</span>
+                        <i class="fas fa-box excel-kpi-icon"></i>
+                    </div>
+                    <div class="excel-kpi-value">@Model.BeginningStockValue.ToString("N0")</div>
+                    <div class="excel-kpi-mom @(Model.BeginningStockValueMoM >= 0 ? "text-excel-green" : "text-excel-red") font-weight-bold">
+                        <i class="fas @(Model.BeginningStockValueMoM >= 0 ? "fa-caret-up" : "fa-caret-down") mr-1"></i>
+                        @Math.Abs(Model.BeginningStockValueMoM).ToString("F2")% Vs tháng trước
+                    </div>
+                </div>
+
+                <!-- 2. Nhập kho -->
+                <div class="excel-kpi-card">
+                    <div class="excel-kpi-header">
+                        <span class="excel-kpi-title">Nhập kho</span>
+                        <i class="fas fa-plus-circle excel-kpi-icon"></i>
+                    </div>
+                    <div class="excel-kpi-value">@Model.ImportStockValue.ToString("N0")</div>
+                    <div class="excel-kpi-mom @(Model.ImportStockValueMoM >= 0 ? "text-excel-green" : "text-excel-red") font-weight-bold">
+                        <i class="fas @(Model.ImportStockValueMoM >= 0 ? "fa-caret-up" : "fa-caret-down") mr-1"></i>
+                        @Math.Abs(Model.ImportStockValueMoM).ToString("F2")% Vs tháng trước
+                    </div>
+                </div>
+
+                <!-- 3. Xuất kho -->
+                <div class="excel-kpi-card">
+                    <div class="excel-kpi-header">
+                        <span class="excel-kpi-title">Xuất kho</span>
+                        <i class="fas fa-minus-circle excel-kpi-icon"></i>
+                    </div>
+                    <div class="excel-kpi-value">@Model.ExportStockValue.ToString("N0")</div>
+                    <div class="excel-kpi-mom @(Model.ExportStockValueMoM >= 0 ? "text-excel-green" : "text-excel-red") font-weight-bold">
+                        <i class="fas @(Model.ExportStockValueMoM >= 0 ? "fa-caret-up" : "fa-caret-down") mr-1"></i>
+                        @Math.Abs(Model.ExportStockValueMoM).ToString("F2")% Vs tháng trước
+                    </div>
+                </div>
+
+                <!-- 4. Tồn kho cuối kỳ -->
+                <div class="excel-kpi-card">
+                    <div class="excel-kpi-header">
+                        <span class="excel-kpi-title">Tồn kho cuối kỳ</span>
+                        <i class="fas fa-warehouse excel-kpi-icon"></i>
+                    </div>
+                    <div class="excel-kpi-value">@Model.EndingStockValue.ToString("N0")</div>
+                    <div class="excel-kpi-mom @(Model.EndingStockValueMoM >= 0 ? "text-excel-green" : "text-excel-red") font-weight-bold">
+                        <i class="fas @(Model.EndingStockValueMoM >= 0 ? "fa-caret-up" : "fa-caret-down") mr-1"></i>
+                        @Math.Abs(Model.EndingStockValueMoM).ToString("F2")% Vs tháng trước
+                    </div>
+                </div>
+
+                <!-- 5. Doanh thu -->
+                <div class="excel-kpi-card">
+                    <div class="excel-kpi-header">
+                        <span class="excel-kpi-title">Doanh thu</span>
+                        <i class="fas fa-shopping-cart excel-kpi-icon"></i>
+                    </div>
+                    <div class="excel-kpi-value">@Model.Revenue.ToString("N0")</div>
+                    <div class="excel-kpi-mom @(Model.RevenueMoM >= 0 ? "text-excel-green" : "text-excel-red") font-weight-bold">
+                        <i class="fas @(Model.RevenueMoM >= 0 ? "fa-caret-up" : "fa-caret-down") mr-1"></i>
+                        @Math.Abs(Model.RevenueMoM).ToString("F2")% Vs tháng trước
+                    </div>
+                </div>
+
+                <!-- 6. Đơn giá BQ xuất kho -->
+                <div class="excel-kpi-card">
+                    <div class="excel-kpi-header">
+                        <span class="excel-kpi-title">Đơn giá BQ xuất kho</span>
+                        <i class="fas fa-tags excel-kpi-icon"></i>
+                    </div>
+                    <div class="excel-kpi-value">@Model.AverageExportPrice.ToString("N0")</div>
+                    <div class="excel-kpi-mom @(Model.AverageExportPriceMoM >= 0 ? "text-excel-green" : "text-excel-red") font-weight-bold">
+                        <i class="fas @(Model.AverageExportPriceMoM >= 0 ? "fa-caret-up" : "fa-caret-down") mr-1"></i>
+                        @Math.Abs(Model.AverageExportPriceMoM).ToString("F2")% Vs tháng trước
+                    </div>
+                </div>
+
+                <!-- 7. Lợi nhuận gộp -->
+                <div class="excel-kpi-card">
+                    <div class="excel-kpi-header">
+                        <span class="excel-kpi-title">Lợi nhuận gộp</span>
+                        <i class="fas fa-chart-pie excel-kpi-icon"></i>
+                    </div>
+                    <div class="excel-kpi-value">@Model.GrossProfit.ToString("N0")</div>
+                    <div class="excel-kpi-mom @(Model.GrossProfitMoM >= 0 ? "text-excel-green" : "text-excel-red") font-weight-bold">
+                        <i class="fas @(Model.GrossProfitMoM >= 0 ? "fa-caret-up" : "fa-caret-down") mr-1"></i>
+                        @Math.Abs(Model.GrossProfitMoM).ToString("F2")% Vs tháng trước
+                    </div>
+                </div>
+
+                <!-- 8. Tỉ suất LNG -->
+                <div class="excel-kpi-card">
+                    <div class="excel-kpi-header">
+                        <span class="excel-kpi-title">Tỉ suất LNG</span>
+                        <i class="fas fa-percent excel-kpi-icon"></i>
+                    </div>
+                    <div class="excel-kpi-value">@Model.GrossProfitMargin.ToString("F2")%</div>
+                    <div class="excel-kpi-mom @(Model.GrossProfitMarginMoM >= 0 ? "text-excel-green" : "text-excel-red") font-weight-bold">
+                        <i class="fas @(Model.GrossProfitMarginMoM >= 0 ? "fa-caret-up" : "fa-caret-down") mr-1"></i>
+                        @Math.Abs(Model.GrossProfitMarginMoM).ToString("F2")% Vs tháng trước
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Second Row: Combo Charts Side-By-Side -->
+    <div class="row mb-3">
+        <div class="col-lg-6 mb-3">
+            <div class="excel-chart-card">
+                <div class="excel-chart-title">Xu hướng doanh thu và xuất kho theo tháng</div>
+                <div style="height: 280px; position: relative;">
+                    <canvas id="monthlyTrendChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 mb-3">
+            <div class="excel-chart-card">
+                <div class="excel-chart-title">Top 10 sản phẩm tồn kho cao nhất theo giá trị</div>
+                <div style="height: 280px; position: relative;">
+                    <canvas id="topStockChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Third Row: Tabbed Panels (Product Sum, Supplier Perf, Top Prod Rev) -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white pb-0 border-bottom-0 pt-3">
+                    <ul class="nav nav-tabs" id="dashboardTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link active font-weight-bold text-uppercase py-2" id="product-tab" data-toggle="tab" href="#product-content" role="tab" aria-controls="product-content" aria-selected="true">
+                                <i class="fas fa-box mr-1"></i> Tổng quan sản phẩm
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link font-weight-bold text-uppercase py-2" id="supplier-tab" data-toggle="tab" href="#supplier-content" role="tab" aria-controls="supplier-content" aria-selected="false">
+                                <i class="fas fa-truck mr-1"></i> Hiệu quả theo nhà cung cấp
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link font-weight-bold text-uppercase py-2" id="chart-tab" data-toggle="tab" href="#chart-content" role="tab" aria-controls="chart-content" aria-selected="false">
+                                <i class="fas fa-chart-bar mr-1"></i> Top 10 sản phẩm theo doanh thu
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body pt-2">
+                    <div class="tab-content" id="dashboardTabsContent">
+                        
+                        <!-- Tab 1: Tổng quan sản phẩm -->
+                        <div class="tab-pane fade show active" id="product-content" role="tabpanel" aria-labelledby="product-tab">
+                            <div class="excel-table-card border-0 p-0">
+                                <div class="table-responsive excel-table-container" style="max-height: 450px;">
+                                    <table class="table table-sm excel-table table-hover table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Tên sản phẩm</th>
+                                                <th>Tồn đầu (Vnd)</th>
+                                                <th>Nhập kho (Vnd)</th>
+                                                <th>Xuất kho (Vnd)</th>
+                                                <th>Tồn cuối (Vnd)</th>
+                                                <th>Doanh thu (Vnd)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @if (Model.ProductSummaries != null && Model.ProductSummaries.Any())
+                                            {
+                                                foreach (var p in Model.ProductSummaries)
+                                                {
+                                                    <tr>
+                                                        <td class="font-weight-bold" style="color: var(--excel-navy);">@p.ProductName</td>
+                                                        <td class="text-right">@p.BeginningValue.ToString("N0")</td>
+                                                        <td class="text-right text-success">@p.ImportValue.ToString("N0")</td>
+                                                        <td class="text-right text-warning">@p.ExportValue.ToString("N0")</td>
+                                                        <td class="text-right text-info font-weight-bold">@p.EndingValue.ToString("N0")</td>
+                                                        <td class="text-right font-weight-bold" style="color: #6f42c1;">@p.Revenue.ToString("N0")</td>
+                                                    </tr>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <tr>
+                                                    <td colspan="6" class="text-center text-muted py-4">Không tìm thấy sản phẩm</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab 2: Hiệu quả theo nhà cung cấp -->
+                        <div class="tab-pane fade" id="supplier-content" role="tabpanel" aria-labelledby="supplier-tab">
+                            <div class="excel-table-card border-0 p-0">
+                                <div class="table-responsive excel-table-container" style="max-height: 450px;">
+                                    <table class="table table-sm excel-table table-hover table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Nhà cung cấp</th>
+                                                <th>Doanh thu hàng hóa (Vnd)</th>
+                                                <th>Lợi nhuận gộp (Vnd)</th>
+                                                <th>Tỉ suất LNG</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @if (Model.SupplierPerformances != null && Model.SupplierPerformances.Any())
+                                            {
+                                                foreach (var supplier in Model.SupplierPerformances)
+                                                {
+                                                    <tr>
+                                                        <td class="font-weight-bold" style="color: var(--excel-navy);">@supplier.SupplierName</td>
+                                                        <td class="text-right">@supplier.Revenue.ToString("N0")</td>
+                                                        <td class="text-right text-excel-green font-weight-bold">@supplier.GrossProfit.ToString("N0")</td>
+                                                        <td class="text-center font-weight-bold text-danger">@supplier.GrossProfitMargin.ToString("F2")%</td>
+                                                    </tr>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <tr>
+                                                    <td colspan="4" class="text-center text-muted py-4">Chưa có dữ liệu nhà cung cấp</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab 3: Top 10 sản phẩm theo doanh thu -->
+                        <div class="tab-pane fade" id="chart-content" role="tabpanel" aria-labelledby="chart-tab">
+                            <div class="excel-table-card border-0 p-0 pt-2">
+                                <div style="height: 380px; position: relative;">
+                                    <canvas id="topRevenueChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fourth Row: Explanations & Quick Read (Side-By-Side) -->
+    <div class="row">
+        <!-- Indicators description -->
+        <div class="col-lg-7 mb-3">
+            <div class="excel-guide-card">
+                <div class="excel-guide-title"><i class="fas fa-info-circle mr-2"></i>Chi tiết các thành phần</div>
+                <div class="excel-guide-item">
+                    <span class="excel-guide-number">1</span>
+                    <span><strong>Dùng bộ lọc:</strong> Năm, Tháng, Nhà cung cấp, Tên sản phẩm, Nhóm sản phẩm giúp phân tích chi tiết lát cắt báo cáo.</span>
+                </div>
+                <div class="excel-guide-item">
+                    <span class="excel-guide-number">2</span>
+                    <span><strong>Theo dõi các KPI chính:</strong> Tồn kho đầu kỳ, Nhập kho, Xuất kho, Tồn kho cuối kỳ, Doanh thu, Đơn giá BQ xuất kho, Lợi nhuận gộp, Tỉ suất LNG.</span>
+                </div>
+                <div class="excel-guide-item">
+                    <span class="excel-guide-number">3</span>
+                    <span><strong>Biểu đồ xu hướng:</strong> Giúp theo dõi doanh thu và xuất kho biến đổi theo tháng.</span>
+                </div>
+                <div class="excel-guide-item">
+                    <span class="excel-guide-number">4</span>
+                    <span><strong>Biểu đồ Top 10:</strong> Giúp nhận diện sản phẩm bán chạy nhất và sản phẩm đang tồn kho cao nhất theo giá trị.</span>
+                </div>
+                <div class="excel-guide-item">
+                    <span class="excel-guide-number">5</span>
+                    <span><strong>Bảng dưới cùng:</strong> Phân tích chi tiết và đối chiếu trực quan hiệu quả hoạt động theo nhà cung cấp và theo sản phẩm.</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Read Guide -->
+        <div class="col-lg-5 mb-3">
+            <div class="excel-guide-card" style="border-left: 4px solid var(--excel-navy-light);">
+                <div class="excel-guide-title" style="color: var(--excel-navy-light);"><i class="fas fa-bolt mr-2"></i>Cách đọc nhanh</div>
+                <ul class="pl-3" style="font-size:11.5px; line-height: 1.8; color: #5a5c69;">
+                    <li><strong>Xem KPI trước:</strong> Đánh giá mức độ tăng trưởng doanh thu và lợi nhuận gộp qua mũi tên và phần trăm biến động so với tháng trước.</li>
+                    <li><strong>Xem xu hướng & top sản phẩm sau:</strong> Định vị các mặt hàng có giá trị tồn kho lớn để chủ động điều phối nhập/xuất hoặc xả kho.</li>
+                    <li><strong>Cuối cùng phân tích chi tiết:</strong> Dùng bảng tổng quan để xem sự biến động hàng hóa và hiệu quả kinh doanh của từng nhà cung cấp.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <!-- Render Charts using Chart.js -->
+    <script>
+        $(document).ready(function() {
+            $('.select2-filter').select2({
+                width: '100%'
+            });
+
+            // Handle bootstrap tab switch chart size rendering refresh
+            $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                if (e.target.id === 'chart-tab') {
+                    topRevenueChart.resize();
+                    topRevenueChart.update();
+                }
+            });
+        });
+
+        // Set defaults to match Outfit font
+        Chart.defaults.global.defaultFontFamily = 'Outfit, Nunito, sans-serif';
+        Chart.defaults.global.defaultFontColor = '#858796';
+
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('vi-VN').format(value);
+        }
+
+        // 1. Monthly Trend Combo Chart (Revenue (Bar) + Export Qty (Line))
+        var monthlyCtx = document.getElementById("monthlyTrendChart").getContext("2d");
+        var monthlyTrendChart = new Chart(monthlyCtx, {
+            type: 'bar',
+            data: {
+                labels: @Html.Raw(Json.Serialize(Model.MonthlyTrends.Select(t => t.MonthLabel))),
+                datasets: [
+                    {
+                        type: 'line',
+                        label: 'SL xuất kho',
+                        borderColor: '#fd7e14',
+                        borderWidth: 2,
+                        fill: false,
+                        yAxisID: 'y-qty',
+                        data: @Html.Raw(Json.Serialize(Model.MonthlyTrends.Select(t => t.ExportQty))),
+                        pointRadius: 3,
+                        pointBackgroundColor: '#fd7e14'
+                    },
+                    {
+                        type: 'bar',
+                        label: 'Doanh thu',
+                        backgroundColor: '#002d62',
+                        hoverBackgroundColor: '#001f42',
+                        yAxisID: 'y-rev',
+                        data: @Html.Raw(Json.Serialize(Model.MonthlyTrends.Select(t => t.Revenue)))
+                    }
+                ]
+            },
+            options: {
+                maintainAspectRatio: false,
+                responsive: true,
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: { boxWidth: 10, fontSize: 10.5 }
+                },
+                tooltips: {
+                    callbacks: {
+                        label: function(tooltipItem, data) {
+                            var datasetLabel = data.datasets[tooltipItem.datasetIndex].label || '';
+                            if (tooltipItem.datasetIndex === 1) {
+                                return datasetLabel + ': ' + formatCurrency(tooltipItem.yLabel);
+                            } else {
+                                return datasetLabel + ': ' + tooltipItem.yLabel.toLocaleString();
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    xAxes: [{
+                        gridLines: { display: false },
+                        ticks: { fontSize: 10 }
+                    }],
+                    yAxes: [
+                        {
+                            id: 'y-rev',
+                            type: 'linear',
+                            position: 'left',
+                            ticks: {
+                                beginAtZero: true,
+                                callback: function(value) {
+                                    return value >= 1000000 ? (value / 1000000) + 'M' : value;
+                                }
+                            },
+                            gridLines: { color: "#eef2f5" }
+                        },
+                        {
+                            id: 'y-qty',
+                            type: 'linear',
+                            position: 'right',
+                            ticks: { beginAtZero: true },
+                            gridLines: { display: false }
+                        }
+                    ]
+                }
+            }
+        });
+
+        // 2. Top Stock Products by Value
+        var stockCtx = document.getElementById("topStockChart").getContext("2d");
+        var topStockChart = new Chart(stockCtx, {
+            type: 'bar',
+            data: {
+                labels: @Html.Raw(Json.Serialize(Model.TopStockProducts.Select(t => t.ProductName))),
+                datasets: [
+                    {
+                        type: 'line',
+                        label: 'Tồn cuối GT',
+                        borderColor: '#fd7e14',
+                        borderWidth: 2,
+                        fill: false,
+                        yAxisID: 'y-val',
+                        data: @Html.Raw(Json.Serialize(Model.TopStockProducts.Select(t => t.EndingStockValue))),
+                        pointRadius: 3
+                    },
+                    {
+                        type: 'bar',
+                        label: 'Tồn cuối SL',
+                        backgroundColor: '#002d62',
+                        yAxisID: 'y-qty',
+                        data: @Html.Raw(Json.Serialize(Model.TopStockProducts.Select(t => t.EndingStockQty)))
+                    }
+                ]
+            },
+            options: {
+                maintainAspectRatio: false,
+                responsive: true,
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: { boxWidth: 10, fontSize: 10.5 }
+                },
+                tooltips: {
+                    callbacks: {
+                        label: function(tooltipItem, data) {
+                            var datasetLabel = data.datasets[tooltipItem.datasetIndex].label || '';
+                            if (tooltipItem.datasetIndex === 0) {
+                                return datasetLabel + ': ' + formatCurrency(tooltipItem.yLabel);
+                            } else {
+                                return datasetLabel + ': ' + tooltipItem.yLabel.toLocaleString();
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    xAxes: [{
+                        gridLines: { display: false },
+                        ticks: {
+                            fontSize: 9.5,
+                            callback: function(value) {
+                                return value.length > 12 ? value.substr(0, 10) + '...' : value;
+                            }
+                        }
+                    }],
+                    yAxes: [
+                        {
+                            id: 'y-qty',
+                            type: 'linear',
+                            position: 'left',
+                            ticks: { beginAtZero: true },
+                            gridLines: { color: "#eef2f5" }
+                        },
+                        {
+                            id: 'y-val',
+                            type: 'linear',
+                            position: 'right',
+                            ticks: {
+                                beginAtZero: true,
+                                callback: function(value) {
+                                    return value >= 1000000 ? (value / 1000000) + 'M' : value;
+                                }
+                            },
+                            gridLines: { display: false }
+                        }
+                    ]
+                }
+            }
+        });
+
+        // 3. Top 10 Products by Revenue (Horizontal Bar Chart)
+        var revenueCtx = document.getElementById("topRevenueChart").getContext("2d");
+        var topRevenueChart = new Chart(revenueCtx, {
+            type: 'horizontalBar',
+            data: {
+                labels: @Html.Raw(Json.Serialize(Model.TopRevenueProducts.Select(t => t.ProductName))),
+                datasets: [{
+                    label: 'Doanh thu',
+                    backgroundColor: '#002d62',
+                    hoverBackgroundColor: '#001f42',
+                    data: @Html.Raw(Json.Serialize(Model.TopRevenueProducts.Select(t => t.Revenue)))
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                responsive: true,
+                legend: { display: false },
+                tooltips: {
+                    callbacks: {
+                        label: function(tooltipItem, data) {
+                            return 'Doanh thu: ' + formatCurrency(tooltipItem.xLabel);
+                        }
+                    }
+                },
+                scales: {
+                    xAxes: [{
+                        ticks: {
+                            beginAtZero: true,
+                            callback: function(value) {
+                                return value >= 1000000 ? (value / 1000000) + 'M' : value;
+                            }
+                        },
+                        gridLines: { color: "#eef2f5" }
+                    }],
+                    yAxes: [{
+                        gridLines: { display: false },
+                        ticks: {
+                            fontSize: 10,
+                            callback: function(value) {
+                                return value.length > 12 ? value.substr(0, 10) + '...' : value;
+                            }
+                        }
+                    }]
+                }
+            }
+        });
+    </script>
+}

@@ -1,5 +1,6 @@
 @using System.Security.Claims
 @using Microsoft.AspNetCore.Mvc.ViewEngines
+@using Microsoft.EntityFrameworkCore
 @using HuflitShopCore.Models
 
 @inject HuflitShopCore.Data.AppDbContext _context
@@ -12,7 +13,22 @@
     };
 
     string userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("Id") ?? "";
-    bool isAdmin = _context.UserRoles.Any(r => r.UserId == userId && (r.RoleId == "1" || r.RoleId == "ROLE-ADMIN"));
+    bool isAdmin = User.IsInRole("1") || User.IsInRole("ROLE-ADMIN");
+
+    // Tối ưu hóa truy vấn: Lấy danh sách đơn hàng chờ duyệt trong 1 câu lệnh duy nhất không tracking
+    var pendingOrders = _context.Orders
+        .AsNoTracking()
+        .Where(o => o.OrderStatus == 0)
+        .Select(o => new {
+            o.Id,
+            o.OrderDate,
+            o.UserId,
+            UserFullName = o.User != null ? o.User.FullName : "Khách hàng",
+            UserAvatar = o.User != null ? o.User.Avatar : null
+        })
+        .ToList();
+
+    int pendingCount = pendingOrders.Count;
 }
 
 <!DOCTYPE html>
@@ -41,6 +57,28 @@
 
     <!-- Paging -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.11.3/css/dataTables.bootstrap5.min.css" />
+
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <style>
+        /* Custom Select2 premium theme styles matching Excel Navy/sb-admin-2 theme */
+        .select2-container--default .select2-selection--single {
+            height: 38px !important;
+            border: 1px solid #d1d3e2 !important;
+            border-radius: 6px !important;
+            padding: 5px 10px !important;
+            display: flex;
+            align-items: center;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 36px !important;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 26px !important;
+            color: #6e707e !important;
+            padding-left: 0 !important;
+        }
+    </style>
     
 
     <!-- Custom CSS for Toast-like Alerts -->
@@ -174,12 +212,20 @@
                 </div>
             </li>
 
+            <!-- Divider -->
+            <hr class="sidebar-divider">
+
+            <!-- Heading -->
+            <div class="sidebar-heading">
+                Quản trị Kho
+            </div>
+
             <!-- Nav Item - Pages Quản lý kho Menu -->
             <li class="nav-item">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseStock"
                    aria-expanded="true" aria-controls="collapseUtilities">
                     <i class="fas fa-warehouse"></i>
-                    <span>Quản lý kho</span>
+                    <span>Phân hệ Kho</span>
                 </a>
                 <div id="collapseStock" class="collapse" aria-labelledby="headingUtilities"
                      data-parent="#accordionSidebar">
@@ -188,6 +234,7 @@
                         <a class="collapse-item" asp-area="Admin" asp-controller="Supplier" asp-action="Index">Nhà cung cấp</a>
                         <a class="collapse-item" asp-area="Admin" asp-controller="StockReceipt" asp-action="Create">Tạo phiếu nhập kho</a>
                         <a class="collapse-item" asp-area="Admin" asp-controller="StockReceipt" asp-action="Index">Lịch sử nhập kho</a>
+                        <a class="collapse-item" asp-area="Admin" asp-controller="WarehouseReport" asp-action="Index">Báo cáo Nhập-Xuất-Tồn</a>
                     </div>
                 </div>
             </li>
@@ -229,11 +276,11 @@
                     <i class="fas fa-clipboard-list"></i>
                     <span>
                         Thông tin đặt hàng
-                        @if (_context.Orders.Where(o => o.OrderStatus == 0).ToList().Count != 0)
+                        @if (pendingCount != 0)
                         {
                             <sup>
                                 <span class="badge badge-danger badge-counter">
-                                    @_context.Orders.Where(o => o.OrderStatus == 0).ToList().Count
+                                    @pendingCount
                                 </span>
                             </sup>
                         }
@@ -245,11 +292,11 @@
                         <a class="collapse-item" asp-area="Admin" asp-controller="Order" asp-action="Index">Danh sách đơn hàng</a>
                         <a class="collapse-item" asp-area="Admin" asp-controller="Order" asp-action="Index" asp-route-pendingOnly="true">
                             Đơn hàng chưa duyệt
-                            @if (_context.Orders.Where(o => o.OrderStatus == 0).ToList().Count != 0)
+                            @if (pendingCount != 0)
                             {
                                 <sup>
                                     <span class="badge badge-danger badge-counter">
-                                        @_context.Orders.Where(o => o.OrderStatus == 0).ToList().Count
+                                        @pendingCount
                                     </span>
                                 </sup>
                             }
@@ -342,30 +389,29 @@
                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <i class="fas fa-bell fa-fw" style="color: #D7DF01;"></i>
                                 <!-- Counter - Alerts -->
-                                @if (_context.Orders.Where(o => o.OrderStatus == 0).ToList().Count != 0)
+                                @if (pendingCount != 0)
                                 {
                                     <span class="badge badge-danger badge-counter">
-                                        @_context.Orders.Where(o => o.OrderStatus == 0).ToList().Count
+                                        @pendingCount
                                     </span>
                                 }
 
                             </a>
                             <!-- Dropdown - Alerts -->
-                            @if (_context.Orders.Where(o => o.OrderStatus == 0).ToList().Count != 0)
+                            @if (pendingCount != 0)
                             {
                                 <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
                                      aria-labelledby="alertsDropdown">
                                     <h6 class="dropdown-header">
                                         Thông báo
                                     </h6>
-                                    @foreach (var item in _context.Orders.Where(o => o.OrderStatus == 0).ToList())
+                                    @foreach (var item in pendingOrders)
                                     {
                                         <a class="dropdown-item d-flex align-items-center" asp-action="Index" asp-route-pendingOnly="true" asp-controller="Order" asp-area="Admin">
                                             <div class="dropdown-list-image mr-3">
-                                                @if (_context.Users.Where(u => u.Id.Contains(item.UserId)).First().Avatar != null)
+                                                @if (!string.IsNullOrEmpty(item.UserAvatar))
                                                 {
-                                                    <img class="rounded-circle" src="@_context.Users.Where(u => u.Id.Contains(item.UserId)).First().Avatar"
-                                                         alt="...">
+                                                    <img class="rounded-circle" src="@item.UserAvatar" alt="...">
                                                 }
                                                 else
                                                 {
@@ -396,18 +442,16 @@
                                                             }
                                                             else
                                                             {
-
                                                                 <div class="small text-gray-500">@totalMinutes phút trước</div>
                                                             }
                                                         }
                                                         else
                                                         {
-
                                                             <div class="small text-gray-500">@totalHours giờ trước</div>
                                                         }
                                                     }
                                                 }
-                                                <span class="font-weight-bold">@_context.Users.Where(u => u.Id.Contains(item.UserId)).First().FullName đã đặt một đơn hàng. Nhấn để xem chi tiết.</span>
+                                                <span class="font-weight-bold">@item.UserFullName đã đặt một đơn hàng. Nhấn để xem chi tiết.</span>
                                             </div>
                                         </a>
                                     }
@@ -424,7 +468,6 @@
                                         Chưa có thông báo mới.
                                     </div>
                                 </div>
-
                             }
                         </li>
                         <div class="topbar-divider d-none d-sm-block"></div>
@@ -557,13 +600,24 @@
     <!--Page level plugin-->
     <script src="~/Admin/vendor/chart.js/Chart.min.js"></script>
 
-    <!-- Paging -->
+    <!-- Paging & Select2 -->
     <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.11.3/js/dataTables.bootstrap5.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
         $(function () {
-            $('.table').DataTable();
+            // Apply DataTable globally unless disabled via class
+            $('.table:not(.no-datatable)').DataTable();
+
+            // Initialize global Select2 inputs
+            $('.select2-enable').select2({
+                width: '100%'
+            });
+
+            $('.select2-filter').select2({
+                width: '100%'
+            });
         });
     </script>
 

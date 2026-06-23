@@ -21,7 +21,7 @@ namespace HuflitShopCore.Services
 
         public async Task<List<CategoryDTO>> GetAllCategoriesAsync()
         {
-            var categories = await _context.Categories.ToListAsync();
+            var categories = await _context.Categories.AsNoTracking().ToListAsync();
             
             return categories.Select(c => new CategoryDTO
             {

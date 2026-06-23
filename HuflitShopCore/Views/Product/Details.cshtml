@@ -6,8 +6,8 @@
     var product = Model;
     var cloudName = Configuration["CloudinarySettings:CloudName"] ?? "Tên_Cloud_Của_Bạn";
     var variants = product?.ProductVariants == null
-            ? Enumerable.Empty<HuflitShopCore.Models.ProductVariant>()
-            : product.ProductVariants.Where(pv => pv.IsActive).ToList();
+        ? Enumerable.Empty<HuflitShopCore.Models.ProductVariant>()
+        : product.ProductVariants.Where(pv => pv.IsActive).ToList();
     var images = product?.ProductImages == null
         ? new List<HuflitShopCore.Models.ProductImage>()
         : product.ProductImages.OrderBy(img => img.ImageOrder).ToList();
@@ -311,10 +311,13 @@
 
                         <div class="selector-group-modern mb-5">
                             <span class="text-uppercase font-weight-bold text-muted mb-2 d-block" style="font-size: 0.85rem; letter-spacing: 1px;">Số lượng</span>
-                            <div class="qty-modern d-inline-flex border border-secondary bg-white">
-                                <button type="button" class="btn bg-transparent rounded-0 border-0 px-3 font-weight-bold" onclick="changeQty(-1)">-</button>
-                                <input type="text" name="quantity" id="qtyInput" value="1" readonly class="form-control bg-transparent border-0 text-center font-weight-bold" style="width: 50px; box-shadow: none;" />
-                                <button type="button" class="btn bg-transparent rounded-0 border-0 px-3 font-weight-bold" onclick="changeQty(1)">+</button>
+                            <div class="d-flex align-items-center">
+                                <div class="qty-modern d-inline-flex border border-secondary bg-white">
+                                    <button type="button" class="btn bg-transparent rounded-0 border-0 px-3 font-weight-bold" onclick="changeQty(-1)">-</button>
+                                    <input type="text" name="quantity" id="qtyInput" value="1" readonly class="form-control bg-transparent border-0 text-center font-weight-bold" style="width: 50px; box-shadow: none;" />
+                                    <button type="button" class="btn bg-transparent rounded-0 border-0 px-3 font-weight-bold" onclick="changeQty(1)">+</button>
+                                </div>
+                                <span id="stockIndicator" class="text-muted ml-3" style="font-size: 0.95rem; font-weight: 500;"></span>
                             </div>
                         </div>
 
@@ -432,7 +435,7 @@
             }
             else
             {
-                <a asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@Context.Request.Path" class="btn btn-ocean-outline rounded-0 font-weight-bold text-uppercase mt-3 w-100">
+                <a asp-controller="Login" asp-action="Login" asp-route-returnUrl="@Context.Request.Path" class="btn btn-ocean-outline rounded-0 font-weight-bold text-uppercase mt-3 w-100">
                     Đăng nhập để đánh giá
                 </a>
             }
@@ -486,6 +489,7 @@
         </div>
     </div>
 </div>
+@section Scripts {
 <script>
     $(document).ready(function () {
         $(document).on('click', '.vote-btn', function () {
@@ -513,7 +517,7 @@
             id = v.Id,
             sizeId = v.SizeId,
             colorId = v.ColorId,
-            price = v.AdditionalPrice ?? 0,
+            price = v.AdditionalPrice,
             stock = v.StockQuantity
         }).ToList()));
 
@@ -544,8 +548,23 @@
     function changeQty(delta) {
         const input = document.getElementById('qtyInput');
         let val = parseInt(input.value) || 1;
+
+        // Find match to get stock quantity
+        const match = productVariants.find(v => 
+            String(v.sizeId).trim().toLowerCase() === currentSizeId && 
+            String(v.colorId).trim().toLowerCase() === currentColorId
+        );
+
         val += delta;
         if (val < 1) val = 1;
+
+        if (match) {
+            const stock = match.stock !== undefined ? match.stock : 0;
+            if (val > stock) {
+                val = stock;
+                alert(`Số lượng chọn vượt quá số lượng trong kho (Tối đa: ${stock})`);
+            }
+        }
         input.value = val;
     }
 
@@ -554,6 +573,8 @@
         const priceEl = document.getElementById('variantPrice');
         const btnAddToCart = document.querySelector('.btn-ocean-primary');
         const btnBuyNow = document.querySelector('.btn-ocean-outline');
+        const stockIndicator = document.getElementById('stockIndicator');
+        const qtyInput = document.getElementById('qtyInput');
 
         // Chưa chọn đủ Size và Màu thì dừng
         if (!currentSizeId || !currentColorId) return;
@@ -578,6 +599,19 @@
                     priceEl.classList.remove('text-muted');
                 }
 
+                if (stockIndicator) {
+                    stockIndicator.innerHTML = `<i class="fas fa-check-circle text-success mr-1"></i>Còn lại: <strong class="text-dark">${match.stock}</strong> sản phẩm`;
+                }
+
+                if (qtyInput) {
+                    let qty = parseInt(qtyInput.value) || 1;
+                    if (qty > match.stock) {
+                        qtyInput.value = match.stock;
+                    } else if (qty < 1) {
+                        qtyInput.value = 1;
+                    }
+                }
+
                 if (btnBuyNow) btnBuyNow.removeAttribute('disabled');
                 if (btnAddToCart) {
                     btnAddToCart.removeAttribute('disabled');
@@ -591,6 +625,14 @@
                     priceEl.textContent = 'Phân loại này đã hết hàng';
                     priceEl.classList.remove('text-danger');
                     priceEl.classList.add('text-muted', 'font-italic');
+                }
+
+                if (stockIndicator) {
+                    stockIndicator.innerHTML = `<i class="fas fa-exclamation-triangle text-danger mr-1"></i>Hết hàng`;
+                }
+
+                if (qtyInput) {
+                    qtyInput.value = 0;
                 }
 
                 if (btnBuyNow) btnBuyNow.setAttribute('disabled', 'true');
@@ -607,6 +649,10 @@
                 priceEl.textContent = 'Phân loại không khả dụng';
                 priceEl.classList.remove('text-danger');
                 priceEl.classList.add('text-muted', 'font-italic');
+            }
+
+            if (stockIndicator) {
+                stockIndicator.innerHTML = `<i class="fas fa-times-circle text-danger mr-1"></i>Không khả dụng`;
             }
 
             if (btnBuyNow) btnBuyNow.setAttribute('disabled', 'true');
@@ -633,10 +679,14 @@
 
     document.addEventListener("DOMContentLoaded", function () {
         // Tự động kích hoạt thuộc tính đầu tiên khi tải trang xong
-        const firstSize = document.querySelector('#sizePillContainer .btn-size-pill');
-        if (firstSize) firstSize.click();
-        const firstColor = document.querySelector('#colorPillContainer .btn-color-swatch');
-        if (firstColor) firstColor.click();
+        try {
+            const firstSize = document.querySelector('#sizePillContainer .btn-size-pill');
+            if (firstSize) firstSize.click();
+            const firstColor = document.querySelector('#colorPillContainer .btn-color-swatch');
+            if (firstColor) firstColor.click();
+        } catch (e) {
+            console.error("Auto-click variant pills failed: ", e);
+        }
 
         // Xử lý ngôi sao đánh giá
         const stars = document.querySelectorAll('#starRatingSelector i');
@@ -645,17 +695,45 @@
         if (stars.length && ratingInput && ratingLabel) {
             const labels = { 1: 'Tệ', 2: 'Tạm ổn', 3: 'Bình thường', 4: 'Rất tốt', 5: 'Tuyệt vời' };
             stars.forEach(star => {
+                // Ensure star has pointer cursor styling
+                star.style.cursor = 'pointer';
+
                 star.addEventListener('click', function () {
                     const val = parseInt(this.getAttribute('data-value'));
                     ratingInput.value = val;
                     ratingLabel.textContent = labels[val] || '';
                     stars.forEach(s => {
                         const sVal = parseInt(s.getAttribute('data-value'));
-                        if (sVal <= val) { s.classList.replace('far', 'fas'); s.classList.add('text-gold-vibrant'); }
-                        else { s.classList.replace('fas', 'far'); s.classList.remove('text-gold-vibrant'); }
+                        if (sVal <= val) {
+                            s.classList.remove('far');
+                            s.classList.add('fas', 'text-gold-vibrant');
+                        } else {
+                            s.classList.remove('fas', 'text-gold-vibrant');
+                            s.classList.add('far');
+                        }
+                    });
+                });
+
+                // Hover effect
+                star.addEventListener('mouseover', function () {
+                    const val = parseInt(this.getAttribute('data-value'));
+                    stars.forEach(s => {
+                        const sVal = parseInt(s.getAttribute('data-value'));
+                        if (sVal <= val) {
+                            s.style.color = '#fbbf24';
+                        } else {
+                            s.style.color = '#d1d5db';
+                        }
+                    });
+                });
+
+                star.addEventListener('mouseout', function () {
+                    stars.forEach(s => {
+                        s.removeAttribute('style');
                     });
                 });
             });
         }
     });
 </script>
+}

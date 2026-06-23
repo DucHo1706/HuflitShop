@@ -85,5 +85,13 @@ namespace HuflitShopCore.Services
             _context.Users.Update(user);
             return await _context.SaveChangesAsync() > 0;
         }
+
+        public async Task<List<string>> GetUserRolesAsync(string userId)
+        {
+            return await _context.UserRoles
+                .Where(ur => ur.UserId == userId)
+                .Select(ur => ur.RoleId)
+                .ToListAsync();
+        }
     }
 }

@@ -28,6 +28,9 @@ namespace HuflitShopCore.Models
         [Column(TypeName = "decimal(18,2)")]
         public decimal AdditionalPrice { get; set; } = 0;
 
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal AverageCostPrice { get; set; } = 0;
+
         [ForeignKey("ProductId")]
         public virtual Product? Product { get; set; }
         [ForeignKey("SizeId")]

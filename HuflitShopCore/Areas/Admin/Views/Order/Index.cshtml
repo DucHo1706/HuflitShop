@@ -81,14 +81,49 @@
         </div>
     </div>
 
+    <!-- Advanced Filter Card -->
+    <div class="card shadow mb-4" style="border-radius: 12px; border: none;">
+        <div class="card-body p-3 bg-light" style="border-radius: 12px;">
+            <div class="row">
+                <div class="col-md-3 mb-2 mb-md-0">
+                    <label class="font-weight-bold small text-muted">Trạng thái đơn hàng:</label>
+                    <select id="filterStatus" class="form-control form-control-sm shadow-sm" style="border-radius: 8px;">
+                        <option value="" selected="@(!pendingOnly ? "selected" : null)">-- Tất cả trạng thái --</option>
+                        <option value="0" selected="@(pendingOnly ? "selected" : null)">Chờ duyệt</option>
+                        <option value="1">Đóng gói</option>
+                        <option value="2">Đang giao</option>
+                        <option value="3">Hoàn thành</option>
+                        <option value="4">Đã hủy</option>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-2 mb-md-0">
+                    <label class="font-weight-bold small text-muted">Trạng thái thanh toán:</label>
+                    <select id="filterPayment" class="form-control form-control-sm shadow-sm" style="border-radius: 8px;">
+                        <option value="">-- Tất cả thanh toán --</option>
+                        <option value="1">Đã thanh toán</option>
+                        <option value="0">Chưa thanh toán</option>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-2 mb-md-0">
+                    <label class="font-weight-bold small text-muted">Từ ngày:</label>
+                    <input type="date" id="filterStartDate" class="form-control form-control-sm shadow-sm" style="border-radius: 8px;" />
+                </div>
+                <div class="col-md-3">
+                    <label class="font-weight-bold small text-muted">Đến ngày:</label>
+                    <input type="date" id="filterEndDate" class="form-control form-control-sm shadow-sm" style="border-radius: 8px;" />
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="card card-modern mb-4">
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover table-modern mb-0" id="dataTable" width="100%" cellspacing="0">
+                <table class="table table-hover table-modern mb-0 no-datatable" id="dataTable" width="100%" cellspacing="0">
                     <thead>
                         <tr>
                             <th class="pl-4">Mã đơn</th>
-                            <th>Khách hàng</th>
+                            <th>Khách hàng & Sản phẩm</th>
                             <th>Ngày đặt</th>
                             <th>Tổng tiền</th>
                             <th>Thanh toán</th>
@@ -101,11 +136,24 @@
                         {
                             foreach (var item in Model)
                             {
-                                <tr>
+                                <tr data-status="@item.OrderStatus" data-payment="@item.PaymentStatus" data-date="@item.OrderDate.ToString("yyyy-MM-dd")">
                                     <td class="pl-4 font-weight-bold text-primary"><span title="@item.Id">#@item.Id.Substring(0, 8).ToUpper()</span></td>
                                     <td>
                                         <div class="font-weight-bold text-dark">@item.CustomerName</div>
-                                        <small class="text-muted">@item.ShippingFullName</small>
+                                        <small class="text-muted d-block mb-1">Người nhận: @item.ShippingFullName</small>
+                                        @if (item.OrderDetails != null && item.OrderDetails.Any())
+                                        {
+                                            <div class="mt-2 pt-2 border-top" style="font-size: 0.8rem; line-height: 1.4;">
+                                                @foreach (var detail in item.OrderDetails)
+                                                {
+                                                    <div class="text-secondary mb-1">
+                                                        <i class="fas fa-tshirt fa-xs text-muted mr-1"></i>
+                                                        <span class="font-weight-bold text-primary">@detail.Quantity x</span> @detail.ProductNameSnapshot 
+                                                        <span class="badge badge-light" style="font-size: 0.7rem; padding: 2px 5px;">@detail.ColorNameSnapshot / @detail.SizeNameSnapshot</span>
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
                                     </td>
                                     <td class="text-secondary">@item.OrderDate.ToString("dd/MM/yyyy HH:mm")</td>
                                     <td class="text-dark font-weight-bold">@item.FinalAmount.ToString("N0") đ</td>
@@ -160,3 +208,76 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Initialize DataTable manually for custom sorting and language translation
+            var table = $('#dataTable').DataTable({
+                "order": [[2, "desc"]], // Sort by date descending
+                "language": {
+                    "search": "Tìm kiếm nhanh:",
+                    "lengthMenu": "Hiển thị _MENU_ dòng",
+                    "info": "Hiển thị từ _START_ đến _END_ trong tổng số _TOTAL_ đơn hàng",
+                    "infoEmpty": "Không có dữ liệu",
+                    "zeroRecords": "Không tìm thấy đơn hàng phù hợp",
+                    "paginate": {
+                        "next": "Sau",
+                        "previous": "Trước"
+                    }
+                }
+            });
+
+            // Register DataTable custom search filter function
+            $.fn.dataTable.ext.search.push(
+                function(settings, data, dataIndex) {
+                    if (settings.nTable.id !== 'dataTable') {
+                        return true;
+                    }
+
+                    var row = $(table.row(dataIndex).node());
+                    var orderStatus = row.attr('data-status');
+                    var paymentStatus = row.attr('data-payment');
+                    var orderDateStr = row.attr('data-date'); // "yyyy-MM-dd"
+
+                    var filterStatus = $('#filterStatus').val();
+                    var filterPayment = $('#filterPayment').val();
+                    var filterStart = $('#filterStartDate').val(); // "yyyy-MM-dd"
+                    var filterEnd = $('#filterEndDate').val(); // "yyyy-MM-dd"
+
+                    // Order Status filter
+                    if (filterStatus && filterStatus !== "" && orderStatus !== filterStatus) {
+                        return false;
+                    }
+
+                    // Payment Status filter
+                    if (filterPayment && filterPayment !== "" && paymentStatus !== filterPayment) {
+                        return false;
+                    }
+
+                    // Date range filter
+                    if (orderDateStr) {
+                        if (filterStart && orderDateStr < filterStart) {
+                            return false;
+                        }
+                        if (filterEnd && orderDateStr > filterEnd) {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                }
+            );
+
+            // Re-draw table when filters change
+            $('#filterStatus, #filterPayment, #filterStartDate, #filterEndDate').on('change', function () {
+                table.draw();
+            });
+
+            // Trigger initial filtering if some values are preselected
+            if ($('#filterStatus').val() !== "") {
+                table.draw();
+            }
+        });
+    </script>
+}

@@ -482,3 +482,7 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# HuflitShop B2B Presentation & Report Folder
+B2B_Report/
+

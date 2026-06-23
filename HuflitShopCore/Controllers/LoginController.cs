@@ -33,9 +33,25 @@ namespace HuflitShopCore.Controllers
                     new Claim("UserName", user.UserName), 
                     new Claim("Name", user.FullName), 
                     new Claim("Phone", user.PhoneNumber ?? ""), 
-                    new Claim("Avatar", user.Avatar ?? ""), 
-                    new Claim(ClaimTypes.Role, user.Role ?? "Customer") 
+                    new Claim("Avatar", user.Avatar ?? "")
                 };
+
+                // Lấy danh sách RoleId từ bảng UserRoles và nạp vào claims
+                var userRoles = await _userService.GetUserRolesAsync(user.Id);
+                foreach (var role in userRoles)
+                {
+                    claims.Add(new Claim(ClaimTypes.Role, role));
+                }
+
+                // Fallback nếu không có role trong bảng trung gian thì lấy theo AppUser.Role hoặc Customer
+                if (!string.IsNullOrEmpty(user.Role) && !userRoles.Contains(user.Role))
+                {
+                    claims.Add(new Claim(ClaimTypes.Role, user.Role));
+                }
+                else if (!userRoles.Any())
+                {
+                    claims.Add(new Claim(ClaimTypes.Role, "Customer"));
+                }
 
                 var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                 var authProperties = new AuthenticationProperties { IsPersistent = dto.RememberMe };
@@ -119,6 +135,12 @@ namespace HuflitShopCore.Controllers
             // Tái gửi email xác thực
             dto.EmailSent = true;
             return View(dto);
+        }
+
+        [HttpGet]
+        public IActionResult AccessDenied()
+        {
+            return View();
         }
 
         public async Task<IActionResult> Logout()
