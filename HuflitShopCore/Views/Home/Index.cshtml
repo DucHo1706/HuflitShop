@@ -64,6 +64,27 @@
             {
                 foreach (var pro in Model)
                 {
+                    var activeAutoPromos = ViewBag.ActiveAutoPromos as List<HuflitShopCore.Models.Promotion> ?? new List<HuflitShopCore.Models.Promotion>();
+                    var prodPromo = activeAutoPromos.FirstOrDefault(p => p.ApplicableProductId == pro.Id);
+                    decimal discountedPrice = pro.Price;
+                    if (prodPromo != null)
+                    {
+                        if (string.Equals(prodPromo.DiscountType, "Percent", StringComparison.OrdinalIgnoreCase) || 
+                            string.Equals(prodPromo.DiscountType, "Percentage", StringComparison.OrdinalIgnoreCase))
+                        {
+                            decimal discount = pro.Price * (prodPromo.DiscountValue / 100);
+                            if (prodPromo.MaxDiscountAmount.HasValue && discount > prodPromo.MaxDiscountAmount.Value)
+                            {
+                                discount = prodPromo.MaxDiscountAmount.Value;
+                            }
+                            discountedPrice = Math.Max(0, pro.Price - discount);
+                        }
+                        else
+                        {
+                            discountedPrice = Math.Max(0, pro.Price - prodPromo.DiscountValue);
+                        }
+                    }
+
                     <div class="col-xl-3 col-lg-3 col-md-4 col-6 mb-4">
                         <div class="hs-product-card">
                             <div class="hs-product-card__thumb">
@@ -76,7 +97,14 @@
                                 }
                                 else
                                 {
-                                    <span class="hs-product-card__badge">Mới</span>
+                                    @if (discountedPrice < pro.Price)
+                                    {
+                                        <span class="hs-product-card__badge" style="background: linear-gradient(135deg, #ef4444, #f43f5e);">Giảm giá</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="hs-product-card__badge">Mới</span>
+                                    }
                                 }
                                 <div class="hs-product-card__actions">
                                     <a asp-controller="Product" asp-action="Details" asp-route-id="@pro.Id" class="hs-product-card__action-btn hs-product-card__action-btn--outline">
@@ -94,7 +122,17 @@
                                 <h3 class="hs-product-card__name">
                                     <a asp-controller="Product" asp-action="Details" asp-route-id="@pro.Id">@pro.Name</a>
                                 </h3>
-                                <div class="hs-product-card__price">@pro.Price.ToString("N0")₫</div>
+                                <div class="hs-product-card__price">
+                                    @if (discountedPrice < pro.Price)
+                                    {
+                                        <span class="text-danger font-weight-bold">@discountedPrice.ToString("N0")₫</span>
+                                        <span class="text-muted small ml-2" style="text-decoration: line-through; font-weight: normal; font-size: 0.85rem;">@pro.Price.ToString("N0")₫</span>
+                                    }
+                                    else
+                                    {
+                                        <span>@pro.Price.ToString("N0")₫</span>
+                                    }
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -276,7 +314,20 @@
     </div>
 </section>
 
-@* ── SECTION 8: PAYMENT METHODS ── *@
+@* ── SECTION: GỢI Ý CÁ NHÂN HÓA (DATA MINING) ── *@
+<section class="hs-products bg-light py-5 border-top border-bottom" id="personalized-recommendations-section" style="display: none; margin-bottom: 2rem;">
+    <div class="container">
+        <div class="hs-section-head">
+            <h2 class="hs-section-head__title" style="background: #f8fafc;"><i class="fas fa-magic mr-2 text-primary"></i>DÀNH RIÊNG CHO BẠN</h2>
+            <div class="hs-section-head__line"></div>
+            <p class="hs-section-head__desc">Sản phẩm được gợi ý tự động dựa trên thói quen xem sản phẩm của bạn</p>
+        </div>
+        <div class="row" id="personalized-recommendations-row">
+            <!-- Được render bằng AJAX JS -->
+        </div>
+    </div>
+</section>
+
 <section class="hs-payments">
     <div class="container">
         <div class="hs-payments__inner">
@@ -307,6 +358,46 @@
                     1024: { slidesPerView: 3 }
                 }
             });
+
+            // Tải sản phẩm gợi ý cá nhân hóa (Datamining)
+            fetch('/Product/GetPersonalizedRecommendations')
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.length > 0) {
+                        const row = document.getElementById('personalized-recommendations-row');
+                        row.innerHTML = '';
+                        data.forEach(p => {
+                            const col = document.createElement('div');
+                            col.className = 'col-xl-3 col-lg-3 col-md-4 col-6 mb-4';
+                            col.innerHTML = `
+                                <div class="hs-product-card h-100">
+                                    <div class="hs-product-card__thumb">
+                                        <a href="/Product/Details/${p.id}">
+                                            <img src="${p.imageUrl}" alt="${p.name}" loading="lazy" style="height: 320px; object-fit: cover;">
+                                        </a>
+                                        <span class="hs-product-card__badge" style="background: linear-gradient(135deg, #2563eb, #06b6d4);">Gợi ý AI</span>
+                                        <div class="hs-product-card__actions">
+                                            <a href="/Product/Details/${p.id}" class="hs-product-card__action-btn hs-product-card__action-btn--outline">
+                                                <i class="fas fa-eye"></i> Xem chi tiết
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div class="hs-product-card__body p-3">
+                                        <h3 class="hs-product-card__title font-weight-bold" style="font-size: 0.95rem; margin-bottom: 8px;">
+                                            <a href="/Product/Details/${p.id}" class="text-dark text-decoration-none">${p.name}</a>
+                                        </h3>
+                                        <div class="hs-product-card__price text-danger font-weight-bold" style="font-size: 1.1rem;">
+                                            ${new Intl.NumberFormat('vi-VN').format(p.price)} đ
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                            row.appendChild(col);
+                        });
+                        document.getElementById('personalized-recommendations-section').style.display = 'block';
+                    }
+                })
+                .catch(err => console.error("Error loading personalized recommendations:", err));
         });
     </script>
 }

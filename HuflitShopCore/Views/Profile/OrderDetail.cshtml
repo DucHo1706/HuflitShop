@@ -5,6 +5,53 @@
     ViewData["Title"] = "Chi tiết đơn hàng #" + Model.Id.Substring(0, 8).ToUpper();
     var suggestedProducts = ViewBag.SuggestedProducts as List<HuflitShopCore.Models.Product> ?? new List<HuflitShopCore.Models.Product>();
     var cloudName = Configuration["CloudinarySettings:CloudName"] ?? "Tên_Cloud_Của_Bạn";
+
+    string originalAddress = Model.ShippingAddress ?? "";
+    string cleanAddress = originalAddress;
+    string carrier = "";
+    string trackingNumber = "";
+    string driverName = "";
+    string driverPhone = "";
+    string licensePlate = "";
+    string trackingUrl = "";
+
+    if (originalAddress.Contains(" | "))
+    {
+        var parts = originalAddress.Split('|');
+        cleanAddress = parts[0].Trim();
+        foreach (var part in parts)
+        {
+            var trimmed = part.Trim();
+            if (trimmed.StartsWith("Vận chuyển:"))
+            {
+                carrier = trimmed.Replace("Vận chuyển:", "").Trim();
+            }
+            else if (trimmed.StartsWith("Tracking:"))
+            {
+                trackingNumber = trimmed.Replace("Tracking:", "").Trim();
+            }
+            else if (trimmed.StartsWith("Driver:"))
+            {
+                var driverInfo = trimmed.Replace("Driver:", "").Trim();
+                var phoneIndex = driverInfo.IndexOf('(');
+                var plateIndex = driverInfo.IndexOf(" - ");
+                if (phoneIndex != -1 && plateIndex != -1)
+                {
+                    driverName = driverInfo.Substring(0, phoneIndex).Trim();
+                    driverPhone = driverInfo.Substring(phoneIndex + 1, plateIndex - phoneIndex - 2).Trim();
+                    licensePlate = driverInfo.Substring(plateIndex + 3).Trim();
+                }
+                else
+                {
+                    driverName = driverInfo;
+                }
+            }
+            else if (trimmed.StartsWith("Link:"))
+            {
+                trackingUrl = trimmed.Replace("Link:", "").Trim();
+            }
+        }
+    }
 }
 
 <style>
@@ -335,7 +382,30 @@
                 <div style="font-size: 0.95rem; line-height: 1.7; color: #4b5563;">
                     <div style="font-size:1.1rem; font-weight: 700; color:#1f2937;" class="mb-2">@Model.CustomerName</div>
                     <div><strong>Số điện thoại:</strong> @Model.ShippingPhoneNumber</div>
-                    <div><strong>Địa chỉ giao nhận:</strong> @Model.ShippingAddress, @Model.ShippingDistrict, @Model.ShippingCity</div>
+                    <div><strong>Địa chỉ giao nhận:</strong> @cleanAddress, @Model.ShippingDistrict, @Model.ShippingCity</div>
+
+                    @if (!string.IsNullOrEmpty(carrier))
+                    {
+                        <div class="mt-2 pt-2 border-top">
+                            <div><strong>Vận chuyển:</strong> <span class="text-success font-weight-bold">@carrier</span></div>
+                            @if (!string.IsNullOrEmpty(trackingNumber))
+                            {
+                                <div><strong>Mã vận đơn:</strong> <span class="badge badge-secondary">@trackingNumber</span></div>
+                            }
+                            @if (!string.IsNullOrEmpty(driverName))
+                            {
+                                <div><strong>Tài xế:</strong> @driverName (@driverPhone) - <strong>@licensePlate</strong></div>
+                            }
+                            @if (!string.IsNullOrEmpty(trackingUrl))
+                            {
+                                <div class="mt-2">
+                                    <a href="@trackingUrl" target="_blank" class="btn btn-xs btn-outline-success font-weight-bold px-3 py-1" style="border-radius: 15px; font-size: 0.8rem;">
+                                        <i class="fas fa-motorcycle mr-1"></i> Theo dõi tài xế
+                                    </a>
+                                </div>
+                            }
+                        </div>
+                    }
                 </div>
             </div>
         </div>

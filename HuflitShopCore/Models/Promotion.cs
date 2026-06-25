@@ -36,6 +36,14 @@ namespace HuflitShopCore.Models
         public int UsedCount { get; set; } = 0;
         public bool IsActive { get; set; } = true;
 
+        [StringLength(50)]
+        public string? ApplicableProductId { get; set; }
+
+        [StringLength(500)]
+        public string? ComboProductIds { get; set; }
+
+        public bool IsAutoApply { get; set; } = false;
+
         public virtual ICollection<Order> Orders { get; set; }
     }
 }

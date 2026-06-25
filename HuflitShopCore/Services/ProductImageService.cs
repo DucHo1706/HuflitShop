@@ -31,7 +31,9 @@ namespace HuflitShopCore.Services
                 Id = i.Id,
                 ProductId = i.ProductId,
                 PublicId = i.PublicId,
-                ImageUrl = string.IsNullOrEmpty(i.AssetVersion) ? i.PublicId : $"https://res.cloudinary.com/{_cloudName}/image/upload/v{i.AssetVersion}/{i.PublicId}.jpg"
+                ImageUrl = (i.PublicId.StartsWith("http://", StringComparison.OrdinalIgnoreCase) || i.PublicId.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+                    ? i.PublicId
+                    : (string.IsNullOrEmpty(i.AssetVersion) ? i.PublicId : $"https://res.cloudinary.com/{_cloudName}/image/upload/v{i.AssetVersion}/{i.PublicId}.jpg")
             }).ToList();
         }
 
@@ -45,7 +47,9 @@ namespace HuflitShopCore.Services
                 Id = img.Id,
                 ProductId = img.ProductId,
                 PublicId = img.PublicId,
-                ImageUrl = string.IsNullOrEmpty(img.AssetVersion) ? img.PublicId : $"https://res.cloudinary.com/{_cloudName}/image/upload/v{img.AssetVersion}/{img.PublicId}.jpg"
+                ImageUrl = (img.PublicId.StartsWith("http://", StringComparison.OrdinalIgnoreCase) || img.PublicId.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+                    ? img.PublicId
+                    : (string.IsNullOrEmpty(img.AssetVersion) ? img.PublicId : $"https://res.cloudinary.com/{_cloudName}/image/upload/v{img.AssetVersion}/{img.PublicId}.jpg")
             };
         }
 

@@ -34,6 +34,12 @@ namespace HuflitShopCore.DTOs
         public double GrossProfitMargin { get; set; } // Tỉ suất LNG (%)
         public double GrossProfitMarginMoM { get; set; }
 
+        // Doanh thu gộp & ròng (MỚI)
+        public decimal GrossRevenue { get; set; }          // Σ(PurchasedPrice × Qty) — trước giảm giá
+        public decimal NetRevenue { get; set; }            // GrossRevenue - TotalDiscount — sau giảm giá
+        public decimal TotalDiscount { get; set; }         // Tổng giảm giá phân bổ
+        public decimal TotalShippingRevenue { get; set; }  // Tổng ship thu từ khách
+
         // Filter selection history for UI
         public int SelectedYear { get; set; }
         public int SelectedMonth { get; set; }
@@ -47,6 +53,7 @@ namespace HuflitShopCore.DTOs
         public List<SupplierPerformanceItem> SupplierPerformances { get; set; } = new();
         public List<ProductSummaryItem> ProductSummaries { get; set; } = new();
         public List<TopProductRevenueItem> TopRevenueProducts { get; set; } = new();
+        public List<ProductProfitItem> ProductProfits { get; set; } = new(); // Lãi/lỗ từng SP (MỚI)
     }
 
     public class MonthlyTrendItem
@@ -89,5 +96,17 @@ namespace HuflitShopCore.DTOs
     {
         public string ProductName { get; set; } = string.Empty;
         public decimal Revenue { get; set; }
+    }
+
+    public class ProductProfitItem
+    {
+        public string ProductName { get; set; } = string.Empty;
+        public int TotalSold { get; set; }
+        public decimal GrossRevenue { get; set; }        // Doanh thu gộp (giá bán × SL)
+        public decimal DiscountAllocated { get; set; }   // Giảm giá phân bổ
+        public decimal NetRevenue { get; set; }           // Doanh thu ròng (gộp - giảm)
+        public decimal COGS { get; set; }                 // Giá vốn hàng bán (FIFO)
+        public decimal GrossProfit { get; set; }          // Lãi gộp = Net - COGS
+        public double ProfitMargin { get; set; }          // Tỉ suất lãi gộp (%)
     }
 }

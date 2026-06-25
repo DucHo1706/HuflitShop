@@ -159,25 +159,45 @@
     <div class="excel-kpi-row mb-4">
         <div class="excel-kpi-card">
             <span class="excel-kpi-title">Tồn đầu kỳ</span>
-            <div class="excel-kpi-value">@Model.BeginningStockValue.ToString("N0")</div>
+            <div class="excel-kpi-value text-dark">@Model.BeginningStockValue.ToString("N0") đ</div>
         </div>
         <div class="excel-kpi-card">
             <span class="excel-kpi-title">Nhập kho</span>
-            <div class="excel-kpi-value text-success">@Model.ImportStockValue.ToString("N0")</div>
+            <div class="excel-kpi-value text-success">@Model.ImportStockValue.ToString("N0") đ</div>
         </div>
         <div class="excel-kpi-card">
             <span class="excel-kpi-title">Xuất kho</span>
-            <div class="excel-kpi-value text-warning">@Model.ExportStockValue.ToString("N0")</div>
+            <div class="excel-kpi-value text-warning">@Model.ExportStockValue.ToString("N0") đ</div>
         </div>
         <div class="excel-kpi-card">
             <span class="excel-kpi-title">Tồn cuối kỳ</span>
-            <div class="excel-kpi-value text-info">@Model.EndingStockValue.ToString("N0")</div>
+            <div class="excel-kpi-value text-info">@Model.EndingStockValue.ToString("N0") đ</div>
+        </div>
+    </div>
+
+    <div class="excel-kpi-row mb-4">
+        <div class="excel-kpi-card">
+            <span class="excel-kpi-title">Doanh thu gộp (Gross)</span>
+            <div class="excel-kpi-value text-dark">@Model.GrossRevenue.ToString("N0") đ</div>
+        </div>
+        <div class="excel-kpi-card">
+            <span class="excel-kpi-title">Tổng giảm giá</span>
+            <div class="excel-kpi-value text-danger">@Model.TotalDiscount.ToString("N0") đ</div>
+        </div>
+        <div class="excel-kpi-card">
+            <span class="excel-kpi-title">Doanh thu ròng (Net)</span>
+            <div class="excel-kpi-value text-success">@Model.NetRevenue.ToString("N0") đ</div>
+        </div>
+        <div class="excel-kpi-card">
+            <span class="excel-kpi-title">Thu phí ship từ khách</span>
+            <div class="excel-kpi-value text-info">@Model.TotalShippingRevenue.ToString("N0") đ</div>
         </div>
     </div>
 
     <div class="admin-card">
         <ul class="nav nav-tabs" id="dashboardTabs">
             <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#product-content">Tổng quan sản phẩm</a></li>
+            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#profit-content">Chi tiết Lãi/Lỗ sản phẩm</a></li>
             <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#chart-content">Biểu đồ doanh thu</a></li>
         </ul>
         <div class="tab-content pt-4">
@@ -201,6 +221,47 @@
                                 <td class="text-right text-success">@p.ImportValue.ToString("N0")</td>
                                 <td class="text-right text-warning">@p.ExportValue.ToString("N0")</td>
                                 <td class="text-right text-info">@p.EndingValue.ToString("N0")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="tab-pane fade" id="profit-content">
+                <table class="table table-admin table-hover">
+                    <thead>
+                        <tr>
+                            <th>Tên sản phẩm</th>
+                            <th class="text-right">Đã bán</th>
+                            <th class="text-right">Doanh thu gộp</th>
+                            <th class="text-right">Chiết khấu</th>
+                            <th class="text-right">Doanh thu ròng</th>
+                            <th class="text-right">Giá vốn (FIFO)</th>
+                            <th class="text-right">Lợi nhuận gộp</th>
+                            <th class="text-right">Tỉ suất LN</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.ProductProfits != null && Model.ProductProfits.Any())
+                        {
+                            foreach (var p in Model.ProductProfits)
+                            {
+                                var profitClass = p.GrossProfit >= 0 ? "text-success" : "text-danger";
+                                <tr>
+                                    <td class="font-weight-bold text-dark">@p.ProductName</td>
+                                    <td class="text-right">@p.TotalSold.ToString("N0")</td>
+                                    <td class="text-right">@p.GrossRevenue.ToString("N0") đ</td>
+                                    <td class="text-right text-muted">@p.DiscountAllocated.ToString("N0") đ</td>
+                                    <td class="text-right">@p.NetRevenue.ToString("N0") đ</td>
+                                    <td class="text-right">@p.COGS.ToString("N0") đ</td>
+                                    <td class="text-right font-weight-bold @profitClass">@p.GrossProfit.ToString("N0") đ</td>
+                                    <td class="text-right font-weight-bold @profitClass">@p.ProfitMargin.ToString("F1")%</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="8" class="text-center text-muted py-4 font-italic">Không có dữ liệu giao dịch trong kỳ này.</td>
                             </tr>
                         }
                     </tbody>

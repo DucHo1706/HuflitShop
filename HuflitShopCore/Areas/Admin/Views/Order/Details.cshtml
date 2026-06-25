@@ -3,6 +3,53 @@
 @{
     ViewData["Title"] = "Chi tiết Đơn Hàng";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+
+    string originalAddress = Model.ShippingAddress ?? "";
+    string cleanAddress = originalAddress;
+    string carrier = "";
+    string trackingNumber = "";
+    string driverName = "";
+    string driverPhone = "";
+    string licensePlate = "";
+    string trackingUrl = "";
+
+    if (originalAddress.Contains(" | "))
+    {
+        var parts = originalAddress.Split('|');
+        cleanAddress = parts[0].Trim();
+        foreach (var part in parts)
+        {
+            var trimmed = part.Trim();
+            if (trimmed.StartsWith("Vận chuyển:"))
+            {
+                carrier = trimmed.Replace("Vận chuyển:", "").Trim();
+            }
+            else if (trimmed.StartsWith("Tracking:"))
+            {
+                trackingNumber = trimmed.Replace("Tracking:", "").Trim();
+            }
+            else if (trimmed.StartsWith("Driver:"))
+            {
+                var driverInfo = trimmed.Replace("Driver:", "").Trim();
+                var phoneIndex = driverInfo.IndexOf('(');
+                var plateIndex = driverInfo.IndexOf(" - ");
+                if (phoneIndex != -1 && plateIndex != -1)
+                {
+                    driverName = driverInfo.Substring(0, phoneIndex).Trim();
+                    driverPhone = driverInfo.Substring(phoneIndex + 1, plateIndex - phoneIndex - 2).Trim();
+                    licensePlate = driverInfo.Substring(plateIndex + 3).Trim();
+                }
+                else
+                {
+                    driverName = driverInfo;
+                }
+            }
+            else if (trimmed.StartsWith("Link:"))
+            {
+                trackingUrl = trimmed.Replace("Link:", "").Trim();
+            }
+        }
+    }
 }
 
 <style>
@@ -164,9 +211,37 @@
 
                     <div class="info-label">Địa chỉ giao hàng</div>
                     <div class="info-value">
-                        @Model.ShippingAddress<br />
+                        @cleanAddress<br />
                         @Model.ShippingDistrict, @Model.ShippingCity
                     </div>
+
+                    @if (!string.IsNullOrEmpty(carrier))
+                    {
+                        <div class="info-label mt-2">Dịch vụ vận chuyển</div>
+                        <div class="info-value font-weight-bold text-success">@carrier</div>
+                        
+                        @if (!string.IsNullOrEmpty(trackingNumber))
+                        {
+                            <div class="info-label">Mã vận đơn (Tracking)</div>
+                            <div class="info-value"><span class="badge badge-info text-white">@trackingNumber</span></div>
+                        }
+                        
+                        @if (!string.IsNullOrEmpty(driverName))
+                        {
+                            <div class="info-label">Tài xế giao hàng</div>
+                            <div class="info-value">@driverName (@driverPhone) - <strong class="text-dark">@licensePlate</strong></div>
+                        }
+                        
+                        @if (!string.IsNullOrEmpty(trackingUrl))
+                        {
+                            <div class="info-label">Theo dõi hành trình</div>
+                            <div class="info-value">
+                                <a href="@trackingUrl" target="_blank" class="btn btn-sm btn-outline-success font-weight-bold" style="border-radius: 20px;">
+                                    <i class="fas fa-map-marked-alt mr-1"></i> Xem định vị tài xế
+                                </a>
+                            </div>
+                        }
+                    }
 
                     <hr class="my-3" />
 

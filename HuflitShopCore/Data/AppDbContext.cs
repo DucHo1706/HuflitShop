@@ -30,6 +30,25 @@ namespace HuflitShopCore.Data
             builder.Entity<ProductVariant>()
                 .HasIndex(pv => new { pv.ProductId, pv.SizeId, pv.ColorId })
                 .IsUnique();
+
+            // Cấu hình Quan hệ cho InventoryLot và OrderDetailLot để tránh Cascade Cycles
+            builder.Entity<InventoryLot>()
+                .HasOne(il => il.StockReceivedDetail)
+                .WithMany()
+                .HasForeignKey(il => il.StockReceivedDetailId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<OrderDetailLot>()
+                .HasOne(odl => odl.InventoryLot)
+                .WithMany()
+                .HasForeignKey(odl => odl.InventoryLotId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<OrderDetailLot>()
+                .HasOne(odl => odl.OrderDetail)
+                .WithMany(od => od.OrderDetailLots)
+                .HasForeignKey(odl => odl.OrderDetailId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
 
         // Nhóm 1: Identity & Users
@@ -52,6 +71,8 @@ namespace HuflitShopCore.Data
         public DbSet<StockReceived> StockReceiveds { get; set; }
         public DbSet<StockReceivedDetail> StockReceivedDetails { get; set; }
         public DbSet<InventoryTransaction> InventoryTransactions { get; set; }
+        public DbSet<InventoryLot> InventoryLots { get; set; }
+        public DbSet<OrderDetailLot> OrderDetailLots { get; set; }
 
         // Nhóm 4: Đơn hàng, Giỏ hàng & Khuyến mãi
         public DbSet<Promotion> Promotions { get; set; }

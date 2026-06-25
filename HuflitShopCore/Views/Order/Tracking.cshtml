@@ -1,0 +1,257 @@
+@model dynamic
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Theo dõi vận đơn hỏa tốc";
+
+    string trackingNumber = ViewBag.TrackingNumber ?? "";
+    string driverName = ViewBag.DriverName ?? "Nguyễn Văn Hùng";
+    string driverPhone = ViewBag.DriverPhone ?? "0903829103";
+    string licensePlate = ViewBag.LicensePlate ?? "59-K1 829.12";
+    string address = ViewBag.Address ?? "";
+    string district = ViewBag.District ?? "";
+    string city = ViewBag.City ?? "";
+    string carrierName = ViewBag.CarrierName ?? "GrabExpress";
+
+    bool isAhamove = carrierName.Contains("Ahamove", StringComparison.OrdinalIgnoreCase);
+    string brandCol = isAhamove ? "#f57224" : "#10b981";
+    string brandLogoClass = isAhamove ? "fas fa-shipping-fast" : "fab fa-grab";
+}
+
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+<style>
+    .tracking-container {
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+    .map-card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+    #map {
+        height: 450px;
+        width: 100%;
+        background-color: #f1f5f9;
+        z-index: 10;
+    }
+    .driver-card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border-left: 5px solid @brandCol;
+    }
+    .driver-avatar {
+        width: 55px;
+        height: 55px;
+        background-color: @brandCol;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+    }
+    .status-badge-live {
+        background-color: @brandCol;
+        color: white;
+        padding: 6px 16px;
+        font-weight: 700;
+        font-size: 0.85rem;
+        border-radius: 30px;
+        text-transform: uppercase;
+        animation: pulse-glow-live 1.5s infinite;
+    }
+    @@keyframes pulse-glow-live {
+        0% { box-shadow: 0 0 0 0 rgba(245, 114, 36, 0.4); }
+        70% { box-shadow: 0 0 0 8px rgba(245, 114, 36, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(245, 114, 36, 0); }
+    }
+    .btn-call {
+        background-color: @brandCol;
+        color: white;
+        font-weight: 700;
+        border-radius: 6px;
+        transition: opacity 0.2s;
+    }
+    .btn-call:hover {
+        opacity: 0.9;
+        color: white;
+    }
+</style>
+
+<div class="tracking-container">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h2 class="font-weight-bold text-dark mb-1">
+                <i class="@brandLogoClass" style="color: @brandCol;"></i> Hành trình giao hàng hỏa tốc
+            </h2>
+            <p class="text-muted mb-0">Mã vận đơn: <span class="badge badge-secondary" style="font-size: 0.9rem;">@trackingNumber</span> &bull; Đơn vị vận chuyển: <strong>@carrierName</strong></p>
+        </div>
+        <div class="status-badge-live" id="liveBadge">Đang giao</div>
+    </div>
+
+    <!-- Map container -->
+    <div class="map-card">
+        <div id="map"></div>
+    </div>
+
+    <!-- Driver and destination profiles -->
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <div class="driver-card h-100">
+                <h5 class="font-weight-bold text-dark border-bottom pb-2 mb-3"><i class="fas fa-motorcycle mr-2" style="color: @brandCol;"></i>Thông tin tài xế</h5>
+                <div class="d-flex align-items-center gap-3 mb-3" style="gap: 15px;">
+                    <div class="driver-avatar">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                    <div>
+                        <div class="font-weight-bold text-dark" style="font-size: 1.1rem;">@driverName</div>
+                        <div class="text-muted small">Biển kiểm soát: <strong class="text-dark">@licensePlate</strong></div>
+                        <div class="text-muted small">Hãng xe: Honda Wave Alpha</div>
+                    </div>
+                </div>
+                <a href="tel:@driverPhone" class="btn btn-call w-100 py-2 font-weight-bold">
+                    <i class="fas fa-phone-alt mr-2"></i>Liên hệ tài xế (@driverPhone)
+                </a>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <div class="driver-card h-100" style="border-left-color: #2563eb;">
+                <h5 class="font-weight-bold text-dark border-bottom pb-2 mb-3"><i class="fas fa-map-marker-alt mr-2 text-primary"></i>Điểm giao hàng</h5>
+                <div style="line-height: 1.6; color: #4b5563; font-size: 0.95rem;">
+                    <div><strong>Khách hàng:</strong> @driverName</div>
+                    <div><strong>Địa chỉ:</strong> @address</div>
+                    <div><strong>Khu vực:</strong> @district, @city</div>
+                    <div class="mt-2 text-muted small"><i class="fas fa-info-circle mr-1"></i>Vị trí kho gửi: 828 Sư Vạn Hạnh, Quận 10, TP.HCM</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Shop coordinates (Quận 10)
+        var shopCoords = [10.776686, 106.667793];
+        
+        // Match customer coordinates based on district to make it realistic
+        var district = "@district";
+        var destCoords = [10.773, 106.662]; // Default Quận 10 nearby
+        
+        if (district.indexOf("Quận 1") !== -1 && district.indexOf("Quận 10") === -1 && district.indexOf("Quận 11") === -1) {
+            destCoords = [10.782, 106.696];
+        } else if (district.indexOf("Quận 3") !== -1) {
+            destCoords = [10.780, 106.681];
+        } else if (district.indexOf("Quận 5") !== -1) {
+            destCoords = [10.758, 106.663];
+        } else if (district.indexOf("Quận 11") !== -1) {
+            destCoords = [10.767, 106.649];
+        } else if (district.indexOf("Tân Bình") !== -1) {
+            destCoords = [10.795, 106.654];
+        } else if (district.indexOf("Bình Thạnh") !== -1) {
+            destCoords = [10.803, 106.711];
+        } else if (district.indexOf("Gò Vấp") !== -1) {
+            destCoords = [10.838, 106.678];
+        } else if (district.indexOf("Quận 7") !== -1) {
+            destCoords = [10.732, 106.721];
+        } else if (district.indexOf("Bình Tân") !== -1) {
+            destCoords = [10.751, 106.602];
+        } else if (district.indexOf("Thủ Đức") !== -1) {
+            destCoords = [10.850, 106.772];
+        }
+
+        // Initialize Leaflet Map (centered between shop and dest)
+        var centerLat = (shopCoords[0] + destCoords[0]) / 2;
+        var centerLng = (shopCoords[1] + destCoords[1]) / 2;
+        
+        var map = L.map('map').setView([centerLat, centerLng], 14);
+
+        // Add free OpenStreetMap layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Define custom marker icons
+        var storeIcon = L.icon({
+            iconUrl: 'https://cdn-icons-png.flaticon.com/512/869/869636.png', // shop icon
+            iconSize: [34, 34],
+            iconAnchor: [17, 34]
+        });
+
+        var homeIcon = L.icon({
+            iconUrl: 'https://cdn-icons-png.flaticon.com/512/1216/1216844.png', // home icon
+            iconSize: [34, 34],
+            iconAnchor: [17, 34]
+        });
+
+        var driverIcon = L.icon({
+            iconUrl: 'https://cdn-icons-png.flaticon.com/512/2965/2965319.png', // delivery driver bike
+            iconSize: [38, 38],
+            iconAnchor: [19, 19]
+        });
+
+        // Add markers to map
+        L.marker(shopCoords, { icon: storeIcon }).addTo(map).bindPopup("Kho hàng HuflitShop (828 Sư Vạn Hạnh, Q10)").openPopup();
+        L.marker(destCoords, { icon: homeIcon }).addTo(map).bindPopup("Điểm giao hàng: " + "@address");
+        
+        var driverMarker = L.marker(shopCoords, { icon: driverIcon }).addTo(map);
+
+        // Fit map bounds to show both markers
+        var bounds = L.latLngBounds([shopCoords, destCoords]);
+        map.fitBounds(bounds, { padding: [50, 50] });
+
+        // Draw dotted path polyline
+        var pathLine = L.polyline([shopCoords, destCoords], {
+            color: '@brandCol',
+            weight: 4,
+            opacity: 0.8,
+            dashArray: '8, 8'
+        }).addTo(map);
+
+        // Simulated animation parameters (22 seconds duration)
+        var duration = 22000;
+        var startTimestamp = null;
+        var liveBadge = document.getElementById("liveBadge");
+
+        function animationLoop(timestamp) {
+            if (!startTimestamp) startTimestamp = timestamp;
+            var elapsed = timestamp - startTimestamp;
+            var t = Math.min(elapsed / duration, 1.0);
+
+            // Interpolate GPS coordinates
+            var currentLat = shopCoords[0] + (destCoords[0] - shopCoords[0]) * t;
+            var currentLng = shopCoords[1] + (destCoords[1] - shopCoords[1]) * t;
+            
+            driverMarker.setLatLng([currentLat, currentLng]);
+
+            // Update status text dynamically
+            if (t >= 1.0) {
+                driverMarker.bindPopup("<strong style='color:@brandCol;'>Đã đến nơi!</strong>").openPopup();
+                liveBadge.innerText = "Đã giao";
+                liveBadge.style.backgroundColor = "#10b981";
+                liveBadge.style.animation = "none";
+            } else {
+                var pct = Math.round(t * 100);
+                driverMarker.bindPopup("Đang di chuyển: " + pct + "%").openPopup();
+                requestAnimationFrame(animationLoop);
+            }
+        }
+
+        // Start animation after a 1 second delay
+        setTimeout(function() {
+            requestAnimationFrame(animationLoop);
+        }, 1000);
+    });
+</script>

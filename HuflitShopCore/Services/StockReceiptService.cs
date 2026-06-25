@@ -145,6 +145,18 @@ namespace HuflitShopCore.Services
                                 ReferenceId = receipt.Id,
                                 Note = $"Nhập kho từ phiếu: {receipt.Id}"
                             });
+
+                            // 5. Tạo lô hàng FIFO
+                            _context.InventoryLots.Add(new InventoryLot
+                            {
+                                Id = Guid.NewGuid().ToString(),
+                                ProductVariantId = item.ProductVariantId,
+                                StockReceivedDetailId = detail.Id,
+                                OriginalQuantity = item.Quantity,
+                                RemainingQuantity = item.Quantity,
+                                UnitCost = item.UnitPrice,
+                                ReceivedDate = DateTime.Now
+                            });
                         }
                     }
 
@@ -230,6 +242,18 @@ namespace HuflitShopCore.Services
                                 TransactionDate = DateTime.Now,
                                 ReferenceId = receiptId,
                                 Note = $"Nhập kho bổ sung từ phiếu: {receiptId}"
+                            });
+
+                            // Tạo lô hàng FIFO
+                            _context.InventoryLots.Add(new InventoryLot
+                            {
+                                Id = Guid.NewGuid().ToString(),
+                                ProductVariantId = dto.ProductVariantId,
+                                StockReceivedDetailId = detail.Id,
+                                OriginalQuantity = dto.Quantity,
+                                RemainingQuantity = dto.Quantity,
+                                UnitCost = dto.UnitPrice,
+                                ReceivedDate = DateTime.Now
                             });
                         }
                     }

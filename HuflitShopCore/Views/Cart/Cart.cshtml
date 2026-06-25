@@ -8,6 +8,18 @@
 
     var items = ViewBag.Items as IEnumerable<CartController.CartItemViewModel>;
     decimal total = ViewBag.Total is decimal d ? d : 0m;
+
+    // Kiểm tra bỏ quên giỏ hàng (Datamining - để 30 giây để dễ dàng test demo)
+    var hasAbandonedCart = false;
+    if (items != null && items.Any())
+    {
+        var firstItem = items.First();
+        var cartItemInDb = _context.Carts.FirstOrDefault(c => c.Id == firstItem.CartId);
+        if (cartItemInDb != null && (DateTime.UtcNow - cartItemInDb.CreatedAt).TotalSeconds >= 30)
+        {
+            hasAbandonedCart = true;
+        }
+    }
 }
 
 <style>
@@ -285,10 +297,18 @@
                                             <div class="text-muted font-italic small">
                                                 Phân loại: @item.ColorName - Size @item.SizeName
                                             </div>
-                                        </div>
-                                    </div>
+                                               </td>
+                                <td class="text-center">
+                                    @if (item.DiscountAmount > 0)
+                                    {
+                                        <span class="text-muted text-decoration-line-through small" style="text-decoration: line-through; display: block; font-size: 0.85rem;">@item.OriginalPrice.ToString("N0") đ</span>
+                                        <span class="text-danger font-weight-bold">@item.Price.ToString("N0") đ</span>
+                                    }
+                                    else
+                                    {
+                                        <span>@item.Price.ToString("N0") đ</span>
+                                    }
                                 </td>
-                                <td class="text-center">@item.Price.ToString("N0") đ</td>
                                 <td class="text-center">
                                     <form asp-action="UpdateQuantity" asp-controller="Cart" method="post" id="qtyForm_@item.CartId" class="d-flex align-items-center justify-content-center m-0">
                                         @Html.AntiForgeryToken()
@@ -318,24 +338,71 @@
         </div>
 
         <!-- Sticky bar at bottom -->
-        <div class="cart-summary-bar">
-            <div>
-                <a class="btn btn-ocean-outline" asp-controller="Product" asp-action="Product">
-                    <i class="fas fa-arrow-left mr-2"></i>Mua thêm
-                </a>
-            </div>
-            <div class="d-flex align-items-center flex-wrap justify-content-end gap-3" style="gap: 1.5rem !important;">
-                <div class="cart-summary-price-box d-flex align-items-center">
-                    <span class="cart-summary-total-label">Tổng thanh toán (<span class="text-dark">@items.Sum(i => i.Quantity)</span> sản phẩm):</span>
-                    <span class="cart-summary-total-price">@total.ToString("N0") đ</span>
+        <div class="cart-summary-bar flex-column align-items-end" style="height: auto; padding: 1.5rem 2rem;">
+            @if (ViewBag.ComboDiscount is decimal comboDisc && comboDisc > 0)
+            {
+                <div class="d-flex flex-column align-items-end w-100 mb-2 border-bottom pb-2 text-muted" style="font-size: 0.95rem;">
+                    <div>Tạm tính: <span class="font-weight-bold text-dark">@(((decimal)ViewBag.SubTotal).ToString("N0")) đ</span></div>
+                    <div class="text-danger">Giảm giá Combo: <span>-@(comboDisc.ToString("N0")) đ</span></div>
+                    @if (ViewBag.ComboDetails is List<string> details && details.Any())
+                    {
+                        <div class="small font-italic text-success">
+                            Combo áp dụng: @string.Join(", ", details)
+                        </div>
+                    }
                 </div>
-                <a class="btn btn-ocean-primary text-uppercase" asp-controller="Order" asp-action="Checkout">
-                    Thanh Toán Ngay
-                </a>
+            }
+            <div class="d-flex justify-content-between align-items-center w-100 flex-wrap gap-3">
+                <div>
+                    <a class="btn btn-ocean-outline" asp-controller="Product" asp-action="Product">
+                        <i class="fas fa-arrow-left mr-2"></i>Mua thêm
+                    </a>
+                </div>
+                <div class="d-flex align-items-center flex-wrap justify-content-end gap-3" style="gap: 1.5rem !important;">
+                    <div class="cart-summary-price-box d-flex align-items-center">
+                        <span class="cart-summary-total-label">Tổng thanh toán (<span class="text-dark">@items.Sum(i => i.Quantity)</span> sản phẩm):</span>
+                        <span class="cart-summary-total-price">@total.ToString("N0") đ</span>
+                    </div>
+                    <a class="btn btn-ocean-primary text-uppercase" asp-controller="Order" asp-action="Checkout">
+                        Thanh Toán Ngay
+                    </a>
+                </div>
             </div>
         </div>
     }
 </div>
+
+@if (hasAbandonedCart)
+{
+    <!-- Abandoned Cart Promo Modal -->
+    <div class="modal fade show" id="abandonedCartModal" tabindex="-1" role="dialog" style="display: block; background: rgba(0,0,0,0.6); z-index: 1050;" aria-modal="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content border-0 rounded-lg shadow-lg overflow-hidden" style="border-radius: 12px;">
+                <div class="modal-header border-0 text-white p-4" style="background: linear-gradient(135deg, var(--vibrantBlue), var(--vibrantCyan));">
+                    <h5 class="modal-title font-weight-bold text-white"><i class="fas fa-gift mr-2"></i>ƯU ĐÃI ĐẶC BIỆT DÀNH CHO BẠN!</h5>
+                    <button type="button" class="close text-white" onclick="closeAbandonedCartModal()" aria-label="Close" style="background: none; border: none; font-size: 1.5rem; line-height: 1;">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body p-4 text-center">
+                    <div class="mb-3" style="font-size: 3.5rem; color: var(--vibrantCyan);">
+                        <i class="fas fa-shopping-basket"></i>
+                    </div>
+                    <h5 class="font-weight-bold text-dark mb-3">Bạn bỏ quên giỏ hàng?</h5>
+                    <p class="text-secondary mb-4" style="line-height: 1.6;">Chúng tôi thấy sản phẩm vẫn đang chờ bạn trong giỏ hàng. Tặng bạn mã giảm giá **10%** để hoàn tất đơn hàng ngay!</p>
+                    <div class="p-3 bg-light border border-dashed border-primary rounded mb-3 d-inline-block" style="border: 2px dashed var(--vibrantBlue); border-radius: 8px;">
+                        <code class="font-weight-bold text-primary" style="font-size: 1.5rem; letter-spacing: 1px; font-family: monospace;">QUENGIORHANG</code>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-4 justify-content-center">
+                    <button type="button" class="btn btn-ocean-primary text-uppercase px-4 font-weight-bold" onclick="copyAndClose()" style="padding: 12px 24px;">
+                        Sao chép và Thanh toán ngay
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 
 <script>
     function changeCartQty(cartId, delta) {
@@ -353,5 +420,23 @@
 
         // Auto submit form to save changes
         document.getElementById('qtyForm_' + cartId).submit();
+    }
+
+    function closeAbandonedCartModal() {
+        const modal = document.getElementById('abandonedCartModal');
+        if (modal) {
+            modal.style.display = 'none';
+            modal.classList.remove('show');
+        }
+    }
+
+    function copyAndClose() {
+        navigator.clipboard.writeText("QUENGIORHANG").then(function() {
+            alert("Đã sao chép mã giảm giá: QUENGIORHANG");
+            closeAbandonedCartModal();
+        }, function() {
+            alert("Vui lòng nhớ mã giảm giá: QUENGIORHANG");
+            closeAbandonedCartModal();
+        });
     }
 </script>

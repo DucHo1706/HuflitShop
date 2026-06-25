@@ -128,5 +128,13 @@ namespace HuflitShopCore.Services
                 await _context.SaveChangesAsync();
             }
         }
+
+        public async Task<List<Promotion>> GetActiveAutoPromotionsAsync()
+        {
+            var now = DateTime.Now;
+            return await _context.Promotions
+                .Where(p => p.IsActive && p.IsAutoApply && p.StartDate <= now && p.EndDate >= now)
+                .ToListAsync();
+        }
     }
 }

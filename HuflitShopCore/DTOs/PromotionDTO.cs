@@ -32,6 +32,10 @@ namespace HuflitShopCore.DTOs
 
         public bool IsActive { get; set; } = true;
         
+        public string? ApplicableProductId { get; set; }
+        public string? ComboProductIds { get; set; }
+        public bool IsAutoApply { get; set; } = false;
+        
         public bool IsOngoing => IsActive && StartDate <= DateTime.Now && EndDate >= DateTime.Now;
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)

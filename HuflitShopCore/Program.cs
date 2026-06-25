@@ -45,6 +45,7 @@ builder.Services.AddScoped<SupplierService>();
 builder.Services.AddScoped<StockReceiptService>();
 builder.Services.AddScoped<PromotionService>();
 builder.Services.AddScoped<OrderService>();
+builder.Services.AddScoped<GrabExpressService>();
 builder.Services.AddScoped<ReviewService>();
 builder.Services.AddScoped<ReportService>();
 builder.Services.AddScoped<ChatService>();

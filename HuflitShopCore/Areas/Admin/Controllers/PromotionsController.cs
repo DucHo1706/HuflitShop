@@ -1,6 +1,9 @@
-﻿using HuflitShopCore.DTOs;
+using HuflitShopCore.Data;
+using HuflitShopCore.DTOs;
 using HuflitShopCore.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace HuflitShopCore.Areas.Admin.Controllers
@@ -9,10 +12,12 @@ namespace HuflitShopCore.Areas.Admin.Controllers
     public class PromotionsController : Controller
     {
         private readonly PromotionService _promotionService;
+        private readonly AppDbContext _context;
 
-        public PromotionsController(PromotionService promotionService)
+        public PromotionsController(PromotionService promotionService, AppDbContext context)
         {
             _promotionService = promotionService;
+            _context = context;
         }
 
         public async Task<IActionResult> Index()
@@ -22,8 +27,10 @@ namespace HuflitShopCore.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
+            var products = await _context.Products.Where(p => !p.IsDeleted).OrderBy(p => p.ProductName).ToListAsync();
+            ViewBag.Products = products;
             return View(new PromotionDTO());
         }
 
@@ -36,6 +43,9 @@ namespace HuflitShopCore.Areas.Admin.Controllers
                 await _promotionService.CreatePromotionAsync(dto);
                 return RedirectToAction(nameof(Index));
             }
+            
+            var products = await _context.Products.Where(p => !p.IsDeleted).OrderBy(p => p.ProductName).ToListAsync();
+            ViewBag.Products = products;
             return View(dto);
         }
 
@@ -44,6 +54,10 @@ namespace HuflitShopCore.Areas.Admin.Controllers
         {
             var promotion = await _promotionService.GetPromotionByIdAsync(id);
             if (promotion == null) return NotFound();
+
+            var products = await _context.Products.Where(p => !p.IsDeleted).OrderBy(p => p.ProductName).ToListAsync();
+            ViewBag.Products = products;
+
             return View(promotion);
         }
 
@@ -56,6 +70,9 @@ namespace HuflitShopCore.Areas.Admin.Controllers
                 await _promotionService.UpdatePromotionAsync(dto);
                 return RedirectToAction(nameof(Index));
             }
+            
+            var products = await _context.Products.Where(p => !p.IsDeleted).OrderBy(p => p.ProductName).ToListAsync();
+            ViewBag.Products = products;
             return View(dto);
         }
 

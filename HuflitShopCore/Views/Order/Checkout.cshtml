@@ -4,6 +4,7 @@
     ViewData["Title"] = "Thanh toán đơn hàng";
 
     decimal total = ViewBag.Total is decimal d ? d : 0m;
+    decimal shippingFee = ViewBag.ShippingFee is decimal sf ? sf : 0m;
     var cartItems = ViewBag.CartItems as List<HuflitShopCore.Models.Cart> ?? new List<HuflitShopCore.Models.Cart>();
 }
 
@@ -335,6 +336,32 @@
             box-shadow: none;
             transform: none;
         }
+
+    /* Tùy chọn Vận chuyển (Shipping Options) */
+    .shipping-option-card {
+        border: 2px solid #e2e8f0;
+        border-radius: 0 !important;
+        padding: 1.25rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: all 0.2s;
+        margin-bottom: 1rem;
+        background: #f8fafc;
+        position: relative;
+    }
+
+        .shipping-option-card:hover {
+            border-color: var(--vibrantBlue);
+            background: #ffffff;
+        }
+
+        .shipping-option-card.selected {
+            border-color: var(--vibrantBlue);
+            background-color: #f0f9ff;
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.1);
+        }
 </style>
 
 <div class="checkout-container">
@@ -360,6 +387,8 @@
         <input type="hidden" name="appliedPromoCode" id="appliedPromoCode" value="" />
         <input type="hidden" name="buyNowVariantId" value="@ViewBag.BuyNowVariantId" />
         <input type="hidden" name="buyNowQty" value="@ViewBag.BuyNowQty" />
+        <input type="hidden" name="shippingFee" id="shippingFeeInput" value="@shippingFee" />
+        <input type="hidden" name="shippingCarrier" id="shippingCarrierInput" value="Giao hàng Tiêu chuẩn (GHN/GHTK)" />
 
         <div class="row">
             <div class="col-lg-8">
@@ -408,6 +437,15 @@
                                 <span asp-validation-for="District" class="text-danger small font-weight-bold mt-1"></span>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <div class="checkout-card" id="shippingMethodCard" style="display:none;">
+                    <div class="checkout-card-header">
+                        <i class="fas fa-shipping-fast" style="color: var(--vibrantCyan);"></i> Phương thức vận chuyển
+                    </div>
+                    <div id="shippingOptionsContainer">
+                        <!-- AJAX rates will load here -->
                     </div>
                 </div>
 
@@ -506,7 +544,7 @@
                     </div>
                     <div class="d-flex justify-content-between mb-3">
                         <span class="text-muted font-weight-bold">Phí vận chuyển</span>
-                        <span class="text-dark font-weight-bold">0 đ</span>
+                        <span class="text-dark font-weight-bold" id="shippingFeeVal">@(shippingFee.ToString("N0")) đ</span>
                     </div>
                     <div class="d-flex justify-content-between mb-3">
                         <span class="text-muted font-weight-bold">Giảm giá voucher</span>
@@ -533,7 +571,7 @@
 
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <span class="font-weight-bold text-dark text-uppercase">Tổng thanh toán</span>
-                        <span class="font-weight-bolder" id="finalPayVal" style="color: var(--vibrantBlue) !important; font-size: 1.8rem;">@(total.ToString("N0")) đ</span>
+                        <span class="font-weight-bolder" id="finalPayVal" style="color: var(--vibrantBlue) !important; font-size: 1.8rem;">@((total + shippingFee).ToString("N0")) đ</span>
                     </div>
 
                     <button type="submit" class="btn btn-ocean-primary btn-lg rounded-0 font-weight-bold text-uppercase py-3 w-100">
@@ -616,6 +654,7 @@
 
             // Đảm bảo lấy giá trị orderTotal an toàn dưới dạng decimal -> js number
             var orderTotal = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(total));
+            var shippingFee = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(shippingFee));
 
             // Voucher Modal Handler
             var btnOpenModal = document.getElementById("btnOpenVoucherModal");
@@ -632,7 +671,9 @@
                     url: "/Order/GetAvailableVouchers",
                     type: "GET",
                     data: {
-                        orderTotal: orderTotal
+                        orderTotal: orderTotal,
+                        buyNowVariantId: '@ViewBag.BuyNowVariantId',
+                        buyNowQty: @(ViewBag.BuyNowQty is int qty1 ? qty1 : 1)
                     },
                     success: function (vouchers) {
                         loadingSpinner.style.display = "none";
@@ -708,7 +749,9 @@
                     type: "POST",
                     data: {
                         promoCode: code,
-                        orderTotal: orderTotal
+                        orderTotal: orderTotal,
+                        buyNowVariantId: '@ViewBag.BuyNowVariantId',
+                        buyNowQty: @(ViewBag.BuyNowQty is int qty2 ? qty2 : 1)
                     },
                     headers: {
                         "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
@@ -719,15 +762,17 @@
                             hiddenInput.value = code;
 
                             // Update values
+                            var currentShippingFee = parseFloat(document.getElementById("shippingFeeInput").value) || 0;
                             discountValSpan.innerText = "- " + res.discount.toLocaleString("vi-VN") + " đ";
-                            finalPaySpan.innerText = res.finalAmount.toLocaleString("vi-VN") + " đ";
+                            finalPaySpan.innerText = (res.finalAmount + currentShippingFee).toLocaleString("vi-VN") + " đ";
                         } else {
                             msgDiv.innerHTML = "<span class='text-danger'><i class='fas fa-exclamation-circle mr-1'></i>" + res.message + "</span>";
                             hiddenInput.value = "";
 
                             // Reset values
+                            var currentShippingFee = parseFloat(document.getElementById("shippingFeeInput").value) || 0;
                             discountValSpan.innerText = "- 0 đ";
-                            finalPaySpan.innerText = orderTotal.toLocaleString("vi-VN") + " đ";
+                            finalPaySpan.innerText = (orderTotal + currentShippingFee).toLocaleString("vi-VN") + " đ";
                         }
                     },
                     error: function () {
@@ -735,6 +780,111 @@
                     }
                 });
             });
+
+            // Ajax loading shipping rates
+            window.loadShippingRates = function () {
+                var city = $('select[name="City"]').val();
+                var district = $('select[name="District"]').val();
+                var specificAddress = $('#SpecificAddress').val();
+
+                if (!city || !district) {
+                    $('#shippingMethodCard').hide();
+                    return;
+                }
+
+                $('#shippingMethodCard').show();
+                $('#shippingOptionsContainer').html(
+                    '<div class="text-center py-4">' +
+                    '  <div class="spinner-border" style="color: var(--vibrantCyan);" role="status">' +
+                    '    <span class="sr-only">Đang tính phí ship...</span>' +
+                    '  </div>' +
+                    '  <p class="text-muted mt-2 mb-0 font-weight-bold" style="font-size: 0.9rem;">Đang tìm dịch vụ GrabExpress và tính phí ship...</p>' +
+                    '</div>'
+                );
+
+                $.ajax({
+                    url: "/Order/GetShippingFee",
+                    type: "POST",
+                    data: {
+                        city: city,
+                        district: district,
+                        specificAddress: specificAddress,
+                        orderTotal: orderTotal
+                    },
+                    success: function (res) {
+                        if (res.success && res.quotes && res.quotes.length > 0) {
+                            var html = "";
+                            res.quotes.forEach(function (q) {
+                                var isGrab = q.serviceCode.indexOf("grab") !== -1;
+                                var iconClass = isGrab ? "fas fa-motorcycle" : "fas fa-shipping-fast";
+                                var iconColor = isGrab ? "#10b981" : "var(--vibrantBlue)";
+                                
+                                html += '<div class="shipping-option-card" onclick="selectShippingOption(this)" data-code="' + q.serviceCode + '" data-fee="' + q.shippingFee + '" data-name="' + q.serviceName + '">' +
+                                    '  <div class="d-flex align-items-center justify-content-between w-100">' +
+                                    '    <div class="d-flex align-items-center gap-3">' +
+                                    '      <div style="font-size: 1.8rem; color: ' + iconColor + ';"><i class="' + iconClass + '"></i></div>' +
+                                    '      <div>' +
+                                    '        <div class="font-weight-bold text-dark text-uppercase" style="font-size: 0.95rem;">' + q.serviceName + '</div>' +
+                                    '        <small class="text-muted"><i class="far fa-clock mr-1"></i>Dự kiến: ' + q.estimatedTime + '</small>' +
+                                    '      </div>' +
+                                    '    </div>' +
+                                    '    <div class="font-weight-bold text-danger" style="font-size: 1.1rem;">' + q.shippingFee.toLocaleString("vi-VN") + ' đ</div>' +
+                                    '  </div>' +
+                                    '</div>';
+                            });
+
+                            $('#shippingOptionsContainer').html(html);
+
+                            // Chọn mặc định tùy chọn đầu tiên
+                            var firstCard = $('#shippingOptionsContainer .shipping-option-card').first();
+                            if (firstCard.length) {
+                                selectShippingOption(firstCard[0]);
+                            }
+                        } else {
+                            $('#shippingOptionsContainer').html("<div class='text-center py-4 text-danger font-weight-bold'><i class='fas fa-exclamation-circle mr-1'></i>Không thể tải danh sách dịch vụ vận chuyển.</div>");
+                        }
+                    },
+                    error: function () {
+                        $('#shippingOptionsContainer').html("<div class='text-center py-4 text-danger font-weight-bold'><i class='fas fa-exclamation-circle mr-1'></i>Không thể kết nối dịch vụ vận chuyển.</div>");
+                    }
+                });
+            };
+
+            window.selectShippingOption = function (el) {
+                $('.shipping-option-card').removeClass('selected');
+                $(el).addClass('selected');
+
+                var fee = parseFloat($(el).attr('data-fee')) || 0;
+                var name = $(el).attr('data-name') || "Tiêu chuẩn";
+
+                $('#shippingFeeInput').val(fee);
+                $('#shippingCarrierInput').val(name);
+
+                // Cập nhật giao diện
+                $('#shippingFeeVal').text(fee.toLocaleString("vi-VN") + " đ");
+
+                // Tính toán tổng thanh toán
+                var discountText = $('#discountVal').text().replace('- ', '').replace(' đ', '').replace(/\./g, '').trim();
+                var discount = parseFloat(discountText) || 0;
+                var finalAmount = orderTotal - discount + fee;
+                $('#finalPayVal').text(finalAmount.toLocaleString("vi-VN") + " đ");
+            };
+
+            // Lắng nghe sự kiện thay đổi địa chỉ
+            $('select[name="City"]').on('change', function () {
+                setTimeout(loadShippingRates, 250);
+            });
+
+            $('select[name="District"]').on('change', function () {
+                loadShippingRates();
+            });
+
+            $('#SpecificAddress').on('blur', function () {
+                loadShippingRates();
+            });
+
+            // Tự động load khi có sẵn địa chỉ từ localStorage
+            setTimeout(loadShippingRates, 650);
         });
     </script>
 }

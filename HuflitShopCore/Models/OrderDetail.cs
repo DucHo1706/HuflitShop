@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -30,6 +31,12 @@ namespace HuflitShopCore.Models
         [Column(TypeName = "decimal(18,2)")]
         public decimal CostPrice { get; set; } = 0;
 
+        /// <summary>
+        /// Phần giảm giá (từ mã khuyến mãi) được phân bổ cho sản phẩm này theo tỉ lệ giá trị.
+        /// </summary>
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal DiscountAllocation { get; set; } = 0;
+
         [Required]
         [StringLength(255)]
         public string ProductNameSnapshot { get; set; }
@@ -47,5 +54,7 @@ namespace HuflitShopCore.Models
         
         [ForeignKey("ProductVariantId")]
         public virtual ProductVariant ProductVariant { get; set; }
+
+        public virtual ICollection<OrderDetailLot> OrderDetailLots { get; set; }
     }
 }

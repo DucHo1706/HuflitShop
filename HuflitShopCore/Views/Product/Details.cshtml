@@ -12,6 +12,27 @@
         ? new List<HuflitShopCore.Models.ProductImage>()
         : product.ProductImages.OrderBy(img => img.ImageOrder).ToList();
     var mainImageUrl = HuflitShopCore.Helpers.ImageRouteHelper.Resolve(images.FirstOrDefault()?.PublicId);
+
+    var activeAutoPromos = ViewBag.ActiveAutoPromos as List<HuflitShopCore.Models.Promotion> ?? new List<HuflitShopCore.Models.Promotion>();
+    var prodPromo = product != null ? activeAutoPromos.FirstOrDefault(p => p.ApplicableProductId == product.Id) : null;
+    decimal discountedPrice = product?.CurrentPrice ?? 0;
+    if (prodPromo != null && product != null)
+    {
+        if (string.Equals(prodPromo.DiscountType, "Percent", StringComparison.OrdinalIgnoreCase) || 
+            string.Equals(prodPromo.DiscountType, "Percentage", StringComparison.OrdinalIgnoreCase))
+        {
+            decimal discount = product.CurrentPrice * (prodPromo.DiscountValue / 100);
+            if (prodPromo.MaxDiscountAmount.HasValue && discount > prodPromo.MaxDiscountAmount.Value)
+            {
+                discount = prodPromo.MaxDiscountAmount.Value;
+            }
+            discountedPrice = Math.Max(0, product.CurrentPrice - discount);
+        }
+        else
+        {
+            discountedPrice = Math.Max(0, product.CurrentPrice - prodPromo.DiscountValue);
+        }
+    }
 }
 
 <style>
@@ -252,8 +273,17 @@
             <div class="product-info-modern">
                 <h1 class="product-title font-weight-bolder text-dark mb-2" style="font-size: 2.2rem; letter-spacing: -0.5px;">@product?.ProductName</h1>
 
-                <div class="price-box-modern mb-4 pb-3 border-bottom">
-                    <span class="price-current text-danger font-weight-bold" id="variantPrice" style="font-size: 1.8rem;">@((product?.CurrentPrice ?? 0).ToString("N0"))₫</span>
+                <div class="price-box-modern mb-4 pb-3 border-bottom d-flex align-items-center flex-wrap gap-2">
+                    @if (discountedPrice < product?.CurrentPrice)
+                    {
+                        <span class="price-current text-danger font-weight-bold" id="variantPrice" style="font-size: 1.8rem;">@discountedPrice.ToString("N0")₫</span>
+                        <span class="text-muted ml-3" style="text-decoration: line-through; font-size: 1.2rem;">@product.CurrentPrice.ToString("N0")₫</span>
+                        <span class="badge badge-danger ml-2" style="font-size: 0.9rem; padding: 4px 8px; vertical-align: middle;">GIẢM GIÁ</span>
+                    }
+                    else
+                    {
+                        <span class="price-current text-danger font-weight-bold" id="variantPrice" style="font-size: 1.8rem;">@((product?.CurrentPrice ?? 0).ToString("N0"))₫</span>
+                    }
                 </div>
 
                 @if (variants == null || !variants.Any())
@@ -489,6 +519,94 @@
         </div>
     </div>
 </div>
+
+<!-- ── SECTION: SẢN PHẨM LIÊN QUAN (RECOMMENDED PRODUCTS) ── -->
+@{
+    var relatedProducts = ViewBag.RelatedProducts as List<HuflitShopCore.Models.Product>;
+}
+@if (relatedProducts != null && relatedProducts.Any())
+{
+    <div class="container my-5 border-top pt-5">
+        <div class="hs-section-head mb-4 text-center">
+            <h3 class="font-weight-bold text-dark text-uppercase" style="letter-spacing: 1px;"><i class="fas fa-heart mr-2 text-danger"></i>Có Thể Bạn Cũng Thích</h3>
+            <div style="width: 50px; height: 3px; background: var(--vibrantBlue); margin: 10px auto;"></div>
+            <p class="text-muted small">Các sản phẩm cùng phong cách danh mục với sản phẩm bạn đang xem</p>
+        </div>
+        <div class="row">
+            @foreach (var rp in relatedProducts)
+            {
+                var rpPromo = activeAutoPromos.FirstOrDefault(p => p.ApplicableProductId == rp.Id);
+                decimal rpDiscountedPrice = rp.CurrentPrice;
+                if (rpPromo != null)
+                {
+                    if (string.Equals(rpPromo.DiscountType, "Percent", StringComparison.OrdinalIgnoreCase) || 
+                        string.Equals(rpPromo.DiscountType, "Percentage", StringComparison.OrdinalIgnoreCase))
+                    {
+                        decimal discount = rp.CurrentPrice * (rpPromo.DiscountValue / 100);
+                        if (rpPromo.MaxDiscountAmount.HasValue && discount > rpPromo.MaxDiscountAmount.Value)
+                        {
+                            discount = rpPromo.MaxDiscountAmount.Value;
+                        }
+                        rpDiscountedPrice = Math.Max(0, rp.CurrentPrice - discount);
+                    }
+                    else
+                    {
+                        rpDiscountedPrice = Math.Max(0, rp.CurrentPrice - rpPromo.DiscountValue);
+                    }
+                }
+
+                var firstImg = rp.ProductImages?.OrderBy(img => img.ImageOrder).FirstOrDefault();
+                string? imgUrl = "/Client/img/default-product.jpg";
+                if (firstImg != null)
+                {
+                    imgUrl = (firstImg.PublicId.StartsWith("http://", StringComparison.OrdinalIgnoreCase) || 
+                              firstImg.PublicId.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+                        ? firstImg.PublicId
+                        : (string.IsNullOrEmpty(firstImg.AssetVersion)
+                            ? firstImg.PublicId
+                            : "https://res.cloudinary.com/" + cloudName + "/image/upload/v" + firstImg.AssetVersion + "/" + firstImg.PublicId + ".jpg");
+                }
+                var resolvedImgUrl = HuflitShopCore.Helpers.ImageRouteHelper.Resolve(imgUrl);
+
+                <div class="col-xl-3 col-lg-3 col-md-4 col-6 mb-4">
+                    <div class="hs-product-card h-100 shadow-sm border rounded-lg" style="border-radius: 8px; overflow: hidden; background: #fff;">
+                        <div class="hs-product-card__thumb position-relative" style="overflow: hidden;">
+                            <a asp-controller="Product" asp-action="Details" asp-route-id="@rp.Id">
+                                <img src="@resolvedImgUrl" alt="@rp.ProductName" loading="lazy" style="width: 100%; height: 280px; object-fit: cover; transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                            </a>
+                            @if (rpDiscountedPrice < rp.CurrentPrice)
+                            {
+                                <span class="badge position-absolute" style="top: 10px; left: 10px; background: linear-gradient(135deg, #ef4444, #f43f5e); color: white; padding: 5px 10px; font-weight: bold; font-size: 0.8rem; z-index: 1;">GIẢM GIÁ</span>
+                            }
+                            <div class="hs-product-card__actions position-absolute w-100 text-center" style="bottom: 15px; left: 0;">
+                                <a asp-controller="Product" asp-action="Details" asp-route-id="@rp.Id" class="btn btn-sm btn-light font-weight-bold shadow">
+                                    <i class="fas fa-eye mr-1"></i> Xem chi tiết
+                                </a>
+                            </div>
+                        </div>
+                        <div class="p-3">
+                            <h4 class="font-weight-bold text-dark mb-2" style="font-size: 0.95rem; line-height: 1.4; height: 40px; overflow: hidden;">
+                                <a asp-controller="Product" asp-action="Details" asp-route-id="@rp.Id" class="text-dark text-decoration-none">@rp.ProductName</a>
+                            </h4>
+                            <div class="text-danger font-weight-bold" style="font-size: 1.1rem;">
+                                @if (rpDiscountedPrice < rp.CurrentPrice)
+                                {
+                                    <span>@rpDiscountedPrice.ToString("N0") đ</span>
+                                    <span class="text-muted small ml-2" style="text-decoration: line-through; font-weight: normal; font-size: 0.85rem; color: #94a3b8 !important;">@rp.CurrentPrice.ToString("N0") đ</span>
+                                }
+                                else
+                                {
+                                    <span>@rp.CurrentPrice.ToString("N0") đ</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+
 @section Scripts {
 <script>
     $(document).ready(function () {
@@ -590,7 +708,7 @@
                 // TỒN TẠI & CÒN HÀNG
                 if (variantInput) variantInput.value = match.id;
                 
-                const basePrice = @((product?.CurrentPrice ?? 0).ToString(System.Globalization.CultureInfo.InvariantCulture));
+                const basePrice = @(discountedPrice.ToString(System.Globalization.CultureInfo.InvariantCulture));
                 const total = Number(basePrice) + Number(match.price);
                 
                 if (priceEl) {
@@ -735,5 +853,60 @@
             });
         }
     });
+
+    // --- THEO DÕI HÀNH VI NGƯỜI DÙNG (DATA MINING) ---
+    (function() {
+        let viewDuration = 0;
+        let viewInterval = null;
+        const productId = "@Model.Id";
+
+        function startTracking() {
+            if (!viewInterval) {
+                viewInterval = setInterval(function () {
+                    if (document.visibilityState === 'visible' && document.hasFocus()) {
+                        viewDuration += 1;
+                        if (viewDuration % 10 === 0 && viewDuration > 0) {
+                            sendPing();
+                        }
+                    }
+                }, 1000);
+            }
+        }
+
+        function stopTracking() {
+            if (viewInterval) {
+                clearInterval(viewInterval);
+                viewInterval = null;
+            }
+        }
+
+        function sendPing() {
+            if (viewDuration > 0) {
+                fetch('/Product/TrackBehavior', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: 'productId=' + encodeURIComponent(productId) + '&durationSeconds=' + viewDuration,
+                    keepalive: true
+                }).catch(err => console.error("Behavior tracking ping failed:", err));
+            }
+        }
+
+        startTracking();
+
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'visible') {
+                startTracking();
+            } else {
+                stopTracking();
+                sendPing();
+            }
+        });
+
+        window.addEventListener('beforeunload', function() {
+            sendPing();
+        });
+    })();
 </script>
 }

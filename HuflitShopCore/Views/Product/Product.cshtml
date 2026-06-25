@@ -548,6 +548,27 @@
                 {
                     foreach (var pro in Model)
                     {
+                        var activeAutoPromos = ViewBag.ActiveAutoPromos as List<HuflitShopCore.Models.Promotion> ?? new List<HuflitShopCore.Models.Promotion>();
+                        var prodPromo = activeAutoPromos.FirstOrDefault(p => p.ApplicableProductId == pro.Id);
+                        decimal discountedPrice = pro.CurrentPrice;
+                        if (prodPromo != null)
+                        {
+                            if (string.Equals(prodPromo.DiscountType, "Percent", StringComparison.OrdinalIgnoreCase) || 
+                                string.Equals(prodPromo.DiscountType, "Percentage", StringComparison.OrdinalIgnoreCase))
+                            {
+                                decimal discount = pro.CurrentPrice * (prodPromo.DiscountValue / 100);
+                                if (prodPromo.MaxDiscountAmount.HasValue && discount > prodPromo.MaxDiscountAmount.Value)
+                                {
+                                    discount = prodPromo.MaxDiscountAmount.Value;
+                                }
+                                discountedPrice = Math.Max(0, pro.CurrentPrice - discount);
+                            }
+                            else
+                            {
+                                discountedPrice = Math.Max(0, pro.CurrentPrice - prodPromo.DiscountValue);
+                            }
+                        }
+
                         var defaultImage = pro.ProductImages?
                         .OrderBy(i => i.ImageOrder)
                         .FirstOrDefault();
@@ -560,6 +581,10 @@
                             <div class="catalog-item">
                                 <div class="catalog-img">
                                     <img src="@imageUrl" alt="@pro.ProductName">
+                                    @if (discountedPrice < pro.CurrentPrice)
+                                    {
+                                        <span class="badge position-absolute" style="top: 10px; left: 10px; background: linear-gradient(135deg, #ef4444, #f43f5e); color: white; padding: 5px 10px; font-weight: bold; font-size: 0.8rem; z-index: 1;">GIẢM GIÁ</span>
+                                    }
                                     <div class="catalog-overlay">
                                         <a asp-controller="Product" asp-action="Details" asp-route-id="@pro.Id"><i class="fas fa-eye mr-2"></i>Xem</a>
                                         @if (totalStock > 0)
@@ -573,7 +598,17 @@
                                         <a asp-controller="Product" asp-action="Details" asp-route-id="@pro.Id" class="text-dark text-decoration-none">@pro.ProductName</a>
                                     </h2>
                                     <div class="catalog-price-row mt-3">
-                                        <div class="catalog-price">@pro.CurrentPrice.ToString("N0")đ</div>
+                                        <div class="catalog-price">
+                                            @if (discountedPrice < pro.CurrentPrice)
+                                            {
+                                                <span class="text-danger font-weight-bold">@discountedPrice.ToString("N0")đ</span>
+                                                <span class="text-muted small ml-2 text-decoration-line-through" style="text-decoration: line-through; font-size: 0.85rem; font-weight: normal; color: #94a3b8 !important;">@pro.CurrentPrice.ToString("N0")đ</span>
+                                            }
+                                            else
+                                            {
+                                                <span>@pro.CurrentPrice.ToString("N0")đ</span>
+                                            }
+                                        </div>
                                         @if (totalStock > 0)
                                         {
                                             <form asp-action="AddCart" asp-controller="Product" method="post" class="d-inline m-0 p-0">

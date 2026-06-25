@@ -22,6 +22,12 @@ namespace HuflitShopCore.Controllers
         {
             var cloudName = _configuration["Cloudinary:CloudName"] ?? _configuration["CloudinarySettings:CloudName"] ?? "dsamboqwp";
 
+            var now = System.DateTime.Now;
+            ViewBag.ActiveAutoPromos = await _context.Promotions
+                .AsNoTracking()
+                .Where(p => p.IsActive && p.IsAutoApply && p.StartDate <= now && p.EndDate >= now && !string.IsNullOrEmpty(p.ApplicableProductId))
+                .ToListAsync();
+
             // Lấy 8 sản phẩm mới nhất, bao gồm ảnh Thumbnail và tổng số lượng tồn từ các biến thể
             var products = await _context.Products
                 .AsNoTracking()
@@ -36,9 +42,11 @@ namespace HuflitShopCore.Controllers
                     ImageDefault = _context.ProductImages
                         .Where(i => i.ProductId == p.Id)
                         .OrderBy(i => i.ImageOrder)
-                        .Select(i => (i.AssetVersion == null || i.AssetVersion == "")
+                        .Select(i => i.PublicId.StartsWith("http://") || i.PublicId.StartsWith("https://")
                             ? i.PublicId
-                            : "https://res.cloudinary.com/" + cloudName + "/image/upload/v" + i.AssetVersion + "/" + i.PublicId + ".jpg")
+                            : ((i.AssetVersion == null || i.AssetVersion == "")
+                                ? i.PublicId
+                                : "https://res.cloudinary.com/" + cloudName + "/image/upload/v" + i.AssetVersion + "/" + i.PublicId + ".jpg"))
                         .FirstOrDefault() ?? "",
                     Count = _context.ProductVariants
                         .Where(pv => pv.ProductId == p.Id)

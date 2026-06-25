@@ -33,7 +33,21 @@
                         foreach (var item in Model)
                         {
                             <tr>
-                                <td><span class="badge bg-info text-white font-weight-bold" style="font-size: 0.95rem;">@item.PromoCode</span></td>
+                                 <td>
+                                     <span class="badge bg-info text-white font-weight-bold d-inline-block mb-1" style="font-size: 0.95rem;">@item.PromoCode</span>
+                                     @if (item.IsAutoApply)
+                                     {
+                                         <span class="badge bg-success text-white d-block mb-1" style="font-size: 0.75rem;"><i class="fas fa-magic mr-1"></i>Tự động áp dụng</span>
+                                     }
+                                     @if (!string.IsNullOrEmpty(item.ApplicableProductId))
+                                     {
+                                         <span class="badge bg-primary text-white d-block mb-1 text-truncate" style="font-size: 0.75rem; max-width: 140px;" title="ID: @item.ApplicableProductId"><i class="fas fa-box mr-1"></i>Sản phẩm riêng</span>
+                                     }
+                                     @if (!string.IsNullOrEmpty(item.ComboProductIds))
+                                     {
+                                         <span class="badge bg-dark text-white d-block mb-1 text-truncate" style="font-size: 0.75rem; max-width: 140px;" title="Combo: @item.ComboProductIds"><i class="fas fa-layer-group mr-1"></i>Combo</span>
+                                     }
+                                 </td>
                                 <td>
                                     @if(string.Equals(item.DiscountType, "Percent", StringComparison.OrdinalIgnoreCase)) {
                                         <span class="font-weight-bold text-danger">@item.DiscountValue.ToString("0.##")%</span>

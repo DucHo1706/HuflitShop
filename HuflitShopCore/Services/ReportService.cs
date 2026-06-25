@@ -92,9 +92,28 @@ namespace HuflitShopCore.Services
             decimal promoVal = activePromo?.DiscountValue ?? 0;
             string promoType = activePromo?.DiscountType ?? "Percent";
 
-            // Total Cost & Profit (Standard model estimate: cost is 60%, profit is 40% of revenue)
-            var totalCost = totalRevenue * 0.60m;
-            var totalProfit = totalRevenue * 0.40m;
+            // Total Cost & Profit (Tính từ giá vốn thực tế trong OrderDetail)
+            decimal totalCost = 0;
+            decimal totalProfit = 0;
+            try
+            {
+                var completedDetails = await _context.OrderDetails
+                    .Include(d => d.Order)
+                    .Where(d => d.Order.OrderStatus == 3 && d.Order.OrderDate.Year == currentYear)
+                    .AsNoTracking()
+                    .ToListAsync();
+
+                totalCost = completedDetails.Sum(d => d.Quantity * d.CostPrice);
+                var totalDiscountAlloc = completedDetails.Sum(d => d.DiscountAllocation);
+                var grossRevenueFromDetails = completedDetails.Sum(d => d.Quantity * d.PurchasedPrice);
+                totalProfit = grossRevenueFromDetails - totalDiscountAlloc - totalCost;
+            }
+            catch
+            {
+                // Fallback nếu có lỗi (ví dụ: chưa migration)
+                totalCost = totalRevenue * 0.60m;
+                totalProfit = totalRevenue * 0.40m;
+            }
 
             return new DTOs.DashboardDTO
             {
@@ -465,22 +484,43 @@ namespace HuflitShopCore.Services
             decimal prevImpValue = prevImports.Sum(d => d.Quantity * d.UnitPrice);
 
             int expQty = exports.Sum(d => d.Quantity);
-            decimal expValue = exports.Sum(d => d.Quantity * d.CostPrice); // Cost of Goods Sold
+            decimal expValue = exports.Sum(d => d.Quantity * d.CostPrice); // Cost of Goods Sold (FIFO)
 
             int prevExpQty = prevExports.Sum(d => d.Quantity);
             decimal prevExpValue = prevExports.Sum(d => d.Quantity * d.CostPrice);
 
-            decimal revenue = exports.Sum(d => d.Quantity * d.PurchasedPrice);
-            decimal prevRevenue = prevExports.Sum(d => d.Quantity * d.PurchasedPrice);
+            // Doanh thu gộp (trước giảm giá) & ròng (sau giảm giá)
+            decimal grossRevenue = exports.Sum(d => d.Quantity * d.PurchasedPrice);
+            decimal totalDiscountAlloc = exports.Sum(d => d.DiscountAllocation);
+            decimal netRevenue = grossRevenue - totalDiscountAlloc;
+
+            decimal prevGrossRevenue = prevExports.Sum(d => d.Quantity * d.PurchasedPrice);
+            decimal prevTotalDiscountAlloc = prevExports.Sum(d => d.DiscountAllocation);
+            decimal prevNetRevenue = prevGrossRevenue - prevTotalDiscountAlloc;
+
+            // Revenue giữ = NetRevenue (doanh thu ròng) cho backward compatibility
+            decimal revenue = netRevenue;
+            decimal prevRevenue = prevNetRevenue;
+
+            // Shipping revenue từ Orders
+            decimal shippingRevenue = 0;
+            try
+            {
+                var orderIds = exports.Select(d => d.OrderId).Distinct().ToList();
+                shippingRevenue = await _context.Orders
+                    .Where(o => orderIds.Contains(o.Id))
+                    .SumAsync(o => o.ShippingFee);
+            }
+            catch { /* Bỏ qua nếu lỗi */ }
 
             decimal averageExportPrice = expQty > 0 ? Math.Round(expValue / expQty, 2) : 0;
             decimal prevAverageExportPrice = prevExpQty > 0 ? Math.Round(prevExpValue / prevExpQty, 2) : 0;
 
-            decimal grossProfit = revenue - expValue;
-            decimal prevGrossProfit = prevRevenue - prevExpValue;
+            decimal grossProfit = netRevenue - expValue;
+            decimal prevGrossProfit = prevNetRevenue - prevExpValue;
 
-            double grossProfitMargin = revenue > 0 ? (double)Math.Round((grossProfit / revenue) * 100, 2) : 0;
-            double prevGrossProfitMargin = prevRevenue > 0 ? (double)Math.Round((prevGrossProfit / prevRevenue) * 100, 2) : 0;
+            double grossProfitMargin = netRevenue > 0 ? (double)Math.Round((grossProfit / netRevenue) * 100, 2) : 0;
+            double prevGrossProfitMargin = prevNetRevenue > 0 ? (double)Math.Round((prevGrossProfit / prevNetRevenue) * 100, 2) : 0;
 
             // Calculate MoM Percentages
             Func<decimal, decimal, double> calcMoM = (curr, prev) =>
@@ -510,6 +550,11 @@ namespace HuflitShopCore.Services
                 Revenue = revenue,
                 RevenueMoM = calcMoM(revenue, prevRevenue),
 
+                GrossRevenue = grossRevenue,
+                NetRevenue = netRevenue,
+                TotalDiscount = totalDiscountAlloc,
+                TotalShippingRevenue = shippingRevenue,
+
                 AverageExportPrice = averageExportPrice,
                 AverageExportPriceMoM = calcMoM(averageExportPrice, prevAverageExportPrice),
 
@@ -518,6 +563,7 @@ namespace HuflitShopCore.Services
 
                 GrossProfitMargin = grossProfitMargin,
                 GrossProfitMarginMoM = calcMoM((decimal)grossProfitMargin, (decimal)prevGrossProfitMargin),
+
 
                 SelectedYear = year,
                 SelectedMonth = month,
@@ -660,6 +706,32 @@ namespace HuflitShopCore.Services
                 .Take(10)
                 .ToList();
             report.TopRevenueProducts = productRevenueGroup;
+
+            // 9. Lãi/Lỗ chi tiết từng sản phẩm (ProductProfits)
+            var productProfits = exports
+                .GroupBy(x => x.ProductNameSnapshot ?? "Sản phẩm")
+                .Select(g =>
+                {
+                    decimal pGross = g.Sum(x => x.Quantity * x.PurchasedPrice);
+                    decimal pDiscount = g.Sum(x => x.DiscountAllocation);
+                    decimal pNet = pGross - pDiscount;
+                    decimal pCOGS = g.Sum(x => x.Quantity * x.CostPrice);
+                    decimal pProfit = pNet - pCOGS;
+                    return new DTOs.ProductProfitItem
+                    {
+                        ProductName = g.Key,
+                        TotalSold = g.Sum(x => x.Quantity),
+                        GrossRevenue = pGross,
+                        DiscountAllocated = pDiscount,
+                        NetRevenue = pNet,
+                        COGS = pCOGS,
+                        GrossProfit = pProfit,
+                        ProfitMargin = pNet > 0 ? (double)Math.Round((pProfit / pNet) * 100, 2) : 0
+                    };
+                })
+                .OrderByDescending(x => x.GrossProfit)
+                .ToList();
+            report.ProductProfits = productProfits;
 
             return report;
         }

@@ -33,7 +33,10 @@ namespace HuflitShopCore.Services
                 EndDate = p.EndDate,
                 UsageLimit = p.UsageLimit,
                 UsedCount = p.UsedCount,
-                IsActive = p.IsActive
+                IsActive = p.IsActive,
+                ApplicableProductId = p.ApplicableProductId,
+                ComboProductIds = p.ComboProductIds,
+                IsAutoApply = p.IsAutoApply
             }).ToList();
         }
 
@@ -54,7 +57,10 @@ namespace HuflitShopCore.Services
                 EndDate = p.EndDate,
                 UsageLimit = p.UsageLimit,
                 UsedCount = p.UsedCount,
-                IsActive = p.IsActive
+                IsActive = p.IsActive,
+                ApplicableProductId = p.ApplicableProductId,
+                ComboProductIds = p.ComboProductIds,
+                IsAutoApply = p.IsAutoApply
             };
         }
 
@@ -72,7 +78,10 @@ namespace HuflitShopCore.Services
                 EndDate = dto.EndDate,
                 UsageLimit = dto.UsageLimit,
                 UsedCount = dto.UsedCount,
-                IsActive = dto.IsActive
+                IsActive = dto.IsActive,
+                ApplicableProductId = dto.ApplicableProductId,
+                ComboProductIds = dto.ComboProductIds,
+                IsAutoApply = dto.IsAutoApply
             };
 
             _context.Promotions.Add(promotion);
@@ -94,6 +103,9 @@ namespace HuflitShopCore.Services
             p.EndDate = dto.EndDate;
             p.UsageLimit = dto.UsageLimit;
             p.IsActive = dto.IsActive;
+            p.ApplicableProductId = dto.ApplicableProductId;
+            p.ComboProductIds = dto.ComboProductIds;
+            p.IsAutoApply = dto.IsAutoApply;
 
             _context.Promotions.Update(p);
             await _context.SaveChangesAsync();
