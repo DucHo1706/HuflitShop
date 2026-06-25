@@ -504,3 +504,143 @@ footer.sticky-footer span {
     color: #64748b;
     font-weight: 500;
 }
+
+/*Sidebar*/
+.sidebar {
+    width: 18rem !important; 
+}
+
+#accordionSidebar {
+    width: 18rem !important;
+}
+
+.sidebar .nav-item .nav-link {
+    width: 18rem !important;
+}
+
+.sidebar.toggled {
+    width: 6rem !important;
+}
+
+/* 1. Tạo khoảng không gian thở cho toàn bộ khung DataTables */
+.dataTables_wrapper {
+    padding: 1rem 0.5rem;
+}
+
+/* 2. Căn chỉnh cụm Search và Show entries */
+.dataTables_length,
+.dataTables_filter {
+    margin-bottom: 1.5rem !important;
+}
+
+    .dataTables_length label,
+    .dataTables_filter label {
+        font-weight: 600 !important;
+        color: #475569 !important;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0;
+    }
+
+    /* 3. Tùy chỉnh Dropdown (Show entries) */
+    .dataTables_length select {
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 8px !important;
+        padding: 0.4rem 1rem !important;
+        outline: none !important;
+        color: var(--vibrantBlue) !important;
+        font-weight: 700 !important;
+        background-color: #f8fafc !important;
+        cursor: pointer;
+        min-width: 70px;
+    }
+
+    /* 4. Tùy chỉnh Ô Search (Tìm kiếm) */
+    .dataTables_filter input {
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 8px !important;
+        padding: 0.5rem 1rem !important;
+        outline: none !important;
+        color: #0f172a !important;
+        background-color: #f8fafc !important;
+        transition: all 0.2s ease !important;
+        margin-left: 0.5rem !important;
+    }
+
+        /* Hiệu ứng khi click vào ô Search / Dropdown */
+        .dataTables_length select:focus,
+        .dataTables_filter input:focus {
+            border-color: var(--vibrantBlue) !important;
+            background-color: #ffffff !important;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+        }
+
+/* 5. Tùy chỉnh dòng Info (Showing 1 to X...) */
+.dataTables_info {
+    color: #64748b !important;
+    font-weight: 600 !important;
+    padding-top: 1.5rem !important;
+    font-size: 0.9rem;
+}
+
+/* 6. Tùy chỉnh cụm Phân trang (Pagination) */
+.dataTables_paginate {
+    padding-top: 1rem !important;
+}
+
+    .dataTables_paginate .pagination {
+        margin: 0;
+        gap: 6px; /* Tách rời các nút phân trang */
+        justify-content: flex-end;
+    }
+
+    .dataTables_paginate .page-item .page-link {
+        border-radius: 8px !important;
+        border: 1px solid #e2e8f0 !important;
+        color: #475569 !important;
+        font-weight: 600 !important;
+        padding: 0.5rem 0.9rem !important;
+        transition: all 0.2s ease !important;
+        background-color: #ffffff !important;
+    }
+
+    /* Hover phân trang */
+    .dataTables_paginate .page-item:not(.active):not(.disabled) .page-link:hover {
+        background-color: #f1f5f9 !important;
+        color: var(--vibrantBlue) !important;
+        border-color: #cbd5e1 !important;
+        transform: translateY(-2px);
+    }
+
+    /* Trang đang chọn (Active) */
+    .dataTables_paginate .page-item.active .page-link {
+        background: var(--oceanGradient) !important;
+        border-color: transparent !important;
+        color: white !important;
+        box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25) !important;
+    }
+
+    /* Trang bị vô hiệu hóa (Disabled) */
+    .dataTables_paginate .page-item.disabled .page-link {
+        background-color: #f8fafc !important;
+        color: #cbd5e1 !important;
+        border-color: #f1f5f9 !important;
+        box-shadow: none !important;
+    }
+
+/* 7. Icon Sắp xếp trên tiêu đề cột */
+table.dataTable thead .sorting:before,
+table.dataTable thead .sorting:after,
+table.dataTable thead .sorting_asc:before,
+table.dataTable thead .sorting_asc:after,
+table.dataTable thead .sorting_desc:before,
+table.dataTable thead .sorting_desc:after {
+    opacity: 0.3;
+}
+
+table.dataTable thead .sorting_asc:before,
+table.dataTable thead .sorting_desc:after {
+    opacity: 1;
+    color: var(--vibrantBlue);
+}

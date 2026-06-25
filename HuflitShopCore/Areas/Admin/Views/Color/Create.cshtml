@@ -4,31 +4,161 @@
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container-fluid mt-4">
-    <h2>Thêm màu sắc mới</h2>
-    <hr />
-    <div class="row">
-        <div class="col-md-6">
-            <form asp-action="Create" method="post">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                
-                <div class="form-group mb-3">
-                    <label asp-for="ColorName" class="control-label fw-bold">Tên màu sắc <span class="text-danger">*</span></label>
-                    <input asp-for="ColorName" class="form-control" placeholder="VD: Đỏ, Xanh dương..." />
-                    <span asp-validation-for="ColorName" class="text-danger"></span>
+<style>
+    .admin-container {
+        padding: 1.5rem 1rem;
+        background-color: #f8fafc;
+        min-height: calc(100vh - 60px);
+    }
+
+    .admin-page-title {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #0f172a;
+        margin-bottom: 0;
+        letter-spacing: -0.5px;
+    }
+
+    .admin-card {
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+        border: 1px solid #e2e8f0;
+        border-top: 4px solid #06b6d4;
+        padding: 2rem;
+        margin-top: 1.5rem;
+    }
+
+    .form-control {
+        border-radius: 8px;
+        border: 1px solid #cbd5e1;
+        padding: 0.75rem 1rem;
+        font-size: 0.95rem;
+        background-color: #f8fafc;
+        transition: all 0.2s;
+        color: #334155;
+    }
+
+        .form-control:focus {
+            border-color: #06b6d4;
+            background-color: #fff;
+            box-shadow: 0 0 0 3px rgba(6,182,212,0.1);
+            outline: none;
+        }
+
+    /* Ô input chọn màu sắc chuyên biệt */
+    input[type="color"].form-control {
+        padding: 0.3rem 0.5rem;
+        height: 45px;
+        cursor: pointer;
+    }
+
+    .control-label {
+        font-weight: 700;
+        color: #475569;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.6rem;
+        display: block;
+    }
+
+    .btn-admin-primary {
+        background: linear-gradient(135deg, #2563eb, #06b6d4);
+        color: #ffffff;
+        border: none;
+        font-weight: 700;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        width: 100%;
+        cursor: pointer;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+    }
+
+        .btn-admin-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(37,99,235,0.2);
+            color: white;
+            text-decoration: none;
+        }
+
+    .btn-admin-secondary {
+        background: #ffffff;
+        border: 2px solid #cbd5e1;
+        color: #475569;
+        font-weight: 700;
+        padding: 0.65rem 1.5rem;
+        border-radius: 8px;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        width: 100%;
+        text-transform: uppercase;
+        text-decoration: none;
+        font-size: 0.9rem;
+    }
+
+        .btn-admin-secondary:hover {
+            background: #f8fafc;
+            color: #0f172a;
+            border-color: #94a3b8;
+            text-decoration: none;
+        }
+</style>
+
+<div class="container-fluid admin-container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="admin-page-title">Thêm màu sắc mới</h1>
+            <p class="text-muted small mb-0 mt-1">Khai báo màu sắc để gán cho các phân loại sản phẩm</p>
+        </div>
+        <a asp-action="Index" class="btn-admin-secondary" style="width: auto;">
+            <i class="fas fa-arrow-left"></i> Quay lại
+        </a>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <form asp-action="Create" method="post" class="admin-card">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded shadow-sm font-weight-bold border-0" style="background-color: #fee2e2; color: #dc2626;"></div>
+
+                <div class="form-group mb-4">
+                    <label asp-for="ColorName" class="control-label">Tên màu sắc <span class="text-danger">*</span></label>
+                    <input asp-for="ColorName" class="form-control" placeholder="VD: Đỏ, Xanh dương, Vàng kem..." />
+                    <span asp-validation-for="ColorName" class="text-danger small font-weight-bold mt-1 d-block"></span>
                 </div>
-                
-                <div class="form-group mb-3">
-                    <label asp-for="HexCode" class="control-label fw-bold">Mã màu (Hex Code)</label>
-                    <input asp-for="HexCode" class="form-control" type="color" style="height: 40px;" />
-                    <span class="text-muted"><small>Chọn bảng màu để hiển thị trực quan ngoài Website.</small></span>
+
+                <div class="form-group mb-5">
+                    <label asp-for="HexCode" class="control-label">Mã màu (Hex Code)</label>
+                    <div class="d-flex gap-2 align-items-center">
+                        <input asp-for="HexCode" class="form-control w-100" type="color" />
+                    </div>
+                    <span class="text-muted mt-2 d-block" style="font-size: 0.85rem;"><i class="fas fa-info-circle mr-1"></i>Click vào ô trên để chọn màu. Màu này sẽ được hiển thị trực quan cho khách hàng chọn.</span>
                 </div>
-                
-                <div class="form-group mt-4">
-                    <button type="submit" class="btn btn-success">Lưu màu sắc</button>
-                    <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
+
+                <div class="row">
+                    <div class="col-6">
+                        <a asp-action="Index" class="btn-admin-secondary">Hủy bỏ</a>
+                    </div>
+                    <div class="col-6">
+                        <button type="submit" class="btn-admin-primary"><i class="fas fa-save"></i> Lưu màu sắc</button>
+                    </div>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

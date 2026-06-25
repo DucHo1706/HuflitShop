@@ -1,41 +1,175 @@
 ﻿@model IEnumerable<HuflitShopCore.DTOs.CategoryDTO>
 @{
     ViewData["Title"] = "Quản lý danh mục";
-    // Bạn có thể đổi lại layout thực tế của Admin template nếu cần
-    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml"; 
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container-fluid">
-    <h2 class="mt-4">Quản lý danh mục</h2>
-    <p>
-        <a asp-action="Create" class="btn btn-primary">Tạo danh mục mới</a>
-    </p>
+<style>
+    /* Các style cơ bản cho trang, các style của DataTables (Search, Phân trang) đã nằm trong admin-custom.css */
+    .admin-container {
+        padding: 1.5rem 1rem;
+        background-color: #f8fafc;
+        min-height: calc(100vh - 60px);
+    }
 
-    <table class="table table-bordered table-striped">
-        <thead class="thead-dark">
-            <tr>
-                <th>Tên danh mục</th>
-                <th>Danh mục cha</th>
-                <th style="width: 150px;">Hành động</th>
-            </tr>
-        </thead>
-        <tbody>
-            @if (Model != null && Model.Any())
-            {
-                foreach (var item in Model)
-                {
+    .admin-page-title {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #0f172a;
+        margin-bottom: 0;
+        letter-spacing: -0.5px;
+    }
+
+    .admin-card {
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+        border: 1px solid #e2e8f0;
+        overflow: hidden;
+        padding: 1.5rem;
+    }
+
+    /* Tuỳ chỉnh bảng */
+    .table-admin {
+        width: 100%;
+        border-collapse: separate !important;
+        border-spacing: 0;
+        margin-top: 1rem !important;
+    }
+
+        .table-admin thead th {
+            background-color: #f8fafc;
+            color: #64748b;
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            padding: 1rem 1.25rem;
+            border-bottom: 2px solid #e2e8f0 !important;
+            border-top: none !important;
+        }
+
+        .table-admin tbody td {
+            padding: 1rem 1.25rem;
+            vertical-align: middle;
+            color: #334155;
+            font-size: 0.95rem;
+            border-bottom: 1px solid #f1f5f9;
+            font-weight: 500;
+        }
+
+        .table-admin tbody tr:hover {
+            background-color: #f8fafc;
+        }
+
+    /* Buttons */
+    .btn-admin-primary {
+        background: linear-gradient(135deg, #2563eb, #06b6d4);
+        color: #ffffff;
+        border: none;
+        font-weight: 600;
+        padding: 0.6rem 1.25rem;
+        border-radius: 8px;
+        transition: all 0.3s;
+        box-shadow: 0 4px 10px rgba(37,99,235,0.2);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+        .btn-admin-primary:hover {
+            transform: translateY(-2px);
+            color: white;
+            text-decoration: none;
+            box-shadow: 0 6px 15px rgba(37,99,235,0.3);
+        }
+
+    .action-btn {
+        width: 32px;
+        height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        border: none;
+        transition: all 0.2s;
+        font-size: 0.85rem;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+        .action-btn.edit {
+            background-color: #fef9c3;
+            color: #d97706;
+        }
+
+        .action-btn.delete {
+            background-color: #fee2e2;
+            color: #dc2626;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            text-decoration: none;
+            color: inherit;
+        }
+</style>
+
+<div class="container-fluid admin-container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="admin-page-title">Quản lý danh mục</h1>
+            <p class="text-muted small mb-0 mt-1">Danh sách phân loại sản phẩm trong cửa hàng</p>
+        </div>
+        <a asp-action="Create" class="btn-admin-primary">
+            <i class="fas fa-plus-circle"></i> Tạo danh mục mới
+        </a>
+    </div>
+
+    <div class="admin-card">
+        <div class="table-responsive">
+            <table class="table table-admin">
+                <thead>
                     <tr>
-                        <td>@item.CategoryName</td>
-                        <td>@(item.ParentName ?? "---")</td>
-                        <td>
-                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm">Sửa</a>
-                            <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa danh mục [@item.CategoryName] không?');">
-                                <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
-                            </form>
-                        </td>
+                        <th style="width: 40%;">Tên danh mục Sản phẩm</th>
+                        <th>Danh mục Sản phẩm </th>
+                        <th class="text-right" style="width: 120px;">Thao tác</th>
                     </tr>
-                }
-            }
-        </tbody>
-    </table>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td style="font-weight: 700; color: #0f172a;">@item.CategoryName</td>
+                                <td>
+                                    @if (string.IsNullOrEmpty(item.ParentName))
+                                    {
+                                        <span class="text-muted font-italic">---</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge" style="background-color: #f1f5f9; color: #475569; padding: 0.4rem 0.75rem; font-size: 0.8rem; border-radius: 6px;"><i class="fas fa-level-up-alt mr-1"></i>@item.ParentName</span>
+                                    }
+                                </td>
+                                <td class="text-right">
+                                    <div class="d-flex justify-content-end gap-2">
+                                        <a asp-action="Edit" asp-route-id="@item.Id" class="action-btn edit" title="Sửa">
+                                            <i class="fas fa-pen"></i>
+                                        </a>
+                                        <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline m-0" onsubmit="return confirm('Bạn có chắc chắn muốn xóa danh mục [@item.CategoryName] không?');">
+                                            <button type="submit" class="action-btn delete" title="Xóa">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>

@@ -5,215 +5,296 @@
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container-fluid mt-4">
-    <form asp-action="Create" method="post">
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Tạo Phiếu Nhập Kho Mới</h6>
+<style>
+    .admin-container {
+        padding: 1.5rem 1rem;
+        background-color: #f8fafc;
+        min-height: calc(100vh - 60px);
+    }
+
+    .admin-page-title {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #0f172a;
+        margin-bottom: 0;
+        letter-spacing: -0.5px;
+    }
+
+    .admin-card {
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        border: 1px solid #e2e8f0;
+        border-top: 4px solid #2563eb;
+        padding: 2rem;
+        margin-top: 1.5rem;
+    }
+
+    .form-control {
+        border-radius: 8px;
+        border: 1px solid #cbd5e1;
+        padding: 0.75rem 1rem;
+        font-size: 0.95rem;
+        background-color: #f8fafc;
+        color: #334155;
+        transition: all 0.2s;
+    }
+
+        .form-control:focus {
+            border-color: #2563eb;
+            background-color: #fff;
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+            outline: none;
+        }
+
+    .control-label {
+        font-weight: 700;
+        color: #475569;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        margin-bottom: 0.6rem;
+        display: block;
+    }
+
+    .section-title {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: #0f172a;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #e2e8f0;
+        margin-bottom: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .table-admin {
+        width: 100%;
+        border-collapse: separate;
+        margin-top: 1rem;
+    }
+
+        .table-admin th {
+            background-color: #f8fafc;
+            color: #64748b;
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            padding: 1rem;
+            border-bottom: 2px solid #e2e8f0;
+            border-top: none;
+        }
+
+        .table-admin td {
+            padding: 1rem;
+            vertical-align: middle;
+            border-bottom: 1px solid #f1f5f9;
+            font-weight: 600;
+            color: #334155;
+        }
+
+    .btn-admin-primary {
+        background: linear-gradient(135deg, #2563eb, #06b6d4);
+        color: #ffffff;
+        border: none;
+        font-weight: 700;
+        padding: 0.8rem 1.5rem;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+        transition: all 0.3s;
+    }
+
+        .btn-admin-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(37,99,235,0.2);
+            color: white;
+        }
+
+    .btn-admin-secondary {
+        background: #ffffff;
+        border: 2px solid #cbd5e1;
+        color: #475569;
+        font-weight: 700;
+        padding: 0.7rem 1.5rem;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        text-transform: uppercase;
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: all 0.2s;
+    }
+
+        .btn-admin-secondary:hover {
+            background: #f8fafc;
+            color: #0f172a;
+            border-color: #94a3b8;
+            text-decoration: none;
+        }
+</style>
+
+<div class="container-fluid admin-container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="admin-page-title">Tạo phiếu nhập kho</h1>
+            <p class="text-muted small mb-0 mt-1">Khai báo thông tin nhập hàng từ nhà cung cấp</p>
+        </div>
+        <a asp-action="Index" class="btn-admin-secondary" style="width: auto;">
+            <i class="fas fa-arrow-left"></i> Quay lại
+        </a>
+    </div>
+
+    <form asp-action="Create" method="post" class="admin-card">
+        <div asp-validation-summary="All" class="alert alert-danger rounded font-weight-bold border-0" style="background-color: #fee2e2; color: #dc2626; display: none;"></div>
+        <div id="debug-details" class="text-muted" style="font-size:12px; display:none;"></div>
+
+        <div class="section-title"><i class="fas fa-info-circle text-primary mr-2"></i>1. Thông tin chung</div>
+        <div class="row">
+            <div class="form-group mb-4 col-md-6">
+                <label asp-for="SupplierId" class="control-label">Nhà cung cấp <span class="text-danger">*</span></label>
+                <select asp-for="SupplierId" class="form-control" asp-items="ViewBag.SupplierList">
+                    <option value="">-- Chọn nhà cung cấp --</option>
+                </select>
+                <span asp-validation-for="SupplierId" class="text-danger small font-weight-bold mt-1 d-block"></span>
             </div>
-            <div class="card-body">
-                <div asp-validation-summary="All" class="text-danger"></div>
-                <div id="debug-details" class="text-muted" style="font-size:12px; display:none;"></div>
+        </div>
 
-                <h5 class="font-weight-bold">1. Thông tin chung</h5>
-                <div class="row">
-                    <div class="form-group mb-3 col-md-6">
-                        <label asp-for="SupplierId" class="control-label font-weight-bold">Nhà cung cấp <span class="text-danger">*</span></label>
-                        <select asp-for="SupplierId" class="form-control" asp-items="ViewBag.SupplierList">
-                            <option value="">-- Chọn nhà cung cấp --</option>
-                        </select>
-                        <span asp-validation-for="SupplierId" class="text-danger"></span>
-                    </div>
-                </div>
-                <hr />
+        <div class="section-title"><i class="fas fa-boxes text-primary mr-2"></i>2. Chọn Sản phẩm & Số lượng</div>
+        <div class="row">
+            <div class="form-group mb-4 col-md-6">
+                <label class="control-label">Sản phẩm cần nhập <span class="text-danger">*</span></label>
+                <select id="product-select" class="form-control">
+                    <option value="">-- Chọn sản phẩm --</option>
+                    @if (ViewBag.ProductList != null)
+                    {
+                        foreach (var item in ViewBag.ProductList)
+                        {
+                            <option value="@item.Value">@item.Text</option>
+                        }
+                    }
+                </select>
+            </div>
+        </div>
 
-                <h5 class="font-weight-bold">2. Chọn Sản phẩm & Nhập số lượng phân loại</h5>
-                <p class="text-muted">Chọn sản phẩm, sau đó nhập số lượng và đơn giá cho các phân loại có hàng về.</p>
-
-                <div class="row">
-                    <div class="col-md-5 mb-4">
-                        <label class="control-label font-weight-bold">Tìm kiếm Sản phẩm <span class="text-danger">*</span></label>
-                        <select id="select-product" class="form-control">
-                            <option value="">-- Tìm sản phẩm --</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div id="variant-matrix-container" class="table-responsive" style="display:none;">
-                    <table class="table table-bordered">
-                        <thead class="bg-light">
+        <div id="variant-matrix-container" style="display:none;" class="mt-2">
+            <div class="p-3 mb-4 rounded" style="background-color: #f0f9ff; border: 1px dashed #93c5fd;">
+                <h6 class="font-weight-bold" style="color: #1e3a8a;"><i class="fas fa-table mr-2"></i>Bảng biến thể sản phẩm</h6>
+                <div class="table-responsive">
+                    <table class="table table-admin">
+                        <thead>
                             <tr>
                                 <th>Màu sắc</th>
                                 <th>Kích thước</th>
                                 <th class="text-center">Tồn kho hiện tại</th>
-                                <th style="width: 150px;">Số lượng nhập</th>
-                                <th style="width: 200px;">Giá nhập (VNĐ)</th>
+                                <th>Số lượng nhập</th>
+                                <th>Đơn giá nhập (VNĐ)</th>
                             </tr>
                         </thead>
                         <tbody id="variant-matrix-body">
-                            <!-- Nội dung được sinh bởi JavaScript -->
                         </tbody>
                     </table>
                 </div>
             </div>
-            <div class="card-footer">
-                <button type="button" class="btn btn-light btn-sm" onclick="return (window.__debugPrintFormDetails ? window.__debugPrintFormDetails() : alert('Chưa có debug func'))">
-                    Debug bind form
-                </button>
-                <button type="submit" class="btn btn-primary" onclick="return __syncAndDebugDetailsBeforeSubmit();">
-                    <i class="fas fa-save"></i> Tạo phiếu và tiếp tục
-                </button>
-                <a asp-action="Index" class="btn btn-secondary">Trở về</a>
-            </div>
+        </div>
+
+        <div class="d-flex justify-content-end mt-4">
+            <button type="submit" class="btn-admin-primary" style="width: auto;">
+                <i class="fas fa-save"></i> Hoàn tất tạo phiếu
+            </button>
         </div>
     </form>
 </div>
 
 @section Scripts {
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
-        function __syncAndDebugDetailsBeforeSubmit() {
-            try {
-                // Chỉ submit khi AJAX render xong bảng variant (tồn tại input Details[*])
-                // Tránh trường hợp user bấm submit quá nhanh hoặc tbody bị rebuild.
+        $(document).ready(function () {
+            // Khi submit form, lọc bỏ các dòng có Quantity == 0 hoặc rỗng
+            $('form').on('submit', function (e) {
+                var valid = true;
+
+                // Nếu chưa render variant nào thì không cho submit
                 if (!window.__variantsRendered) {
-                    console.warn('[StockReceipt][SubmitGuard] __variantsRendered = false. Prevent submit.');
+                    e.preventDefault();
+                    alert("Vui lòng chọn sản phẩm để nhập kho!");
                     return false;
                 }
 
-                // Không dùng alert để bạn copy log dễ hơn -> chỉ console.log
-                var details = [];
+                var hasAnyQuantity = false;
 
+                $('#variant-matrix-body tr').each(function (index) {
+                    var qtyInput = $(this).find('input[name$=".Quantity"]');
+                    var priceInput = $(this).find('input[name$=".UnitPrice"]');
+                    var variantInput = $(this).find('input[name$=".ProductVariantId"]');
 
-                // Lấy đúng DOM đang hiển thị trong tbody (giảm rủi ro lệch index)
-                var tbody = $('#variant-matrix-body');
-                tbody.find('tr').each(function () {
-                    var rowInputs = $(this).find('input[name], select[name]');
-                    rowInputs.each(function () {
-                        var name = $(this).attr('name');
-                        var m = name && name.match(/^Details\[(\d+)\]\.(.+)$/);
-                        if (!m) return;
+                    var qty = parseFloat(qtyInput.val());
+                    if (qty > 0) {
+                        hasAnyQuantity = true;
+                        // Đổi lại name index thành tuần tự (0, 1, 2...) để ASP.NET Core bind được danh sách
+                        var newIndex = $('#variant-matrix-body tr').filter(function () {
+                            return parseFloat($(this).find('input[name$=".Quantity"]').val()) > 0;
+                        }).index(this);
 
-                        var idx = parseInt(m[1], 10);
-                        var prop = m[2];
-                        while (details.length <= idx) details.push({});
-                        details[idx][prop] = $(this).val();
-                    });
+                        variantInput.attr('name', `Details[${newIndex}].ProductVariantId`);
+                        qtyInput.attr('name', `Details[${newIndex}].Quantity`);
+                        priceInput.attr('name', `Details[${newIndex}].UnitPrice`);
+                    } else {
+                        // Nếu Quantity = 0, vô hiệu hóa các input này để không gửi lên server
+                        variantInput.prop('disabled', true);
+                        qtyInput.prop('disabled', true);
+                        priceInput.prop('disabled', true);
+                    }
                 });
 
-                var valid = details
-                    .map((d, i) => {
-                        var q = Number(d && d['Quantity'] != null ? d['Quantity'] : 0);
-                        if (q <= 0) return null;
-                        return {
-                            i: i,
-                            ProductVariantId: d['ProductVariantId'],
-                            Quantity: q,
-                            UnitPrice: Number(d['UnitPrice'] != null ? d['UnitPrice'] : 0)
-                        };
-                    })
-                    .filter(Boolean);
+                if (!hasAnyQuantity) {
+                    e.preventDefault();
+                    alert("Vui lòng nhập số lượng > 0 cho ít nhất 1 biến thể!");
 
-                console.log('[StockReceipt][Submit][Details][Quantity>0 only]', valid);
-                console.log('[StockReceipt][Submit][Details][All raw]', details);
-            } catch (e) {
-                console.error('[StockReceipt][Submit][DebugError]', e);
-            }
-
-            // Hard guard: nếu không có bất kỳ input Details[i].* nào trong DOM thì không cho submit
-            var detailsInputsCount = $('input[name^="Details["]').length;
-            console.warn('[StockReceipt][SubmitGuard] detailsInputsCount=', detailsInputsCount);
-
-            if (detailsInputsCount <= 0) {
-                console.warn('[StockReceipt][SubmitGuard] No Details inputs found. Prevent submit.');
-                return false;
-            }
-
-            return true;
-        }
-
-
-        $(document).ready(function () {
-            $('select[name="SupplierId"]').select2({ placeholder: "Gõ để tìm nhà cung cấp..." });
-
-            $('#select-product').select2({
-                placeholder: "Gõ tên sản phẩm, danh mục hoặc thương hiệu...",
-                minimumInputLength: 0,
-                allowClear: true,
-                ajax: {
-                    url: '@Url.Action("SearchProducts", "StockReceipt")',
-                    dataType: 'json',
-                    delay: 250, // Độ trễ trước khi gửi request
-                    data: function (params) {
-                        return {
-                            term: params.term, // search term
-                            categoryId: $('.cate-filter.active').data('id'), // Thêm lọc theo danh mục
-                            page: params.page || 1
-                        };
-                    },
-                    processResults: function (data, params) {
-                        params.page = params.page || 1;
-                        return {
-                            results: data.results,
-                            pagination: { more: data.pagination.more }
-                        };
-                    },
-                    cache: true
+                    // Phục hồi lại disabled nếu submit lỗi
+                    $('#variant-matrix-body input').prop('disabled', false);
+                    return false;
                 }
             });
 
-            // Xử lý khi nhấn vào Gợi ý (Quick Pick)
-            $('.quick-pick').click(function () {
-                var id = $(this).data('id');
-                var name = $(this).text().trim();
-
-                var option = new Option(name, id, true, true);
-                $('#select-product').append(option).trigger('change');
-            });
-
-            // Xử lý bộ lọc danh mục
-            $('.cate-filter').click(function () {
-                $('.cate-filter').removeClass('active btn-primary').addClass('btn-light');
-                $(this).addClass('active btn-primary').removeClass('btn-light');
-                $('#select-product').val(null).trigger('change');
-            });
-
-            $('#select-product').change(function () {
+            $('#product-select').on('change', function () {
                 var productId = $(this).val();
                 var container = $('#variant-matrix-container');
                 var tbody = $('#variant-matrix-body');
-
                 tbody.empty();
+                window.__variantsRendered = false;
 
                 if (productId) {
                     container.show();
-                    tbody.append('<tr><td colspan="5" class="text-center">Đang tải phân loại...</td></tr>');
-
-                    // Reset cờ render trước khi AJAX chạy
-                    window.__variantsRendered = false;
+                    // Hiển thị loading
+                    tbody.html('<tr><td colspan="5" class="text-center text-primary py-3"><i class="fas fa-spinner fa-spin mr-2"></i> Đang tải biến thể...</td></tr>');
 
                     $.getJSON('@Url.Action("GetVariantsByProduct", "StockReceipt")', { productId: productId }, function (data) {
                         tbody.empty();
+
                         if (data.length === 0) {
-                            tbody.append('<tr><td colspan="5" class="text-center text-danger">Sản phẩm này chưa được cấu hình phân loại.</td></tr>');
+                            tbody.html('<tr><td colspan="5" class="text-center text-danger font-weight-bold py-3">Sản phẩm này chưa có biến thể/phân loại.</td></tr>');
                             return;
                         }
 
                         $.each(data, function (i, item) {
                             var row = `
-                                <tr>
-                                    <td>${item.color}</td>
-                                    <td>${item.size} ${item.isActive ? '' : '<span class="badge badge-warning">Ngừng bán</span>'}</td>
-                                    <td class="text-center">${item.stock}</td>
-                                    <td>
-                                        <input type="hidden" name="Details[${i}].ProductVariantId" value="${item.id}" />
-                                        <input type="number" name="Details[${i}].Quantity" class="form-control" min="0" value="0" />
-                                    </td>
-                                    <td>
-                                        <input type="number" step="0.01" name="Details[${i}].UnitPrice" class="form-control unit-price" min="0" value="0" />
-                                    </td>
-                                </tr>`;
+                                        <tr>
+                                            <td>${item.color}</td>
+                                            <td>${item.size} ${item.isActive ? '' : '<span class="badge bg-warning text-dark ml-2">Ngừng bán</span>'}</td>
+                                            <td class="text-center"><span class="badge" style="background:#f1f5f9; color:#475569; font-size:0.9rem;">${item.stock}</span></td>
+                                            <td>
+                                                <input type="hidden" name="Details[${i}].ProductVariantId" value="${item.id}" />
+                                                <input type="number" name="Details[${i}].Quantity" class="form-control text-center font-weight-bold" style="max-width: 120px;" min="0" value="0" />
+                                            </td>
+                                            <td>
+                                                <input type="number" step="0.01" name="Details[${i}].UnitPrice" class="form-control unit-price font-weight-bold text-danger" style="max-width: 150px;" min="0" value="0" />
+                                            </td>
+                                        </tr>`;
                             tbody.append(row);
                         });
 
@@ -228,4 +309,3 @@
         });
     </script>
 }
-

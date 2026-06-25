@@ -11,94 +11,141 @@
 }
 
 <style>
+    .admin-container {
+        padding: 1.5rem 1rem;
+        background-color: #f8fafc;
+        min-height: calc(100vh - 60px);
+    }
+
+    .admin-page-title {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #0f172a;
+        margin-bottom: 0;
+        letter-spacing: -0.5px;
+    }
+
     /* ===== Statistics Cards ===== */
     .stat-card {
-        border: none;
+        background: #ffffff;
         border-radius: 12px;
-        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
         overflow: hidden;
-        position: relative;
+        transition: all 0.3s ease;
     }
-    .stat-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 12px 28px rgba(0,0,0,0.12) !important;
-    }
-    .stat-card .stat-icon {
-        width: 56px;
-        height: 56px;
-        border-radius: 14px;
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+            border-color: #cbd5e1;
+        }
+
+    .stat-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 12px;
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 1.4rem;
+        color: #fff;
     }
-    .stat-card .stat-value {
-        font-size: 1.65rem;
+
+    .stat-value {
+        font-size: 1.4rem;
         font-weight: 800;
+        color: #0f172a;
         line-height: 1.2;
         margin-bottom: 2px;
     }
-    .stat-card .stat-label {
-        font-size: 0.78rem;
+
+    .stat-label {
+        font-size: 0.8rem;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        font-weight: 600;
+        font-weight: 700;
+        color: #64748b;
     }
 
     /* ===== Receipt Table ===== */
-    .receipt-table-card {
-        border: none;
-        border-radius: 14px;
-        overflow: hidden;
-    }
-    .receipt-table-card .card-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border: none;
-        padding: 18px 24px;
-    }
-    .receipt-table thead th {
-        background: #f8f9fc;
-        border-top: none;
-        font-size: 0.78rem;
-        text-transform: uppercase;
-        letter-spacing: 0.6px;
-        font-weight: 700;
-        color: #6c757d;
-        padding: 14px 16px;
-        white-space: nowrap;
-    }
-    .receipt-table tbody tr {
-        transition: all 0.2s ease;
-    }
-    .receipt-table tbody tr:hover {
-        background: #f0f4ff !important;
-    }
-    .receipt-table tbody td {
-        vertical-align: middle;
-        padding: 14px 16px;
-        border-color: #f0f0f0;
+    .admin-card {
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        border: 1px solid #e2e8f0;
+        padding: 1.5rem;
     }
 
-    /* ===== Receipt ID Badge ===== */
+    .table-admin {
+        width: 100%;
+        border-collapse: separate !important;
+        border-spacing: 0;
+        margin-top: 1rem !important;
+    }
+
+        .table-admin thead th {
+            background-color: #f8fafc;
+            color: #64748b;
+            font-weight: 700;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            padding: 1rem;
+            border-bottom: 2px solid #e2e8f0 !important;
+            border-top: none !important;
+        }
+
+        .table-admin tbody td {
+            padding: 1rem;
+            vertical-align: middle;
+            color: #334155;
+            font-size: 0.95rem;
+            border-bottom: 1px solid #f1f5f9;
+            font-weight: 500;
+        }
+
+        .table-admin tbody tr:hover {
+            background-color: #f8fafc;
+        }
+
+    /* ===== Badges & Utilities ===== */
     .receipt-id {
         font-family: 'Courier New', monospace;
-        font-size: 0.82rem;
+        font-size: 0.9rem;
         font-weight: 700;
-        color: #4e73df;
-        background: rgba(78,115,223,0.08);
-        padding: 5px 10px;
+        color: #0f172a;
+        background: #f1f5f9;
+        padding: 4px 8px;
         border-radius: 6px;
-        display: inline-block;
     }
 
-    /* ===== Supplier Badge ===== */
+    .amount-value {
+        font-weight: 800;
+        font-size: 1.05rem;
+        color: #ef4444;
+    }
+
+    .item-count-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: #f0fdf4;
+        color: #16a34a;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-weight: 700;
+        font-size: 0.85rem;
+    }
+
     .supplier-badge {
         display: inline-flex;
         align-items: center;
         gap: 8px;
         font-weight: 600;
+        color: #334155;
     }
-    .supplier-badge .supplier-avatar {
+
+    .supplier-avatar {
         width: 32px;
         height: 32px;
         border-radius: 8px;
@@ -106,325 +153,259 @@
         align-items: center;
         justify-content: center;
         font-weight: 700;
-        font-size: 0.75rem;
+        font-size: 0.8rem;
         color: #fff;
         flex-shrink: 0;
     }
 
-    /* ===== Amount Cell ===== */
-    .amount-value {
-        font-weight: 800;
-        font-size: 1rem;
-        color: #e74a3b;
-    }
-    .amount-currency {
-        font-size: 0.72rem;
-        color: #999;
-        font-weight: 600;
-    }
-
-    /* ===== Item Count Chip ===== */
-    .item-count-chip {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-        padding: 5px 12px;
-        border-radius: 20px;
-        font-weight: 700;
-        font-size: 0.82rem;
-        color: #333;
-    }
-
-    /* ===== Date Cell ===== */
     .date-primary {
         font-weight: 700;
         font-size: 0.9rem;
-        color: #333;
+        color: #0f172a;
     }
+
     .date-secondary {
-        font-size: 0.75rem;
-        color: #999;
-    }
-
-    /* ===== Action Buttons ===== */
-    .btn-view-detail {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border: none;
-        color: #fff;
-        padding: 7px 16px;
-        border-radius: 8px;
         font-size: 0.8rem;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        text-decoration: none;
-    }
-    .btn-view-detail:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(102,126,234,0.4);
-        color: #fff;
-        text-decoration: none;
+        color: #64748b;
     }
 
-    /* ===== Create Button ===== */
-    .btn-create-receipt {
-        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-        border: none;
-        color: #fff;
-        padding: 10px 22px;
-        border-radius: 10px;
+    .time-ago {
+        font-size: 0.75rem;
+        color: var(--vibrantBlue);
         font-weight: 700;
-        font-size: 0.88rem;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(17,153,142,0.3);
-    }
-    .btn-create-receipt:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(17,153,142,0.4);
-        color: #fff;
+        background: #eff6ff;
+        padding: 2px 8px;
+        border-radius: 4px;
+        display: inline-block;
+        margin-top: 4px;
     }
 
-    /* ===== User Badge ===== */
     .user-badge {
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        font-size: 0.82rem;
-        color: #555;
-    }
-    .user-badge i {
-        color: #4e73df;
+        font-size: 0.85rem;
+        color: #475569;
+        font-weight: 600;
     }
 
-    /* ===== Empty State ===== */
+    /* ===== Buttons ===== */
+    .btn-create-receipt {
+        background: linear-gradient(135deg, #2563eb, #06b6d4);
+        color: #ffffff;
+        border: none;
+        font-weight: 700;
+        padding: 0.7rem 1.5rem;
+        border-radius: 8px;
+        transition: all 0.3s;
+        box-shadow: 0 4px 10px rgba(37,99,235,0.2);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+        .btn-create-receipt:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(37,99,235,0.3);
+            color: #fff;
+            text-decoration: none;
+        }
+
+    .btn-view-detail {
+        background-color: #eff6ff;
+        color: #2563eb;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        transition: all 0.2s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+        .btn-view-detail:hover {
+            background-color: #2563eb;
+            color: #fff;
+            text-decoration: none;
+        }
+
+    /* Empty State */
     .empty-state {
         text-align: center;
         padding: 60px 20px;
     }
-    .empty-state i {
-        font-size: 4rem;
-        color: #d1d3e2;
-        margin-bottom: 16px;
-    }
-    .empty-state h5 {
-        color: #666;
-        font-weight: 700;
-    }
-    .empty-state p {
-        color: #999;
-        font-size: 0.9rem;
-    }
 
-    /* ===== Time Ago Badge ===== */
-    .time-ago {
-        font-size: 0.72rem;
-        color: #1cc88a;
-        font-weight: 600;
-        background: rgba(28,200,138,0.08);
-        padding: 2px 8px;
-        border-radius: 4px;
-    }
+        .empty-state i {
+            font-size: 4rem;
+            color: #cbd5e1;
+            margin-bottom: 16px;
+        }
 
-    /* ===== Override DataTables ===== */
-    .receipt-table_wrapper .dataTables_filter input {
-        border-radius: 8px;
-        border: 2px solid #e3e6f0;
-        padding: 6px 14px;
-        transition: border-color 0.3s;
-    }
-    .receipt-table_wrapper .dataTables_filter input:focus {
-        border-color: #4e73df;
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(78,115,223,0.15);
-    }
+        .empty-state h5 {
+            color: #0f172a;
+            font-weight: 800;
+        }
 </style>
 
-<div class="container-fluid">
-    <!-- Page Heading -->
+<div class="container-fluid admin-container">
     <div class="d-flex align-items-center justify-content-between mb-4">
         <div>
-            <h1 class="h3 mb-1 text-gray-800 font-weight-bold">
-                <i class="fas fa-warehouse mr-2" style="color: #667eea;"></i>Lịch sử nhập kho
-            </h1>
-            <p class="text-muted mb-0" style="font-size: 0.88rem;">
-                Quản lý và theo dõi tất cả phiếu nhập kho trong hệ thống
-            </p>
+            <h1 class="admin-page-title">Lịch sử nhập kho</h1>
+            <p class="text-muted mb-0 mt-1">Quản lý và theo dõi tất cả phiếu nhập kho trong hệ thống</p>
         </div>
-        <a asp-action="Create" class="btn-create-receipt d-none d-sm-inline-flex align-items-center">
-            <i class="fas fa-plus-circle mr-2"></i> Tạo phiếu nhập mới
+        <a asp-action="Create" class="btn-create-receipt">
+            <i class="fas fa-plus-circle"></i> Tạo phiếu nhập mới
         </a>
     </div>
 
-    <!-- Statistics Cards -->
     <div class="row mb-4">
-        <!-- Tổng phiếu nhập -->
         <div class="col-xl-3 col-md-6 mb-3">
-            <div class="card stat-card shadow-sm h-100">
-                <div class="card-body d-flex align-items-center">
-                    <div class="stat-icon mr-3" style="background: linear-gradient(135deg, #667eea, #764ba2);">
-                        <i class="fas fa-file-invoice text-white"></i>
+            <div class="stat-card h-100 p-3">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon mr-3" style="background: linear-gradient(135deg, #2563eb, #3b82f6);">
+                        <i class="fas fa-file-invoice"></i>
                     </div>
                     <div>
-                        <div class="stat-value text-gray-800">@totalReceipts</div>
-                        <div class="stat-label text-muted">Tổng phiếu nhập</div>
+                        <div class="stat-value">@totalReceipts</div>
+                        <div class="stat-label">Tổng phiếu nhập</div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Tổng giá trị -->
         <div class="col-xl-3 col-md-6 mb-3">
-            <div class="card stat-card shadow-sm h-100">
-                <div class="card-body d-flex align-items-center">
-                    <div class="stat-icon mr-3" style="background: linear-gradient(135deg, #e74a3b, #f78b77);">
-                        <i class="fas fa-coins text-white"></i>
+            <div class="stat-card h-100 p-3">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon mr-3" style="background: linear-gradient(135deg, #ef4444, #f43f5e);">
+                        <i class="fas fa-coins"></i>
                     </div>
                     <div>
-                        <div class="stat-value text-gray-800" style="font-size: 1.3rem;">@totalAmount.ToString("N0")<span class="amount-currency ml-1">₫</span></div>
-                        <div class="stat-label text-muted">Tổng giá trị nhập</div>
+                        <div class="stat-value" style="font-size: 1.25rem;">@totalAmount.ToString("N0")<span style="font-size: 0.8rem; margin-left: 2px;">₫</span></div>
+                        <div class="stat-label">Tổng giá trị nhập</div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Tổng sản phẩm -->
         <div class="col-xl-3 col-md-6 mb-3">
-            <div class="card stat-card shadow-sm h-100">
-                <div class="card-body d-flex align-items-center">
-                    <div class="stat-icon mr-3" style="background: linear-gradient(135deg, #1cc88a, #36d7b7);">
-                        <i class="fas fa-boxes text-white"></i>
+            <div class="stat-card h-100 p-3">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon mr-3" style="background: linear-gradient(135deg, #10b981, #14b8a6);">
+                        <i class="fas fa-boxes"></i>
                     </div>
                     <div>
-                        <div class="stat-value text-gray-800">@totalItems</div>
-                        <div class="stat-label text-muted">Tổng mặt hàng nhập</div>
+                        <div class="stat-value">@totalItems</div>
+                        <div class="stat-label">Tổng mặt hàng nhập</div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Hôm nay -->
         <div class="col-xl-3 col-md-6 mb-3">
-            <div class="card stat-card shadow-sm h-100">
-                <div class="card-body d-flex align-items-center">
-                    <div class="stat-icon mr-3" style="background: linear-gradient(135deg, #f6c23e, #f4a261);">
-                        <i class="fas fa-calendar-day text-white"></i>
+            <div class="stat-card h-100 p-3">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon mr-3" style="background: linear-gradient(135deg, #f59e0b, #fbbf24);">
+                        <i class="fas fa-calendar-day"></i>
                     </div>
                     <div>
-                        <div class="stat-value text-gray-800">@todayReceipts</div>
-                        <div class="stat-label text-muted">Nhập hôm nay</div>
+                        <div class="stat-value">@todayReceipts</div>
+                        <div class="stat-label">Nhập hôm nay</div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Receipt Table -->
-    <div class="card receipt-table-card shadow mb-4">
-        <div class="card-header d-flex align-items-center justify-content-between">
-            <h6 class="m-0 font-weight-bold text-white">
-                <i class="fas fa-list-alt mr-2"></i>Danh sách phiếu nhập kho
-            </h6>
-            <span class="text-white-50" style="font-size: 0.82rem;">
-                <i class="fas fa-clock mr-1"></i>Cập nhật theo thời gian thực
-            </span>
-        </div>
-        <div class="card-body p-0">
-            @if (Model != null && Model.Any())
-            {
-                <div class="table-responsive">
-                    <table class="table receipt-table mb-0" id="receiptDataTable" width="100%" cellspacing="0">
-                        <thead>
+    <div class="admin-card">
+        @if (Model != null && Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-admin" id="receiptDataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Mã phiếu</th>
+                            <th>Ngày nhập</th>
+                            <th>Nhà cung cấp</th>
+                            <th>Người nhập</th>
+                            <th class="text-center">Mặt hàng</th>
+                            <th class="text-right">Tổng tiền</th>
+                            <th class="text-center" style="width: 140px;">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            var avatarColors = new[] { "#2563eb", "#10b981", "#06b6d4", "#f59e0b", "#ef4444", "#64748b", "#8b5cf6" };
+                            int colorIdx = 0;
+                        }
+                        @foreach (var item in Model)
+                        {
+                            var supplierInitial = !string.IsNullOrEmpty(item.SupplierName) ? item.SupplierName.Substring(0, 1).ToUpper() : "?";
+                            var bgColor = avatarColors[colorIdx % avatarColors.Length];
+                            colorIdx++;
+                            var timeSpan = DateTime.Now - item.ReceiptDate;
+                            string timeAgo;
+                            if (timeSpan.TotalMinutes < 60) timeAgo = $"{(int)timeSpan.TotalMinutes} phút trước";
+                            else if (timeSpan.TotalHours < 24) timeAgo = $"{(int)timeSpan.TotalHours} giờ trước";
+                            else if (timeSpan.TotalDays < 7) timeAgo = $"{(int)timeSpan.TotalDays} ngày trước";
+                            else timeAgo = item.ReceiptDate.ToString("dd/MM/yyyy");
+
                             <tr>
-                                <th>Mã phiếu</th>
-                                <th>Ngày nhập</th>
-                                <th>Nhà cung cấp</th>
-                                <th>Người nhập</th>
-                                <th class="text-center">Số mặt hàng</th>
-                                <th class="text-end">Tổng tiền</th>
-                                <th class="text-center" style="width: 140px;">Thao tác</th>
+                                <td>
+                                    <span class="receipt-id">#@item.Id[..8]</span>
+                                </td>
+                                <td>
+                                    <div class="date-primary">@item.ReceiptDate.ToString("dd/MM/yyyy")</div>
+                                    <div class="date-secondary">@item.ReceiptDate.ToString("HH:mm")</div>
+                                    @if (timeSpan.TotalDays < 3)
+                                    {
+                                        <span class="time-ago">@timeAgo</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="supplier-badge">
+                                        <div class="supplier-avatar" style="background: @bgColor;">@supplierInitial</div>
+                                        <span>@item.SupplierName</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="user-badge">
+                                        <i class="fas fa-user-circle" style="color: #94a3b8; font-size: 1.2rem;"></i>
+                                        <span>@(item.UserName ?? "—")</span>
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <span class="item-count-chip">
+                                        <i class="fas fa-cube"></i> @item.ItemCount
+                                    </span>
+                                </td>
+                                <td class="text-right">
+                                    <div class="amount-value">@item.TotalAmount.ToString("N0") <span style="font-size: 0.8rem; color: #64748b;">₫</span></div>
+                                </td>
+                                <td class="text-center">
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn-view-detail">
+                                        <i class="fas fa-eye"></i> Chi tiết
+                                    </a>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            @{
-                                // Tạo mảng màu cho supplier avatar
-                                var avatarColors = new[] { "#4e73df", "#1cc88a", "#36b9cc", "#f6c23e", "#e74a3b", "#858796", "#5a5c69", "#6f42c1" };
-                                int colorIdx = 0;
-                            }
-                            @foreach (var item in Model)
-                            {
-                                var supplierInitial = !string.IsNullOrEmpty(item.SupplierName) ? item.SupplierName.Substring(0, 1).ToUpper() : "?";
-                                var bgColor = avatarColors[colorIdx % avatarColors.Length];
-                                colorIdx++;
-
-                                // Tính time ago
-                                var timeSpan = DateTime.Now - item.ReceiptDate;
-                                string timeAgo;
-                                if (timeSpan.TotalMinutes < 60)
-                                    timeAgo = $"{(int)timeSpan.TotalMinutes} phút trước";
-                                else if (timeSpan.TotalHours < 24)
-                                    timeAgo = $"{(int)timeSpan.TotalHours} giờ trước";
-                                else if (timeSpan.TotalDays < 7)
-                                    timeAgo = $"{(int)timeSpan.TotalDays} ngày trước";
-                                else
-                                    timeAgo = item.ReceiptDate.ToString("dd/MM/yyyy");
-
-                                <tr>
-                                    <td>
-                                        <span class="receipt-id">#@item.Id[..8]</span>
-                                    </td>
-                                    <td>
-                                        <div class="date-primary">@item.ReceiptDate.ToString("dd/MM/yyyy")</div>
-                                        <div class="date-secondary">@item.ReceiptDate.ToString("HH:mm")</div>
-                                        @if (timeSpan.TotalDays < 3)
-                                        {
-                                            <span class="time-ago">@timeAgo</span>
-                                        }
-                                    </td>
-                                    <td>
-                                        <div class="supplier-badge">
-                                            <div class="supplier-avatar" style="background: @bgColor;">@supplierInitial</div>
-                                            <span>@item.SupplierName</span>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="user-badge">
-                                            <i class="fas fa-user-circle"></i>
-                                            <span>@(item.UserName ?? "—")</span>
-                                        </div>
-                                    </td>
-                                    <td class="text-center">
-                                        <span class="item-count-chip">
-                                            <i class="fas fa-cube" style="font-size: 0.7rem;"></i>
-                                            @item.ItemCount
-                                        </span>
-                                    </td>
-                                    <td class="text-end">
-                                        <div class="amount-value">@item.TotalAmount.ToString("N0")</div>
-                                        <span class="amount-currency">VNĐ</span>
-                                    </td>
-                                    <td class="text-center">
-                                        <a asp-action="Details" asp-route-id="@item.Id" class="btn-view-detail">
-                                            <i class="fas fa-eye mr-1"></i> Chi tiết
-                                        </a>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            }
-            else
-            {
-                <div class="empty-state">
-                    <i class="fas fa-inbox d-block"></i>
-                    <h5>Chưa có phiếu nhập kho nào</h5>
-                    <p>Bắt đầu bằng cách tạo phiếu nhập kho đầu tiên</p>
-                    <a asp-action="Create" class="btn-create-receipt mt-3 d-inline-flex align-items-center">
-                        <i class="fas fa-plus-circle mr-2"></i> Tạo phiếu nhập ngay
-                    </a>
-                </div>
-            }
-        </div>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <i class="fas fa-inbox d-block"></i>
+                <h5>Chưa có phiếu nhập kho nào</h5>
+                <p>Bắt đầu bằng cách tạo phiếu nhập kho đầu tiên</p>
+                <a asp-action="Create" class="btn-create-receipt mt-3">
+                    <i class="fas fa-plus-circle"></i> Tạo phiếu nhập ngay
+                </a>
+            </div>
+        }
     </div>
 </div>
 
@@ -454,8 +435,8 @@
                 "pageLength": 10,
                 "order": [[1, "desc"]],
                 "dom": "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
-                       "<'row'<'col-sm-12'tr>>" +
-                       "<'row mt-3'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                    "<'row'<'col-sm-12'tr>>" +
+                    "<'row mt-3'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
                 "columnDefs": [
                     { "orderable": false, "targets": [6] }
                 ]
