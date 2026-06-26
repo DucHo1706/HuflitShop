@@ -214,29 +214,40 @@ namespace HuflitShopCore.Controllers
         {
             try
             {
+                string targetVariantId = string.Empty;
+
+                // Kiểm tra xem khách có truyền vào phân loại (màu, size) không
                 if (!string.IsNullOrWhiteSpace(productVariantId))
                 {
                     var pv = await _productService.GetActiveVariantByIdAsync(productVariantId);
+                    if (pv == null) return Json(new { success = false, message = "Phân loại sản phẩm không tồn tại hoặc đã ngừng bán!" });
 
-                    if (pv == null) return RedirectToAction("Index", "Home");
+                    targetVariantId = pv.Id;
+                }
+                else
+                {
+                    // Nếu bấm từ trang danh sách (không có chọn màu/size), tự động lấy phân loại đầu tiên
+                    var variant = await _productService.GetFirstActiveVariantByProductIdAsync(id);
+                    if (variant == null) return Json(new { success = false, message = "Sản phẩm hiện đang hết hàng hoặc không khả dụng!" });
 
-                    await AddOrUpdateCartItemAsync(pv.Id, Math.Max(1, quantity));
-                    return RedirectToAction("Cart", "Cart");
+                    targetVariantId = variant.Id;
                 }
 
-                // Fallback: Home/Index.cshtml truyền ProductId.
-                var variant = await _productService.GetFirstActiveVariantByProductIdAsync(id);
+                // 1. Thêm vào giỏ hàng và nhận lại Cookie Session ID (dành cho khách chưa đăng nhập)
+                string? guestCartId = await AddOrUpdateCartItemAsync(targetVariantId, Math.Max(1, quantity));
 
-                if (variant == null)
-                    return RedirectToAction("Index", "Home");
+                // 2. Lấy thông tin user hiện tại để đếm tổng số lượng
+                var isAuth = User.Identity != null && User.Identity.IsAuthenticated;
+                var userId = isAuth ? (User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("Id")) : null;
 
-                await AddOrUpdateCartItemAsync(variant.Id, Math.Max(1, quantity));
-                return RedirectToAction("Cart", "Cart");
+                int count = await _cartService.GetCartCountAsync(userId, guestCartId);
+
+                // 3. BẮT BUỘC trả về JSON để AJAX Javascript nhận diện được
+                return Json(new { success = true, newCartCount = count, message = "Đã thêm vào giỏ hàng thành công!" });
             }
             catch (System.Exception ex)
             {
-                TempData["ErrorMessage"] = ex.Message;
-                return RedirectToAction("Details", new { id = id });
+                return Json(new { success = false, message = ex.Message });
             }
         }
 
@@ -310,11 +321,10 @@ namespace HuflitShopCore.Controllers
 
 
 
-        private async Task AddOrUpdateCartItemAsync(string productVariantId, int delta)
+        private async Task<string?> AddOrUpdateCartItemAsync(string productVariantId, int delta)
         {
             var isAuth = User.Identity != null && User.Identity.IsAuthenticated;
-            var userId = isAuth ? User.FindFirstValue(ClaimTypes.NameIdentifier) : null;
-
+            var userId = isAuth ? (User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("Id")) : null;
             string? guestCartId = Request.Cookies["GuestCartId"];
             if (string.IsNullOrEmpty(guestCartId))
             {
@@ -331,6 +341,9 @@ namespace HuflitShopCore.Controllers
             var cartKeySessionId = isAuth ? null : guestCartId;
 
             await _cartService.AddOrUpdateCartItemAsync(cartKeyUserId, cartKeySessionId, productVariantId, delta);
+
+            // Trả về guestCartId để dùng cho việc đếm số lượng ngay lập tức
+            return guestCartId;
         }
         [HttpGet]
         public async Task<IActionResult> SearchSuggestions(string term)
@@ -381,8 +394,7 @@ namespace HuflitShopCore.Controllers
         public async Task<IActionResult> TrackBehavior(string productId, int durationSeconds)
         {
             var isAuth = User.Identity != null && User.Identity.IsAuthenticated;
-            var userId = isAuth ? User.FindFirstValue(ClaimTypes.NameIdentifier) : null;
-
+            var userId = isAuth ? (User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("Id")) : null;
             if (string.IsNullOrEmpty(userId))
             {
                 return Json(new { success = false, message = "Không xác thực" });
@@ -414,8 +426,7 @@ namespace HuflitShopCore.Controllers
         public async Task<IActionResult> GetPersonalizedRecommendations()
         {
             var isAuth = User.Identity != null && User.Identity.IsAuthenticated;
-            var userId = isAuth ? User.FindFirstValue(ClaimTypes.NameIdentifier) : null;
-
+            var userId = isAuth ? (User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("Id")) : null;
             var cloudName = _configuration["Cloudinary:CloudName"] ?? _configuration["CloudinarySettings:CloudName"] ?? "dsamboqwp";
 
             if (string.IsNullOrEmpty(userId))
