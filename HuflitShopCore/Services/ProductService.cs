@@ -62,7 +62,7 @@ namespace HuflitShopCore.Services
             };
         }
 
-        public async Task<bool> CreateProductAsync(ProductDTO dto)
+        public async Task<bool> CreateProductAsync(ProductDTO dto, string? userId = null)
         {
             var product = new Product
             {
@@ -84,13 +84,14 @@ namespace HuflitShopCore.Services
                 ProductId = product.Id,
                 OldPrice = 0,
                 NewPrice = dto.CurrentPrice,
-                EffectiveDate = DateTime.Now
+                EffectiveDate = DateTime.Now,
+                ChangedBy = userId
             });
             await _context.SaveChangesAsync();
             return true;
         }
 
-        public async Task<bool> UpdateProductAsync(ProductDTO dto)
+        public async Task<bool> UpdateProductAsync(ProductDTO dto, string? userId = null)
         {
             var product = await _context.Products.FindAsync(dto.Id);
             if (product == null) return false;
@@ -104,7 +105,8 @@ namespace HuflitShopCore.Services
                     ProductId = product.Id,
                     OldPrice = product.CurrentPrice,
                     NewPrice = dto.CurrentPrice,
-                    EffectiveDate = DateTime.Now
+                    EffectiveDate = DateTime.Now,
+                    ChangedBy = userId
                 });
                 product.CurrentPrice = dto.CurrentPrice;
             }
@@ -118,6 +120,15 @@ namespace HuflitShopCore.Services
 
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<List<ProductPriceHistory>> GetProductPriceHistoryAsync(string productId)
+        {
+            return await _context.ProductPriceHistories
+                .Include(h => h.User)
+                .Where(h => h.ProductId == productId)
+                .OrderByDescending(h => h.EffectiveDate)
+                .ToListAsync();
         }
 
         public async Task<string> ToggleProductStatusAsync(string id)

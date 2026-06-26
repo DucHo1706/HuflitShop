@@ -1,0 +1,59 @@
+@model IEnumerable<ProductPriceHistory>
+
+<table class="table table-bordered table-striped" id="price-history-table" style="width: 100%;">
+    <thead class="thead-dark">
+        <tr>
+            <th>Ngày hiệu lực</th>
+            <th>Giá cũ (VNĐ)</th>
+            <th>Giá mới (VNĐ)</th>
+            <th>Mức chênh lệch</th>
+            <th>Người thực hiện</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            foreach (var item in Model)
+            {
+                var difference = item.NewPrice - item.OldPrice;
+                var diffClass = "";
+                var diffText = "";
+
+                if (item.OldPrice == 0)
+                {
+                    diffClass = "text-info font-weight-bold";
+                    diffText = "Khởi tạo giá";
+                }
+                else if (difference > 0)
+                {
+                    diffClass = "text-success font-weight-bold";
+                    diffText = "+" + difference.ToString("N0") + " VNĐ";
+                }
+                else if (difference < 0)
+                {
+                    diffClass = "text-danger font-weight-bold";
+                    diffText = difference.ToString("N0") + " VNĐ";
+                }
+                else
+                {
+                    diffClass = "text-muted";
+                    diffText = "Không thay đổi";
+                }
+
+                <tr>
+                    <td>@item.EffectiveDate.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                    <td>@(item.OldPrice == 0 ? "---" : item.OldPrice.ToString("N0"))</td>
+                    <td>@item.NewPrice.ToString("N0")</td>
+                    <td class="@diffClass">@diffText</td>
+                    <td>@(item.User?.FullName ?? item.User?.UserName ?? "Hệ thống (hoặc không xác định)")</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="5" class="text-center text-muted">Chưa có lịch sử điều chỉnh giá cho sản phẩm này.</td>
+            </tr>
+        }
+    </tbody>
+</table>
