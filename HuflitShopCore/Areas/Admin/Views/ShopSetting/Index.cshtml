@@ -1,0 +1,49 @@
+@model IEnumerable<HuflitShopCore.Models.ShopSetting>
+@{
+    ViewData["Title"] = "Cấu hình Cửa hàng";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+
+    var currentWifiIp = Model?.FirstOrDefault(s => s.Key == "AllowedWiFiIP")?.Value ?? "Chưa thiết lập";
+    var updatedAt = Model?.FirstOrDefault(s => s.Key == "AllowedWiFiIP")?.UpdatedAt.ToString("dd/MM/yyyy HH:mm:ss") ?? "";
+}
+
+<div class="container-fluid">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Cấu hình IP WiFi Chấm công</h6>
+        </div>
+        <div class="card-body">
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    @TempData["SuccessMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    @TempData["ErrorMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>IP WiFi Cửa Hàng Hiện Tại:</strong> <span class="badge bg-info text-dark" style="font-size: 1.2em;">@currentWifiIp</span></p>
+                    @if(!string.IsNullOrEmpty(updatedAt))
+                    {
+                        <p class="text-muted"><small>Cập nhật lần cuối: @updatedAt</small></p>
+                    }
+                    <p><em>* Lưu ý: Khi nhân viên Check-in/Check-out, hệ thống sẽ kiểm tra IP thiết bị của nhân viên có khớp với IP này hay không. Nếu mạng ở quán bị đổi IP (do khởi động lại Router), quản lý cần kết nối WiFi quán và bấm nút cập nhật lại dưới đây.</em></p>
+                    
+                    <form asp-action="UpdateWifiIp" method="post">
+                        <button type="submit" class="btn btn-primary mt-3">
+                            <i class="fas fa-sync-alt"></i> Cập Nhật Bằng IP Hiện Tại (Của Bạn)
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -50,6 +50,9 @@ namespace HuflitShopCore.Models
         [StringLength(20)]
         public string PhoneNumber { get; set; }
 
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal HourlyRate { get; set; } = 0;
+
         public virtual ICollection<Address> Addresses { get; set; }
         public virtual ICollection<UserRole> UserRoles { get; set; }
     }

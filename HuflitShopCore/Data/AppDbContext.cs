@@ -49,6 +49,19 @@ namespace HuflitShopCore.Data
                 .WithMany(od => od.OrderDetailLots)
                 .HasForeignKey(odl => odl.OrderDetailId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // Cấu hình Quan hệ cho HRM để tránh Cascade Cycles
+            builder.Entity<ShiftRegistration>()
+                .HasOne(sr => sr.Staff)
+                .WithMany()
+                .HasForeignKey(sr => sr.StaffId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<WorkSchedule>()
+                .HasOne(ws => ws.Staff)
+                .WithMany()
+                .HasForeignKey(ws => ws.StaffId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
 
         // Nhóm 1: Identity & Users
@@ -87,5 +100,12 @@ namespace HuflitShopCore.Data
         public DbSet<ChatSession> ChatSessions { get; set; }
         public DbSet<ChatMessage> ChatMessages { get; set; }
         public DbSet<ProductViewsLog> ProductViewsLogs { get; set; }
+
+        // Nhóm 6: HRM - Quản lý nhân sự, Lịch làm & Chấm công
+        public DbSet<Shift> Shifts { get; set; }
+        public DbSet<ShiftRegistration> ShiftRegistrations { get; set; }
+        public DbSet<WorkSchedule> WorkSchedules { get; set; }
+        public DbSet<Attendance> Attendances { get; set; }
+        public DbSet<ShopSetting> ShopSettings { get; set; }
     }
 }

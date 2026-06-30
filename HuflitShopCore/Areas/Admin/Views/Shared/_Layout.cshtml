@@ -156,6 +156,24 @@
                 </li>
             }
 
+            <!-- Nav Item - Pages Quản lý Nhân sự & Chấm công -->
+            @if (isAdmin)
+            {
+                <li class="nav-item">
+                    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseHRM"
+                       aria-expanded="true" aria-controls="collapseHRM">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>Lịch làm & Chấm công</span>
+                    </a>
+                    <div id="collapseHRM" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                        <div class="bg-white py-2 collapse-inner rounded">
+                            <h6 class="collapse-header">Thiết lập:</h6>
+                            <a class="collapse-item" asp-area="Admin" asp-controller="ShopSetting" asp-action="Index">Cấu hình IP WiFi</a>
+                        </div>
+                    </div>
+                </li>
+            }
+
             <!-- Nav Item - Pages Quản lý sản phẩm Menu -->
             <li class="nav-item">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseProducts"
