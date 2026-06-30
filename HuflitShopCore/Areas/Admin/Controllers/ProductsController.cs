@@ -1,7 +1,8 @@
-﻿using HuflitShopCore.DTOs;
+using HuflitShopCore.DTOs;
 using HuflitShopCore.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace HuflitShopCore.Areas.Admin.Controllers
@@ -46,7 +47,8 @@ namespace HuflitShopCore.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
-                await _productService.CreateProductAsync(dto);
+                string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                await _productService.CreateProductAsync(dto, userId);
                 return RedirectToAction(nameof(Index));
             }
             var categories = await _categoryService.GetAllCategoriesAsync();
@@ -71,7 +73,8 @@ namespace HuflitShopCore.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
-                await _productService.UpdateProductAsync(dto);
+                string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                await _productService.UpdateProductAsync(dto, userId);
                 return RedirectToAction(nameof(Index));
             }
             var categories = await _categoryService.GetAllCategoriesAsync();
@@ -128,6 +131,15 @@ namespace HuflitShopCore.Areas.Admin.Controllers
             ViewBag.ProductId = productId;
             ViewBag.Images = await _imageService.GetImagesByProductIdAsync(productId);
             return PartialView("_ProductImagesPartial");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> PriceHistoryPartial(string productId)
+        {
+            if (string.IsNullOrEmpty(productId)) return BadRequest();
+            ViewBag.ProductId = productId;
+            var history = await _productService.GetProductPriceHistoryAsync(productId);
+            return PartialView("_ProductPriceHistoryPartial", history);
         }
 
         #endregion
