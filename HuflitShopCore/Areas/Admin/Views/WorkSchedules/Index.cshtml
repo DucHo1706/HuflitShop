@@ -1,0 +1,120 @@
+@model IEnumerable<HuflitShopCore.Models.WorkSchedule>
+@{
+    ViewData["Title"] = "Bảng Chia Ca (Lịch Làm Việc)";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+    var attendances = ViewBag.Attendances as Dictionary<int, HuflitShopCore.Models.Attendance> ?? new Dictionary<int, HuflitShopCore.Models.Attendance>();
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Lịch Làm Việc & Chấm Công</h1>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">Danh sách nhân viên & thời gian chấm công</h6>
+            <form method="get" class="form-inline">
+                <input type="date" name="dateFilter" class="form-control mr-2" value="@ViewBag.DateFilter" />
+                <button type="submit" class="btn btn-primary btn-sm">Lọc theo ngày</button>
+                <a asp-action="Index" class="btn btn-secondary btn-sm ml-2">Xem từ hôm nay</a>
+            </form>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" width="100%" cellspacing="0">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Ngày Làm Việc</th>
+                            <th>Ca Làm</th>
+                            <th>Thời Gian</th>
+                            <th>Nhân Viên Đảm Nhận</th>
+                            <th>Check-in</th>
+                            <th>Check-out</th>
+                            <th>Trạng Thái</th>
+                            <th>Tổng giờ công</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            var groupedByDate = Model.GroupBy(w => w.WorkDate.Date);
+                            foreach (var dateGroup in groupedByDate)
+                            {
+                                <tr class="table-active">
+                                    <td colspan="7"><strong>@dateGroup.Key.ToString("dd/MM/yyyy - dddd")</strong></td>
+                                </tr>
+                                var groupedByShift = dateGroup.GroupBy(w => w.Shift.Id);
+                                foreach (var shiftGroup in groupedByShift)
+                                {
+                                    var firstItem = shiftGroup.First();
+                                    int rowSpan = shiftGroup.Count();
+                                    bool isFirst = true;
+                                    
+                                    foreach (var staffSchedule in shiftGroup)
+                                    {
+                                        var attendance = attendances.ContainsKey(staffSchedule.Id) ? attendances[staffSchedule.Id] : null;
+                                        
+                                        <tr>
+                                            @if (isFirst)
+                                            {
+                                                <td rowspan="@rowSpan"></td>
+                                                <td rowspan="@rowSpan"><span class="badge badge-info" style="font-size:13px;">@firstItem.Shift.Name</span></td>
+                                                <td rowspan="@rowSpan">@firstItem.Shift.StartTime.ToString(@"hh\:mm") - @firstItem.Shift.EndTime.ToString(@"hh\:mm")</td>
+                                                isFirst = false;
+                                            }
+                                            <td>
+                                                <strong>@staffSchedule.Staff.FullName</strong> <br/>
+                                                <small class="text-muted">(@staffSchedule.Staff.UserName)</small>
+                                            </td>
+                                            <td>
+                                                @(attendance?.CheckInTime?.ToString("HH:mm") ?? "-")
+                                            </td>
+                                            <td>
+                                                @(attendance?.CheckOutTime?.ToString("HH:mm") ?? "-")
+                                            </td>
+                                            <td>
+                                                @if (attendance == null)
+                                                {
+                                                    <span class="badge badge-secondary">Chưa điểm danh</span>
+                                                }
+                                                else if (attendance.Status == "Late")
+                                                {
+                                                    <span class="badge badge-warning">Đi trễ</span>
+                                                    @if (!string.IsNullOrEmpty(attendance.Note))
+                                                    {
+                                                        <br/><small class="text-danger">@attendance.Note</small>
+                                                    }
+                                                }
+                                                else if (attendance.Status == "Absent")
+                                                {
+                                                    <span class="badge badge-danger">Vắng mặt / Nghỉ</span>
+                                                    @if (!string.IsNullOrEmpty(attendance.Note))
+                                                    {
+                                                        <br/><small class="text-muted">@attendance.Note</small>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge badge-success">Đúng giờ</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <strong>@(attendance != null ? Math.Round(attendance.CalculatedHours, 2).ToString("0.##") : "0")</strong> h
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="7" class="text-center text-muted py-4">Không có dữ liệu lịch làm việc.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

@@ -107,5 +107,6 @@ namespace HuflitShopCore.Data
         public DbSet<WorkSchedule> WorkSchedules { get; set; }
         public DbSet<Attendance> Attendances { get; set; }
         public DbSet<ShopSetting> ShopSettings { get; set; }
+        public DbSet<StaffRequest> StaffRequests { get; set; }
     }
 }

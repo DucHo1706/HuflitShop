@@ -113,24 +113,27 @@
             <!-- Divider -->
             <hr class="sidebar-divider my-0">
 
-            <!-- Nav Item - Dashboard -->
-            <li class="nav-item active">
-                <a class="nav-link" asp-area="Admin" asp-controller="Home" asp-action="Index">
-                    <i class="fas fa-fw fa-tachometer-alt"></i>
-                    <span>Tổng quan</span>
-                </a>
-            </li>
+            @if (isAdmin)
+            {
+                <!-- Nav Item - Dashboard -->
+                <li class="nav-item active">
+                    <a class="nav-link" asp-area="Admin" asp-controller="Home" asp-action="Index">
+                        <i class="fas fa-fw fa-tachometer-alt"></i>
+                        <span>Tổng quan</span>
+                    </a>
+                </li>
 
-            <!-- Nav Item - Instruction -->
-            <li class="nav-item">
-                <a class="nav-link" asp-area="Admin" asp-controller="Home" asp-action="Instruction">
-                    <i class="fas fa-fw fa-book"></i>
-                    <span>Hướng dẫn sử dụng</span>
-                </a>
-            </li>
+                <!-- Nav Item - Instruction -->
+                <li class="nav-item">
+                    <a class="nav-link" asp-area="Admin" asp-controller="Home" asp-action="Instruction">
+                        <i class="fas fa-fw fa-book"></i>
+                        <span>Hướng dẫn sử dụng</span>
+                    </a>
+                </li>
 
-            <!-- Divider -->
-            <hr class="sidebar-divider">
+                <!-- Divider -->
+                <hr class="sidebar-divider">
+            }
 
             <!-- Heading -->
             <div class="sidebar-heading">
@@ -157,25 +160,48 @@
             }
 
             <!-- Nav Item - Pages Quản lý Nhân sự & Chấm công -->
-            @if (isAdmin)
-            {
-                <li class="nav-item">
-                    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseHRM"
-                       aria-expanded="true" aria-controls="collapseHRM">
-                        <i class="fas fa-calendar-alt"></i>
-                        <span>Lịch làm & Chấm công</span>
-                    </a>
-                    <div id="collapseHRM" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
-                        <div class="bg-white py-2 collapse-inner rounded">
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseHRM"
+                   aria-expanded="true" aria-controls="collapseHRM">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Lịch làm & Chấm công</span>
+                </a>
+                <div id="collapseHRM" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        @if (isAdmin)
+                        {
                             <h6 class="collapse-header">Thiết lập:</h6>
                             <a class="collapse-item" asp-area="Admin" asp-controller="ShopSetting" asp-action="Index">Cấu hình IP WiFi</a>
-                        </div>
+                            <a class="collapse-item" asp-area="Admin" asp-controller="Shifts" asp-action="Index">Định nghĩa Ca làm</a>
+                            <div class="collapse-divider"></div>
+                            <h6 class="collapse-header">Nhân sự & Đơn từ:</h6>
+                            <a class="collapse-item" asp-area="Admin" asp-controller="ShiftRegistrations" asp-action="Index">Duyệt Đơn Đăng Ký</a>
+                            <a class="collapse-item" asp-area="Admin" asp-controller="WorkSchedules" asp-action="Index">Bảng Phân Ca</a>
+                            <a class="collapse-item" asp-area="Admin" asp-controller="Requests" asp-action="Index">Đơn chờ xử lý</a>
+                            <a class="collapse-item" asp-area="Admin" asp-controller="Requests" asp-action="History">Lịch sử Đơn từ</a>
+                            <div class="collapse-divider"></div>
+                            <h6 class="collapse-header">Tài chính & Thống kê:</h6>
+                            <a class="collapse-item" asp-area="Admin" asp-controller="Salary" asp-action="Index">Bảng Lương Tổng Hợp</a>
+                        }
+                        else
+                        {
+                            <h6 class="collapse-header">Cá nhân:</h6>
+                            <a class="collapse-item" asp-area="" asp-controller="Profile" asp-action="Profile">Quản lý tài khoản</a>
+                            <a class="collapse-item" asp-area="Admin" asp-controller="Salary" asp-action="MySalary">Bảng lương của tôi</a>
+                            <div class="collapse-divider"></div>
+                            <h6 class="collapse-header">Ca làm & Điểm danh:</h6>
+                            <a class="collapse-item" asp-area="Admin" asp-controller="StaffShift" asp-action="Index">Đăng ký ca làm</a>
+                            <a class="collapse-item" asp-area="Admin" asp-controller="Attendance" asp-action="Index">Chấm công (Check-in)</a>
+                            <a class="collapse-item" asp-area="Admin" asp-controller="Requests" asp-action="MyRequests">Đơn từ / Yêu cầu</a>
+                        }
                     </div>
-                </li>
-            }
+                </div>
+            </li>
 
-            <!-- Nav Item - Pages Quản lý sản phẩm Menu -->
-            <li class="nav-item">
+            @if (isAdmin)
+            {
+                <!-- Nav Item - Pages Quản lý sản phẩm Menu -->
+                <li class="nav-item">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseProducts"
                    aria-expanded="true" aria-controls="collapseUtilities">
                     <i class="fab fa-product-hunt"></i>
@@ -338,6 +364,7 @@
                     <span>Tư vấn khách hàng</span>
                 </a>
             </li>
+            }
 
             @if (isAdmin)
             {

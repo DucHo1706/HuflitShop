@@ -1,0 +1,123 @@
+@model IEnumerable<HuflitShopCore.Models.ShiftRegistration>
+@{
+    ViewData["Title"] = "Đăng ký Lịch Làm Việc";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+    var shifts = ViewBag.Shifts as IEnumerable<HuflitShopCore.Models.Shift>;
+}
+
+<div class="container my-5">
+    <div class="row">
+        <!-- Đăng ký ca làm -->
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Đăng Ký Ca Làm</h5>
+                </div>
+                <div class="card-body">
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+                    }
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+                    }
+
+                    <form asp-action="Register" method="post">
+                        <div class="form-group">
+                            <label>Ngày làm việc</label>
+                            <input type="date" name="date" class="form-control" required min="@DateTime.Today.ToString("yyyy-MM-dd")" value="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                        </div>
+                        <div class="form-group mt-3">
+                            <label>Chọn Ca</label>
+                            <select name="shiftId" class="form-control" required>
+                                <option value="">-- Chọn ca làm --</option>
+                                @if (shifts != null)
+                                {
+                                    foreach (var shift in shifts)
+                                    {
+                                        <option value="@shift.Id">@shift.Name (@shift.StartTime.ToString(@"hh\:mm") - @shift.EndTime.ToString(@"hh\:mm"))</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 mt-4">Xác nhận Đăng ký</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lịch sử đăng ký của nhân viên -->
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">Ca làm của bạn trong tương lai</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th>Ngày</th>
+                                    <th>Ca làm</th>
+                                    <th>Thời gian</th>
+                                    <th>Trạng thái</th>
+                                    <th>Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model != null && Model.Any())
+                                {
+                                    foreach (var item in Model)
+                                    {
+                                        <tr>
+                                            <td><strong>@item.RegistrationDate.ToString("dd/MM/yyyy")</strong></td>
+                                            <td><span class="badge bg-info text-white">@item.Shift.Name</span></td>
+                                            <td>@item.Shift.StartTime.ToString(@"hh\:mm") - @item.Shift.EndTime.ToString(@"hh\:mm")</td>
+                                            <td>
+                                                @if (item.Status == "Pending")
+                                                {
+                                                    <span class="badge bg-warning text-dark">Đang chờ duyệt</span>
+                                                }
+                                                else if (item.Status == "Approved")
+                                                {
+                                                    <span class="badge bg-success text-white">Đã chốt ca</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-danger text-white">Đã từ chối</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (item.Status == "Pending")
+                                                {
+                                                    <form asp-action="Cancel" asp-route-id="@item.Id" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn hủy đăng ký ca này?');">
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger">Hủy ca</button>
+                                                    </form>
+                                                }
+                                                else if (item.Status == "Rejected")
+                                                {
+                                                    <form asp-action="Cancel" asp-route-id="@item.Id" method="post" onsubmit="return confirm('Bạn muốn xóa bản ghi này khỏi danh sách?');">
+                                                        <button type="submit" class="btn btn-sm btn-outline-secondary">Xóa bản ghi</button>
+                                                    </form>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="5" class="text-center py-4 text-muted">Bạn chưa đăng ký ca làm nào sắp tới.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Đã ẩn Lịch sử ca làm (Trong quá khứ) theo yêu cầu -->
+</div>

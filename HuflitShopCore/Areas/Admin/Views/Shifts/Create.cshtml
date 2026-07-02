@@ -1,0 +1,58 @@
+@model HuflitShopCore.Models.Shift
+@{
+    ViewData["Title"] = "Tạo Ca Làm";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Tạo Ca Làm Mới</h6>
+        </div>
+        <div class="card-body">
+            <form asp-action="Create">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                
+                <div class="form-group row">
+                    <div class="col-md-6">
+                        <label asp-for="Name" class="control-label">Tên Ca (VD: Ca Sáng)</label>
+                        <input asp-for="Name" class="form-control" required />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-group row mt-3">
+                    <div class="col-md-3">
+                        <label asp-for="StartTime" class="control-label">Giờ Bắt Đầu</label>
+                        <input asp-for="StartTime" type="time" class="form-control" required />
+                        <span asp-validation-for="StartTime" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="EndTime" class="control-label">Giờ Kết Thúc</label>
+                        <input asp-for="EndTime" type="time" class="form-control" required />
+                        <span asp-validation-for="EndTime" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-group row mt-3">
+                    <div class="col-md-3">
+                        <label asp-for="MaxStaff" class="control-label">Số NV Tối Đa</label>
+                        <input asp-for="MaxStaff" type="number" min="1" value="2" class="form-control" required />
+                        <span asp-validation-for="MaxStaff" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-group form-check mt-3">
+                    <label class="form-check-label">
+                        <input class="form-check-input" asp-for="IsActive" checked /> Đang áp dụng
+                    </label>
+                </div>
+
+                <div class="form-group mt-4">
+                    <input type="submit" value="Tạo Mới" class="btn btn-primary" />
+                    <a asp-action="Index" class="btn btn-secondary">Trở lại</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

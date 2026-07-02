@@ -1,4 +1,4 @@
-﻿@model HuflitShopCore.DTOs.DashboardDTO
+@model HuflitShopCore.DTOs.DashboardDTO
 @{
     ViewData["Title"] = "Tổng quan";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
@@ -6,6 +6,16 @@
 
 <!-- Content Row -->
 <div class="row mt-4">
+
+    @if (!Model.IsAdmin)
+    {
+        <div class="col-12">
+            <div class="alert alert-info">
+                <h5>Xin chào, Nhân viên!</h5>
+                <p>Chào mừng bạn đến với trang quản trị. Tại đây, bạn có thể xem và đăng ký ca làm việc, chấm công cũng như theo dõi bảng lương của mình ở menu bên trái.</p>
+            </div>
+        </div>
+    }
 
     @if (Model.IsAdmin)
     {
@@ -153,103 +163,106 @@
 }
 
 
-<!-- Content Row -->
-<div class="row">
+@if (Model.IsAdmin)
+{
+    <!-- Content Row -->
+    <div class="row">
 
-    <!-- Content Column -->
-    <div class="col-lg-6 mb-4">
+        <!-- Content Column -->
+        <div class="col-lg-6 mb-4">
 
-        <!-- Project Card Example -->
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Đánh giá shop</h6>
-            </div>
-            <div class="card-body">
-                <h4 class="small font-weight-bold">
-                    <i class="fas fa-star" style="color: #D7DF01;"></i>
-                    <i class="fas fa-star" style="color: #D7DF01;"></i>
-                    <i class="fas fa-star" style="color: #D7DF01;"></i>
-                    <i class="fas fa-star" style="color: #D7DF01;"></i>
-                    <i class="fas fa-star" style="color: #D7DF01;"></i>
-                    <span class="float-right">@Model.FiveStarPercentage%</span>
-                </h4>
-                <div class="progress mb-4">
-                    <div class="progress-bar bg-danger" role="progressbar" style="width: @Model.FiveStarPercentage%"
-                         aria-valuenow="@Model.FiveStarPercentage" aria-valuemin="0" aria-valuemax="100"></div>
+            <!-- Project Card Example -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Đánh giá shop</h6>
                 </div>
-                <h4 class="small font-weight-bold">
-                    <i class="fas fa-star" style="color: #D7DF01;"></i>
-                    <i class="fas fa-star" style="color: #D7DF01;"></i>
-                    <i class="fas fa-star" style="color: #D7DF01;"></i>
-                    <i class="fas fa-star" style="color: #D7DF01;"></i>
-                    <span class="float-right">@Model.FourStarPercentage%</span>
-                </h4>
-                <div class="progress mb-4">
-                    <div class="progress-bar bg-warning" role="progressbar" style="width: @Model.FourStarPercentage%"
-                         aria-valuenow="@Model.FourStarPercentage" aria-valuemin="0" aria-valuemax="100"></div>
+                <div class="card-body">
+                    <h4 class="small font-weight-bold">
+                        <i class="fas fa-star" style="color: #D7DF01;"></i>
+                        <i class="fas fa-star" style="color: #D7DF01;"></i>
+                        <i class="fas fa-star" style="color: #D7DF01;"></i>
+                        <i class="fas fa-star" style="color: #D7DF01;"></i>
+                        <i class="fas fa-star" style="color: #D7DF01;"></i>
+                        <span class="float-right">@Model.FiveStarPercentage%</span>
+                    </h4>
+                    <div class="progress mb-4">
+                        <div class="progress-bar bg-danger" role="progressbar" style="width: @Model.FiveStarPercentage%"
+                             aria-valuenow="@Model.FiveStarPercentage" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <h4 class="small font-weight-bold">
+                        <i class="fas fa-star" style="color: #D7DF01;"></i>
+                        <i class="fas fa-star" style="color: #D7DF01;"></i>
+                        <i class="fas fa-star" style="color: #D7DF01;"></i>
+                        <i class="fas fa-star" style="color: #D7DF01;"></i>
+                        <span class="float-right">@Model.FourStarPercentage%</span>
+                    </h4>
+                    <div class="progress mb-4">
+                        <div class="progress-bar bg-warning" role="progressbar" style="width: @Model.FourStarPercentage%"
+                             aria-valuenow="@Model.FourStarPercentage" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <h4 class="small font-weight-bold">
+                        <i class="fas fa-star" style="color: #D7DF01;"></i>
+                        <i class="fas fa-star" style="color: #D7DF01;"></i>
+                        <i class="fas fa-star" style="color: #D7DF01;"></i>
+                        <span class="float-right">@Model.ThreeStarPercentage%</span>
+                    </h4>
+                    <div class="progress mb-4">
+                        <div class="progress-bar" role="progressbar" style="width: @Model.ThreeStarPercentage%"
+                             aria-valuenow="@Model.ThreeStarPercentage" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <h4 class="small font-weight-bold">
+                        <i class="fas fa-star" style="color: #D7DF01;"></i>
+                        <i class="fas fa-star" style="color: #D7DF01;"></i>
+                        <span class="float-right">@Model.TwoStarPercentage%</span>
+                    </h4>
+                    <div class="progress mb-4">
+                        <div class="progress-bar bg-info" role="progressbar" style="width: @Model.TwoStarPercentage%"
+                             aria-valuenow="@Model.TwoStarPercentage" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <h4 class="small font-weight-bold">
+                        <i class="fas fa-star" style="color: #D7DF01;"></i>
+                        <span class="float-right">@Model.OneStarPercentage%</span>
+                    </h4>
+                    <div class="progress">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: @Model.OneStarPercentage%"
+                             aria-valuenow="@Model.OneStarPercentage" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
                 </div>
-                <h4 class="small font-weight-bold">
-                    <i class="fas fa-star" style="color: #D7DF01;"></i>
-                    <i class="fas fa-star" style="color: #D7DF01;"></i>
-                    <i class="fas fa-star" style="color: #D7DF01;"></i>
-                    <span class="float-right">@Model.ThreeStarPercentage%</span>
-                </h4>
-                <div class="progress mb-4">
-                    <div class="progress-bar" role="progressbar" style="width: @Model.ThreeStarPercentage%"
-                         aria-valuenow="@Model.ThreeStarPercentage" aria-valuemin="0" aria-valuemax="100"></div>
-                </div>
-                <h4 class="small font-weight-bold">
-                    <i class="fas fa-star" style="color: #D7DF01;"></i>
-                    <i class="fas fa-star" style="color: #D7DF01;"></i>
-                    <span class="float-right">@Model.TwoStarPercentage%</span>
-                </h4>
-                <div class="progress mb-4">
-                    <div class="progress-bar bg-info" role="progressbar" style="width: @Model.TwoStarPercentage%"
-                         aria-valuenow="@Model.TwoStarPercentage" aria-valuemin="0" aria-valuemax="100"></div>
-                </div>
-                <h4 class="small font-weight-bold">
-                    <i class="fas fa-star" style="color: #D7DF01;"></i>
-                    <span class="float-right">@Model.OneStarPercentage%</span>
-                </h4>
-                <div class="progress">
-                    <div class="progress-bar bg-success" role="progressbar" style="width: @Model.OneStarPercentage%"
-                         aria-valuenow="@Model.OneStarPercentage" aria-valuemin="0" aria-valuemax="100"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-6 mb-4">
-
-
-        <!-- Illustrations -->
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Chương trình khuyến mãi</h6>
-            </div>
-            <div class="card-body">
-                <div class="text-center">
-                    <img class="img-fluid px-3 px-sm-4 mt-3 mb-4" style="width: 25rem;"
-                         src="~/Admin/img/promotion.jpg" alt="...">
-                </div>
-                @if (!Model.HasActivePromotion)
-                {
-                    <p>Chưa có chương trình khuyến mãi nào.</p>
-                }
-                else
-                {
-                    string displayValue = Model.ActivePromotionType == "Percent" ? Model.ActivePromotionValue.ToString("0.##") + "%" : Model.ActivePromotionValue.ToString("N0") + "đ";
-                    <p>Shop đang áp dụng chương trình khuyến mãi giảm <strong>@displayValue</strong>.</p>
-                }
-
-                <a target="_blank" rel="nofollow" asp-action="Index" asp-controller="Promotions" asp-area="Admin">
-                    Xem tất cả &rarr;
-                </a>
             </div>
         </div>
 
+        <div class="col-lg-6 mb-4">
+
+
+            <!-- Illustrations -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Chương trình khuyến mãi</h6>
+                </div>
+                <div class="card-body">
+                    <div class="text-center">
+                        <img class="img-fluid px-3 px-sm-4 mt-3 mb-4" style="width: 25rem;"
+                             src="~/Admin/img/promotion.jpg" alt="...">
+                    </div>
+                    @if (!Model.HasActivePromotion)
+                    {
+                        <p>Chưa có chương trình khuyến mãi nào.</p>
+                    }
+                    else
+                    {
+                        string displayValue = Model.ActivePromotionType == "Percent" ? Model.ActivePromotionValue.ToString("0.##") + "%" : Model.ActivePromotionValue.ToString("N0") + "đ";
+                        <p>Shop đang áp dụng chương trình khuyến mãi giảm <strong>@displayValue</strong>.</p>
+                    }
+
+                    <a target="_blank" rel="nofollow" asp-action="Index" asp-controller="Promotions" asp-area="Admin">
+                        Xem tất cả &rarr;
+                    </a>
+                </div>
+            </div>
+
+        </div>
     </div>
-</div>
+}
 
 @section Scripts
 {

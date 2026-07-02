@@ -1,0 +1,150 @@
+@model HuflitShopCore.Models.SalaryViewModel
+@{
+    ViewData["Title"] = "Bảng Lương Của Tôi";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Bảng Lương Của Tôi</h1>
+    </div>
+
+    <!-- Bộ lọc tháng năm -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <form method="get" class="form-inline">
+                <label class="mr-2 font-weight-bold text-primary">Xem lương tháng:</label>
+                <select name="month" class="form-control mr-2">
+                    @for (int i = 1; i <= 12; i++)
+                    {
+                        if (i == Model.Month)
+                        {
+                            <option value="@i" selected>Tháng @i</option>
+                        }
+                        else
+                        {
+                            <option value="@i">Tháng @i</option>
+                        }
+                    }
+                </select>
+                <select name="year" class="form-control mr-3">
+                    @for (int y = DateTime.Now.Year - 1; y <= DateTime.Now.Year + 1; y++)
+                    {
+                        if (y == Model.Year)
+                        {
+                            <option value="@y" selected>Năm @y</option>
+                        }
+                        else
+                        {
+                            <option value="@y">Năm @y</option>
+                        }
+                    }
+                </select>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Tra cứu</button>
+            </form>
+        </div>
+        <div class="card-body text-center">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <div class="card bg-info text-white shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-uppercase mb-1">Tổng giờ công (Thực tế)</div>
+                                    <div class="h5 mb-0 font-weight-bold">@Math.Round(Model.TotalHours, 2) giờ</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-clock fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card bg-warning text-white shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-uppercase mb-1">Mức lương (Theo giờ)</div>
+                                    <div class="h5 mb-0 font-weight-bold">@Model.HourlyRate.ToString("N0") VNĐ</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-coins fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card bg-success text-white shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-uppercase mb-1">Tổng Lương Tạm Tính</div>
+                                    <div class="h4 mb-0 font-weight-bold">@Model.TotalSalary.ToString("N0") VNĐ</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-money-bill-wave fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chi tiết công -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Chi tiết chấm công tháng @Model.Month/@Model.Year</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" width="100%" cellspacing="0">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Ngày</th>
+                            <th>Ca</th>
+                            <th>Giờ vào</th>
+                            <th>Giờ ra</th>
+                            <th>Giờ công (Thực tế)</th>
+                            <th>Ghi chú / Phạt</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Attendances.Any())
+                        {
+                            foreach (var item in Model.Attendances)
+                            {
+                                <tr>
+                                    <td><strong>@item.WorkSchedule.WorkDate.ToString("dd/MM/yyyy")</strong></td>
+                                    <td><span class="badge badge-info">@item.WorkSchedule.Shift.Name</span></td>
+                                    <td>@(item.CheckInTime?.ToString("HH:mm") ?? "-")</td>
+                                    <td>@(item.CheckOutTime?.ToString("HH:mm") ?? "-")</td>
+                                    <td><strong class="text-success">@Math.Round(item.CalculatedHours, 2)h</strong></td>
+                                    <td>
+                                        @if (item.Status == "Late")
+                                        {
+                                            <span class="text-danger"><i class="fas fa-exclamation-circle"></i> @item.Note</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-success"><i class="fas fa-check-circle"></i> Đúng giờ</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center py-4 text-muted">Không có dữ liệu chấm công trong tháng này.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

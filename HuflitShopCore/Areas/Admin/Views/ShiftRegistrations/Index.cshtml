@@ -1,0 +1,90 @@
+@model IEnumerable<HuflitShopCore.Models.ShiftRegistration>
+@{
+    ViewData["Title"] = "Duyệt Đăng ký Ca làm";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Duyệt Đăng Ký Ca Làm</h1>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">Danh sách nhân viên đăng ký ca</h6>
+            <form method="get" class="form-inline">
+                <input type="date" name="dateFilter" class="form-control mr-2" value="@ViewBag.DateFilter" />
+                <button type="submit" class="btn btn-primary btn-sm">Lọc theo ngày</button>
+                <a asp-action="Index" class="btn btn-secondary btn-sm ml-2">Xem tất cả từ hôm nay</a>
+            </form>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" width="100%" cellspacing="0">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Nhân viên</th>
+                            <th>Ngày đăng ký</th>
+                            <th>Ca làm</th>
+                            <th>Trạng thái</th>
+                            <th>Ngày gửi đơn</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model) {
+                            <tr>
+                                <td>
+                                    <strong>@item.Staff?.FullName</strong><br/>
+                                    <small class="text-muted">@item.Staff?.UserName</small>
+                                </td>
+                                <td>@item.RegistrationDate.ToString("dd/MM/yyyy")</td>
+                                <td><span class="badge badge-info" style="font-size:13px;">@item.Shift?.Name</span> (@item.Shift?.StartTime.ToString(@"hh\:mm") - @item.Shift?.EndTime.ToString(@"hh\:mm"))</td>
+                                <td>
+                                    @if (item.Status == "Pending")
+                                    {
+                                        <span class="badge badge-warning text-dark">Đang chờ duyệt</span>
+                                    }
+                                    else if (item.Status == "Approved")
+                                    {
+                                        <span class="badge badge-success">Đã chốt ca</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-danger">Đã từ chối</span>
+                                    }
+                                </td>
+                                <td>@item.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>
+                                    @if (item.Status == "Pending")
+                                    {
+                                        <div class="btn-group" role="group">
+                                            <form asp-action="Approve" asp-route-id="@item.Id" method="post" style="display:inline;">
+                                                <button type="submit" class="btn btn-sm btn-success mr-1" title="Duyệt"><i class="fas fa-check"></i> Duyệt</button>
+                                            </form>
+                                            <form asp-action="Reject" asp-route-id="@item.Id" method="post" style="display:inline;" onsubmit="return confirm('Từ chối đơn này?');">
+                                                <button type="submit" class="btn btn-sm btn-danger" title="Từ chối"><i class="fas fa-times"></i></button>
+                                            </form>
+                                        </div>
+                                    }
+                                    else if (item.Status == "Approved")
+                                    {
+                                        <form asp-action="Reject" asp-route-id="@item.Id" method="post" style="display:inline;" onsubmit="return confirm('Hủy ca này? Nhân viên sẽ bị xóa khỏi lịch làm chính thức.');">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Hủy ca"><i class="fas fa-ban"></i> Hủy duyệt</button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <form asp-action="Approve" asp-route-id="@item.Id" method="post" style="display:inline;">
+                                            <button type="submit" class="btn btn-sm btn-outline-success" title="Duyệt lại"><i class="fas fa-undo"></i> Duyệt lại</button>
+                                        </form>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
