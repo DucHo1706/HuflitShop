@@ -4,6 +4,7 @@ using HuflitShopCore.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HuflitShopCore.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260708200052_AddSalaryAdjustment")]
+    partial class AddSalaryAdjustment
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -320,8 +323,6 @@ namespace HuflitShopCore.Migrations
 
                     b.HasIndex("ProductVariantId");
 
-                    b.HasIndex("ReceivedDate");
-
                     b.HasIndex("StockReceivedDetailId");
 
                     b.ToTable("InventoryLots");
@@ -364,8 +365,6 @@ namespace HuflitShopCore.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ProductVariantId");
-
-                    b.HasIndex("TransactionDate");
 
                     b.ToTable("InventoryTransactions");
                 });
@@ -442,8 +441,6 @@ namespace HuflitShopCore.Migrations
                     b.HasIndex("PromotionId");
 
                     b.HasIndex("UserId");
-
-                    b.HasIndex("OrderDate", "OrderStatus");
 
                     b.ToTable("Orders");
                 });
@@ -1093,8 +1090,6 @@ namespace HuflitShopCore.Migrations
                     b.HasIndex("StaffId");
 
                     b.HasIndex("WorkScheduleId");
-
-                    b.HasIndex("Status", "CreatedAt");
 
                     b.ToTable("StaffRequests");
                 });

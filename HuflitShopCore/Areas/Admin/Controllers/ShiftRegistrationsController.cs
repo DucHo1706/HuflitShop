@@ -18,6 +18,11 @@ namespace HuflitShopCore.Areas.Admin.Controllers
             _context = context;
         }
 
+        private bool IsAjaxRequest()
+        {
+            return Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+        }
+
         // GET: Admin/ShiftRegistrations
         public async Task<IActionResult> Index(DateTime? dateFilter)
         {
@@ -51,13 +56,17 @@ namespace HuflitShopCore.Areas.Admin.Controllers
 
             if (reg.Status == "Approved")
             {
-                TempData["ErrorMessage"] = "Ca này đã được duyệt từ trước.";
+                string msg = "Ca này đã được duyệt từ trước.";
+                if (IsAjaxRequest()) return Json(new { success = false, message = msg });
+                TempData["ErrorMessage"] = msg;
                 return RedirectToAction(nameof(Index));
             }
 
             if (reg.RegistrationDate.Date < DateTime.Today)
             {
-                TempData["ErrorMessage"] = "Không thể duyệt ca làm việc trong quá khứ.";
+                string msg = "Không thể duyệt ca làm việc trong quá khứ.";
+                if (IsAjaxRequest()) return Json(new { success = false, message = msg });
+                TempData["ErrorMessage"] = msg;
                 return RedirectToAction(nameof(Index));
             }
 
@@ -67,7 +76,9 @@ namespace HuflitShopCore.Areas.Admin.Controllers
 
             if (currentApprovedCount >= reg.Shift.MaxStaff)
             {
-                TempData["ErrorMessage"] = $"Ca này đã đủ người ({reg.Shift.MaxStaff} người). Không thể duyệt thêm!";
+                string msg = $"Ca này đã đủ người ({reg.Shift.MaxStaff} người). Không thể duyệt thêm!";
+                if (IsAjaxRequest()) return Json(new { success = false, message = msg });
+                TempData["ErrorMessage"] = msg;
                 return RedirectToAction(nameof(Index));
             }
 
@@ -85,6 +96,24 @@ namespace HuflitShopCore.Areas.Admin.Controllers
             _context.WorkSchedules.Add(workSchedule);
 
             await _context.SaveChangesAsync();
+
+            var staffUser = await _context.Users.FindAsync(reg.StaffId);
+
+            if (IsAjaxRequest())
+            {
+                return Json(new { 
+                    success = true, 
+                    message = "Đã duyệt và xếp lịch thành công!",
+                    data = new {
+                        id = workSchedule.Id,
+                        staffId = workSchedule.StaffId,
+                        fullName = staffUser?.FullName ?? "Nhân viên",
+                        userName = staffUser?.UserName ?? "",
+                        initials = string.IsNullOrEmpty(staffUser?.FullName) ? "?" : staffUser.FullName.Substring(0, 1).ToUpper()
+                    }
+                });
+            }
+
             TempData["SuccessMessage"] = "Đã duyệt và xếp lịch thành công!";
             return RedirectToAction(nameof(Index));
         }
@@ -110,7 +139,9 @@ namespace HuflitShopCore.Areas.Admin.Controllers
 
                     if (hasRequests || hasAttendance)
                     {
-                        TempData["ErrorMessage"] = "Không thể hủy ca này vì nhân viên đã gửi đơn từ hoặc có lịch sử điểm danh liên quan. Vui lòng xử lý đơn từ trước.";
+                        string msg = "Không thể hủy ca này vì nhân viên đã gửi đơn từ hoặc có lịch sử điểm danh liên quan. Vui lòng xử lý đơn từ trước.";
+                        if (IsAjaxRequest()) return Json(new { success = false, message = msg });
+                        TempData["ErrorMessage"] = msg;
                         return RedirectToAction(nameof(Index));
                     }
 
@@ -122,7 +153,10 @@ namespace HuflitShopCore.Areas.Admin.Controllers
             _context.ShiftRegistrations.Update(reg);
             await _context.SaveChangesAsync();
 
-            TempData["SuccessMessage"] = "Đã từ chối đơn đăng ký ca.";
+            string successMsg = "Đã từ chối đơn đăng ký ca.";
+            if (IsAjaxRequest()) return Json(new { success = true, message = successMsg });
+
+            TempData["SuccessMessage"] = successMsg;
             return RedirectToAction(nameof(Index));
         }
     }

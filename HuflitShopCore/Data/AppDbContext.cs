@@ -62,6 +62,19 @@ namespace HuflitShopCore.Data
                 .WithMany()
                 .HasForeignKey(ws => ws.StaffId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // Tối ưu hóa chỉ mục (Indexes)
+            builder.Entity<Order>()
+                .HasIndex(o => new { o.OrderDate, o.OrderStatus });
+
+            builder.Entity<InventoryTransaction>()
+                .HasIndex(t => t.TransactionDate);
+
+            builder.Entity<InventoryLot>()
+                .HasIndex(l => l.ReceivedDate);
+
+            builder.Entity<StaffRequest>()
+                .HasIndex(r => new { r.Status, r.CreatedAt });
         }
 
         // Nhóm 1: Identity & Users
@@ -108,5 +121,6 @@ namespace HuflitShopCore.Data
         public DbSet<Attendance> Attendances { get; set; }
         public DbSet<ShopSetting> ShopSettings { get; set; }
         public DbSet<StaffRequest> StaffRequests { get; set; }
+        public DbSet<SalaryAdjustment> SalaryAdjustments { get; set; }
     }
 }

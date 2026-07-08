@@ -1,14 +1,30 @@
 /* ==========================================================================
-   Tracy Admin Custom Stylesheet - Luxury & Professional Minimalist Design
+   Tracy Admin Custom Stylesheet - SaaS Elite Luxury Theme
+   Transforms generic SB Admin 2 into a professional enterprise-level dashboard.
    ========================================================================== */
 
 /* --- Fonts & Base Setup --- */
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
 
+:root {
+    --primary-bg: #f8fafc;
+    --sidebar-bg: #0b1329;
+    --sidebar-hover: rgba(255, 255, 255, 0.04);
+    --sidebar-active: rgba(255, 255, 255, 0.07);
+    --accent-blue: #3b82f6;
+    --accent-green: #10b981;
+    --accent-indigo: #6366f1;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --border-color: rgba(226, 232, 240, 0.8);
+    --card-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.03), 0 8px 15px -6px rgba(0, 0, 0, 0.02);
+}
+
 body {
-    font-family: 'Outfit', sans-serif !important;
-    background-color: #f8fafc; /* Màu nền xám nhạt nhẹ nhàng quý phái */
-    color: #334155; /* Màu chữ slate đậm dịu mắt */
+    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    background-color: var(--primary-bg);
+    color: var(--text-secondary);
+    letter-spacing: -0.01em;
 }
 
 /* --- Global Scrollbar --- */
@@ -21,65 +37,76 @@ body {
 }
 ::-webkit-scrollbar-thumb {
     background: #cbd5e1;
-    border-radius: 4px;
+    border-radius: 6px;
 }
 ::-webkit-scrollbar-thumb:hover {
     background: #94a3b8;
 }
 
-/* --- Sidebar (Thanh điều hướng bên trái) --- */
+/* --- Sidebar (SaaS Dark Mode Theme) --- */
 #accordionSidebar {
-    background: linear-gradient(180deg, #0d1e3d 0%, #1e40af 100%) !important; /* Royal Navy & Royal Blue */
-    box-shadow: 4px 0 24px rgba(13, 30, 61, 0.08);
-    border-right: 1px solid #1e3a8a;
+    background: var(--sidebar-bg) !important;
+    box-shadow: 4px 0 30px rgba(11, 19, 41, 0.05);
+    border-right: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 #accordionSidebar .sidebar-brand {
-    height: 4.375rem;
+    height: 4.5rem;
     text-decoration: none;
-    background-color: rgba(13, 30, 61, 0.4);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    background-color: rgba(0, 0, 0, 0.15);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 #accordionSidebar .sidebar-brand-text {
     font-weight: 700;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.08em;
     color: #ffffff;
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     text-transform: uppercase;
 }
 
 #accordionSidebar .sidebar-brand-icon i {
-    color: #38bdf8 !important; /* Xanh ngọc nhẹ */
+    color: var(--accent-blue) !important;
+    text-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
 }
 
-/* Sidebar Links */
+/* Sidebar Navigation Items */
 #accordionSidebar .nav-item .nav-link {
-    padding: 0.85rem 1.5rem;
+    padding: 0.9rem 1.5rem;
     font-weight: 500;
-    font-size: 0.9rem;
+    font-size: 0.88rem;
     color: #94a3b8 !important;
-    transition: all 0.2s ease-in-out;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    margin: 0.15rem 0.75rem;
+    border-radius: 8px;
 }
 
 #accordionSidebar .nav-item .nav-link i {
     margin-right: 0.75rem;
     font-size: 0.95rem;
     color: #64748b;
-    transition: all 0.2s ease-in-out;
+    transition: all 0.2s ease;
     width: 1.25rem;
     text-align: center;
 }
 
-#accordionSidebar .nav-item .nav-link:hover,
+#accordionSidebar .nav-item .nav-link:hover {
+    color: #ffffff !important;
+    background-color: var(--sidebar-hover);
+}
+
 #accordionSidebar .nav-item.active .nav-link {
     color: #ffffff !important;
-    background-color: rgba(255, 255, 255, 0.04);
+    background-color: var(--sidebar-active) !important;
+    font-weight: 600;
 }
 
 #accordionSidebar .nav-item .nav-link:hover i,
 #accordionSidebar .nav-item.active .nav-link i {
-    color: #38bdf8 !important; /* Highlight icon */
+    color: var(--accent-blue) !important;
 }
 
 #accordionSidebar .nav-item.active {
@@ -89,19 +116,20 @@ body {
 #accordionSidebar .nav-item.active::before {
     content: '';
     position: absolute;
-    left: 0;
-    top: 15%;
-    height: 70%;
-    width: 4px;
-    background-color: #38bdf8;
-    border-radius: 0 4px 4px 0;
+    left: 8px;
+    top: 25%;
+    height: 50%;
+    width: 3px;
+    background-color: var(--accent-blue);
+    border-radius: 4px;
+    box-shadow: 0 0 8px var(--accent-blue);
 }
 
 /* Submenu / Collapse Inner Menu */
 #accordionSidebar .collapse-inner {
-    background-color: #09162e !important;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    margin: 0.25rem 1rem 0.5rem 1rem !important;
+    background-color: rgba(0, 0, 0, 0.2) !important;
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    margin: 0.25rem 0.75rem 0.5rem 0.75rem !important;
     padding: 0.5rem 0 !important;
     border-radius: 8px !important;
 }
@@ -109,114 +137,126 @@ body {
 #accordionSidebar .collapse-inner .collapse-header {
     color: #475569 !important;
     font-weight: 600;
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     text-transform: uppercase;
-    padding: 0.5rem 1.2rem;
-    letter-spacing: 0.05em;
+    padding: 0.4rem 1.2rem;
+    letter-spacing: 0.06em;
 }
 
 #accordionSidebar .collapse-inner .collapse-item {
     color: #94a3b8 !important;
-    font-size: 0.85rem;
+    font-size: 0.83rem;
     padding: 0.45rem 1.2rem;
     font-weight: 400;
     transition: all 0.2s ease;
-    border-radius: 4px;
+    border-radius: 6px;
     margin: 0 0.5rem;
+    display: block;
 }
 
 #accordionSidebar .collapse-inner .collapse-item:hover {
-    background-color: rgba(255, 255, 255, 0.05) !important;
+    background-color: rgba(255, 255, 255, 0.04) !important;
     color: #ffffff !important;
     text-decoration: none;
+    transform: translateX(2px);
 }
 
 #accordionSidebar .sidebar-divider {
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    border-top: 1px solid rgba(255, 255, 255, 0.03);
     margin: 0.75rem 0;
 }
 
 #accordionSidebar .sidebar-heading {
     color: #475569 !important;
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     font-weight: 700;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.12em;
     padding: 0.75rem 1.5rem 0.25rem 1.5rem;
     text-transform: uppercase;
 }
 
-/* --- Topbar (Thanh tìm kiếm & thông tin user ở trên) --- */
+/* --- Topbar (Glassmorphism Effect) --- */
 .topbar {
-    background-color: #ffffff !important;
-    border-bottom: 1px solid #e2e8f0;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
-    height: 4.375rem;
+    backdrop-filter: blur(12px);
+    background-color: rgba(255, 255, 255, 0.85) !important;
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.01) !important;
+    height: 4.5rem;
 }
 
 .topbar .nav-item .nav-link {
     color: #64748b !important;
+    font-weight: 500;
 }
 
 .topbar .nav-item .nav-link:hover {
-    color: #0f172a !important;
+    color: var(--text-primary) !important;
 }
 
 .topbar .topbar-divider {
-    border-right: 1px solid #e2e8f0;
+    border-right: 1px solid var(--border-color);
 }
 
 .img-profile {
     border: 2px solid #f1f5f9;
     padding: 1px;
     object-fit: cover;
+    border-radius: 50%;
 }
 
 /* --- Content Wrapper & Cards --- */
 #content-wrapper {
-    background-color: #f8fafc !important;
+    background-color: var(--primary-bg) !important;
 }
 
 .container-fluid {
-    padding-left: 2rem !important;
-    padding-right: 2rem !important;
-    padding-bottom: 2rem !important;
+    padding-left: 2.2rem !important;
+    padding-right: 2.2rem !important;
+    padding-bottom: 2.2rem !important;
 }
 
 h1.h3 {
     font-weight: 700;
-    color: #0f172a !important;
-    letter-spacing: -0.02em;
+    color: var(--text-primary) !important;
+    letter-spacing: -0.03em;
 }
 
-/* --- Modern Card Styling --- */
+/* --- Modern Card Styling (Stripe-like Minimalist) --- */
 .card {
-    border: 1px solid #e2e8f0 !important;
-    border-radius: 12px !important;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.01) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 14px !important;
+    box-shadow: var(--card-shadow) !important;
     background-color: #ffffff;
     overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.05), 0 10px 20px -6px rgba(0, 0, 0, 0.03) !important;
 }
 
 .card-header {
     background-color: #ffffff !important;
-    border-bottom: 1px solid #e2e8f0 !important;
-    padding: 1.25rem 1.5rem !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    padding: 1.25rem 1.6rem !important;
 }
 
 .card-header h6 {
     font-weight: 600 !important;
-    color: #0f172a !important;
+    color: var(--text-primary) !important;
+    font-size: 0.95rem;
 }
 
 .card-body {
-    padding: 1.5rem !important;
+    padding: 1.6rem !important;
 }
 
-/* --- Data Tables & Tables --- */
+/* --- Data Tables & Clean Tables --- */
 .table-responsive {
     border-radius: 12px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--border-color);
     background-color: #ffffff;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.01);
 }
 
 .table {
@@ -230,14 +270,14 @@ h1.h3 {
 
 .table thead th {
     background-color: #f8fafc !important;
-    color: #475569 !important;
+    color: var(--text-secondary) !important;
     font-weight: 600 !important;
-    font-size: 0.85rem !important;
+    font-size: 0.8rem !important;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.07em;
     padding: 1rem 1.25rem !important;
     border: none !important;
-    border-bottom: 2px solid #e2e8f0 !important;
+    border-bottom: 2px solid #f1f5f9 !important;
 }
 
 .table tbody tr {
@@ -245,12 +285,12 @@ h1.h3 {
 }
 
 .table tbody tr:hover {
-    background-color: #f1f5f9 !important; /* Hover tinh tế màu xám dịu */
+    background-color: #f8fafc !important;
 }
 
 .table tbody td {
-    padding: 1.1rem 1.25rem !important;
-    font-size: 0.92rem;
+    padding: 1rem 1.25rem !important;
+    font-size: 0.9rem;
     color: #334155;
     border: none !important;
     border-bottom: 1px solid #f1f5f9 !important;
@@ -261,12 +301,19 @@ h1.h3 {
 .dataTables_wrapper .dataTables_length select,
 .dataTables_wrapper .dataTables_filter input {
     border: 1px solid #cbd5e1 !important;
-    border-radius: 6px !important;
-    padding: 0.35rem 0.75rem !important;
+    border-radius: 8px !important;
+    padding: 0.4rem 0.8rem !important;
     font-size: 0.88rem !important;
-    color: #334155 !important;
+    color: var(--text-secondary) !important;
     background-color: #ffffff !important;
     outline: none !important;
+    transition: border-color 0.2s ease;
+}
+
+.dataTables_wrapper .dataTables_length select:focus,
+.dataTables_wrapper .dataTables_filter input:focus {
+    border-color: var(--accent-blue) !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
 }
 
 .dataTables_wrapper .dataTables_filter input {
@@ -275,7 +322,7 @@ h1.h3 {
 }
 
 .dataTables_wrapper .dataTables_info {
-    font-size: 0.85rem !important;
+    font-size: 0.82rem !important;
     color: #64748b !important;
     padding-top: 1rem !important;
 }
@@ -285,9 +332,9 @@ h1.h3 {
 }
 
 .dataTables_wrapper .dataTables_paginate .paginate_button {
-    padding: 0.4rem 0.85rem !important;
-    margin-left: 2px !important;
-    border-radius: 6px !important;
+    padding: 0.4rem 0.8rem !important;
+    margin-left: 3px !important;
+    border-radius: 8px !important;
     border: 1px solid #e2e8f0 !important;
     background: #ffffff !important;
     color: #475569 !important;
@@ -298,204 +345,183 @@ h1.h3 {
 .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
     background: #f1f5f9 !important;
     border-color: #cbd5e1 !important;
-    color: #0f172a !important;
+    color: var(--text-primary) !important;
 }
 
 .dataTables_wrapper .dataTables_paginate .paginate_button.current,
 .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
-    background: #1e40af !important;
-    border-color: #1e40af !important;
+    background: var(--accent-blue) !important;
+    border-color: var(--accent-blue) !important;
     color: #ffffff !important;
+    font-weight: 600;
 }
 
-/* --- Badges (Trạng thái) - Dạng Glassmorphic Tint tinh tế --- */
+/* --- Badges (Luxury Tailwind UI Pill Style) --- */
 .badge {
-    padding: 0.45em 0.8em !important;
-    font-size: 0.78rem !important;
+    padding: 0.4em 0.75em !important;
+    font-size: 0.75rem !important;
     font-weight: 600 !important;
-    border-radius: 6px !important;
+    border-radius: 9999px !important;
     display: inline-flex;
     align-items: center;
-    gap: 0.25rem;
+    gap: 0.3rem;
     box-shadow: none !important;
 }
 
-/* Badges override */
 .badge.bg-success, .badge-success {
-    background-color: #f0fdf4 !important;
-    color: #16a34a !important;
-    border: 1px solid #bbf7d0 !important;
+    background-color: #dcfce7 !important;
+    color: #15803d !important;
+    border: 1px solid rgba(22, 163, 74, 0.15) !important;
 }
 
 .badge.bg-danger, .badge-danger {
-    background-color: #fef2f2 !important;
-    color: #dc2626 !important;
-    border: 1px solid #fecaca !important;
+    background-color: #fee2e2 !important;
+    color: #b91c1c !important;
+    border: 1px solid rgba(220, 38, 38, 0.15) !important;
 }
 
 .badge.bg-warning, .badge-warning {
-    background-color: #fffbeb !important;
-    color: #d97706 !important;
-    border: 1px solid #fde68a !important;
+    background-color: #fef3c7 !important;
+    color: #b45309 !important;
+    border: 1px solid rgba(217, 119, 6, 0.15) !important;
 }
 
 .badge.bg-info, .badge-info {
-    background-color: #f0f9ff !important;
-    color: #0284c7 !important;
-    border: 1px solid #bae6fd !important;
+    background-color: #e0f2fe !important;
+    color: #0369a1 !important;
+    border: 1px solid rgba(2, 132, 199, 0.15) !important;
 }
 
 /* --- Buttons --- */
 .btn {
     border-radius: 8px !important;
-    font-weight: 500 !important;
-    font-size: 0.88rem !important;
-    padding: 0.5rem 1rem;
-    transition: all 0.2s ease-in-out;
+    font-weight: 600 !important;
+    font-size: 0.85rem !important;
+    padding: 0.5rem 1.1rem;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: none !important;
 }
 
 .btn-sm {
-    padding: 0.35rem 0.75rem !important;
-    font-size: 0.82rem !important;
+    padding: 0.35rem 0.85rem !important;
+    font-size: 0.8rem !important;
     border-radius: 6px !important;
 }
 
-/* Custom button colors (Chuyên nghiệp hơn, không chói) */
+/* Custom premium button colors */
 .btn-primary {
-    background-color: #1e40af !important;
-    border-color: #1e40af !important;
+    background-color: var(--accent-blue) !important;
+    border-color: var(--accent-blue) !important;
     color: #ffffff !important;
 }
 
 .btn-primary:hover, .btn-primary:focus {
-    background-color: #1d4ed8 !important;
-    border-color: #1d4ed8 !important;
+    background-color: #2563eb !important;
+    border-color: #2563eb !important;
 }
 
 .btn-warning {
     background-color: #fef3c7 !important;
-    border-color: #fde68a !important;
-    color: #d97706 !important;
+    border-color: rgba(217, 119, 6, 0.1) !important;
+    color: #b45309 !important;
 }
 
 .btn-warning:hover {
     background-color: #fde68a !important;
-    color: #b45309 !important;
 }
 
 .btn-info {
     background-color: #e0f2fe !important;
-    border-color: #bae6fd !important;
+    border-color: rgba(2, 132, 199, 0.1) !important;
     color: #0369a1 !important;
 }
 
 .btn-info:hover {
     background-color: #bae6fd !important;
-    color: #0369a1 !important;
 }
 
 .btn-danger {
-    background-color: #fef2f2 !important;
-    border-color: #fecaca !important;
+    background-color: #fee2e2 !important;
+    border-color: rgba(220, 38, 38, 0.1) !important;
     color: #b91c1c !important;
 }
 
 .btn-danger:hover {
     background-color: #fecaca !important;
-    color: #991b1b !important;
 }
 
 .btn-success {
-    background-color: #ecfdf5 !important;
-    border-color: #a7f3d0 !important;
-    color: #047857 !important;
+    background-color: #dcfce7 !important;
+    border-color: rgba(22, 163, 74, 0.1) !important;
+    color: #15803d !important;
 }
 
 .btn-success:hover {
-    background-color: #a7f3d0 !important;
-    color: #065f46 !important;
+    background-color: #bbf7d0 !important;
 }
 
-/* Nút dạng Icon trong bảng */
+/* Circular Icon buttons inside tables */
 td a.btn-sm, td button.btn-sm {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 30px;
-    height: 30px;
+    width: 32px;
+    height: 32px;
     padding: 0 !important;
-    border-radius: 6px !important;
-    margin-right: 0.2rem;
+    border-radius: 50% !important;
+    margin-right: 0.3rem;
 }
 
 td a.btn-sm i, td button.btn-sm i {
     font-size: 0.85rem;
 }
 
-/* --- Toast Notification (Thông báo góc) --- */
-.toast-container {
-    top: 24px !important;
-    right: 24px !important;
-}
-
-.toast-container .alert {
-    border-radius: 10px !important;
-    border: none !important;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.05) !important;
-    padding: 1rem 1.25rem !important;
-    color: #0f172a !important;
-    display: flex;
-    align-items: center;
-    font-weight: 500;
-}
-
-.toast-container .alert-success {
-    background-color: #f0fdf4 !important;
-    border-left: 4px solid #16a34a !important;
-}
-
-.toast-container .alert-danger {
-    background-color: #fef2f2 !important;
-    border-left: 4px solid #dc2626 !important;
-}
-
-.toast-container .alert .close {
-    opacity: 0.5;
-    text-shadow: none;
-    color: #0f172a;
-    outline: none !important;
-    padding: 0.8rem 1rem !important;
-}
-
 /* --- Form Fields & Labels --- */
 .form-control {
     border: 1px solid #cbd5e1 !important;
     border-radius: 8px !important;
-    padding: 0.6rem 0.9rem !important;
-    font-size: 0.92rem !important;
-    color: #334155 !important;
+    padding: 0.55rem 0.85rem !important;
+    font-size: 0.9rem !important;
+    color: var(--text-primary) !important;
     background-color: #ffffff !important;
     transition: all 0.15s ease-in-out !important;
     box-shadow: none !important;
 }
 
 .form-control:focus {
-    border-color: #64748b !important;
+    border-color: var(--accent-blue) !important;
     background-color: #ffffff !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12) !important;
 }
 
-label.fw-bold {
+/* Fix text cut-off in select dropdowns and date inputs globally */
+select.form-control, select.form-select, select.custom-select {
+    height: auto !important;
+    min-height: calc(1.5em + 0.9rem + 2px) !important;
+    padding-top: 0.4rem !important;
+    padding-bottom: 0.4rem !important;
+    line-height: 1.5 !important;
+}
+
+input[type="date"].form-control {
+    height: auto !important;
+    min-height: calc(1.5em + 0.9rem + 2px) !important;
+    padding-top: 0.4rem !important;
+    padding-bottom: 0.4rem !important;
+    line-height: 1.5 !important;
+}
+
+label, label.fw-bold {
     font-weight: 600 !important;
-    color: #475569 !important;
-    font-size: 0.88rem !important;
-    margin-bottom: 0.4rem !important;
+    color: var(--text-secondary) !important;
+    font-size: 0.85rem !important;
+    margin-bottom: 0.35rem !important;
 }
 
 /* --- Sticky Footer --- */
 footer.sticky-footer {
     background-color: #ffffff !important;
-    border-top: 1px solid #e2e8f0;
+    border-top: 1px solid var(--border-color);
     padding: 1.5rem 0 !important;
 }
 
@@ -505,7 +531,7 @@ footer.sticky-footer span {
     font-weight: 500;
 }
 
-/*Sidebar*/
+/* Sidebar dimensions */
 .sidebar {
     width: 18rem !important; 
 }
@@ -515,132 +541,49 @@ footer.sticky-footer span {
 }
 
 .sidebar .nav-item .nav-link {
-    width: 18rem !important;
+    width: auto !important;
 }
 
 .sidebar.toggled {
-    width: 6rem !important;
+    width: 6.5rem !important;
 }
 
-/* 1. Tạo khoảng không gian thở cho toàn bộ khung DataTables */
+.sidebar.toggled #accordionSidebar {
+    width: 6.5rem !important;
+}
+
+.sidebar.toggled .nav-item .nav-link {
+    margin: 0.15rem 0.35rem;
+    padding: 0.75rem;
+    text-align: center;
+}
+
+/* --- DataTables Container Padding --- */
 .dataTables_wrapper {
-    padding: 1rem 0.5rem;
+    padding: 1.25rem 1.25rem;
 }
 
-/* 2. Căn chỉnh cụm Search và Show entries */
 .dataTables_length,
 .dataTables_filter {
-    margin-bottom: 1.5rem !important;
+    margin-bottom: 1.25rem !important;
 }
 
-    .dataTables_length label,
-    .dataTables_filter label {
-        font-weight: 600 !important;
-        color: #475569 !important;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        margin-bottom: 0;
-    }
-
-    /* 3. Tùy chỉnh Dropdown (Show entries) */
-    .dataTables_length select {
-        border: 1px solid #cbd5e1 !important;
-        border-radius: 8px !important;
-        padding: 0.4rem 1rem !important;
-        outline: none !important;
-        color: var(--vibrantBlue) !important;
-        font-weight: 700 !important;
-        background-color: #f8fafc !important;
-        cursor: pointer;
-        min-width: 70px;
-    }
-
-    /* 4. Tùy chỉnh Ô Search (Tìm kiếm) */
-    .dataTables_filter input {
-        border: 1px solid #cbd5e1 !important;
-        border-radius: 8px !important;
-        padding: 0.5rem 1rem !important;
-        outline: none !important;
-        color: #0f172a !important;
-        background-color: #f8fafc !important;
-        transition: all 0.2s ease !important;
-        margin-left: 0.5rem !important;
-    }
-
-        /* Hiệu ứng khi click vào ô Search / Dropdown */
-        .dataTables_length select:focus,
-        .dataTables_filter input:focus {
-            border-color: var(--vibrantBlue) !important;
-            background-color: #ffffff !important;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
-        }
-
-/* 5. Tùy chỉnh dòng Info (Showing 1 to X...) */
-.dataTables_info {
-    color: #64748b !important;
+.dataTables_length label,
+.dataTables_filter label {
     font-weight: 600 !important;
-    padding-top: 1.5rem !important;
-    font-size: 0.9rem;
+    color: var(--text-secondary) !important;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0;
 }
 
-/* 6. Tùy chỉnh cụm Phân trang (Pagination) */
-.dataTables_paginate {
-    padding-top: 1rem !important;
-}
-
-    .dataTables_paginate .pagination {
-        margin: 0;
-        gap: 6px; /* Tách rời các nút phân trang */
-        justify-content: flex-end;
-    }
-
-    .dataTables_paginate .page-item .page-link {
-        border-radius: 8px !important;
-        border: 1px solid #e2e8f0 !important;
-        color: #475569 !important;
-        font-weight: 600 !important;
-        padding: 0.5rem 0.9rem !important;
-        transition: all 0.2s ease !important;
-        background-color: #ffffff !important;
-    }
-
-    /* Hover phân trang */
-    .dataTables_paginate .page-item:not(.active):not(.disabled) .page-link:hover {
-        background-color: #f1f5f9 !important;
-        color: var(--vibrantBlue) !important;
-        border-color: #cbd5e1 !important;
-        transform: translateY(-2px);
-    }
-
-    /* Trang đang chọn (Active) */
-    .dataTables_paginate .page-item.active .page-link {
-        background: var(--oceanGradient) !important;
-        border-color: transparent !important;
-        color: white !important;
-        box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25) !important;
-    }
-
-    /* Trang bị vô hiệu hóa (Disabled) */
-    .dataTables_paginate .page-item.disabled .page-link {
-        background-color: #f8fafc !important;
-        color: #cbd5e1 !important;
-        border-color: #f1f5f9 !important;
-        box-shadow: none !important;
-    }
-
-/* 7. Icon Sắp xếp trên tiêu đề cột */
-table.dataTable thead .sorting:before,
-table.dataTable thead .sorting:after,
-table.dataTable thead .sorting_asc:before,
-table.dataTable thead .sorting_asc:after,
-table.dataTable thead .sorting_desc:before,
-table.dataTable thead .sorting_desc:after {
-    opacity: 0.3;
-}
-
-table.dataTable thead .sorting_asc:before,
-table.dataTable thead .sorting_desc:after {
-    opacity: 1;
-    color: var(--vibrantBlue);
+/* Admin Card layout helper */
+.admin-card {
+    border: 1px solid var(--border-color) !important;
+    border-radius: 14px !important;
+    box-shadow: var(--card-shadow) !important;
+    background-color: #ffffff;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
 }

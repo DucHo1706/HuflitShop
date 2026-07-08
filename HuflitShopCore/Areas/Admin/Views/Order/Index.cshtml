@@ -48,6 +48,14 @@
         padding: 4px 12px;
         font-size: 0.8rem;
     }
+    @@keyframes pulse-highlight {
+        0% { background-color: rgba(46, 204, 113, 0.25); }
+        50% { background-color: rgba(46, 204, 113, 0.5); }
+        100% { background-color: transparent; }
+    }
+    .table-success-highlight {
+        animation: pulse-highlight 2s ease-in-out 3;
+    }
 </style>
 
 <div class="container-fluid mt-4">
@@ -85,7 +93,7 @@
     <div class="card shadow mb-4" style="border-radius: 12px; border: none;">
         <div class="card-body p-3 bg-light" style="border-radius: 12px;">
             <div class="row">
-                <div class="col-md-3 mb-2 mb-md-0">
+                <div class="col-md-3 mb-2">
                     <label class="font-weight-bold small text-muted">Trạng thái đơn hàng:</label>
                     <select id="filterStatus" class="form-control form-control-sm shadow-sm" style="border-radius: 8px;">
                         <option value="" selected="@(!pendingOnly ? "selected" : null)">-- Tất cả trạng thái --</option>
@@ -96,7 +104,7 @@
                         <option value="4">Đã hủy</option>
                     </select>
                 </div>
-                <div class="col-md-3 mb-2 mb-md-0">
+                <div class="col-md-3 mb-2">
                     <label class="font-weight-bold small text-muted">Trạng thái thanh toán:</label>
                     <select id="filterPayment" class="form-control form-control-sm shadow-sm" style="border-radius: 8px;">
                         <option value="">-- Tất cả thanh toán --</option>
@@ -104,13 +112,32 @@
                         <option value="0">Chưa thanh toán</option>
                     </select>
                 </div>
-                <div class="col-md-3 mb-2 mb-md-0">
+                <div class="col-md-3 mb-2">
                     <label class="font-weight-bold small text-muted">Từ ngày:</label>
                     <input type="date" id="filterStartDate" class="form-control form-control-sm shadow-sm" style="border-radius: 8px;" />
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-3 mb-2">
                     <label class="font-weight-bold small text-muted">Đến ngày:</label>
                     <input type="date" id="filterEndDate" class="form-control form-control-sm shadow-sm" style="border-radius: 8px;" />
+                </div>
+            </div>
+            <div class="row mt-2 pt-2 border-top">
+                <div class="col-md-4 mb-2 mb-md-0">
+                    <label class="font-weight-bold small text-muted">Tìm theo tên sản phẩm:</label>
+                    <input type="text" id="filterProductName" class="form-control form-control-sm shadow-sm" placeholder="Nhập tên sản phẩm..." style="border-radius: 8px;" />
+                </div>
+                <div class="col-md-3 mb-2 mb-md-0">
+                    <label class="font-weight-bold small text-muted">Khoảng giá từ (đ):</label>
+                    <input type="number" id="filterMinAmount" class="form-control form-control-sm shadow-sm" placeholder="Min" style="border-radius: 8px;" />
+                </div>
+                <div class="col-md-3 mb-2 mb-md-0">
+                    <label class="font-weight-bold small text-muted">Khoảng giá đến (đ):</label>
+                    <input type="number" id="filterMaxAmount" class="form-control form-control-sm shadow-sm" placeholder="Max" style="border-radius: 8px;" />
+                </div>
+                <div class="col-md-2 d-flex align-items-end justify-content-end">
+                    <button type="button" id="btnResetFilters" class="btn btn-secondary btn-sm w-100 shadow-sm" style="border-radius: 8px; height: 31px; display: inline-flex; align-items: center; justify-content: center; font-weight: 600;">
+                        <i class="fas fa-undo fa-xs mr-1"></i> Xóa bộ lọc
+                    </button>
                 </div>
             </div>
         </div>
@@ -122,13 +149,13 @@
                 <table class="table table-hover table-modern mb-0 no-datatable" id="dataTable" width="100%" cellspacing="0">
                     <thead>
                         <tr>
-                            <th class="pl-4">Mã đơn</th>
-                            <th>Khách hàng & Sản phẩm</th>
-                            <th>Ngày đặt</th>
-                            <th>Tổng tiền</th>
-                            <th>Thanh toán</th>
-                            <th>Trạng thái</th>
-                            <th class="text-center pr-4">Hành động</th>
+                            <th class="pl-4 text-nowrap">Mã đơn</th>
+                            <th class="text-nowrap">Khách hàng & Sản phẩm</th>
+                            <th class="text-nowrap">Ngày đặt</th>
+                            <th class="text-nowrap">Tổng tiền</th>
+                            <th class="text-nowrap">Thanh toán</th>
+                            <th class="text-nowrap">Trạng thái</th>
+                            <th class="text-center pr-4 text-nowrap">Hành động</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -136,8 +163,8 @@
                         {
                             foreach (var item in Model)
                             {
-                                <tr data-status="@item.OrderStatus" data-payment="@item.PaymentStatus" data-date="@item.OrderDate.ToString("yyyy-MM-dd")">
-                                    <td class="pl-4 font-weight-bold text-primary"><span title="@item.Id">#@item.Id.Substring(0, 8).ToUpper()</span></td>
+                                <tr data-status="@item.OrderStatus" data-payment="@item.PaymentStatus" data-date="@item.OrderDate.ToString("yyyy-MM-dd")" data-amount="@item.FinalAmount" data-products="@(string.Join("||", item.OrderDetails?.Select(d => d.ProductNameSnapshot?.ToLower() ?? "") ?? new List<string>()))" data-customer="@item.CustomerName.ToLower() @item.ShippingFullName.ToLower()">
+                                    <td class="pl-4 font-weight-bold text-primary text-nowrap"><span title="@item.Id">#@item.Id.Substring(0, 8).ToUpper()</span></td>
                                     <td>
                                         <div class="font-weight-bold text-dark">@item.CustomerName</div>
                                         <small class="text-muted d-block mb-1">Người nhận: @item.ShippingFullName</small>
@@ -155,9 +182,9 @@
                                             </div>
                                         }
                                     </td>
-                                    <td class="text-secondary">@item.OrderDate.ToString("dd/MM/yyyy HH:mm")</td>
-                                    <td class="text-dark font-weight-bold">@item.FinalAmount.ToString("N0") đ</td>
-                                    <td>
+                                    <td class="text-secondary text-nowrap" data-order="@item.OrderDate.ToString("yyyyMMddHHmmss")">@item.OrderDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td class="text-dark font-weight-bold text-nowrap">@item.FinalAmount.ToString("N0") đ</td>
+                                    <td class="text-nowrap">
                                         @if (item.PaymentStatus == 1)
                                         {
                                             <span class="badge-paid"><i class="fas fa-check-circle mr-1"></i> Đã TT</span>
@@ -167,7 +194,7 @@
                                             <span class="badge-unpaid"><i class="fas fa-times-circle mr-1"></i> Chưa TT</span>
                                         }
                                     </td>
-                                    <td>
+                                    <td class="text-nowrap">
                                         @switch (item.OrderStatus)
                                         {
                                             case 0:
@@ -190,7 +217,7 @@
                                                 break;
                                         }
                                     </td>
-                                    <td class="text-center pr-4">
+                                    <td class="text-center pr-4 text-nowrap">
                                         <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-action text-white">
                                             <i class="fas fa-eye mr-1"></i> Chi tiết
                                         </a>
@@ -239,11 +266,16 @@
                     var orderStatus = row.attr('data-status');
                     var paymentStatus = row.attr('data-payment');
                     var orderDateStr = row.attr('data-date'); // "yyyy-MM-dd"
+                    var amount = parseFloat(row.attr('data-amount')) || 0;
+                    var products = row.attr('data-products') || "";
 
                     var filterStatus = $('#filterStatus').val();
                     var filterPayment = $('#filterPayment').val();
                     var filterStart = $('#filterStartDate').val(); // "yyyy-MM-dd"
                     var filterEnd = $('#filterEndDate').val(); // "yyyy-MM-dd"
+                    var filterProduct = $('#filterProductName').val();
+                    var filterMin = parseFloat($('#filterMinAmount').val());
+                    var filterMax = parseFloat($('#filterMaxAmount').val());
 
                     // Order Status filter
                     if (filterStatus && filterStatus !== "" && orderStatus !== filterStatus) {
@@ -265,12 +297,50 @@
                         }
                     }
 
+                    // Product Name filter
+                    if (filterProduct && filterProduct.trim() !== "") {
+                        var query = filterProduct.toLowerCase().trim();
+                        if (products.indexOf(query) === -1) {
+                            return false;
+                        }
+                    }
+
+                    // Price Range filter
+                    if (!isNaN(filterMin) && amount < filterMin) {
+                        return false;
+                    }
+                    if (!isNaN(filterMax) && amount > filterMax) {
+                        return false;
+                    }
+
                     return true;
                 }
             );
 
             // Re-draw table when filters change
-            $('#filterStatus, #filterPayment, #filterStartDate, #filterEndDate').on('change', function () {
+            $('#filterStatus, #filterPayment, #filterStartDate, #filterEndDate, #filterMinAmount, #filterMaxAmount').on('change keyup', function () {
+                table.draw();
+            });
+
+            // Delayed keystroke filter for product name search
+            var typingTimer;
+            $('#filterProductName').on('keyup input', function () {
+                clearTimeout(typingTimer);
+                typingTimer = setTimeout(function () {
+                    table.draw();
+                }, 300);
+            });
+
+            // Reset filters button
+            $('#btnResetFilters').on('click', function () {
+                $('#filterStatus').val('');
+                $('#filterPayment').val('');
+                $('#filterStartDate').val('');
+                $('#filterEndDate').val('');
+                $('#filterProductName').val('');
+                $('#filterMinAmount').val('');
+                $('#filterMaxAmount').val('');
+                table.search('').draw();
                 table.draw();
             });
 
@@ -278,6 +348,67 @@
             if ($('#filterStatus').val() !== "") {
                 table.draw();
             }
+
+            // Real-time SignalR order injection event listener
+            window.addEventListener('NewOrderReceived', function (e) {
+                var data = e.detail;
+                if (table) {
+                    var orderIdShort = data.orderId.substring(0, 8).toUpperCase();
+                    var formattedAmount = new Intl.NumberFormat('vi-VN').format(data.amount) + ' đ';
+                    var detailsUrl = `/Admin/Order/Details/${data.orderId}`;
+                    
+                    var detailsHtml = `<div class="mt-2 pt-2 border-top" style="font-size: 0.8rem; line-height: 1.4;">
+                        <div class="text-secondary mb-1">
+                            <i class="fas fa-tshirt fa-xs text-muted mr-1"></i>
+                            <span class="font-weight-bold text-success">Đơn hàng mới nhận real-time</span> (tải lại trang để cập nhật đầy đủ chi tiết sản phẩm)
+                        </div>
+                    </div>`;
+
+                    var newRowNode = table.row.add([
+                        `<span title="${data.orderId}">#${orderIdShort}</span>`,
+                        `<div>
+                            <div class="font-weight-bold text-dark">${data.customerName}</div>
+                            <small class="text-muted d-block mb-1">Người nhận: ${data.shippingFullName}</small>
+                            ${detailsHtml}
+                        </div>`,
+                        data.date,
+                        formattedAmount,
+                        `<span class="badge-unpaid"><i class="fas fa-times-circle mr-1"></i> Chưa TT</span>`,
+                        `<span class="badge badge-status bg-warning text-dark"><i class="fas fa-hourglass-start mr-1"></i> Chờ duyệt</span>`,
+                        `<div class="text-center pr-4">
+                            <a href="${detailsUrl}" class="btn btn-info btn-action text-white">
+                                <i class="fas fa-eye mr-1"></i> Chi tiết
+                            </a>
+                         </div>`
+                    ]).draw(false).node();
+
+                    // Convert dd/MM/yyyy HH:mm -> yyyy-MM-dd
+                    var dateParts = data.date.split(' ')[0].split('/');
+                    var parsedDate = dateParts[2] + '-' + dateParts[1] + '-' + dateParts[0];
+
+                    // Style cell nodes to avoid wrapping and preserve layout
+                    var cellNodes = $(newRowNode).find('td');
+                    $(cellNodes[0]).addClass('pl-4 font-weight-bold text-primary text-nowrap');
+                    $(cellNodes[1]).addClass('');
+                    $(cellNodes[2]).addClass('text-secondary text-nowrap').attr('data-order', parsedDate.replace(/-/g, '') + '000000');
+                    $(cellNodes[3]).addClass('text-dark font-weight-bold text-nowrap');
+                    $(cellNodes[4]).addClass('text-nowrap');
+                    $(cellNodes[5]).addClass('text-nowrap');
+                    $(cellNodes[6]).addClass('text-center pr-4 text-nowrap');
+
+                    $(newRowNode)
+                        .attr('data-status', '0')
+                        .attr('data-payment', '0')
+                        .attr('data-date', parsedDate)
+                        .attr('data-amount', data.amount)
+                        .attr('data-products', '')
+                        .attr('data-customer', data.customerName.toLowerCase() + ' ' + data.shippingFullName.toLowerCase())
+                        .addClass('table-success-highlight');
+
+                    // Redraw to sort the new order to the top
+                    table.order([2, 'desc']).draw();
+                }
+            });
         });
     </script>
 }

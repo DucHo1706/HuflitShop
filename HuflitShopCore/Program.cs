@@ -10,6 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddSignalR();
+builder.Services.AddMemoryCache();
 
 // 2. Cấu hình DbContext kết nối SQL Server
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -49,6 +50,10 @@ builder.Services.AddScoped<GrabExpressService>();
 builder.Services.AddScoped<ReviewService>();
 builder.Services.AddScoped<ReportService>();
 builder.Services.AddScoped<ChatService>();
+builder.Services.AddScoped<HuflitShopCore.Services.IAprioriService, HuflitShopCore.Services.AprioriService>();
+builder.Services.AddScoped<HuflitShopCore.Services.IRequestsService, HuflitShopCore.Services.RequestsService>();
+builder.Services.AddScoped<HuflitShopCore.Services.IAttendanceService, HuflitShopCore.Services.AttendanceService>();
+builder.Services.AddScoped<HuflitShopCore.Services.ISalaryService, HuflitShopCore.Services.SalaryService>();
 
 var app = builder.Build();
 

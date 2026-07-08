@@ -104,276 +104,198 @@
 
             <!-- Sidebar - Brand -->
             <a class="sidebar-brand d-flex align-items-center justify-content-center" asp-area="Admin" asp-controller="Home" asp-action="Index">
-                <div class="sidebar-brand-icon rotate-n-15">
-                    <i class="fas fa-laugh-wink"></i>
+                <div class="sidebar-brand-icon">
+                    <i class="fas fa-chart-line"></i>
                 </div>
-                <div class="sidebar-brand-text mx-3">Tracy Admin</div>
+                <div class="sidebar-brand-text mx-3">Tracy ERP</div>
             </a>
 
             <!-- Divider -->
             <hr class="sidebar-divider my-0">
 
+            <!-- Phân khúc 1: TỔNG QUAN & BÁO CÁO -->
+            <div class="sidebar-heading">Tổng quan & Phân tích</div>
+            
+            <li class="nav-item">
+                <a class="nav-link" asp-area="Admin" asp-controller="Home" asp-action="Index">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Bảng tổng quan</span>
+                </a>
+            </li>
+
             @if (isAdmin)
             {
-                <!-- Nav Item - Dashboard -->
-                <li class="nav-item active">
-                    <a class="nav-link" asp-area="Admin" asp-controller="Home" asp-action="Index">
-                        <i class="fas fa-fw fa-tachometer-alt"></i>
-                        <span>Tổng quan</span>
+                <li class="nav-item">
+                    <a class="nav-link" asp-area="Admin" asp-controller="Report" asp-action="Index">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Thống kê doanh thu</span>
                     </a>
                 </li>
-
-                <!-- Nav Item - Instruction -->
                 <li class="nav-item">
-                    <a class="nav-link" asp-area="Admin" asp-controller="Home" asp-action="Instruction">
-                        <i class="fas fa-fw fa-book"></i>
-                        <span>Hướng dẫn sử dụng</span>
-                    </a>
-                </li>
-
-                <!-- Divider -->
-                <hr class="sidebar-divider">
-            }
-
-            <!-- Heading -->
-            <div class="sidebar-heading">
-                Quản lý
-            </div>
-
-            @if (isAdmin)
-            {
-                <!-- Nav Item - Pages Quản lý Nhân viên Menu -->
-                <li class="nav-item">
-                    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseEmployees"
-                       aria-expanded="true" aria-controls="collapseTwo">
-                        <i class="fas fa-address-book"></i>
-                        <span>Quản lý nhân viên</span>
-                    </a>
-                    <div id="collapseEmployees" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
-                        <div class="bg-white py-2 collapse-inner rounded">
-                            <h6 class="collapse-header">Quản lý nhân viên:</h6>
-                            <a class="collapse-item" asp-area="Admin" asp-controller="Employee" asp-action="Index">Danh sách nhân viên</a>
-                            <a class="collapse-item" asp-area="Admin" asp-controller="Employee" asp-action="Create">Thêm nhân viên</a>
-                        </div>
-                    </div>
-                </li>
-            }
-
-            <!-- Nav Item - Pages Quản lý Nhân sự & Chấm công -->
-            <li class="nav-item">
-                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseHRM"
-                   aria-expanded="true" aria-controls="collapseHRM">
-                    <i class="fas fa-calendar-alt"></i>
-                    <span>Lịch làm & Chấm công</span>
-                </a>
-                <div id="collapseHRM" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
-                    <div class="bg-white py-2 collapse-inner rounded">
-                        @if (isAdmin)
-                        {
-                            <h6 class="collapse-header">Thiết lập:</h6>
-                            <a class="collapse-item" asp-area="Admin" asp-controller="ShopSetting" asp-action="Index">Cấu hình IP WiFi</a>
-                            <a class="collapse-item" asp-area="Admin" asp-controller="Shifts" asp-action="Index">Định nghĩa Ca làm</a>
-                            <div class="collapse-divider"></div>
-                            <h6 class="collapse-header">Nhân sự & Đơn từ:</h6>
-                            <a class="collapse-item" asp-area="Admin" asp-controller="ShiftRegistrations" asp-action="Index">Duyệt Đơn Đăng Ký</a>
-                            <a class="collapse-item" asp-area="Admin" asp-controller="WorkSchedules" asp-action="Index">Bảng Phân Ca</a>
-                            <a class="collapse-item" asp-area="Admin" asp-controller="Requests" asp-action="Index">Đơn chờ xử lý</a>
-                            <a class="collapse-item" asp-area="Admin" asp-controller="Requests" asp-action="History">Lịch sử Đơn từ</a>
-                            <div class="collapse-divider"></div>
-                            <h6 class="collapse-header">Tài chính & Thống kê:</h6>
-                            <a class="collapse-item" asp-area="Admin" asp-controller="Salary" asp-action="Index">Bảng Lương Tổng Hợp</a>
-                        }
-                        else
-                        {
-                            <h6 class="collapse-header">Cá nhân:</h6>
-                            <a class="collapse-item" asp-area="" asp-controller="Profile" asp-action="Profile">Quản lý tài khoản</a>
-                            <a class="collapse-item" asp-area="Admin" asp-controller="Salary" asp-action="MySalary">Bảng lương của tôi</a>
-                            <div class="collapse-divider"></div>
-                            <h6 class="collapse-header">Ca làm & Điểm danh:</h6>
-                            <a class="collapse-item" asp-area="Admin" asp-controller="StaffShift" asp-action="Index">Đăng ký ca làm</a>
-                            <a class="collapse-item" asp-area="Admin" asp-controller="Attendance" asp-action="Index">Chấm công (Check-in)</a>
-                            <a class="collapse-item" asp-area="Admin" asp-controller="Requests" asp-action="MyRequests">Đơn từ / Yêu cầu</a>
-                        }
-                    </div>
-                </div>
-            </li>
-
-            @if (isAdmin)
-            {
-                <!-- Nav Item - Pages Quản lý sản phẩm Menu -->
-                <li class="nav-item">
-                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseProducts"
-                   aria-expanded="true" aria-controls="collapseUtilities">
-                    <i class="fab fa-product-hunt"></i>
-                    <span>Quản lý sản phẩm</span>
-                </a>
-                <div id="collapseProducts" class="collapse" aria-labelledby="headingUtilities"
-                     data-parent="#accordionSidebar">
-                    <div class="bg-white py-2 collapse-inner rounded">
-                        <h6 class="collapse-header">Quản lý sản phẩm:</h6>
-                        <a class="collapse-item" asp-area="Admin" asp-controller="Category" asp-action="Index">Danh mục sản phẩm</a>
-                        <a class="collapse-item" asp-area="Admin" asp-controller="Color" asp-action="Index">Màu sắc (Colors)</a>
-                        <a class="collapse-item" asp-area="Admin" asp-controller="Size" asp-action="Index">Kích thước (Sizes)</a>
-                        <a class="collapse-item" asp-area="Admin" asp-controller="Products" asp-action="Index" asp-route-id="0">Sản phẩm</a>
-                    </div>
-                </div>
-            </li>
-
-            <!-- Nav Item - Pages Quản lý khuyến mãi Menu -->
-            <li class="nav-item">
-                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePromotions"
-                   aria-expanded="true" aria-controls="collapseUtilities">
-                    <i class="fas fa-percentage"></i>
-                    <span>Quản lý khuyến mãi</span>
-                </a>
-                <div id="collapsePromotions" class="collapse" aria-labelledby="headingUtilities"
-                     data-parent="#accordionSidebar">
-                    <div class="bg-white py-2 collapse-inner rounded">
-                        <h6 class="collapse-header">Quản lý khuyến mãi:</h6>
-                        <a class="collapse-item" asp-area="Admin" asp-controller="Promotions" asp-action="Index">Chương trình khuyến mãi</a>
-                        @if (isAdmin)
-                        {
-                            <a class="collapse-item" asp-area="Admin" asp-controller="Promotions" asp-action="Create">Thêm khuyến mãi mới</a>
-                        }
-
-                    </div>
-                </div>
-            </li>
-
-            <!-- Nav Item - Pages Quản lý khách hàng Menu -->
-            <li class="nav-item">
-                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseCustomers"
-                   aria-expanded="true" aria-controls="collapseUtilities">
-                    <i class="fas fa-portrait"></i>
-                    <span>Quản lý khách hàng</span>
-                </a>
-                <div id="collapseCustomers" class="collapse" aria-labelledby="headingUtilities"
-                     data-parent="#accordionSidebar">
-                    <div class="bg-white py-2 collapse-inner rounded">
-                        <h6 class="collapse-header">Quản lý khách hàng:</h6>
-                        <a class="collapse-item" asp-area="Admin" asp-controller="Customer" asp-action="Index">Danh sách khách hàng</a>
-                    </div>
-                </div>
-            </li>
-
-            <!-- Divider -->
-            <hr class="sidebar-divider">
-
-            <!-- Heading -->
-            <div class="sidebar-heading">
-                Quản trị Kho
-            </div>
-
-            <!-- Nav Item - Pages Quản lý kho Menu -->
-            <li class="nav-item">
-                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseStock"
-                   aria-expanded="true" aria-controls="collapseUtilities">
-                    <i class="fas fa-warehouse"></i>
-                    <span>Phân hệ Kho</span>
-                </a>
-                <div id="collapseStock" class="collapse" aria-labelledby="headingUtilities"
-                     data-parent="#accordionSidebar">
-                    <div class="bg-white py-2 collapse-inner rounded">
-                        <h6 class="collapse-header">Quản lý kho:</h6>
-                        <a class="collapse-item" asp-area="Admin" asp-controller="Supplier" asp-action="Index">Nhà cung cấp</a>
-                        <a class="collapse-item" asp-area="Admin" asp-controller="StockReceipt" asp-action="Create">Tạo phiếu nhập kho</a>
-                        <a class="collapse-item" asp-area="Admin" asp-controller="StockReceipt" asp-action="Index">Lịch sử nhập kho</a>
-                        <a class="collapse-item" asp-area="Admin" asp-controller="WarehouseReport" asp-action="Index">Báo cáo Nhập-Xuất-Tồn</a>
-                    </div>
-                </div>
-            </li>
-
-            @* Đã ẩn module Message theo yêu cầu
-            @if (isAdmin)
-            {
-                <!-- Nav Item - Pages Quản lý MessageBot Menu -->
-                <li class="nav-item">
-                    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseMessageBot"
-                       aria-expanded="true" aria-controls="collapseUtilities">
+                    <a class="nav-link" asp-area="Admin" asp-controller="WarehouseReport" asp-action="Index">
                         <i class="fas fa-warehouse"></i>
-                        <span>Quản lý MessageBot</span>
+                        <span>Báo cáo kho BI</span>
                     </a>
-                    <div id="collapseMessageBot" class="collapse" aria-labelledby="headingUtilities"
-                         data-parent="#accordionSidebar">
-                        <div class="bg-white py-2 collapse-inner rounded">
-                            <h6 class="collapse-header">Quản lý MessageBot:</h6>
-                            <a class="collapse-item" asp-area="Admin" asp-action="Index" asp-controller="Messages">Danh sách message bot</a>
-                            <a class="collapse-item" asp-area="Admin" asp-action="CreateMessageBot" asp-controller="Messages">Tạo message bot</a>
-                        </div>
-                    </div>
                 </li>
             }
-            *@
+            
+            <li class="nav-item">
+                <a class="nav-link" asp-area="Admin" asp-controller="Home" asp-action="Instruction">
+                    <i class="fas fa-book-open"></i>
+                    <span>Tài liệu vận hành</span>
+                </a>
+            </li>
 
             <!-- Divider -->
             <hr class="sidebar-divider">
 
-            <!-- Heading -->
-            <div class="sidebar-heading">
-                Chức năng khác
-            </div>
+            <!-- Phân khúc 2: BÁN HÀNG & KHÁCH HÀNG -->
+            <div class="sidebar-heading">Kinh doanh & Khách hàng</div>
 
-            <!-- Nav Item - Pages Thông tin đặt hàng Menu -->
+            <!-- Đơn hàng -->
             <li class="nav-item">
-                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseOrder"
-                   aria-expanded="true" aria-controls="collapsePages">
-                    <i class="fas fa-clipboard-list"></i>
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseSales" aria-expanded="true">
+                    <i class="fas fa-shopping-bag"></i>
                     <span>
-                        Thông tin đặt hàng
+                        Quản lý bán hàng
                         @if (pendingCount != 0)
                         {
-                            <sup>
-                                <span class="badge badge-danger badge-counter">
-                                    @pendingCount
-                                </span>
-                            </sup>
+                            <span class="badge badge-danger ml-1">@pendingCount</span>
                         }
                     </span>
                 </a>
-                <div id="collapseOrder" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
+                <div id="collapseSales" class="collapse" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
-                        <h6 class="collapse-header">Thông tin đặt hàng:</h6>
-                        <a class="collapse-item" asp-area="Admin" asp-controller="Order" asp-action="Index">Danh sách đơn hàng</a>
-                        <a class="collapse-item" asp-area="Admin" asp-controller="Order" asp-action="Index" asp-route-pendingOnly="true">
-                            Đơn hàng chưa duyệt
-                            @if (pendingCount != 0)
-                            {
-                                <sup>
-                                    <span class="badge badge-danger badge-counter">
-                                        @pendingCount
-                                    </span>
-                                </sup>
-                            }
-                        </a>
+                        <a class="collapse-item" asp-area="Admin" asp-controller="Order" asp-action="Index">Tất cả đơn hàng</a>
+                        <a class="collapse-item" asp-area="Admin" asp-controller="Order" asp-action="Index" asp-route-pendingOnly="true">Đơn hàng chờ duyệt</a>
                     </div>
                 </div>
             </li>
 
-            <!-- Nav Item - Phản hồi -->
+            <!-- Khách hàng & Phản hồi -->
             <li class="nav-item">
-                <a class="nav-link" asp-area="Admin" asp-controller="Reviews" asp-action="Index">
-                    <i class="fas fa-comments"></i>
-                    <span>Phản hồi</span>
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseCRM" aria-expanded="true">
+                    <i class="fas fa-users-cog"></i>
+                    <span>Khách hàng & CSKH</span>
+                </a>
+                <div id="collapseCRM" class="collapse" data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <a class="collapse-item" asp-area="Admin" asp-controller="Customer" asp-action="Index">Danh sách khách hàng</a>
+                        <a class="collapse-item" asp-area="Admin" asp-controller="Reviews" asp-action="Index">Đánh giá & Phản hồi</a>
+                        <a class="collapse-item" asp-area="Admin" asp-controller="Messages" asp-action="Chat" asp-route-userId="">Tư vấn Chat (Live)</a>
+                    </div>
+                </div>
+            </li>
+
+            <!-- Khuyến mãi -->
+            <li class="nav-item">
+                <a class="nav-link" asp-area="Admin" asp-controller="Promotions" asp-action="Index">
+                    <i class="fas fa-tags"></i>
+                    <span>Khuyến mãi & Combo</span>
                 </a>
             </li>
 
-            <!-- Nav Item - Chat -->
+            <!-- Divider -->
+            <hr class="sidebar-divider">
+
+            <!-- Phân khúc 3: SẢN PHẨM & VẬN HÀNH KHO -->
+            <div class="sidebar-heading">Sản phẩm & Vận hành kho</div>
+
+            <!-- Sản phẩm -->
             <li class="nav-item">
-                <a class="nav-link" asp-area="Admin" asp-controller="Messages" asp-action="Chat" asp-route-userId="">
-                    <i class="fas fa-comment-dots"></i>
-                    <span>Tư vấn khách hàng</span>
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseProductsList" aria-expanded="true">
+                    <i class="fas fa-box-open"></i>
+                    <span>Quản lý sản phẩm</span>
                 </a>
+                <div id="collapseProductsList" class="collapse" data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <a class="collapse-item" asp-area="Admin" asp-controller="Products" asp-action="Index" asp-route-id="0">Sản phẩm</a>
+                        <a class="collapse-item" asp-area="Admin" asp-controller="Category" asp-action="Index">Danh mục</a>
+                        <a class="collapse-item" asp-area="Admin" asp-controller="Color" asp-action="Index">Màu sắc (Colors)</a>
+                        <a class="collapse-item" asp-area="Admin" asp-controller="Size" asp-action="Index">Kích thước (Sizes)</a>
+                    </div>
+                </div>
             </li>
-            }
+
+            <!-- Nhập kho & Nhà cung cấp -->
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseInventory" aria-expanded="true">
+                    <i class="fas fa-warehouse"></i>
+                    <span>Quản lý kho hàng</span>
+                </a>
+                <div id="collapseInventory" class="collapse" data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <a class="collapse-item" asp-area="Admin" asp-controller="Supplier" asp-action="Index">Nhà cung cấp</a>
+                        <a class="collapse-item" asp-area="Admin" asp-controller="StockReceipt" asp-action="Create">Lập phiếu nhập kho</a>
+                        <a class="collapse-item" asp-area="Admin" asp-controller="StockReceipt" asp-action="Index">Lịch sử nhập kho</a>
+                    </div>
+                </div>
+            </li>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider">
+
+            <!-- Phân khúc 4: NHÂN SỰ & CHẤM CÔNG -->
+            <div class="sidebar-heading">Quản trị nhân sự (HRM)</div>
 
             @if (isAdmin)
             {
-                <!-- Nav Item - Thống kê doanh thu -->
+                <!-- Nhân viên -->
                 <li class="nav-item">
-                    <a class="nav-link" asp-area="Admin" asp-controller="Report" asp-action="Index">
-                        <i class="fas fa-fw fa-chart-line"></i>
-                        <span>Thống kê doanh thu</span>
+                    <a class="nav-link" asp-area="Admin" asp-controller="Employee" asp-action="Index">
+                        <i class="fas fa-user-tie"></i>
+                        <span>Danh sách nhân viên</span>
                     </a>
+                </li>
+                
+                <!-- Duyệt & phân lịch -->
+                <li class="nav-item">
+                    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseHRMOps" aria-expanded="true">
+                        <i class="fas fa-calendar-check"></i>
+                        <span>Vận hành & Đăng ký ca</span>
+                    </a>
+                    <div id="collapseHRMOps" class="collapse" data-parent="#accordionSidebar">
+                        <div class="bg-white py-2 collapse-inner rounded">
+                            <a class="collapse-item" asp-area="Admin" asp-controller="ShiftRegistrations" asp-action="Index">Duyệt ca làm</a>
+                            <a class="collapse-item" asp-area="Admin" asp-controller="WorkSchedules" asp-action="Index">Bảng phân ca tuần</a>
+                            <a class="collapse-item" asp-area="Admin" asp-controller="Requests" asp-action="Index">Đơn từ chờ duyệt</a>
+                            <a class="collapse-item" asp-area="Admin" asp-controller="Requests" asp-action="History">Lịch sử duyệt đơn</a>
+                        </div>
+                    </div>
+                </li>
+
+                <!-- Lương & Cấu hình -->
+                <li class="nav-item">
+                    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseHRMSettings" aria-expanded="true">
+                        <i class="fas fa-cogs"></i>
+                        <span>Tài chính & Thiết lập</span>
+                    </a>
+                    <div id="collapseHRMSettings" class="collapse" data-parent="#accordionSidebar">
+                        <div class="bg-white py-2 collapse-inner rounded">
+                            <a class="collapse-item" asp-area="Admin" asp-controller="Salary" asp-action="Index">Bảng lương tổng hợp</a>
+                            <a class="collapse-item" asp-area="Admin" asp-controller="Shifts" asp-action="Index">Định nghĩa ca làm</a>
+                            <a class="collapse-item" asp-area="Admin" asp-controller="ShopSetting" asp-action="Index">Cấu hình IP Wifi</a>
+                        </div>
+                    </div>
+                </li>
+            }
+            else
+            {
+                <!-- Nhân viên cá nhân -->
+                <li class="nav-item">
+                    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseMyHRM" aria-expanded="true">
+                        <i class="fas fa-user-circle"></i>
+                        <span>Cá nhân & Ca làm</span>
+                    </a>
+                    <div id="collapseMyHRM" class="collapse" data-parent="#accordionSidebar">
+                        <div class="bg-white py-2 collapse-inner rounded">
+                            <a class="collapse-item" asp-area="" asp-controller="Profile" asp-action="Profile">Hồ sơ cá nhân</a>
+                            <a class="collapse-item" asp-area="Admin" asp-controller="Salary" asp-action="MySalary">Bảng lương của tôi</a>
+                            <a class="collapse-item" asp-area="Admin" asp-controller="StaffShift" asp-action="Index">Đăng ký ca làm</a>
+                            <a class="collapse-item" asp-area="Admin" asp-controller="Attendance" asp-action="Index">Chấm công Check-in</a>
+                            <a class="collapse-item" asp-area="Admin" asp-controller="Requests" asp-action="MyRequests">Gửi đơn từ / Yêu cầu</a>
+                        </div>
+                    </div>
                 </li>
             }
 
@@ -765,6 +687,56 @@
         })
 
         //]]></script>
+
+    <!-- SignalR for Real-time System Notifications -->
+    <script src="~/lib/signalr/dist/browser/signalr.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            var connection = new signalR.HubConnectionBuilder()
+                .withUrl("/chatHub")
+                .withAutomaticReconnect()
+                .build();
+
+            connection.on("ReceiveSystemNotification", function (data) {
+                console.log("System Notification received:", data);
+                
+                // Play notification chime sound
+                try {
+                    var audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869-84.wav");
+                    audio.play().catch(function(e) {
+                        console.log("Audio block: user interaction required.");
+                    });
+                } catch (e) {
+                    console.log("Sound failed", e);
+                }
+
+                // Show SweetAlert popup notification
+                if (typeof swal === "function") {
+                    swal({
+                        title: data.title,
+                        text: data.message,
+                        icon: data.icon || "info",
+                        button: "Đóng"
+                    });
+                } else {
+                    alert(data.title + "\n" + data.message);
+                }
+
+                // Dispatch custom event for real-time list updates
+                if (data.type === "NewOrder") {
+                    window.dispatchEvent(new CustomEvent('NewOrderReceived', { detail: data }));
+                }
+            });
+
+            connection.start()
+                .then(function () {
+                    console.log("Global System Notification connection established successfully!");
+                })
+                .catch(function (err) {
+                    console.error("SignalR connection failed: ", err.toString());
+                });
+        });
+    </script>
 
     @RenderSection("Scripts", required: false)
 

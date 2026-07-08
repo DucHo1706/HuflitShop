@@ -1,123 +1,503 @@
 @model IEnumerable<HuflitShopCore.Models.ShiftRegistration>
 @{
-    ViewData["Title"] = "Đăng ký Lịch Làm Việc";
+    ViewData["Title"] = "Đăng Ký Lịch Làm Việc Theo Tuần";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
-    var shifts = ViewBag.Shifts as IEnumerable<HuflitShopCore.Models.Shift>;
+    
+    var shifts = ViewBag.Shifts as IEnumerable<HuflitShopCore.Models.Shift> ?? new List<HuflitShopCore.Models.Shift>();
+    var workSchedules = ViewBag.WorkSchedules as IEnumerable<HuflitShopCore.Models.WorkSchedule> ?? new List<HuflitShopCore.Models.WorkSchedule>();
+    DateTime monday = ViewBag.Monday;
+    DateTime sunday = ViewBag.Sunday;
+    DateTime today = ViewBag.Today;
+
+    var daysOfWeek = new[]
+    {
+        new { DayName = "Thứ 2", Date = monday },
+        new { DayName = "Thứ 3", Date = monday.AddDays(1) },
+        new { DayName = "Thứ 4", Date = monday.AddDays(2) },
+        new { DayName = "Thứ 5", Date = monday.AddDays(3) },
+        new { DayName = "Thứ 6", Date = monday.AddDays(4) },
+        new { DayName = "Thứ 7", Date = monday.AddDays(5) },
+        new { DayName = "Chủ Nhật", Date = monday.AddDays(6) }
+    };
 }
 
-<div class="container my-5">
-    <div class="row">
-        <!-- Đăng ký ca làm -->
-        <div class="col-md-4">
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">Đăng Ký Ca Làm</h5>
-                </div>
-                <div class="card-body">
-                    @if (TempData["SuccessMessage"] != null)
-                    {
-                        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
-                    }
-                    @if (TempData["ErrorMessage"] != null)
-                    {
-                        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
-                    }
+<style>
+    .week-navigation-card {
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+        color: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    /* Fix screen overflow and match Kanban layout */
+    .kanban-wrapper {
+        width: 100%;
+        overflow-x: auto;
+        padding-bottom: 10px;
+        -webkit-overflow-scrolling: touch;
+    }
 
-                    <form asp-action="Register" method="post">
-                        <div class="form-group">
-                            <label>Ngày làm việc</label>
-                            <input type="date" name="date" class="form-control" required min="@DateTime.Today.ToString("yyyy-MM-dd")" value="@DateTime.Today.ToString("yyyy-MM-dd")" />
-                        </div>
-                        <div class="form-group mt-3">
-                            <label>Chọn Ca</label>
-                            <select name="shiftId" class="form-control" required>
-                                <option value="">-- Chọn ca làm --</option>
-                                @if (shifts != null)
-                                {
-                                    foreach (var shift in shifts)
-                                    {
-                                        <option value="@shift.Id">@shift.Name (@shift.StartTime.ToString(@"hh\:mm") - @shift.EndTime.ToString(@"hh\:mm"))</option>
-                                    }
-                                }
-                            </select>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100 mt-4">Xác nhận Đăng ký</button>
-                    </form>
+    .kanban-board {
+        display: flex;
+        gap: 15px;
+        min-width: 1200px;
+        min-height: 520px;
+        padding: 5px;
+    }
+
+    .kanban-column {
+        flex: 1;
+        min-width: 250px;
+        background-color: #f8f9fc;
+        border-radius: 12px;
+        border: 1px solid #e3e6f0;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+    }
+
+    .kanban-column.today-column {
+        border: 2px solid #4e73df;
+        background-color: rgba(78, 115, 223, 0.02);
+    }
+
+    .kanban-header {
+        padding: 12px;
+        border-bottom: 1px solid #e3e6f0;
+        border-top-left-radius: 11px;
+        border-top-right-radius: 11px;
+    }
+
+    .kanban-header.today-header {
+        background-color: #4e73df;
+        color: white;
+    }
+
+    .kanban-content {
+        padding: 10px;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .shift-card {
+        background-color: white;
+        border-radius: 10px;
+        border: 1px solid #e3e6f0;
+        padding: 12px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .shift-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.07);
+    }
+
+    .shift-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+        border-bottom: 1px dashed #eaecf4;
+        padding-bottom: 4px;
+    }
+
+    .shift-name {
+        font-weight: 700;
+        color: #4e73df;
+        font-size: 13px;
+    }
+
+    .shift-time {
+        font-size: 10px;
+        color: #858796;
+        font-weight: 600;
+    }
+
+    .registration-status-box {
+        border-radius: 8px;
+        padding: 10px;
+        min-height: 80px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        font-size: 12px;
+        border: 1px solid transparent;
+        transition: all 0.2s;
+    }
+
+    .status-past {
+        background-color: #eaecf4;
+        color: #858796;
+        border: 1px dashed #d1d3e2;
+    }
+
+    .status-available {
+        background-color: #ffffff;
+        border: 1px dashed #b7b9cc;
+        cursor: pointer;
+    }
+
+    .status-available:hover {
+        border-color: #4e73df;
+        background-color: rgba(78, 115, 223, 0.03);
+    }
+
+    .status-pending {
+        background-color: rgba(246, 194, 62, 0.12);
+        border: 1px solid #f6c23e;
+        color: #856404;
+    }
+
+    .status-approved {
+        background-color: rgba(28, 200, 138, 0.12);
+        border: 1px solid #1cc88a;
+        color: #155724;
+        font-weight: 600;
+    }
+
+    .status-rejected {
+        background-color: rgba(231, 74, 59, 0.08);
+        border: 1px solid #e74a3b;
+        color: #721c24;
+    }
+
+    .status-badge {
+        font-size: 9px;
+        font-weight: 700;
+        text-transform: uppercase;
+        padding: 3px 6px;
+        border-radius: 12px;
+        margin-bottom: 6px;
+    }
+
+    .btn-register-action {
+        font-weight: 600;
+        font-size: 11px;
+        border-radius: 20px;
+        padding: 3px 10px;
+    }
+
+    .btn-cancel-action {
+        font-weight: 600;
+        font-size: 10px;
+        border-radius: 12px;
+        padding: 1px 8px;
+    }
+</style>
+
+<!-- Floating Toast Container -->
+<div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;"></div>
+
+<div class="container-fluid py-4">
+    <!-- Header Page -->
+    <div class="row mb-3">
+        <div class="col-12" id="alert-placeholder">
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+                    <i class="fas fa-check-circle mr-2"></i> @TempData["SuccessMessage"]
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
-            </div>
+            }
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+                    <i class="fas fa-exclamation-circle mr-2"></i> @TempData["ErrorMessage"]
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            }
         </div>
+    </div>
 
-        <!-- Lịch sử đăng ký của nhân viên -->
-        <div class="col-md-8">
-            <div class="card shadow-sm">
-                <div class="card-header bg-dark text-white">
-                    <h5 class="mb-0">Ca làm của bạn trong tương lai</h5>
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead class="bg-light">
-                                <tr>
-                                    <th>Ngày</th>
-                                    <th>Ca làm</th>
-                                    <th>Thời gian</th>
-                                    <th>Trạng thái</th>
-                                    <th>Hành động</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @if (Model != null && Model.Any())
-                                {
-                                    foreach (var item in Model)
-                                    {
-                                        <tr>
-                                            <td><strong>@item.RegistrationDate.ToString("dd/MM/yyyy")</strong></td>
-                                            <td><span class="badge bg-info text-white">@item.Shift.Name</span></td>
-                                            <td>@item.Shift.StartTime.ToString(@"hh\:mm") - @item.Shift.EndTime.ToString(@"hh\:mm")</td>
-                                            <td>
-                                                @if (item.Status == "Pending")
-                                                {
-                                                    <span class="badge bg-warning text-dark">Đang chờ duyệt</span>
-                                                }
-                                                else if (item.Status == "Approved")
-                                                {
-                                                    <span class="badge bg-success text-white">Đã chốt ca</span>
-                                                }
-                                                else
-                                                {
-                                                    <span class="badge bg-danger text-white">Đã từ chối</span>
-                                                }
-                                            </td>
-                                            <td>
-                                                @if (item.Status == "Pending")
-                                                {
-                                                    <form asp-action="Cancel" asp-route-id="@item.Id" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn hủy đăng ký ca này?');">
-                                                        <button type="submit" class="btn btn-sm btn-outline-danger">Hủy ca</button>
-                                                    </form>
-                                                }
-                                                else if (item.Status == "Rejected")
-                                                {
-                                                    <form asp-action="Cancel" asp-route-id="@item.Id" method="post" onsubmit="return confirm('Bạn muốn xóa bản ghi này khỏi danh sách?');">
-                                                        <button type="submit" class="btn btn-sm btn-outline-secondary">Xóa bản ghi</button>
-                                                    </form>
-                                                }
-                                            </td>
-                                        </tr>
-                                    }
-                                }
-                                else
-                                {
-                                    <tr>
-                                        <td colspan="5" class="text-center py-4 text-muted">Bạn chưa đăng ký ca làm nào sắp tới.</td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+    <!-- Navigation Card -->
+    <div class="card week-navigation-card mb-4 border-0">
+        <div class="card-body py-4 px-4 d-flex flex-column flex-sm-row justify-content-between align-items-center">
+            <div>
+                <h4 class="mb-1 font-weight-bold"><i class="far fa-calendar-alt mr-2"></i> Đăng Ký Lịch Làm Việc Tuần (Kanban Nhân Viên)</h4>
+                <p class="mb-0 text-white-50">Lịch tuần từ <strong>@monday.ToString("dd/MM/yyyy")</strong> đến <strong>@sunday.ToString("dd/MM/yyyy")</strong></p>
+            </div>
+            <div class="mt-3 mt-sm-0 d-flex flex-wrap justify-content-center gap-2">
+                <a href="?startOfWeek=@(monday.AddDays(-7).ToString("yyyy-MM-dd"))" class="btn btn-light btn-icon-split shadow-sm mr-2 text-primary font-weight-bold">
+                    <span class="icon text-primary-50"><i class="fas fa-chevron-left"></i></span>
+                    <span class="text">Tuần trước</span>
+                </a>
+                <a href="?startOfWeek=@(today.ToString("yyyy-MM-dd"))" class="btn btn-info shadow-sm mr-2 font-weight-bold text-white">
+                    <i class="fas fa-calendar-day mr-1"></i> Tuần này
+                </a>
+                <a href="?startOfWeek=@(monday.AddDays(7).ToString("yyyy-MM-dd"))" class="btn btn-light btn-icon-split shadow-sm font-weight-bold text-primary">
+                    <span class="text">Tuần sau</span>
+                    <span class="icon text-primary-50"><i class="fas fa-chevron-right"></i></span>
+                </a>
             </div>
         </div>
     </div>
 
-    <!-- Đã ẩn Lịch sử ca làm (Trong quá khứ) theo yêu cầu -->
+    <!-- Legend and Instructions -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body py-3 d-flex flex-wrap justify-content-between align-items-center small">
+            <div>
+                <i class="fas fa-info-circle text-primary mr-1"></i> <strong>Hướng dẫn nhân viên:</strong> Click vào các nút Đăng ký hoặc Hủy ca trực tiếp trên thẻ ca làm. Trạng thái ca làm sẽ thay đổi lập tức mà không load lại trang.
+            </div>
+            <div class="d-flex flex-wrap gap-2 font-weight-bold mt-2 mt-md-0">
+                <div class="mr-2"><span class="badge badge-light text-primary border" style="border-style:dashed !important;">Chưa đky</span></div>
+                <div class="mr-2"><span class="badge badge-warning">Chờ duyệt</span></div>
+                <div class="mr-2"><span class="badge badge-success">Đã chốt</span></div>
+                <div><span class="badge badge-danger">Từ chối</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Weekly Kanban Board -->
+    <div class="kanban-wrapper">
+        <div class="kanban-board">
+            @for (int i = 0; i < 7; i++)
+            {
+                var day = daysOfWeek[i];
+                var isToday = day.Date.Date == today.Date;
+                var isPastDay = day.Date.Date < today.Date;
+
+                <div class="kanban-column @(isToday ? "today-column" : "")">
+                    <!-- Column Header -->
+                    <div class="kanban-header @(isToday ? "today-header" : "bg-light text-dark") text-center">
+                        <h6 class="mb-0 font-weight-bold">@day.DayName</h6>
+                        <small class="@(isToday ? "text-white-50" : "text-muted") font-weight-bold">@day.Date.ToString("dd/MM/yyyy")</small>
+                    </div>
+
+                    <!-- Shift list in this column -->
+                    <div class="kanban-content">
+                        @foreach (var shift in shifts)
+                        {
+                            var approvedSchedule = workSchedules.FirstOrDefault(w => w.WorkDate.Date == day.Date.Date && w.ShiftId == shift.Id);
+                            var registration = Model.FirstOrDefault(r => r.RegistrationDate.Date == day.Date.Date && r.ShiftId == shift.Id);
+
+                            <div class="shift-card" id="shift-card-@i-@shift.Id" data-date="@day.Date.ToString("yyyy-MM-dd")" data-day-label="@day.Date.ToString("dd/MM")" data-shift-id="@shift.Id">
+                                <div class="shift-card-header">
+                                    <span class="shift-name">@shift.Name</span>
+                                    <span class="shift-time">@shift.StartTime.ToString(@"hh\:mm") - @shift.EndTime.ToString(@"hh\:mm")</span>
+                                </div>
+
+                                <!-- Status Area (Interactive) -->
+                                <div class="status-container" id="status-container-@i-@shift.Id">
+                                    @if (approvedSchedule != null)
+                                    {
+                                        <div class="registration-status-box status-approved">
+                                            <span class="status-badge badge bg-success text-white"><i class="fas fa-check-circle mr-1"></i> Đã chốt ca</span>
+                                            <div class="small">Lịch làm chính thức</div>
+                                        </div>
+                                    }
+                                    else if (registration != null)
+                                    {
+                                        if (registration.Status == "Pending")
+                                        {
+                                            <div class="registration-status-box status-pending">
+                                                <span class="status-badge badge bg-warning text-dark"><i class="fas fa-hourglass-half mr-1"></i> Chờ duyệt</span>
+                                                <div class="mb-2 text-xs">Đơn đã gửi lên quản lý</div>
+                                                <form class="ajax-cancel-form" asp-action="Cancel" method="post">
+                                                    <input type="hidden" name="id" value="@registration.Id" />
+                                                    <input type="hidden" name="startOfWeek" value="@monday.ToString("yyyy-MM-dd")" />
+                                                    <button type="submit" class="btn btn-xs btn-outline-danger btn-cancel-action shadow-xs"><i class="fas fa-times-circle"></i> Hủy ca</button>
+                                                </form>
+                                            </div>
+                                        }
+                                        else if (registration.Status == "Rejected")
+                                        {
+                                            <div class="registration-status-box status-rejected">
+                                                <span class="status-badge badge bg-danger text-white"><i class="fas fa-times mr-1"></i> Từ chối</span>
+                                                <div class="mb-2 text-xs font-italic">Quản lý không duyệt</div>
+                                                @if (!isPastDay)
+                                                {
+                                                    <form class="ajax-register-form" asp-action="Register" method="post">
+                                                        <input type="hidden" name="date" value="@day.Date.ToString("yyyy-MM-dd")" />
+                                                        <input type="hidden" name="shiftId" value="@shift.Id" />
+                                                        <input type="hidden" name="startOfWeek" value="@monday.ToString("yyyy-MM-dd")" />
+                                                        <button type="submit" class="btn btn-xs btn-outline-danger btn-register-action shadow-xs"><i class="fas fa-undo"></i> Đăng ký lại</button>
+                                                    </form>
+                                                }
+                                            </div>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (isPastDay)
+                                        {
+                                            <div class="registration-status-box status-past">
+                                                <div class="text-muted"><i class="fas fa-lock"></i></div>
+                                                <div class="text-xs mt-1">Đã qua ngày</div>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="registration-status-box status-available">
+                                                <div class="text-xs text-muted mb-2">Chưa đăng ký</div>
+                                                <form class="ajax-register-form" asp-action="Register" method="post">
+                                                    <input type="hidden" name="date" value="@day.Date.ToString("yyyy-MM-dd")" />
+                                                    <input type="hidden" name="shiftId" value="@shift.Id" />
+                                                    <input type="hidden" name="startOfWeek" value="@monday.ToString("yyyy-MM-dd")" />
+                                                    <button type="submit" class="btn btn-primary btn-sm btn-register-action shadow-xs"><i class="fas fa-plus"></i> Đăng ký</button>
+                                                </form>
+                                            </div>
+                                        }
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Event delegation
+            document.addEventListener('submit', function (e) {
+                if (e.target && e.target.classList.contains('ajax-register-form')) {
+                    e.preventDefault();
+                    handleRegister(e.target);
+                }
+                if (e.target && e.target.classList.contains('ajax-cancel-form')) {
+                    e.preventDefault();
+                    handleCancel(e.target);
+                }
+            });
+
+            function showToast(message, type = 'success') {
+                const container = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                toast.className = `alert alert-${type} shadow-sm border-left-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
+                toast.role = 'alert';
+                toast.style.marginBottom = '10px';
+                toast.style.fontSize = '12px';
+                toast.innerHTML = `
+                    <i class="fas ${type === 'success' ? 'fa-check-circle text-success' : 'fa-exclamation-circle text-danger'} mr-2"></i>
+                    ${message}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close" style="padding: 0.5rem 0.75rem;">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                `;
+                container.appendChild(toast);
+                setTimeout(() => {
+                    $(toast).alert('close');
+                }, 4000);
+            }
+
+            function handleRegister(form) {
+                const btn = form.querySelector('button[type="submit"]');
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+
+                const formData = new FormData(form);
+                const actionUrl = form.action || form.getAttribute('action');
+
+                fetch(actionUrl, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(result => {
+                    btn.disabled = false;
+                    if (result.success) {
+                        showToast(result.message, 'success');
+                        
+                        const statusContainer = form.closest('.status-container');
+                        const startOfWeekVal = form.querySelector('input[name="startOfWeek"]').value;
+                        const verificationToken = form.querySelector('input[name="__RequestVerificationToken"]').value;
+
+                        // Switch container to Pending
+                        statusContainer.innerHTML = `
+                            <div class="registration-status-box status-pending">
+                                <span class="status-badge badge bg-warning text-dark"><i class="fas fa-hourglass-half mr-1"></i> Chờ duyệt</span>
+                                <div class="mb-2 text-xs">Đơn đã gửi lên quản lý</div>
+                                <form class="ajax-cancel-form" action="${form.action.replace('Register', 'Cancel')}" method="post">
+                                    <input type="hidden" name="id" value="${result.registrationId}" />
+                                    <input type="hidden" name="startOfWeek" value="${startOfWeekVal}" />
+                                    <input type="hidden" name="__RequestVerificationToken" value="${verificationToken}" />
+                                    <button type="submit" class="btn btn-xs btn-outline-danger btn-cancel-action shadow-xs"><i class="fas fa-times-circle"></i> Hủy ca</button>
+                                </form>
+                            </div>
+                        `;
+                    } else {
+                        btn.innerHTML = '<i class="fas fa-plus"></i> Đăng ký';
+                        showToast(result.message, 'danger');
+                    }
+                })
+                .catch(err => {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-plus"></i> Đăng ký';
+                    showToast('Đã xảy ra lỗi hệ thống.', 'danger');
+                    console.error(err);
+                });
+            }
+
+            function handleCancel(form) {
+                if (!confirm('Bạn muốn hủy đăng ký ca này?')) return;
+
+                const btn = form.querySelector('button[type="submit"]');
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+
+                const formData = new FormData(form);
+                const actionUrl = form.action || form.getAttribute('action');
+
+                fetch(actionUrl, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(result => {
+                    btn.disabled = false;
+                    if (result.success) {
+                        showToast(result.message, 'success');
+                        
+                        const statusContainer = form.closest('.status-container');
+                        const card = form.closest('.shift-card');
+                        const date = card.getAttribute('data-date');
+                        const shiftId = card.getAttribute('data-shift-id');
+                        const startOfWeekVal = form.querySelector('input[name="startOfWeek"]').value;
+                        const verificationToken = form.querySelector('input[name="__RequestVerificationToken"]').value;
+
+                        // Switch container to Available
+                        statusContainer.innerHTML = `
+                            <div class="registration-status-box status-available">
+                                <div class="text-xs text-muted mb-2">Chưa đăng ký</div>
+                                <form class="ajax-register-form" action="${form.action.replace('Cancel', 'Register')}" method="post">
+                                    <input type="hidden" name="date" value="${date}" />
+                                    <input type="hidden" name="shiftId" value="${shiftId}" />
+                                    <input type="hidden" name="startOfWeek" value="${startOfWeekVal}" />
+                                    <input type="hidden" name="__RequestVerificationToken" value="${verificationToken}" />
+                                    <button type="submit" class="btn btn-primary btn-sm btn-register-action shadow-xs"><i class="fas fa-plus"></i> Đăng ký</button>
+                                </form>
+                            </div>
+                        `;
+                    } else {
+                        btn.innerHTML = '<i class="fas fa-times-circle"></i> Hủy ca';
+                        showToast(result.message, 'danger');
+                    }
+                })
+                .catch(err => {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-times-circle"></i> Hủy ca';
+                    showToast('Đã xảy ra lỗi hệ thống.', 'danger');
+                    console.error(err);
+                });
+            }
+        });
+    </script>
+}

@@ -198,6 +198,7 @@
         <ul class="nav nav-tabs" id="dashboardTabs">
             <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#product-content">Tổng quan sản phẩm</a></li>
             <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#profit-content">Chi tiết Lãi/Lỗ sản phẩm</a></li>
+            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#lot-profit-content">Chi tiết Lãi/Lỗ theo Lô Hàng</a></li>
             <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#chart-content">Biểu đồ doanh thu</a></li>
         </ul>
         <div class="tab-content pt-4">
@@ -266,6 +267,57 @@
                         }
                     </tbody>
                 </table>
+            </div>
+            <div class="tab-pane fade" id="lot-profit-content">
+                <div class="table-responsive">
+                    <table class="table table-admin table-hover">
+                        <thead>
+                            <tr>
+                                <th>Mã lô</th>
+                                <th>Tên sản phẩm</th>
+                                <th>Phân loại</th>
+                                <th>Nhà cung cấp</th>
+                                <th class="text-right">Đơn giá vốn</th>
+                                <th class="text-right">Nhập (SL)</th>
+                                <th class="text-right">Tồn (SL)</th>
+                                <th class="text-right">Đã bán</th>
+                                <th class="text-right">Doanh thu</th>
+                                <th class="text-right">Giá vốn (FIFO)</th>
+                                <th class="text-right">Lợi nhuận gộp</th>
+                                <th class="text-right">Tỉ suất LN</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.LotProfits != null && Model.LotProfits.Any())
+                            {
+                                foreach (var lot in Model.LotProfits)
+                                {
+                                    var profitClass = lot.GrossProfit >= 0 ? "text-success" : "text-danger";
+                                    <tr>
+                                        <td class="font-weight-bold text-dark" style="font-size: 11px;">@lot.LotId</td>
+                                        <td class="font-weight-bold" style="font-size: 12px;">@lot.ProductName</td>
+                                        <td class="text-muted" style="font-size: 11px;">@lot.VariantName</td>
+                                        <td class="text-secondary" style="font-size: 11px;">@lot.SupplierName</td>
+                                        <td class="text-right">@lot.UnitCost.ToString("N0") đ</td>
+                                        <td class="text-right font-weight-bold">@lot.OriginalQty.ToString("N0")</td>
+                                        <td class="text-right text-info font-weight-bold">@lot.RemainingQty.ToString("N0")</td>
+                                        <td class="text-right text-warning font-weight-bold">@lot.SoldQty.ToString("N0")</td>
+                                        <td class="text-right text-success font-weight-bold">@lot.Revenue.ToString("N0") đ</td>
+                                        <td class="text-right text-muted">@lot.COGS.ToString("N0") đ</td>
+                                        <td class="text-right font-weight-bold @profitClass">@lot.GrossProfit.ToString("N0") đ</td>
+                                        <td class="text-right font-weight-bold @profitClass">@lot.ProfitMargin.ToString("F1")%</td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="12" class="text-center text-muted py-4 font-italic">Không có lô hàng nào khả dụng hoặc có giao dịch trong kỳ này.</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
             </div>
             <div class="tab-pane fade" id="chart-content">
                 <canvas id="topRevenueChart" height="100"></canvas>

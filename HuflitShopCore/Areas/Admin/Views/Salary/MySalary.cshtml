@@ -6,15 +6,15 @@
 
 <div class="container-fluid">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Bảng Lương Của Tôi</h1>
+        <h1 class="h3 mb-0 text-gray-800 font-weight-bold">Bảng Lương Của Tôi</h1>
     </div>
 
     <!-- Bộ lọc tháng năm -->
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
+    <div class="card shadow mb-4 border-0" style="border-radius:12px;">
+        <div class="card-header bg-white py-3 border-bottom">
             <form method="get" class="form-inline">
-                <label class="mr-2 font-weight-bold text-primary">Xem lương tháng:</label>
-                <select name="month" class="form-control mr-2">
+                <label class="mr-2 font-weight-bold text-primary"><i class="fas fa-search-dollar mr-1"></i> Xem lương tháng:</label>
+                <select name="month" class="form-control form-control-sm mr-2 font-weight-bold text-dark" style="border-radius:8px;">
                     @for (int i = 1; i <= 12; i++)
                     {
                         if (i == Model.Month)
@@ -27,7 +27,7 @@
                         }
                     }
                 </select>
-                <select name="year" class="form-control mr-3">
+                <select name="year" class="form-control form-control-sm mr-3 font-weight-bold text-dark" style="border-radius:8px;">
                     @for (int y = DateTime.Now.Year - 1; y <= DateTime.Now.Year + 1; y++)
                     {
                         if (y == Model.Year)
@@ -40,51 +40,102 @@
                         }
                     }
                 </select>
-                <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Tra cứu</button>
+                <button type="submit" class="btn btn-primary btn-sm px-3 font-weight-bold" style="border-radius:8px;"><i class="fas fa-search"></i> Tra cứu</button>
             </form>
         </div>
-        <div class="card-body text-center">
+        <div class="card-body">
             <div class="row">
-                <div class="col-md-4 mb-3">
-                    <div class="card bg-info text-white shadow h-100 py-2">
+                <!-- Tổng giờ công -->
+                <div class="col-xl-3 col-md-6 mb-3">
+                    <div class="card bg-info text-white shadow border-0 h-100 py-2" style="border-radius:10px;">
                         <div class="card-body">
                             <div class="row no-gutters align-items-center">
                                 <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-uppercase mb-1">Tổng giờ công (Thực tế)</div>
+                                    <div class="text-xs font-weight-bold text-uppercase mb-1" style="opacity:0.9;">Tổng giờ công</div>
                                     <div class="h5 mb-0 font-weight-bold">@Math.Round(Model.TotalHours, 2) giờ</div>
                                 </div>
                                 <div class="col-auto">
-                                    <i class="fas fa-clock fa-2x text-gray-300"></i>
+                                    <i class="fas fa-clock fa-2x" style="opacity:0.5;"></i>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4 mb-3">
-                    <div class="card bg-warning text-white shadow h-100 py-2">
+                <!-- Hệ số lương -->
+                <div class="col-xl-3 col-md-6 mb-3">
+                    <div class="card bg-secondary text-white shadow border-0 h-100 py-2" style="border-radius:10px;">
                         <div class="card-body">
                             <div class="row no-gutters align-items-center">
                                 <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-uppercase mb-1">Mức lương (Theo giờ)</div>
-                                    <div class="h5 mb-0 font-weight-bold">@Model.HourlyRate.ToString("N0") VNĐ</div>
+                                    <div class="text-xs font-weight-bold text-uppercase mb-1" style="opacity:0.9;">Đơn giá/giờ</div>
+                                    <div class="h5 mb-0 font-weight-bold">@Model.HourlyRate.ToString("N0") đ</div>
                                 </div>
                                 <div class="col-auto">
-                                    <i class="fas fa-coins fa-2x text-gray-300"></i>
+                                    <i class="fas fa-coins fa-2x" style="opacity:0.5;"></i>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4 mb-3">
-                    <div class="card bg-success text-white shadow h-100 py-2">
+                <!-- Tổng Thưởng -->
+                <div class="col-xl-3 col-md-6 mb-3">
+                    <div class="card bg-success text-white shadow border-0 h-100 py-2" style="border-radius:10px;">
                         <div class="card-body">
                             <div class="row no-gutters align-items-center">
                                 <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-uppercase mb-1">Tổng Lương Tạm Tính</div>
-                                    <div class="h4 mb-0 font-weight-bold">@Model.TotalSalary.ToString("N0") VNĐ</div>
+                                    <div class="text-xs font-weight-bold text-uppercase mb-1" style="opacity:0.9;">Tổng Thưởng (+)</div>
+                                    <div class="h5 mb-0 font-weight-bold">+@Model.TotalAllowances.ToString("N0") đ</div>
                                 </div>
                                 <div class="col-auto">
-                                    <i class="fas fa-money-bill-wave fa-2x text-gray-300"></i>
+                                    <i class="fas fa-gift fa-2x" style="opacity:0.5;"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Tổng Phạt -->
+                <div class="col-xl-3 col-md-6 mb-3">
+                    <div class="card bg-danger text-white shadow border-0 h-100 py-2" style="border-radius:10px;">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-uppercase mb-1" style="opacity:0.9;">Tổng Phạt (-)</div>
+                                    <div class="h5 mb-0 font-weight-bold">@(-Model.TotalDeductions).ToString("N0") đ</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-exclamation-triangle fa-2x" style="opacity:0.5;"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-2">
+                <!-- Lương cơ bản -->
+                <div class="col-md-6 mb-3">
+                    <div class="card bg-light border-0 shadow-sm py-2" style="border-radius:10px; border-left: 4px solid #4e73df !important;">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-muted text-uppercase mb-1">Lương giờ cơ bản</div>
+                                    <div class="h4 mb-0 font-weight-bold text-primary">@Model.TotalSalary.ToString("N0") đ</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Lương thực nhận -->
+                <div class="col-md-6 mb-3">
+                    <div class="card text-white shadow py-2" style="border-radius:10px; background: linear-gradient(135deg, #1e293b, #0f172a); border-left: 4px solid #1cc88a !important;">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Tổng lương thực nhận (Net)</div>
+                                    <div class="h3 mb-0 font-weight-bolder text-white">@Model.NetSalary.ToString("N0") đ</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-wallet fa-2x text-success"></i>
                                 </div>
                             </div>
                         </div>
@@ -94,56 +145,111 @@
         </div>
     </div>
 
-    <!-- Chi tiết công -->
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Chi tiết chấm công tháng @Model.Month/@Model.Year</h6>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover" width="100%" cellspacing="0">
-                    <thead class="thead-light">
-                        <tr>
-                            <th>Ngày</th>
-                            <th>Ca</th>
-                            <th>Giờ vào</th>
-                            <th>Giờ ra</th>
-                            <th>Giờ công (Thực tế)</th>
-                            <th>Ghi chú / Phạt</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @if (Model.Attendances.Any())
-                        {
-                            foreach (var item in Model.Attendances)
-                            {
+    <div class="row">
+        <!-- Chi tiết chấm công -->
+        <div class="col-lg-7">
+            <div class="card shadow mb-4 border-0" style="border-radius:12px;">
+                <div class="card-header bg-white py-3 border-bottom">
+                    <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-history mr-1"></i> Chi tiết chấm công tháng @Model.Month/@Model.Year</h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped mb-0 text-dark" width="100%" cellspacing="0">
+                            <thead class="bg-light font-weight-bold">
                                 <tr>
-                                    <td><strong>@item.WorkSchedule.WorkDate.ToString("dd/MM/yyyy")</strong></td>
-                                    <td><span class="badge badge-info">@item.WorkSchedule.Shift.Name</span></td>
-                                    <td>@(item.CheckInTime?.ToString("HH:mm") ?? "-")</td>
-                                    <td>@(item.CheckOutTime?.ToString("HH:mm") ?? "-")</td>
-                                    <td><strong class="text-success">@Math.Round(item.CalculatedHours, 2)h</strong></td>
-                                    <td>
-                                        @if (item.Status == "Late")
-                                        {
-                                            <span class="text-danger"><i class="fas fa-exclamation-circle"></i> @item.Note</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="text-success"><i class="fas fa-check-circle"></i> Đúng giờ</span>
-                                        }
-                                    </td>
+                                    <th class="pl-3 py-2">Ngày</th>
+                                    <th class="py-2">Ca làm</th>
+                                    <th class="py-2">Giờ vào</th>
+                                    <th class="py-2">Giờ ra</th>
+                                    <th class="py-2 text-right">Giờ công</th>
+                                    <th class="py-2 pr-3">Ghi chú</th>
                                 </tr>
-                            }
-                        }
-                        else
-                        {
-                            <tr>
-                                <td colspan="6" class="text-center py-4 text-muted">Không có dữ liệu chấm công trong tháng này.</td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+                            </thead>
+                            <tbody>
+                                @if (Model.Attendances.Any())
+                                {
+                                    foreach (var item in Model.Attendances)
+                                    {
+                                        <tr>
+                                            <td class="pl-3 align-middle"><strong>@item.WorkSchedule.WorkDate.ToString("dd/MM/yyyy")</strong></td>
+                                            <td class="align-middle"><span class="badge badge-info font-weight-bold">@item.WorkSchedule.Shift.Name</span></td>
+                                            <td class="align-middle">@(item.CheckInTime?.ToString("HH:mm") ?? "-")</td>
+                                            <td class="align-middle">@(item.CheckOutTime?.ToString("HH:mm") ?? "-")</td>
+                                            <td class="align-middle text-right"><strong class="text-success font-weight-bold">@Math.Round(item.CalculatedHours, 2)h</strong></td>
+                                            <td class="align-middle pr-3">
+                                                @if (item.Status == "Late")
+                                                {
+                                                    <span class="text-danger small font-weight-bold"><i class="fas fa-exclamation-circle mr-1"></i> @item.Note</span>
+                                                }
+                                                else if (item.Status == "Absent")
+                                                {
+                                                    <span class="text-warning small font-weight-bold"><i class="fas fa-bed mr-1"></i> Nghỉ phép</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-success small"><i class="fas fa-check-circle mr-1"></i> Đúng giờ</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="6" class="text-center py-4 text-muted font-italic">Không có dữ liệu chấm công trong tháng này.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Các khoản thưởng/phạt điều chỉnh lương -->
+        <div class="col-lg-5">
+            <div class="card shadow mb-4 border-0" style="border-radius:12px;">
+                <div class="card-header bg-white py-3 border-bottom">
+                    <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-donate mr-1"></i> Chi tiết Thưởng (+) / Phạt (-) khác</h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0 text-dark" width="100%" cellspacing="0">
+                            <thead class="bg-light font-weight-bold">
+                                <tr>
+                                    <th class="pl-3 py-2">Loại</th>
+                                    <th class="py-2 text-right">Số tiền (đ)</th>
+                                    <th class="py-2 pl-3">Lý do điều chỉnh</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.Adjustments.Any())
+                                {
+                                    foreach (var item in Model.Adjustments)
+                                    {
+                                        var typeBadge = item.Type == "Allowance" 
+                                            ? "<span class='badge badge-success font-weight-bold'><i class='fas fa-arrow-up mr-1'></i> Thưởng</span>" 
+                                            : "<span class='badge badge-danger font-weight-bold'><i class='fas fa-arrow-down mr-1'></i> Phạt</span>";
+                                        var amountClass = item.Type == "Allowance" ? "text-success" : "text-danger";
+                                        var prefix = item.Type == "Allowance" ? "+" : "-";
+
+                                        <tr>
+                                            <td class="pl-3 align-middle">@Html.Raw(typeBadge)</td>
+                                            <td class="align-middle text-right font-weight-bold @amountClass">@prefix@item.Amount.ToString("N0")</td>
+                                            <td class="align-middle font-weight-bold pl-3 text-dark">@item.Reason</td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="3" class="text-center py-4 text-muted font-italic">Không có khoản thưởng hoặc phạt bổ sung nào.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

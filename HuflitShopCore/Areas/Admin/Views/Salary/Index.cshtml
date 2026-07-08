@@ -6,15 +6,15 @@
 
 <div class="container-fluid">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Thống Kê Bảng Lương</h1>
-        <button class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-download fa-sm text-white-50"></i> Xuất Excel</button>
+        <h1 class="h3 mb-0 text-gray-800 font-weight-bold">Thống Kê Bảng Lương</h1>
+        <button class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-download fa-sm text-white-50 mr-1"></i> Xuất Excel</button>
     </div>
 
-    <div class="card shadow mb-4">
-        <div class="card-header py-3 d-flex justify-content-between align-items-center">
-            <h6 class="m-0 font-weight-bold text-primary">Tổng hợp lương tháng @ViewBag.Month/@ViewBag.Year</h6>
+    <div class="card shadow mb-4 border-0" style="border-radius:12px;">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
+            <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-calendar-alt mr-1"></i> Tổng hợp lương tháng @ViewBag.Month/@ViewBag.Year</h6>
             <form method="get" class="form-inline">
-                <select name="month" class="form-control mr-2 form-control-sm">
+                <select name="month" class="form-control mr-2 form-control-sm font-weight-bold text-dark" style="border-radius:8px;">
                     @for (int i = 1; i <= 12; i++)
                     {
                         if (i == ViewBag.Month)
@@ -27,7 +27,7 @@
                         }
                     }
                 </select>
-                <select name="year" class="form-control mr-3 form-control-sm">
+                <select name="year" class="form-control mr-3 form-control-sm font-weight-bold text-dark" style="border-radius:8px;">
                     @for (int y = DateTime.Now.Year - 1; y <= DateTime.Now.Year + 1; y++)
                     {
                         if (y == ViewBag.Year)
@@ -40,19 +40,22 @@
                         }
                     }
                 </select>
-                <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-filter"></i> Lọc</button>
+                <button type="submit" class="btn btn-primary btn-sm px-3 font-weight-bold" style="border-radius:8px;"><i class="fas fa-filter mr-1"></i> Lọc</button>
             </form>
         </div>
-        <div class="card-body">
+        <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-bordered table-hover" width="100%" cellspacing="0">
-                    <thead class="thead-light">
+                <table class="table table-hover table-striped mb-0 text-dark" width="100%" cellspacing="0">
+                    <thead class="bg-light font-weight-bold">
                         <tr>
-                            <th>Nhân viên</th>
-                            <th>Hệ số lương (VNĐ/Giờ)</th>
-                            <th>Tổng giờ công</th>
-                            <th>Tổng lương thực nhận</th>
-                            <th>Hành động</th>
+                            <th class="pl-4 py-3">Nhân viên</th>
+                            <th class="py-3">Đơn giá (đ/Giờ)</th>
+                            <th class="py-3">Tổng giờ công</th>
+                            <th class="py-3 text-right">Lương cơ bản (đ)</th>
+                            <th class="py-3 text-right">Thưởng (+) (đ)</th>
+                            <th class="py-3 text-right text-danger">Phạt (-) (đ)</th>
+                            <th class="py-3 text-right font-weight-bolder text-primary">Thực nhận (đ)</th>
+                            <th class="text-center py-3 pr-4">Hành động</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -61,19 +64,28 @@
                             foreach (var item in Model)
                             {
                                 <tr>
-                                    <td>
-                                        <strong>@item.StaffName</strong><br/>
+                                    <td class="pl-4 align-middle">
+                                        <strong class="text-dark" style="font-size:0.95rem;">@item.StaffName</strong><br/>
                                         <small class="text-muted">@item.StaffUserName</small>
                                     </td>
-                                    <td>@item.HourlyRate.ToString("N0")</td>
-                                    <td><strong class="text-info">@Math.Round(item.TotalHours, 2)h</strong></td>
-                                    <td><strong class="text-success" style="font-size: 1.1rem;">@item.TotalSalary.ToString("N0") VNĐ</strong></td>
-                                    <td>
-                                        <button class="btn btn-sm btn-outline-primary" title="In phiếu lương">
-                                            <i class="fas fa-print"></i> In phiếu
+                                    <td class="align-middle font-weight-bold">@item.HourlyRate.ToString("N0")</td>
+                                    <td class="align-middle"><strong class="text-info font-weight-bold" style="font-size:0.95rem;">@Math.Round(item.TotalHours, 2)h</strong></td>
+                                    <td class="align-middle text-right font-weight-bold">@item.TotalSalary.ToString("N0")</td>
+                                    <td class="align-middle text-right font-weight-bold text-success">
+                                        @(item.Allowances > 0 ? $"+{item.Allowances.ToString("N0")}" : "0")
+                                    </td>
+                                    <td class="align-middle text-right font-weight-bold text-danger">
+                                        @(item.Deductions > 0 ? $"-{item.Deductions.ToString("N0")}" : "0")
+                                    </td>
+                                    <td class="align-middle text-right font-weight-bolder text-primary" style="font-size: 1.05rem;">
+                                        @item.NetSalary.ToString("N0")
+                                    </td>
+                                    <td class="text-center align-middle pr-4">
+                                        <button class="btn btn-sm btn-info font-weight-bold px-2 py-1 mr-1" onclick="openAdjustmentModal('@item.StaffId', '@item.StaffName')" style="border-radius:6px;" title="Điều chỉnh thưởng/phạt">
+                                            <i class="fas fa-gift mr-1"></i> Thưởng/Phạt
                                         </button>
-                                        <button class="btn btn-sm btn-outline-success" title="Chốt lương & Thanh toán">
-                                            <i class="fas fa-check-double"></i> Đã trả
+                                        <button class="btn btn-sm btn-outline-success font-weight-bold px-2 py-1" style="border-radius:6px;" title="Xác nhận thanh toán">
+                                            <i class="fas fa-check-double mr-1"></i> Đã trả
                                         </button>
                                     </td>
                                 </tr>
@@ -82,17 +94,21 @@
                         else
                         {
                             <tr>
-                                <td colspan="5" class="text-center py-4 text-muted">Không có dữ liệu chấm công cho tháng này.</td>
+                                <td colspan="8" class="text-center py-5 text-muted font-italic">Không có dữ liệu chấm công cho tháng này.</td>
                             </tr>
                         }
                     </tbody>
                     @if (Model != null && Model.Any())
                     {
-                        <tfoot class="bg-light">
+                        <tfoot class="bg-light font-weight-bolder">
                             <tr>
-                                <th colspan="2" class="text-right">TỔNG CỘNG:</th>
-                                <th>@Math.Round(Model.Sum(x => x.TotalHours), 2)h</th>
-                                <th colspan="2" class="text-danger" style="font-size:1.2rem;">@Model.Sum(x => x.TotalSalary).ToString("N0") VNĐ</th>
+                                <td colspan="2" class="text-right pl-4 py-3">TỔNG CỘNG:</td>
+                                <td class="text-info font-weight-bold">@Math.Round(Model.Sum(x => x.TotalHours), 2)h</td>
+                                <td class="text-right">@Model.Sum(x => x.TotalSalary).ToString("N0")</td>
+                                <td class="text-right text-success">+@Model.Sum(x => x.Allowances).ToString("N0")</td>
+                                <td class="text-right text-danger">-@Model.Sum(x => x.Deductions).ToString("N0")</td>
+                                <td class="text-right text-primary" style="font-size:1.15rem;">@Model.Sum(x => x.NetSalary).ToString("N0") đ</td>
+                                <td></td>
                             </tr>
                         </tfoot>
                     }
@@ -104,9 +120,9 @@
     <!-- Biểu đồ cường độ làm việc -->
     @if (Model != null && Model.Any())
     {
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Biểu đồ cường độ làm việc (Tổng giờ công/tháng)</h6>
+        <div class="card shadow mb-4 border-0" style="border-radius:12px;">
+            <div class="card-header bg-white py-3 border-bottom">
+                <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-chart-bar mr-1"></i> Biểu đồ cường độ làm việc (Tổng giờ công/tháng)</h6>
             </div>
             <div class="card-body">
                 <div class="chart-bar" style="height: 350px;">
@@ -115,6 +131,79 @@
             </div>
         </div>
     }
+</div>
+
+<!-- Modal Quản Lý Thưởng/Phạt -->
+<div class="modal fade" id="adjustmentModal" tabindex="-1" role="dialog" aria-labelledby="adjustmentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content border-0 shadow" style="border-radius: 12px; overflow: hidden;">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title font-weight-bold" id="adjustmentModalLabel"><i class="fas fa-donate mr-1"></i> Quản Lý Thưởng / Phạt Nhân Sự</h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body p-4">
+                <h6 class="font-weight-bold text-gray-800 mb-3" style="font-size:1.05rem;">
+                    <i class="fas fa-user-circle mr-1"></i> Nhân viên: <span id="adjStaffName" class="text-primary font-weight-bold"></span>
+                </h6>
+                
+                <!-- Form thêm mới điều chỉnh -->
+                <div class="card bg-light border-0 mb-4" style="border-radius:10px;">
+                    <div class="card-body p-3">
+                        <form id="addAdjustmentForm">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" id="adjStaffId" name="staffId" />
+                            <input type="hidden" name="month" value="@ViewBag.Month" />
+                            <input type="hidden" name="year" value="@ViewBag.Year" />
+                            
+                            <div class="row">
+                                <div class="col-md-3 form-group">
+                                    <label class="small font-weight-bold text-dark">Loại điều chỉnh</label>
+                                    <select class="form-control form-control-sm font-weight-bold text-dark" name="type" id="adjType" required style="border-radius:6px;">
+                                        <option value="Allowance">Thưởng / Cộng (+)</option>
+                                        <option value="Deduction">Phạt / Trừ (-)</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 form-group">
+                                    <label class="small font-weight-bold text-dark">Số tiền (VNĐ)</label>
+                                    <input type="number" class="form-control form-control-sm font-weight-bold text-dark" name="amount" id="adjAmount" placeholder="Nhập số tiền..." required min="1000" style="border-radius:6px;" />
+                                </div>
+                                <div class="col-md-4 form-group">
+                                    <label class="small font-weight-bold text-dark">Lý do điều chỉnh</label>
+                                    <input type="text" class="form-control form-control-sm font-weight-bold text-dark" name="reason" id="adjReason" placeholder="Vỡ ly, làm thế ca, chuyên cần..." required style="border-radius:6px;" />
+                                </div>
+                                <div class="col-md-2 form-group d-flex align-items-end">
+                                    <button type="submit" class="btn btn-primary btn-sm btn-block font-weight-bold py-1" style="border-radius:6px;"><i class="fas fa-plus mr-1"></i> Thêm</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Bảng danh sách các khoản phạt/thưởng hiện tại -->
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover table-bordered mb-0" id="adjustmentsTable">
+                        <thead class="bg-light font-weight-bold">
+                            <tr>
+                                <th class="py-2 pl-3">Ngày tạo</th>
+                                <th class="py-2 text-center">Loại</th>
+                                <th class="py-2 text-right">Số tiền (VNĐ)</th>
+                                <th class="py-2 pl-3">Lý do</th>
+                                <th class="py-2 text-center">Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adjustmentsList">
+                            <!-- Sẽ được điền động bằng JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer bg-light border-top">
+                <button type="button" class="btn btn-secondary btn-sm font-weight-bold" data-dismiss="modal" style="border-radius:6px;">Đóng & Cập nhật</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 @section Scripts {
@@ -163,5 +252,108 @@
             }
             </text>
         }
+
+        // --- AJAX CRUD THƯỞNG PHẠT NHÂN SỰ ---
+        function openAdjustmentModal(staffId, staffName) {
+            $('#adjStaffId').val(staffId);
+            $('#adjStaffName').text(staffName);
+            $('#adjAmount').val('');
+            $('#adjReason').val('');
+            
+            loadAdjustments(staffId);
+            $('#adjustmentModal').modal('show');
+        }
+
+        function loadAdjustments(staffId) {
+            const month = @ViewBag.Month;
+            const year = @ViewBag.Year;
+            
+            fetch(`/Admin/Salary/GetAdjustmentsJson?staffId=${staffId}&month=${month}&year=${year}`)
+                .then(r => r.json())
+                .then(data => {
+                    const tbody = $('#adjustmentsList');
+                    tbody.empty();
+                    
+                    if (data && data.length > 0) {
+                        data.forEach(item => {
+                            const date = new Date(item.createdAt).toLocaleDateString('vi-VN', {
+                                year: 'numeric',
+                                month: '2-digit',
+                                day: '2-digit',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            });
+                            const typeBadge = item.type === 'Allowance' 
+                                ? '<span class="badge badge-success font-weight-bold px-2 py-1"><i class="fas fa-arrow-up mr-1"></i> Thưởng</span>' 
+                                : '<span class="badge badge-danger font-weight-bold px-2 py-1"><i class="fas fa-arrow-down mr-1"></i> Phạt</span>';
+                            const amountClass = item.type === 'Allowance' ? 'text-success' : 'text-danger';
+                            const prefix = item.type === 'Allowance' ? '+' : '-';
+                            
+                            tbody.append(`
+                                <tr>
+                                    <td class="align-middle pl-3">${date}</td>
+                                    <td class="align-middle text-center">${typeBadge}</td>
+                                    <td class="align-middle text-right font-weight-bold ${amountClass}" style="font-size:0.95rem;">${prefix}${parseFloat(item.amount).toLocaleString('vi-VN')} đ</td>
+                                    <td class="align-middle text-dark font-weight-bold pl-3">${item.reason}</td>
+                                    <td class="align-middle text-center">
+                                        <button class="btn btn-sm btn-outline-danger font-weight-bold px-2 py-0" onclick="deleteAdjustment('${item.id}', '${staffId}')" style="border-radius:4px; font-size:11px;">
+                                            <i class="fas fa-trash-alt mr-1"></i> Xóa
+                                        </button>
+                                    </td>
+                                </tr>
+                            `);
+                        });
+                    } else {
+                        tbody.append('<tr><td colspan="5" class="text-center text-muted py-4 font-italic">Không có khoản thưởng/phạt nào trong tháng này.</td></tr>');
+                    }
+                });
+        }
+
+        $('#addAdjustmentForm').on('submit', function (e) {
+            e.preventDefault();
+            const staffId = $('#adjStaffId').val();
+            const form = new FormData(this);
+            
+            fetch('/Admin/Salary/AddAdjustment', {
+                method: 'POST',
+                body: form
+            })
+            .then(r => r.json())
+            .then(res => {
+                if (res.success) {
+                    loadAdjustments(staffId);
+                    $('#adjAmount').val('');
+                    $('#adjReason').val('');
+                } else {
+                    alert(res.message);
+                }
+            });
+        });
+
+        function deleteAdjustment(id, staffId) {
+            if (!confirm('Bạn có chắc muốn xóa khoản điều chỉnh lương này không?')) return;
+            
+            const form = new FormData();
+            form.append('id', id);
+            form.append('__RequestVerificationToken', $('input[name="__RequestVerificationToken"]').val());
+            
+            fetch('/Admin/Salary/DeleteAdjustment', {
+                method: 'POST',
+                body: form
+            })
+            .then(r => r.json())
+            .then(res => {
+                if (res.success) {
+                    loadAdjustments(staffId);
+                } else {
+                    alert(res.message);
+                }
+            });
+        }
+
+        // Tự động load lại bảng lương chính khi đóng modal
+        $('#adjustmentModal').on('hidden.bs.modal', function () {
+            window.location.reload();
+        });
     </script>
 }
