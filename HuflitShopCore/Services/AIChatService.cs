@@ -62,31 +62,26 @@ namespace HuflitShopCore.Services
                 if (isAskingProduct)
                 {
                     var products = await _context.Products
-                        .OrderBy(p => p.ProductName)
                         .Where(p => !p.IsDeleted)
-                        .Select(p => $"- {p.ProductName} | Giá: {p.CurrentPrice:N0}đ")
-                        .Take(40)
+                        .OrderBy(p => p.ProductName)
+                        .Take(40) // TỐI ƯU: Đưa Take(40) lên trước Select
+                        .Select(p => $"- {p.ProductName} | Giá: {p.CurrentPrice:N0}đ | Link: /Product/Details/{p.Id}") // SỬA LỖI: Đã thêm chữ 's' vào Details
                         .ToListAsync();
 
                     dynamicContext += "DANH SÁCH SẢN PHẨM HIỆN CÓ TẠI SHOP:\n";
                     dynamicContext += products.Any() ? string.Join("\n", products) : "Hiện không có sản phẩm nào khả dụng.\n";
                     dynamicContext += "\n";
                 }
-
                 // 4. Xây dựng Prompt
                 string prompt = $@"
-Bạn là nhân viên tư vấn thời trang AI (Stylist AI) chuyên nghiệp của HuflitShop. Tên bạn là 'Trợ lý HuflitShop'.
-Nhiệm vụ của bạn:
-1. Gợi ý phối đồ (Mix & Match) cho khách theo ngữ cảnh (đi tiệc, đi làm, thời tiết).
-2. Kiểm tra tồn kho, kích cỡ và báo giá dựa trên dữ liệu thật.
-3. Giải đáp tình trạng đơn hàng nếu khách hỏi.
-4. Trả lời về các chính sách của cửa hàng.
+Bạn là nhân viên tư vấn thời trang AI (Stylist AI) chuyên nghiệp của HuflitShop. Tên bạn là 'Trợ lý Huflit'.
+Nhiệm vụ của bạn: Gợi ý phối đồ, báo giá và kiểm tra tồn kho.
 
 QUY TẮC CỐT LÕI:
 - Trả lời ngắn gọn, lịch sự, xưng 'dạ/vâng' và gọi khách là 'bạn' hoặc 'chị/anh'.
-- KHÔNG BAO GIỜ bịa đặt sản phẩm hoặc đơn hàng. Chỉ tư vấn dựa vào [DỮ LIỆU THỰC TẾ CỦA SHOP] bên dưới.
-- Bảng Size quy chuẩn: Size S (40-47kg), Size M (48-54kg), Size L (55-60kg).
-- Chính sách: Miễn phí đổi trả 7 ngày. Phí ship đồng giá 30k, Freeship đơn từ 500k.
+- KHÔNG BAO GIỜ bịa đặt sản phẩm. Chỉ tư vấn dựa vào [DỮ LIỆU THỰC TẾ CỦA SHOP] bên dưới.
+- BẮT BUỘC GẮN LINK: Khi bạn nhắc đến tên một sản phẩm, bạn PHẢI tạo một đường dẫn có thể click được theo cú pháp Markdown là [Tên sản phẩm](Link). 
+  (Ví dụ: Dạ shop em đang có mẫu [Áo sơ mi trắng](/Product/Detail/123) giá 200.000đ ạ).
 
 [DỮ LIỆU THỰC TẾ CỦA SHOP]:
 {dynamicContext}
@@ -107,8 +102,7 @@ Hãy trả lời khách hàng ngay bây giờ:
                 var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
 
                 // ĐẢM BẢO MODEL LÀ gemini-1.5-flash VÀ XOÁ KHOẢNG TRẮNG CỦA API KEY
-                var url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key={_apiKey.Trim()}";
-
+                var url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={_apiKey.Trim()}";
                 var response = await _httpClient.PostAsync(url, content);
 
                 if (!response.IsSuccessStatusCode)
