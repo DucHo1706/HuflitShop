@@ -165,11 +165,11 @@ namespace HuflitShopCore.Services
                 Console.WriteLine($"Error auto-generating combo promotions: {ex.Message}");
             }
 
-            // Lưu kết quả vào bộ đệm RAM và gia hạn 30 phút hoạt động
+            // Lưu kết quả vào bộ đệm RAM và gia hạn 5 giây hoạt động phục vụ test nhanh
             lock (_cacheLock)
             {
                 _cachedRules = rules;
-                _cacheExpiration = DateTime.Now.AddMinutes(30);
+                _cacheExpiration = DateTime.Now.AddSeconds(5);
             }
 
             return rules;
