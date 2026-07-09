@@ -49,6 +49,8 @@ builder.Services.AddScoped<GrabExpressService>();
 builder.Services.AddScoped<ReviewService>();
 builder.Services.AddScoped<ReportService>();
 builder.Services.AddScoped<ChatService>();
+builder.Services.AddScoped<AIChatService>();
+
 
 var app = builder.Build();
 

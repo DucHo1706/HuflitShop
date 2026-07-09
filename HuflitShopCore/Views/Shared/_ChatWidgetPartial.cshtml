@@ -1,7 +1,7 @@
 @using System.Security.Claims
 
 @{
-    var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
+    var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
                  ?? User.FindFirst("Id")?.Value;
 }
 
@@ -17,428 +17,596 @@
     <div id="chat-widget-window">
         <!-- Header -->
         <div class="chat-widget-header">
+            <button type="button" class="chat-widget-back-btn" id="chatWidgetBackBtn" onclick="goBackToSelection()"
+                    style="display: none;">&larr;</button>
             <div class="chat-widget-title">
                 <span class="chat-online-dot"></span>
-                Hỗ trợ trực tuyến
+                <span id="chatWidgetTitleText">Hỗ trợ trực tuyến</span>
             </div>
             <button type="button" class="chat-widget-close" onclick="toggleChatWidget()">&times;</button>
         </div>
 
-        <!-- Chat History -->
-        <div class="chat-widget-body" id="chatWidgetBody">
-            <div class="text-center text-muted py-3" style="font-size: 0.8rem;" id="chatWidgetStatusText">
-                Đang kết nối tới máy chủ hỗ trợ...
+        <!-- Pre-chat screen -->
+        <div id="chat-widget-pre-chat">
+            <div class="pre-chat-content">
+                <i class="fas fa-headset pre-chat-icon"></i>
+                <h4 class="pre-chat-title">Chào bạn, HuflitShop có thể giúp gì cho bạn?</h4>
+                <p class="pre-chat-desc">Vui lòng chọn một hình thức hỗ trợ bên dưới.</p>
+                <button class="pre-chat-btn" onclick="startChat('ai')"><i class="fas fa-robot"></i> Trò chuyện với Trợ lý
+                    AI</button>
+                    <button class="pre-chat-btn" onclick="startChat('human')"><i class="fas fa-user-tie"></i> Gặp nhân viên tư
+                        vấn</button>
+                    </div>
+                </div>
+
+                <!-- Chat History -->
+                <div class="chat-widget-body" id="chatWidgetBody" style="display: none;">
+                    <!-- Messages will be appended here -->
+                </div>
+
+                <!-- Input Box -->
+                <div class="chat-widget-footer" id="chatWidgetFooter" style="display: none;">
+                    <input type="text" id="chatWidgetInput" placeholder="Đang kết nối..." disabled
+                           onkeypress="handleWidgetKeyPress(event)">
+                    <button type="button" id="chat-widget-send-btn" onclick="sendWidgetMessage()" disabled>
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
             </div>
-        </div>
 
-        <!-- Input Box -->
-        <div class="chat-widget-footer">
-            <input type="text" id="chatWidgetInput" placeholder="Đang kết nối..." disabled onkeypress="handleWidgetKeyPress(event)">
-            <button type="button" id="chat-widget-send-btn" onclick="sendWidgetMessage()" disabled>
-                <i class="fas fa-paper-plane"></i>
-            </button>
-        </div>
-    </div>
+            <!-- Styling -->
+            <style>
+                #chat-widget-button {
+                    position: fixed;
+                    bottom: 25px;
+                    right: 25px;
+                    width: 56px;
+                    height: 56px;
+                    background-color: #1e40af;
+                    /* Xanh hoàng gia */
+                    color: #ffffff;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 1.5rem;
+                    cursor: pointer;
+                    box-shadow: 0 4px 16px rgba(30, 64, 175, 0.35);
+                    z-index: 99999;
+                    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+                }
 
-    <!-- Styling -->
-    <style>
-        #chat-widget-button {
-            position: fixed;
-            bottom: 25px;
-            right: 25px;
-            width: 56px;
-            height: 56px;
-            background-color: #1e40af; /* Xanh hoàng gia */
-            color: #ffffff;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            cursor: pointer;
-            box-shadow: 0 4px 16px rgba(30, 64, 175, 0.35);
-            z-index: 99999;
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+                #chat-widget-button:hover {
+                    transform: scale(1.08);
+                    background-color: #1d4ed8;
+                }
 
-        #chat-widget-button:hover {
-            transform: scale(1.08);
-            background-color: #1d4ed8;
-        }
+                .chat-badge {
+                    position: absolute;
+                    top: -2px;
+                    right: -2px;
+                    width: 18px;
+                    height: 18px;
+                    background-color: #dc2626;
+                    color: white;
+                    font-size: 0.7rem;
+                    font-weight: bold;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border: 2px solid #ffffff;
+                }
 
-        .chat-badge {
-            position: absolute;
-            top: -2px;
-            right: -2px;
-            width: 18px;
-            height: 18px;
-            background-color: #dc2626;
-            color: white;
-            font-size: 0.7rem;
-            font-weight: bold;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 2px solid #ffffff;
-        }
+                #chat-widget-window {
+                    position: fixed;
+                    bottom: 95px;
+                    right: 25px;
+                    width: 330px;
+                    height: 430px;
+                    background-color: #ffffff;
+                    border-radius: 16px;
+                    border: 1px solid #e2e8f0;
+                    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+                    z-index: 99999;
+                    display: none;
+                    flex-direction: column;
+                    overflow: hidden;
+                    font-family: 'Outfit', sans-serif;
+                    transition: all 0.3s ease;
+                }
 
-        #chat-widget-window {
-            position: fixed;
-            bottom: 95px;
-            right: 25px;
-            width: 330px;
-            height: 430px;
-            background-color: #ffffff;
-            border-radius: 16px;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
-            z-index: 99999;
-            display: none;
-            flex-direction: column;
-            overflow: hidden;
-            font-family: 'Outfit', sans-serif;
-            transition: all 0.3s ease;
-        }
+                .chat-widget-back-btn {
+                    background: transparent;
+                    border: none;
+                    color: rgba(255, 255, 255, 0.8);
+                    font-size: 1.2rem;
+                    cursor: pointer;
+                    line-height: 1;
+                    padding: 0 0.5rem 0 0;
+                    transition: color 0.15s ease;
+                    outline: none !important;
+                }
 
-        .chat-widget-header {
-            background-color: #1e40af;
-            color: #ffffff;
-            padding: 0.85rem 1.2rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-weight: 600;
-        }
+                .chat-widget-header {
+                    background-color: #1e40af;
+                    color: #ffffff;
+                    padding: 0.85rem 1.2rem;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    font-weight: 600;
+                }
 
-        .chat-widget-title {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.92rem;
-        }
+                .chat-widget-title {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    font-size: 0.92rem;
+                }
 
-        .chat-online-dot {
-            width: 8px;
-            height: 8px;
-            background-color: #10b981;
-            border-radius: 50%;
-            display: inline-block;
-            box-shadow: 0 0 8px #10b981;
-        }
+                .chat-online-dot {
+                    width: 8px;
+                    height: 8px;
+                    background-color: #10b981;
+                    border-radius: 50%;
+                    display: inline-block;
+                    box-shadow: 0 0 8px #10b981;
+                }
 
-        .chat-widget-close {
-            background: transparent;
-            border: none;
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 1.5rem;
-            cursor: pointer;
-            line-height: 1;
-            padding: 0;
-            transition: color 0.15s ease;
-            outline: none !important;
-        }
+                .chat-widget-close {
+                    background: transparent;
+                    border: none;
+                    color: rgba(255, 255, 255, 0.8);
+                    font-size: 1.5rem;
+                    cursor: pointer;
+                    line-height: 1;
+                    padding: 0;
+                    transition: color 0.15s ease;
+                    outline: none !important;
+                }
 
-        .chat-widget-close:hover {
-            color: #ffffff;
-        }
+                .chat-widget-close:hover {
+                    color: #ffffff;
+                }
 
-        .chat-widget-body {
-            flex: 1;
-            padding: 1rem;
-            background-color: #f8fafc;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-        }
+                .chat-widget-body {
+                    flex: 1;
+                    padding: 1rem;
+                    background-color: #f8fafc;
+                    overflow-y: auto;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.75rem;
+                }
 
-        /* Message bubbles */
-        .chat-widget-msg {
-            max-width: 80%;
-            padding: 0.55rem 0.85rem;
-            border-radius: 12px;
-            font-size: 0.85rem;
-            line-height: 1.35;
-            word-break: break-word;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.01);
-        }
+                #chat-widget-pre-chat {
+                    flex: 1;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    text-align: center;
+                    padding: 2rem 1.5rem;
+                    background-color: #f8fafc;
+                }
 
-        .chat-widget-msg.sent {
-            background-color: #e2e8f0;
-            color: #1e293b;
-            align-self: flex-start;
-            border-top-left-radius: 2px;
-        }
+                .pre-chat-icon {
+                    font-size: 2.5rem;
+                    color: #1e40af;
+                    margin-bottom: 1rem;
+                }
 
-        .chat-widget-msg.received {
-            background-color: #1e40af; /* Xanh hoàng gia cho Khách gửi */
-            color: #ffffff;
-            align-self: flex-end;
-            border-top-right-radius: 2px;
-        }
+                .pre-chat-title {
+                    font-size: 1.1rem;
+                    font-weight: 600;
+                    color: #1e293b;
+                    margin-bottom: 0.5rem;
+                }
 
-        .chat-widget-time {
-            font-size: 0.68rem;
-            color: #94a3b8;
-            margin-top: 0.15rem;
-            display: block;
-        }
-        
-        .chat-widget-msg.sent .chat-widget-time {
-            text-align: left;
-        }
+                .pre-chat-desc {
+                    font-size: 0.85rem;
+                    color: #64748b;
+                    margin-bottom: 1.5rem;
+                }
 
-        .chat-widget-msg.received .chat-widget-time {
-            color: rgba(255, 255, 255, 0.7);
-            text-align: right;
-        }
+                .pre-chat-btn {
+                    display: block;
+                    width: 100%;
+                    padding: 0.75rem;
+                    margin-bottom: 0.75rem;
+                    border: 1px solid #1e40af;
+                    background-color: #1e40af;
+                    color: #ffffff;
+                    border-radius: 8px;
+                    font-weight: 500;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                }
 
-        .chat-widget-footer {
-            padding: 0.65rem 1rem;
-            border-top: 1px solid #e2e8f0;
-            background-color: #ffffff;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
+                .pre-chat-btn:hover {
+                    background-color: #1d4ed8;
+                }
 
-        .chat-widget-footer input {
-            flex: 1;
-            border: 1px solid #cbd5e1;
-            border-radius: 20px;
-            padding: 0.45rem 1rem;
-            font-size: 0.88rem;
-            outline: none;
-            transition: border-color 0.15s ease;
-        }
+                .pre-chat-btn:last-child {
+                    background-color: #ffffff;
+                    color: #1e40af;
+                }
 
-        .chat-widget-footer input:focus {
-            border-color: #1e40af;
-        }
+                .pre-chat-btn:last-child:hover {
+                    background-color: #f1f5f9;
+                }
 
-        #chat-widget-send-btn {
-            background-color: #1e40af;
-            color: #ffffff;
-            border: none;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: background-color 0.15s ease;
-            outline: none !important;
-            padding: 0;
-        }
+                .pre-chat-btn i {
+                    margin-right: 0.5rem;
+                }
 
-        #chat-widget-send-btn:hover {
-            background-color: #1d4ed8;
-        }
+                /* Message bubbles */
+                .chat-widget-msg {
+                    max-width: 80%;
+                    padding: 0.55rem 0.85rem;
+                    border-radius: 12px;
+                    font-size: 0.85rem;
+                    line-height: 1.35;
+                    word-break: break-word;
+                    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.01);
+                }
 
-        #chat-widget-send-btn:disabled {
-            background-color: #cbd5e1;
-            cursor: not-allowed;
-        }
-    </style>
+                .chat-widget-msg.sent {
+                    background-color: #e2e8f0;
+                    color: #1e293b;
+                    align-self: flex-start;
+                    border-top-left-radius: 2px;
+                }
 
-    <!-- SignalR Script & Logic -->
-    <script src="/lib/signalr/dist/browser/signalr.min.js"></script>
-    <script>
-        // Bắt lỗi JS toàn cục - chỉ hiển thị các lỗi liên quan trực tiếp đến SignalR
-        window.addEventListener('error', function (e) {
-            var isSignalRError = e.message && (
-                e.message.toLowerCase().includes('signalr') || 
-                e.message.toLowerCase().includes('chat') || 
+                .chat-widget-msg.ai {
+                    background-color: #f0f9ff;
+                    /* Màu nền xanh nhạt cho AI */
+                    color: #0c4a6e;
+                    align-self: flex-start;
+                    border-top-left-radius: 2px;
+                    border: 1px solid #e0f2fe;
+                }
+
+                .chat-widget-msg.received {
+                    background-color: #1e40af;
+                    /* Xanh hoàng gia cho Khách gửi */
+                    color: #ffffff;
+                    align-self: flex-end;
+                    border-top-right-radius: 2px;
+                }
+
+                .chat-widget-time {
+                    font-size: 0.68rem;
+                    color: #94a3b8;
+                    margin-top: 0.15rem;
+                    display: block;
+                }
+
+                .chat-widget-msg.sent .chat-widget-time {
+                    text-align: left;
+                }
+
+                .chat-widget-msg.received .chat-widget-time {
+                    color: rgba(255, 255, 255, 0.7);
+                    text-align: right;
+                }
+
+                .chat-widget-footer {
+                    padding: 0.65rem 1rem;
+                    border-top: 1px solid #e2e8f0;
+                    background-color: #ffffff;
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                }
+
+                .chat-widget-footer input {
+                    flex: 1;
+                    border: 1px solid #cbd5e1;
+                    border-radius: 20px;
+                    padding: 0.45rem 1rem;
+                    font-size: 0.88rem;
+                    outline: none;
+                    transition: border-color 0.15s ease;
+                }
+
+                .chat-widget-footer input:focus {
+                    border-color: #1e40af;
+                }
+
+                #chat-widget-send-btn {
+                    background-color: #1e40af;
+                    color: #ffffff;
+                    border: none;
+                    width: 32px;
+                    height: 32px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    cursor: pointer;
+                    transition: background-color 0.15s ease;
+                    outline: none !important;
+                    padding: 0;
+                }
+
+                #chat-widget-send-btn:hover {
+                    background-color: #1d4ed8;
+                }
+
+                #chat-widget-send-btn:disabled {
+                    background-color: #cbd5e1;
+                    cursor: not-allowed;
+                }
+            </style>
+
+            <!-- SignalR Script & Logic -->
+            <script src="/lib/signalr/dist/browser/signalr.min.js"></script>
+            <script>
+                // Bắt lỗi JS toàn cục - chỉ hiển thị các lỗi liên quan trực tiếp đến SignalR
+                window.addEventListener('error', function (e) {
+                var isSignalRError = e.message && (
+                e.message.toLowerCase().includes('signalr') ||
+                e.message.toLowerCase().includes('chat') ||
                 e.filename.toLowerCase().includes('signalr')
-            );
-            if (isSignalRError) {
+                );
+                if (isSignalRError) {
                 console.error("SignalR Client Error caught: ", e.message);
                 var statusText = document.getElementById('chatWidgetStatusText');
                 if (statusText) {
-                    statusText.innerText = "Lỗi khởi tạo: " + e.message;
-                    statusText.style.color = "#ef4444";
+                statusText.innerText = "Lỗi khởi tạo: " + e.message;
+                statusText.style.color = "#ef4444";
                 }
-            }
-        });
+                }
+                });
 
-        var widgetConnection = null;
-        var isChatOpen = false;
-        var unreadCount = 0;
+                var widgetConnection = null;
+                var isChatOpen = false;
+                var unreadCount = 0;
+                var currentChatMode = null; // 'ai' or 'human'
 
-        function toggleChatWidget() {
-            var windowDiv = document.getElementById('chat-widget-window');
-            if (isChatOpen) {
+                function toggleChatWidget() {
+                var windowDiv = document.getElementById('chat-widget-window');
+                if (isChatOpen) {
                 windowDiv.style.display = 'none';
                 isChatOpen = false;
-            } else {
+                } else {
                 windowDiv.style.display = 'flex';
                 isChatOpen = true;
-                
-                // Reset badge thông báo khi mở hộp chat
+                // Nếu chưa chọn chế độ, hiển thị màn hình lựa chọn
+                if (currentChatMode === null) {
+                goBackToSelection();
+                }
+                }
+                }
+
+                function goBackToSelection() {
+                currentChatMode = null;
+                updateChatUI();
+                }
+
+                function initWidgetSignalR() {
+                if (widgetConnection !== null) return;
+
+                setWidgetChatStatus(false);
+                console.log("Customer Chat Widget initiating connection...");
+
+                try {
+                // Loại bỏ .withAutomaticReconnect() để tương thích tối đa với phiên bản JS cũ hơn trong project
+                widgetConnection = new signalR.HubConnectionBuilder()
+                .withUrl("/chatHub")
+                .build();
+
+                // Lắng nghe nhận tin nhắn
+                widgetConnection.on("ReceiveUserMessage", function (data) {
+                appendWidgetMessage(data.messageContent, data.sentAt, data.isAdmin, data.senderType);
+                scrollWidgetToBottom();
+
+                // Nếu đang đóng hộp chat và nhận được tin từ Admin/AI thì tăng badge thông báo
+                if (!isChatOpen && (data.isAdmin || data.senderType === 'AI')) {
+                unreadCount++;
+                var badge = document.getElementById('chatWidgetBadge');
+                badge.classList.remove('d-none');
+                badge.innerText = unreadCount;
+                playWidgetSound();
+                }
+                });
+
+                widgetConnection.start().then(function () {
+                console.log("Customer Chat Widget Auto-connected successfully!");
+                if (currentChatMode) {
+                setWidgetChatStatus(true);
+                }
+                }).catch(function (err) {
+                console.error("SignalR Connection Error: ", err.toString());
+                var statusText = document.getElementById('chatWidgetStatusText');
+                if (statusText) {
+                statusText.innerText = "Lỗi kết nối: " + err.toString();
+                statusText.style.color = "#ef4444";
+                }
+                });
+                } catch (e) {
+                console.error("SignalR Builder Error: ", e.message);
+                var statusText = document.getElementById('chatWidgetStatusText');
+                if (statusText) {
+                statusText.innerText = "Lỗi khởi tạo: " + e.message;
+                statusText.style.color = "#ef4444";
+                }
+                }
+                }
+
+                function setWidgetChatStatus(connected) {
+                var input = document.getElementById('chatWidgetInput');
+                var btn = document.getElementById('chat-widget-send-btn');
+
+                if (connected) {
+                input.placeholder = "Nhập tin nhắn...";
+                input.removeAttribute('disabled');
+                btn.removeAttribute('disabled');
+                } else {
+                input.placeholder = "Đang kết nối...";
+                input.setAttribute('disabled', 'true');
+                btn.setAttribute('disabled', 'true');
+                }
+                }
+
+                function startChat(mode) {
+                currentChatMode = mode;
+                updateChatUI();
+
+                // Reset badge khi bắt đầu chat
                 unreadCount = 0;
                 var badge = document.getElementById('chatWidgetBadge');
                 badge.classList.add('d-none');
                 badge.innerText = '';
 
-                // Cuộn xuống cuối và nạp lại lịch sử tin nhắn
+                var body = document.getElementById('chatWidgetBody');
+                body.innerHTML = ''; // Xóa tin nhắn cũ
+
+                if (mode === 'human') {
                 loadWidgetHistory();
-            }
-        }
-
-        function initWidgetSignalR() {
-            if (widgetConnection !== null) return;
-
-            setWidgetChatStatus(false);
-            console.log("Customer Chat Widget initiating connection...");
-
-            try {
-                // Loại bỏ .withAutomaticReconnect() để tương thích tối đa với phiên bản JS cũ hơn trong project
-                widgetConnection = new signalR.HubConnectionBuilder()
-                    .withUrl("/chatHub")
-                    .build();
-
-                // Lắng nghe nhận tin nhắn
-                widgetConnection.on("ReceiveUserMessage", function (data) {
-                    appendWidgetMessage(data.messageContent, data.sentAt, data.isAdmin);
-                    scrollWidgetToBottom();
-
-                    // Nếu đang đóng hộp chat và nhận được tin từ Admin thì tăng badge thông báo
-                    if (!isChatOpen && data.isAdmin) {
-                        unreadCount++;
-                        var badge = document.getElementById('chatWidgetBadge');
-                        badge.classList.remove('d-none');
-                        badge.innerText = unreadCount;
-                        playWidgetSound();
-                    }
-                });
-
-                widgetConnection.start().then(function () {
-                    console.log("Customer Chat Widget Auto-connected successfully!");
-                    setWidgetChatStatus(true);
-                    loadWidgetHistory();
-                }).catch(function (err) {
-                    console.error("SignalR Connection Error: ", err.toString());
-                    var statusText = document.getElementById('chatWidgetStatusText');
-                    if (statusText) {
-                        statusText.innerText = "Lỗi kết nối: " + err.toString();
-                        statusText.style.color = "#ef4444";
-                    }
-                });
-            } catch (e) {
-                console.error("SignalR Builder Error: ", e.message);
-                var statusText = document.getElementById('chatWidgetStatusText');
-                if (statusText) {
-                    statusText.innerText = "Lỗi khởi tạo: " + e.message;
-                    statusText.style.color = "#ef4444";
+                } else if (mode === 'ai') {
+                // Hiển thị tin nhắn chào mừng từ AI
+                setTimeout(() => {
+                appendWidgetMessage("Dạ, Trợ lý AI của HuflitShop xin chào ạ! Em có thể giúp gì cho chị ạ?", new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }), true, 'AI');
+                }, 200);
                 }
-            }
-        }
-
-        function setWidgetChatStatus(connected) {
-            var input = document.getElementById('chatWidgetInput');
-            var btn = document.getElementById('chat-widget-send-btn');
-            var statusText = document.getElementById('chatWidgetStatusText');
-            
-            if (connected) {
-                input.placeholder = "Nhập tin nhắn...";
-                input.removeAttribute('disabled');
-                btn.removeAttribute('disabled');
-                if (statusText) {
-                    statusText.innerText = "Đã kết nối. Hãy bắt đầu cuộc hội thoại!";
-                    statusText.style.color = "#64748b";
                 }
-            } else {
-                input.placeholder = "Đang kết nối...";
-                input.setAttribute('disabled', 'true');
-                btn.setAttribute('disabled', 'true');
-                if (statusText) {
-                    statusText.innerText = "Đang kết nối tới máy chủ hỗ trợ...";
-                    statusText.style.color = "#64748b";
+
+                function updateChatUI() {
+                const preChatScreen = document.getElementById('chat-widget-pre-chat');
+                const chatBody = document.getElementById('chatWidgetBody');
+                const chatFooter = document.getElementById('chatWidgetFooter');
+                const backBtn = document.getElementById('chatWidgetBackBtn');
+                const titleText = document.getElementById('chatWidgetTitleText');
+
+                if (currentChatMode === null) { // Màn hình lựa chọn
+                preChatScreen.style.display = 'flex';
+                chatBody.style.display = 'none';
+                chatFooter.style.display = 'none';
+                backBtn.style.display = 'none';
+                titleText.innerText = 'Hỗ trợ trực tuyến';
+                setWidgetChatStatus(false);
+                } else { // Màn hình chat
+                preChatScreen.style.display = 'none';
+                chatBody.style.display = 'flex';
+                chatFooter.style.display = 'flex';
+                backBtn.style.display = 'block';
+                setWidgetChatStatus(true);
+
+                if (currentChatMode === 'ai') {
+                titleText.innerText = 'Trợ lý AI';
+                } else if (currentChatMode === 'human') {
+                titleText.innerText = 'Tư vấn viên';
                 }
-            }
-        }
+                }
+                }
 
-        function loadWidgetHistory() {
-            if (!widgetConnection || widgetConnection.state !== signalR.HubConnectionState.Connected) return;
+                function loadWidgetHistory() {
+                if (!widgetConnection || widgetConnection.state !== signalR.HubConnectionState.Connected) return;
 
-            widgetConnection.invoke("GetChatHistory")
+                widgetConnection.invoke("GetChatHistory")
                 .then(function (messages) {
-                    var body = document.getElementById('chatWidgetBody');
-                    body.innerHTML = ''; // Clear cũ
+                var body = document.getElementById('chatWidgetBody');
+                body.innerHTML = ''; // Clear cũ
 
-                    if (messages && messages.length > 0) {
-                        messages.forEach(m => {
-                            appendWidgetMessage(m.messageContent, m.sentAt, m.senderType === 'Admin');
-                        });
-                    } else {
-                        body.innerHTML = `
-                            <div class="text-center text-muted py-4" style="font-size: 0.82rem;">
-                                Hãy gửi tin nhắn cho chúng tôi để được tư vấn trực tiếp!
-                            </div>
-                        `;
-                    }
-                    scrollWidgetToBottom();
+                if (messages && messages.length > 0) {
+                messages.forEach(m => {
+                // senderType có thể là 'Admin', 'User' (vì đã lọc AI ở backend)
+                var isAdminMessage = m.senderType === 'Admin';
+                appendWidgetMessage(m.messageContent, m.sentAt, isAdminMessage, m.senderType);
+                });
+                } else {
+                body.innerHTML = `
+                <div class="text-center text-muted py-4" style="font-size: 0.82rem;">
+                Hãy gửi tin nhắn cho chúng tôi để được tư vấn trực tiếp!
+                </div>
+                `;
+                }
+                scrollWidgetToBottom();
                 })
                 .catch(err => console.error("Lỗi khi tải lịch sử widget chat: ", err));
-        }
+                }
 
-        function appendWidgetMessage(content, time, isAdminMessage) {
-            var body = document.getElementById('chatWidgetBody');
-            if (!body) return;
+                function appendWidgetMessage(content, time, isAdminMessage, senderType) {
+                var body = document.getElementById('chatWidgetBody');
+                if (!body) return;
 
-            var emptyText = body.querySelector('.text-muted');
-            if (emptyText) {
+                var emptyText = body.querySelector('.text-muted');
+                if (emptyText) {
                 emptyText.remove();
-            }
+                }
 
-            var msgDiv = document.createElement('div');
-            msgDiv.className = 'chat-widget-msg ' + (isAdminMessage ? 'sent' : 'received');
+                var msgDiv = document.createElement('div');
+                var msgClass = 'chat-widget-msg ';
 
-            msgDiv.innerHTML = `
-                ${escapeHtml(content)}
-                <span class="chat-widget-time">${time}</span>
-            `;
+                if (senderType === 'AI') {
+                msgClass += 'ai'; // Style riêng cho AI
+                } else if (isAdminMessage) {
+                msgClass += 'sent'; // Style cho Admin
+                } else {
+                msgClass += 'received'; // Style cho User
+                }
+                msgDiv.className = msgClass;
 
-            body.appendChild(msgDiv);
-        }
+                var botIcon = senderType === 'AI' ? '<i class="fas fa-robot" style="margin-right: 6px; font-size: 0.8rem; opacity: 0.7;"></i>' : '';
+                var senderName = isAdminMessage ? 'HuflitShop' : 'Bạn';
 
-        // Gửi tin nhắn
-        function sendWidgetMessage() {
-            var input = document.getElementById('chatWidgetInput');
-            var text = input.value.trim();
-            if (!text || !widgetConnection || widgetConnection.state !== signalR.HubConnectionState.Connected) return;
+                msgDiv.innerHTML = `
+                <div>${botIcon}${escapeHtml(content)}</div>
+                <span class="chat-widget-time">${senderName} lúc ${time}</span>
+                `;
 
-            input.setAttribute('disabled', 'true');
+                body.appendChild(msgDiv);
+                }
 
-            widgetConnection.invoke("SendMessageToAdmin", text)
-                .then(function () {
-                    input.value = '';
-                    input.removeAttribute('disabled');
-                    input.focus();
-                })
-                .catch(err => {
-                    console.error("Gửi tin nhắn thất bại: ", err);
-                    input.removeAttribute('disabled');
-                });
-        }
+                // Gửi tin nhắn
+                    function sendWidgetMessage() {
+        var input = document.getElementById('chatWidgetInput');
+        var text = input.value.trim();
 
-        function handleWidgetKeyPress(event) {
-            if (event.key === 'Enter') {
+        // Kiểm tra kết nối trước khi gửi
+        if (!text || !widgetConnection || widgetConnection.state !== signalR.HubConnectionState.Connected) return;
+
+        // --- XÓA HOẶC CHÚ THÍCH DÒNG BÊN DƯỚI ĐỂ TRÁNH GỬI DOUBLE ---
+        // appendWidgetMessage(text, new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }), false, 'User');
+        // scrollWidgetToBottom(); 
+        // -----------------------------------------------------------
+
+        // Tạm khóa input để tránh gửi liên tục
+        input.setAttribute('disabled', 'true');
+        input.value = ''; // Xóa text ngay lập tức để tạo cảm giác "đã gửi"
+
+        let hubMethod = currentChatMode === 'ai' ? "SendMessageToAI" : "SendMessageToAdmin";
+
+        widgetConnection.invoke(hubMethod, text)
+            .then(function () {
+                // Mở khóa input sau khi server xác nhận đã nhận
+                input.removeAttribute('disabled');
+                input.focus();
+            })
+            .catch(err => {
+                console.error(`Gửi tin nhắn tới ${hubMethod} thất bại: `, err);
+                input.removeAttribute('disabled');
+                // Có thể hiện thông báo lỗi cho user ở đây
+            });
+    }
+
+                function handleWidgetKeyPress(event) {
+                if (event.key === 'Enter') {
                 sendWidgetMessage();
-            }
-        }
+                }
+                }
 
-        function scrollWidgetToBottom() {
-            var body = document.getElementById('chatWidgetBody');
-            if (body) {
+                function scrollWidgetToBottom() {
+                var body = document.getElementById('chatWidgetBody');
+                if (body) {
                 body.scrollTop = body.scrollHeight;
-            }
-        }
+                }
+                }
 
-        function playWidgetSound() {
-            try {
+                function playWidgetSound() {
+                try {
                 var context = new (window.AudioContext || window.webkitAudioContext)();
                 var osc = context.createOscillator();
                 var gain = context.createGain();
@@ -449,23 +617,23 @@
                 gain.connect(context.destination);
                 osc.start();
                 osc.stop(context.currentTime + 0.12);
-            } catch (e) {
+                } catch (e) {
                 console.log("Audio play blocked: ", e);
-            }
-        }
+                }
+                }
 
-        function escapeHtml(text) {
-            var map = {
+                function escapeHtml(text) {
+                var map = {
                 '&': '&amp;',
                 '<': '&lt;',
                 '>': '&gt;',
                 '"': '&quot;',
                 "'": '&#039;'
-            };
-            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
-        }
+                };
+                return text.replace(/[&<>"']/g, function (m) { return map[m]; });
+                }
 
-        // Tự động khởi chạy ngay lập tức khi mã JS này được tải
-        initWidgetSignalR();
-    </script>
-}
+                // Tự động khởi chạy ngay lập tức khi mã JS này được tải
+                initWidgetSignalR();
+            </script>
+        }
