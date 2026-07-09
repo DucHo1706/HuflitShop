@@ -31,6 +31,9 @@ namespace HuflitShopCore.DTOs
 
         public bool IsActive { get; set; } = true;
 
+        [Required(ErrorMessage = "Vui lòng nhập mức lương theo giờ")]
+        public decimal HourlyRate { get; set; } = 25000;
+
         public string FullAddress { get; set; } = string.Empty;
 
         // Địa chỉ chi tiết

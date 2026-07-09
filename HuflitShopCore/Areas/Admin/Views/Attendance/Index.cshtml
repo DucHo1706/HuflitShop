@@ -1,0 +1,166 @@
+@model HuflitShopCore.Models.Attendance
+@{
+    ViewData["Title"] = "Chấm Công";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+    var workSchedule = ViewBag.WorkSchedule as HuflitShopCore.Models.WorkSchedule;
+    bool hasSchedule = ViewBag.HasSchedule;
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Chấm Công (Check-in/out)</h1>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Thông tin ca làm hôm nay</h6>
+                </div>
+                <div class="card-body text-center">
+                    @if (!hasSchedule)
+                    {
+                        <div class="alert alert-secondary">
+                            <i class="fas fa-calendar-times fa-2x mb-3 text-muted d-block"></i>
+                            Bạn không có ca làm việc nào được xếp trong hôm nay.
+                        </div>
+                    }
+                    else if (workSchedule != null)
+                    {
+                        <h5 class="font-weight-bold text-info">Ca: @workSchedule.Shift.Name</h5>
+                        <p class="mb-1"><i class="far fa-clock"></i> Thời gian: <strong>@workSchedule.Shift.StartTime.ToString(@"hh\:mm") - @workSchedule.Shift.EndTime.ToString(@"hh\:mm")</strong> <span class="text-muted">(Định mức: @Math.Round((workSchedule.Shift.EndTime - workSchedule.Shift.StartTime).TotalHours < 0 ? (workSchedule.Shift.EndTime - workSchedule.Shift.StartTime).TotalHours + 24 : (workSchedule.Shift.EndTime - workSchedule.Shift.StartTime).TotalHours, 2) giờ)</span></p>
+                        <p class="mb-4"><i class="far fa-calendar-alt"></i> Ngày: <strong>@workSchedule.WorkDate.ToString("dd/MM/yyyy")</strong></p>
+
+                        @if (Model == null)
+                        {
+                            <!-- Chưa check-in -->
+                            <form asp-action="CheckIn" method="post">
+                                <input type="hidden" name="workScheduleId" value="@workSchedule.Id" />
+                                <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5 shadow-sm">
+                                    <i class="fas fa-sign-in-alt"></i> Bắt đầu ca (Check-in)
+                                </button>
+                            </form>
+                        }
+                        else if (!Model.CheckOutTime.HasValue)
+                        {
+                            <!-- Đã check-in, chưa check-out -->
+                            <div class="alert alert-success">
+                                <i class="fas fa-check-circle"></i> Bạn đã Check-in lúc <strong>@Model.CheckInTime?.ToString("HH:mm")</strong><br/>
+                                <small>Giờ công tạm tính: <strong>@Math.Round((DateTime.Now - Model.CheckInTime.Value).TotalHours < 0 ? 0 : (DateTime.Now - Model.CheckInTime.Value).TotalHours, 2) giờ</strong> (sẽ chốt khi Check-out)</small>
+                            </div>
+                            <form asp-action="CheckOut" method="post">
+                                <input type="hidden" name="attendanceId" value="@Model.Id" />
+                                <button type="submit" class="btn btn-warning btn-lg rounded-pill px-5 shadow-sm">
+                                    <i class="fas fa-sign-out-alt"></i> Kết thúc ca (Check-out)
+                                </button>
+                            </form>
+                        }
+                        else
+                        {
+                            <!-- Đã check-out -->
+                            <div class="alert alert-info">
+                                <i class="fas fa-clipboard-check"></i> Ca làm việc đã hoàn thành.
+                                <hr />
+                                Check-in: <strong>@Model.CheckInTime?.ToString("HH:mm")</strong> <br/>
+                                Check-out: <strong>@Model.CheckOutTime?.ToString("HH:mm")</strong> <br/>
+                                Giờ công: <strong>@Math.Round(Model.CalculatedHours, 2) giờ</strong>
+                            </div>
+                            @if (!string.IsNullOrEmpty(Model.Note))
+                            {
+                                <div class="alert alert-danger small">
+                                    <i class="fas fa-exclamation-triangle"></i> Ghi chú hệ thống: @Model.Note
+                                </div>
+                            }
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Quy định chấm công</h6>
+                </div>
+                <div class="card-body">
+                    <ul>
+                        <li>Bạn chỉ có thể chấm công nếu đã được quản lý chốt ca làm cho ngày hôm nay.</li>
+                        <li><strong>Điều kiện Check-in:</strong> Thiết bị của bạn phải kết nối đúng mạng WiFi của cửa hàng.</li>
+                        <li><strong>Đi trễ:</strong> Nếu bạn check-in trễ từ 1-10 phút so với giờ bắt đầu ca, hệ thống sẽ tự động trừ 15 phút giờ làm.</li>
+                        <li>Đừng quên Check-out khi ra về để hệ thống tính toán giờ làm chính xác nhất.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bảng lịch sử chấm công -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Lịch sử chấm công (30 lần gần nhất)</h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th>Ngày</th>
+                                    <th>Ca làm</th>
+                                    <th>Thời gian (Quy định)</th>
+                                    <th>Check-in thực tế</th>
+                                    <th>Check-out thực tế</th>
+                                    <th>Trạng thái</th>
+                                    <th>Giờ công nhận được</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (ViewBag.PastAttendances != null && ((IEnumerable<HuflitShopCore.Models.Attendance>)ViewBag.PastAttendances).Any())
+                                {
+                                    foreach (var item in (IEnumerable<HuflitShopCore.Models.Attendance>)ViewBag.PastAttendances)
+                                    {
+                                        <tr>
+                                            <td><strong>@item.WorkSchedule.WorkDate.ToString("dd/MM/yyyy")</strong></td>
+                                            <td><span class="badge badge-info">@item.WorkSchedule.Shift.Name</span></td>
+                                            <td>@item.WorkSchedule.Shift.StartTime.ToString(@"hh\:mm") - @item.WorkSchedule.Shift.EndTime.ToString(@"hh\:mm")</td>
+                                            <td>@(item.CheckInTime?.ToString("HH:mm") ?? "-")</td>
+                                            <td>@(item.CheckOutTime?.ToString("HH:mm") ?? "-")</td>
+                                            <td>
+                                                @if (item.Status == "Late")
+                                                {
+                                                    <span class="badge badge-warning">Đi trễ</span>
+                                                    @if (!string.IsNullOrEmpty(item.Note))
+                                                    {
+                                                        <br/><small class="text-danger">@item.Note</small>
+                                                    }
+                                                }
+                                                else if (item.Status == "Absent")
+                                                {
+                                                    <span class="badge badge-danger">Vắng mặt</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge badge-success">Đúng giờ</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <strong class="text-primary" style="font-size: 1.1em;">@Math.Round(item.CalculatedHours, 2).ToString("0.##")</strong> giờ
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="7" class="text-center py-4 text-muted">Chưa có dữ liệu lịch sử chấm công.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

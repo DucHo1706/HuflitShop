@@ -1,0 +1,884 @@
+@model IEnumerable<HuflitShopCore.Models.WorkSchedule>
+@{
+    ViewData["Title"] = "Bảng Phân Ca Theo Tuần";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+    
+    var shifts = ViewBag.Shifts as IEnumerable<HuflitShopCore.Models.Shift> ?? new List<HuflitShopCore.Models.Shift>();
+    var staffList = ViewBag.StaffList as IEnumerable<HuflitShopCore.Models.AppUser> ?? new List<HuflitShopCore.Models.AppUser>();
+    var attendances = ViewBag.Attendances as Dictionary<int, HuflitShopCore.Models.Attendance> ?? new Dictionary<int, HuflitShopCore.Models.Attendance>();
+    var weeklyRegistrations = ViewBag.Registrations as IEnumerable<HuflitShopCore.Models.ShiftRegistration> ?? new List<HuflitShopCore.Models.ShiftRegistration>();
+    
+    DateTime monday = ViewBag.Monday;
+    DateTime sunday = ViewBag.Sunday;
+    DateTime today = ViewBag.Today;
+
+    var daysOfWeek = new[]
+    {
+        new { DayName = "Thứ 2", Date = monday },
+        new { DayName = "Thứ 3", Date = monday.AddDays(1) },
+        new { DayName = "Thứ 4", Date = monday.AddDays(2) },
+        new { DayName = "Thứ 5", Date = monday.AddDays(3) },
+        new { DayName = "Thứ 6", Date = monday.AddDays(4) },
+        new { DayName = "Thứ 7", Date = monday.AddDays(5) },
+        new { DayName = "Chủ Nhật", Date = monday.AddDays(6) }
+    };
+
+    bool isAdmin = User.IsInRole("1") || User.IsInRole("ROLE-ADMIN") || User.IsInRole("Admin");
+}
+
+<style>
+    .week-navigation-card {
+        background: linear-gradient(135deg, #1cc88a 0%, #13855c 100%);
+        color: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    /* Fix screen overflow */
+    .kanban-wrapper {
+        width: 100%;
+        overflow-x: auto;
+        padding-bottom: 10px;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .kanban-board {
+        display: flex;
+        gap: 15px;
+        min-width: 1200px; /* Ensures horizontal scroll when columns exceed layout */
+        min-height: 580px;
+        padding: 5px;
+    }
+
+    .kanban-column {
+        flex: 1;
+        min-width: 250px;
+        background-color: #f8f9fc;
+        border-radius: 12px;
+        border: 1px solid #e3e6f0;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+    }
+
+    .kanban-column.today-column {
+        border: 2px solid #4e73df;
+        background-color: rgba(78, 115, 223, 0.02);
+    }
+
+    .kanban-header {
+        padding: 12px;
+        border-bottom: 1px solid #e3e6f0;
+        border-top-left-radius: 11px;
+        border-top-right-radius: 11px;
+    }
+
+    .kanban-header.today-header {
+        background-color: #4e73df;
+        color: white;
+    }
+
+    .kanban-content {
+        padding: 10px;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .shift-card {
+        background-color: white;
+        border-radius: 10px;
+        border: 1px solid #e3e6f0;
+        padding: 10px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .shift-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.07);
+    }
+
+    .shift-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+        border-bottom: 1px dashed #eaecf4;
+        padding-bottom: 4px;
+    }
+
+    .shift-name {
+        font-weight: 700;
+        color: #4e73df;
+        font-size: 13px;
+    }
+
+    .shift-time {
+        font-size: 10px;
+        color: #858796;
+        font-weight: 600;
+    }
+
+    .staff-list {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .staff-item {
+        background-color: #f8f9fc;
+        border-radius: 8px;
+        padding: 6px 8px;
+        border: 1px solid #eaecf4;
+        font-size: 11px;
+    }
+
+    .staff-avatar-placeholder {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background-color: #4e73df;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 10px;
+        margin-right: 6px;
+    }
+
+    .staff-info {
+        flex-grow: 1;
+        line-height: 1.2;
+    }
+
+    .staff-name {
+        font-weight: 600;
+        color: #2e2f37;
+    }
+
+    .staff-username {
+        font-size: 9px;
+        color: #858796;
+    }
+
+    .attendance-badge {
+        font-size: 8px;
+        font-weight: bold;
+        padding: 1px 4px;
+        border-radius: 8px;
+        margin-top: 2px;
+        display: inline-block;
+    }
+
+    .attendance-time {
+        font-size: 9px;
+        color: #5a5c69;
+        margin-top: 2px;
+    }
+
+    .btn-remove-staff {
+        padding: 2px 4px;
+        font-size: 10px;
+        color: #e74a3b;
+        background: none;
+        border: none;
+        cursor: pointer;
+        opacity: 0.7;
+        transition: opacity 0.2s;
+    }
+
+    .btn-remove-staff:hover {
+        opacity: 1;
+        color: #be2617;
+    }
+
+    .staff-capacity-progress {
+        height: 3px;
+        margin-top: 6px;
+        border-radius: 1.5px;
+        background-color: #eaecf4;
+    }
+
+    .btn-assign-toggle {
+        font-size: 10px;
+        font-weight: 600;
+        color: #4e73df;
+        border: 1px dashed #4e73df;
+        background-color: rgba(78, 115, 223, 0.02);
+        border-radius: 6px;
+        padding: 3px 6px;
+        width: 100%;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-assign-toggle:hover {
+        background-color: #4e73df;
+        color: white;
+        border-style: solid;
+    }
+</style>
+
+<!-- Floating Toast Container -->
+<div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;"></div>
+
+<div class="container-fluid py-4">
+    <!-- Header Page -->
+    <div class="row mb-3">
+        <div class="col-12" id="alert-placeholder">
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+                    <i class="fas fa-check-circle mr-2"></i> @TempData["SuccessMessage"]
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            }
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+                    <i class="fas fa-exclamation-circle mr-2"></i> @TempData["ErrorMessage"]
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Navigation Card -->
+    <div class="card week-navigation-card mb-4 border-0">
+        <div class="card-body py-4 px-4 d-flex flex-column flex-sm-row justify-content-between align-items-center">
+            <div>
+                <h4 class="mb-1 font-weight-bold"><i class="fas fa-network-wired mr-2"></i> Bảng Phân Công Lịch Làm Việc Tuần</h4>
+                <p class="mb-0 text-white-50">Lịch tuần từ <strong>@monday.ToString("dd/MM/yyyy")</strong> đến <strong>@sunday.ToString("dd/MM/yyyy")</strong></p>
+            </div>
+            <div class="mt-3 mt-sm-0 d-flex flex-wrap justify-content-center gap-2">
+                <a href="?startOfWeek=@(monday.AddDays(-7).ToString("yyyy-MM-dd"))" class="btn btn-light btn-icon-split shadow-sm mr-2 text-success font-weight-bold">
+                    <span class="icon text-success-50"><i class="fas fa-chevron-left"></i></span>
+                    <span class="text">Tuần trước</span>
+                </a>
+                <a href="?startOfWeek=@(today.ToString("yyyy-MM-dd"))" class="btn btn-warning shadow-sm mr-2 font-weight-bold text-white">
+                    <i class="fas fa-calendar-day mr-1"></i> Tuần này
+                </a>
+                <a href="?startOfWeek=@(monday.AddDays(7).ToString("yyyy-MM-dd"))" class="btn btn-light btn-icon-split shadow-sm font-weight-bold text-success">
+                    <span class="text">Tuần sau</span>
+                    <span class="icon text-success-50"><i class="fas fa-chevron-right"></i></span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Instructions / Legend -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body py-3 d-flex flex-wrap justify-content-between align-items-center small">
+            <div>
+                @if (isAdmin)
+                {
+                    <span><i class="fas fa-info-circle text-info mr-1"></i> <strong>Quyền hạn Admin:</strong> Phân công đồng thời nhiều nhân viên bằng hộp checkbox. Xóa ca không cần load lại trang.</span>
+                }
+                else
+                {
+                    <span><i class="fas fa-info-circle text-info mr-1"></i> <strong>Chế độ nhân viên:</strong> Bạn đang xem lịch phân công chính thức của toàn hệ thống trong tuần này (Chỉ xem).</span>
+                }
+            </div>
+            <div class="d-flex flex-wrap gap-3 mt-2 mt-md-0 font-weight-bold">
+                <div class="mr-3"><span class="badge badge-success">Đúng giờ</span></div>
+                <div class="mr-3"><span class="badge badge-warning">Đi trễ</span></div>
+                <div><span class="badge badge-danger">Vắng</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kanban Wrapper -->
+    <div class="kanban-wrapper">
+        <div class="kanban-board">
+            @for (int i = 0; i < 7; i++)
+            {
+                var day = daysOfWeek[i];
+                var isToday = day.Date.Date == today.Date;
+                var daySchedules = Model.Where(w => w.WorkDate.Date == day.Date.Date).ToList();
+
+                <div class="kanban-column @(isToday ? "today-column" : "")">
+                    <!-- Column Header -->
+                    <div class="kanban-header @(isToday ? "today-header" : "bg-light text-dark") text-center">
+                        <h6 class="mb-0 font-weight-bold">@day.DayName</h6>
+                        <small class="@(isToday ? "text-white-50" : "text-muted") font-weight-bold">@day.Date.ToString("dd/MM/yyyy")</small>
+                    </div>
+
+                    <!-- Column Cards Content -->
+                    <div class="kanban-content">
+                        @foreach (var shift in shifts)
+                        {
+                            var shiftStaffList = daySchedules.Where(s => s.ShiftId == shift.Id).ToList();
+                            var currentStaffCount = shiftStaffList.Count;
+                            var isFull = currentStaffCount >= shift.MaxStaff;
+                            
+                            <div class="shift-card" id="shift-card-@i-@shift.Id" data-max-staff="@shift.MaxStaff" data-current-staff="@currentStaffCount" data-day-index="@i" data-shift-id="@shift.Id" data-date="@day.Date.ToString("yyyy-MM-dd")">
+                                <div class="shift-card-header">
+                                    <div>
+                                        <span class="shift-name">@shift.Name</span>
+                                        <div class="shift-time">@shift.StartTime.ToString(@"hh\:mm") - @shift.EndTime.ToString(@"hh\:mm")</div>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="badge badge-capacity @(isFull ? "badge-danger" : "badge-light text-primary")" style="font-size:10px;">
+                                            @currentStaffCount/@shift.MaxStaff NV
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- List of Staff in this Shift -->
+                                @{
+                                    var shiftRegistrations = weeklyRegistrations.Where(r => r.RegistrationDate.Date == day.Date.Date && r.ShiftId == shift.Id).ToList();
+                                }
+                                <div class="staff-list">
+                                    @if (shiftStaffList.Any() || shiftRegistrations.Any())
+                                    {
+                                        @if (shiftStaffList.Any())
+                                        {
+                                            foreach (var ws in shiftStaffList)
+                                            {
+                                                var attendance = attendances.ContainsKey(ws.Id) ? attendances[ws.Id] : null;
+                                                var initials = string.IsNullOrEmpty(ws.Staff.FullName) ? "?" : ws.Staff.FullName.Substring(0, 1).ToUpper();
+
+                                                <div class="staff-item d-flex align-items-start" id="staff-item-@ws.Id">
+                                                    <!-- Avatar Placeholder -->
+                                                    <div class="staff-avatar-placeholder bg-gradient-primary text-white">
+                                                        @initials
+                                                    </div>
+                                                    <!-- Staff Details -->
+                                                    <div class="staff-info">
+                                                        <div class="staff-name">@ws.Staff.FullName</div>
+                                                        <div class="staff-username">@ws.Staff.UserName</div>
+
+                                                        <!-- Attendance indicator -->
+                                                        @if (attendance != null)
+                                                        {
+                                                            <div>
+                                                                @if (attendance.Status == "Late")
+                                                                {
+                                                                    <span class="attendance-badge badge-warning text-dark">Đi trễ</span>
+                                                                }
+                                                                else if (attendance.Status == "Absent")
+                                                                {
+                                                                    <span class="attendance-badge badge-danger">Vắng</span>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <span class="attendance-badge badge-success">Đúng giờ</span>
+                                                                }
+                                                                <div class="attendance-time">
+                                                                    Check-in: @(attendance.CheckInTime?.ToString("HH:mm") ?? "-") <br />
+                                                                    Check-out: @(attendance.CheckOutTime?.ToString("HH:mm") ?? "-")
+                                                                </div>
+                                                            </div>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="attendance-badge badge-secondary text-white">Lên lịch</span>
+                                                        }
+                                                    </div>
+
+                                                    <!-- Remove staff button (Admin only) -->
+                                                    @if (isAdmin)
+                                                    {
+                                                        <form class="remove-staff-form" asp-action="RemoveStaff" method="post" data-staff-id="@ws.StaffId" data-fullname="@ws.Staff.FullName">
+                                                            <input type="hidden" name="id" value="@ws.Id" />
+                                                            <input type="hidden" name="startOfWeek" value="@monday.ToString("yyyy-MM-dd")" />
+                                                            <button type="submit" class="btn-remove-staff" title="Hủy phân ca"><i class="fas fa-trash-alt"></i></button>
+                                                        </form>
+                                                    }
+                                                </div>
+                                            }
+                                        }
+                                        @if (shiftRegistrations.Any())
+                                        {
+                                            foreach (var reg in shiftRegistrations)
+                                            {
+                                                var initialsReg = string.IsNullOrEmpty(reg.Staff.FullName) ? "?" : reg.Staff.FullName.Substring(0, 1).ToUpper();
+
+                                                <div class="staff-item-pending d-flex align-items-center justify-content-between p-2 border rounded mt-2" id="reg-item-@reg.Id" style="background-color: rgba(246, 194, 62, 0.08); border: 1px dashed #f6c23e; font-size:11px; width: 100%;">
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="staff-avatar-placeholder bg-warning text-white" style="width:20px; height:20px; font-size:9px; margin-right:6px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold;">
+                                                            @initialsReg
+                                                        </div>
+                                                        <div class="staff-info" style="line-height: 1.1;">
+                                                            <span class="font-weight-bold text-dark">@reg.Staff.FullName</span><br/>
+                                                            <span class="text-muted" style="font-size: 8px;">Đăng ký ca</span>
+                                                        </div>
+                                                    </div>
+                                                    @if (isAdmin)
+                                                    {
+                                                        <div class="d-flex gap-1" style="gap:3px;">
+                                                            <form class="approve-reg-form" action="/Admin/ShiftRegistrations/Approve" method="post">
+                                                                <input type="hidden" name="id" value="@reg.Id" />
+                                                                <button type="submit" class="btn btn-xs btn-success p-1" style="font-size:9px; padding: 2px 5px !important;" title="Duyệt ca"><i class="fas fa-check"></i></button>
+                                                            </form>
+                                                            <form class="reject-reg-form" action="/Admin/ShiftRegistrations/Reject" method="post">
+                                                                <input type="hidden" name="id" value="@reg.Id" />
+                                                                <button type="submit" class="btn btn-xs btn-danger p-1" style="font-size:9px; padding: 2px 5px !important;" title="Từ chối ca"><i class="fas fa-times"></i></button>
+                                                            </form>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <div class="text-center text-muted py-3 text-xs bg-light rounded placeholder-empty" style="border: 1px dashed #eaecf4;">
+                                            Trống ca làm
+                                        </div>
+                                    }
+                                </div>
+
+                                <!-- Staff capacity progress bar -->
+                                <div class="staff-capacity-progress">
+                                    <div class="progress-bar @(isFull ? "bg-danger" : "bg-primary")" role="progressbar" 
+                                         style="width: @((float)currentStaffCount / shift.MaxStaff * 100)%; height:100%;" 
+                                         aria-valuenow="@currentStaffCount" aria-valuemin="0" aria-valuemax="@shift.MaxStaff"></div>
+                                </div>
+
+                                <!-- Assign Quick Form (Admin only) -->
+                                @if (isAdmin)
+                                {
+                                    <div class="mt-2 btn-assign-container @(isFull ? "d-none" : "")">
+                                        <button class="btn-assign-toggle shadow-xs" type="button" data-toggle="collapse" 
+                                                data-target="#assignForm-@i-@shift.Id" aria-expanded="false">
+                                            <i class="fas fa-plus mr-1"></i> Phân ca nhanh
+                                        </button>
+
+                                        <!-- Collapsible Form -->
+                                        <div class="collapse mt-2" id="assignForm-@i-@shift.Id">
+                                            <form class="ajax-assign-form" asp-action="AssignStaff" method="post" class="p-2 border rounded bg-light">
+                                                <input type="hidden" name="date" value="@day.Date.ToString("yyyy-MM-dd")" />
+                                                <input type="hidden" name="shiftId" value="@shift.Id" />
+                                                <input type="hidden" name="startOfWeek" value="@monday.ToString("yyyy-MM-dd")" />
+                                                
+                                                <div class="form-group mb-2">
+                                                    <label class="small font-weight-bold text-muted mb-1" style="font-size:10px;">Chọn nhiều nhân viên:</label>
+                                                    <div class="staff-checkbox-list" style="max-height: 100px; overflow-y: auto; background: white; border: 1px solid #d1d3e2; padding: 5px; border-radius: 4px;">
+                                                        @foreach (var staff in staffList)
+                                                        {
+                                                            var isAssigned = shiftStaffList.Any(s => s.StaffId == staff.Id);
+                                                            if (!isAssigned)
+                                                            {
+                                                                <div class="custom-control custom-checkbox small mb-1">
+                                                                    <input type="checkbox" name="staffIds" value="@staff.Id" class="custom-control-input staff-checkbox" id="chk-@i-@shift.Id-@staff.Id">
+                                                                    <label class="custom-control-label staff-checkbox-label" data-fullname="@staff.FullName" data-username="@staff.UserName" for="chk-@i-@shift.Id-@staff.Id" style="font-size:10px; cursor:pointer;">
+                                                                        @staff.FullName
+                                                                    </label>
+                                                                </div>
+                                                            }
+                                                        }
+                                                    </div>
+                                                </div>
+                                                <div class="d-flex justify-content-between">
+                                                    <button type="submit" class="btn btn-success btn-xs py-1 px-2 font-weight-bold" style="font-size:10px;">Lưu</button>
+                                                    <button type="button" class="btn btn-light btn-xs border py-1 px-2 font-weight-bold" style="font-size:10px;"
+                                                            data-toggle="collapse" data-target="#assignForm-@i-@shift.Id">Hủy</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- If your layout requires jquery, it is loaded. If not, this script works directly with Vanilla JS fetch requests -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Event delegation to capture form submits dynamically
+            document.addEventListener('submit', function (e) {
+                if (e.target && e.target.classList.contains('ajax-assign-form')) {
+                    e.preventDefault();
+                    handleAssignFormSubmit(e.target);
+                }
+                if (e.target && e.target.classList.contains('remove-staff-form')) {
+                    e.preventDefault();
+                    handleRemoveFormSubmit(e.target);
+                }
+                if (e.target && e.target.classList.contains('approve-reg-form')) {
+                    e.preventDefault();
+                    handleApproveRegistration(e.target);
+                }
+                if (e.target && e.target.classList.contains('reject-reg-form')) {
+                    e.preventDefault();
+                    handleRejectRegistration(e.target);
+                }
+            });
+
+            function showToast(message, type = 'success') {
+                const container = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                toast.className = `alert alert-${type} shadow-sm border-left-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
+                toast.role = 'alert';
+                toast.style.marginBottom = '10px';
+                toast.style.fontSize = '12px';
+                toast.innerHTML = `
+                    <i class="fas ${type === 'success' ? 'fa-check-circle text-success' : 'fa-exclamation-circle text-danger'} mr-2"></i>
+                    ${message}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close" style="padding: 0.5rem 0.75rem;">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                `;
+                container.appendChild(toast);
+                setTimeout(() => {
+                    $(toast).alert('close');
+                }, 4000);
+            }
+
+            function handleAssignFormSubmit(form) {
+                const submitBtn = form.querySelector('button[type="submit"]');
+                submitBtn.disabled = true;
+                submitBtn.innerText = 'Lưu...';
+
+                const formData = new FormData(form);
+                const actionUrl = form.action || form.getAttribute('action');
+
+                fetch(actionUrl, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(result => {
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = 'Lưu';
+
+                    if (result.success) {
+                        showToast(result.message, 'success');
+                        
+                        const card = form.closest('.shift-card');
+                        const staffListDiv = card.querySelector('.staff-list');
+                        
+                        // Remove empty placeholder if exists
+                        const emptyPlaceholder = staffListDiv.querySelector('.placeholder-empty');
+                        if (emptyPlaceholder) {
+                            emptyPlaceholder.remove();
+                        }
+
+                        // Add staff elements
+                        const startOfWeekVal = form.querySelector('input[name="startOfWeek"]').value;
+                        const verificationToken = form.querySelector('input[name="__RequestVerificationToken"]').value;
+
+                        result.data.forEach(item => {
+                            const staffHtml = `
+                                <div class="staff-item d-flex align-items-start" id="staff-item-${item.id}">
+                                    <div class="staff-avatar-placeholder bg-gradient-primary text-white">
+                                        ${item.initials}
+                                    </div>
+                                    <div class="staff-info">
+                                        <div class="staff-name">${item.fullName}</div>
+                                        <div class="staff-username">${item.userName}</div>
+                                        <span class="attendance-badge badge-secondary text-white">Lên lịch</span>
+                                    </div>
+                                    <form class="remove-staff-form" action="${form.action.replace('AssignStaff', 'RemoveStaff')}" method="post">
+                                        <input type="hidden" name="id" value="${item.id}" />
+                                        <input type="hidden" name="startOfWeek" value="${startOfWeekVal}" />
+                                        <input type="hidden" name="__RequestVerificationToken" value="${verificationToken}" />
+                                        <button type="submit" class="btn-remove-staff" title="Hủy phân ca"><i class="fas fa-trash-alt"></i></button>
+                                    </form>
+                                </div>
+                            `;
+                            staffListDiv.insertAdjacentHTML('beforeend', staffHtml);
+
+                            // Remove assigned checkbox from list
+                            const chkWrapper = form.querySelector(`.staff-checkbox[value="${item.staffId}"]`);
+                            if (chkWrapper) {
+                                chkWrapper.closest('.custom-checkbox').remove();
+                            }
+                        });
+
+                        // Update current staff count
+                        let currentCount = parseInt(card.getAttribute('data-current-staff')) + result.data.length;
+                        const maxStaff = parseInt(card.getAttribute('data-max-staff'));
+                        card.setAttribute('data-current-staff', currentCount);
+
+                        // Update badge text
+                        const capacityBadge = card.querySelector('.badge-capacity');
+                        capacityBadge.innerText = `${currentCount}/${maxStaff} NV`;
+                        if (currentCount >= maxStaff) {
+                            capacityBadge.className = 'badge badge-capacity badge-danger';
+                            // Hide the assign container
+                            const assignContainer = card.querySelector('.btn-assign-container');
+                            if (assignContainer) assignContainer.remove();
+                        }
+
+                        // Update progress bar
+                        const progressBar = card.querySelector('.progress-bar');
+                        progressBar.style.width = `${(currentCount / maxStaff) * 100}%`;
+                        progressBar.setAttribute('aria-valuenow', currentCount);
+                        if (currentCount >= maxStaff) {
+                            progressBar.className = 'progress-bar bg-danger';
+                        }
+
+                        // Hide Collapse
+                        $(form.closest('.collapse')).collapse('hide');
+                    } else {
+                        showToast(result.message, 'danger');
+                    }
+                })
+                .catch(err => {
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = 'Lưu';
+                    showToast('Đã xảy ra lỗi hệ thống.', 'danger');
+                    console.error(err);
+                });
+            }
+
+            function handleRemoveFormSubmit(form) {
+                if (!confirm('Bạn có chắc chắn muốn xóa phân ca cho nhân viên này?')) return;
+
+                const submitBtn = form.querySelector('button[type="submit"]');
+                submitBtn.disabled = true;
+
+                const formData = new FormData(form);
+                const actionUrl = form.action || form.getAttribute('action');
+
+                fetch(actionUrl, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(result => {
+                    submitBtn.disabled = false;
+
+                    if (result.success) {
+                        showToast(result.message, 'success');
+
+                        const staffItem = form.closest('.staff-item');
+                        const staffId = staffItem.querySelector('.remove-staff-form').getAttribute('data-staff-id') || ''; 
+                        // Wait, we can get staff details from the DOM before deleting it
+                        const fullName = staffItem.querySelector('.staff-name').innerText;
+                        const userName = staffItem.querySelector('.staff-username').innerText;
+                        
+                        const card = form.closest('.shift-card');
+                        const maxStaff = parseInt(card.getAttribute('data-max-staff'));
+                        let currentCount = parseInt(card.getAttribute('data-current-staff')) - 1;
+                        card.setAttribute('data-current-staff', currentCount);
+
+                        // Remove element
+                        staffItem.remove();
+
+                        const staffListDiv = card.querySelector('.staff-list');
+                        if (staffListDiv.children.length === 0) {
+                            const emptyHtml = `
+                                <div class="text-center text-muted py-3 text-xs bg-light rounded placeholder-empty" style="border: 1px dashed #eaecf4;">
+                                    Trống ca làm
+                                </div>
+                            `;
+                            staffListDiv.innerHTML = emptyHtml;
+                        }
+
+                        // Update capacity badge
+                        const capacityBadge = card.querySelector('.badge-capacity');
+                        capacityBadge.innerText = `${currentCount}/${maxStaff} NV`;
+                        if (currentCount < maxStaff) {
+                            capacityBadge.className = 'badge badge-capacity badge-light text-primary';
+                        }
+
+                        // Update progress bar
+                        const progressBar = card.querySelector('.progress-bar');
+                        progressBar.style.width = `${(currentCount / maxStaff) * 100}%`;
+                        progressBar.setAttribute('aria-valuenow', currentCount);
+                        if (currentCount < maxStaff) {
+                            progressBar.className = 'progress-bar bg-primary';
+                        }
+
+                        // Re-enable/Render assignment form if it was hidden or full
+                        // But wait! If it was full, we need to create the Phân ca container back.
+                        // For simplicity, it is easier to dynamically reload checkboxes or just append it back.
+                        // Let's retrieve form and add checkbox back
+                        const assignForm = card.querySelector('.ajax-assign-form');
+                        if (assignForm) {
+                            // Re-append checkbox for the removed staff
+                            // We need staff ID. We can extract it from the remove form name/attributes or database, 
+                            // actually, wait! We can find the staffId by looking at the input value in form if we had put it.
+                            // Oh! Let's ensure the remove form has an input with the staff ID, or we can just fetch it.
+                            // In our rendered markup, we didn't add a hidden input for staffId in the remove form, but we can!
+                            // Let's add it!
+                        } else {
+                            // If the card was full, the assign quick button was not rendered.
+                            // Since reloading the entire card or DOM is complex, 
+                            // a page reload would be a backup. But we can prevent full page reload by just keeping the button hidden or re-rendering it.
+                            // Actually, keeping the button rendered but disabled/hidden when full is better!
+                            // Let's check how the index.cshtml renders it: it renders 'if (!isFull)'.
+                            // Let's change the Razor code to always render the assign container, but toggle class `d-none` when it's full!
+                            // That way, we can easily show/hide it in JS! This is a beautiful trick.
+                        }
+                        
+                        // We will implement this trick. Let's make sure the page is updated.
+                        // To make it super robust, let's just trigger a reload if we need to restore the full button, 
+                        // or better yet, just toggle d-none. Let's update index.cshtml to keep assign container always rendered,
+                        // and toggle class 'd-none' if full!
+                        const assignContainer = card.querySelector('.btn-assign-container');
+                        if (assignContainer) {
+                            if (currentCount < maxStaff) {
+                                assignContainer.classList.remove('d-none');
+                            }
+                        }
+                    } else {
+                        showToast(result.message, 'danger');
+                    }
+                })
+                .catch(err => {
+                    submitBtn.disabled = false;
+                    showToast('Đã xảy ra lỗi hệ thống.', 'danger');
+                    console.error(err);
+                });
+            }
+
+            function handleApproveRegistration(form) {
+                const submitBtn = form.querySelector('button[type="submit"]');
+                submitBtn.disabled = true;
+
+                const formData = new FormData(form);
+                const actionUrl = form.action || form.getAttribute('action');
+                const verificationToken = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+
+                fetch(actionUrl, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(result => {
+                    submitBtn.disabled = false;
+
+                    if (result.success) {
+                        showToast(result.message, 'success');
+
+                        const regItem = form.closest('.staff-item-pending');
+                        const card = form.closest('.shift-card');
+                        const staffListDiv = card.querySelector('.staff-list');
+                        
+                        regItem.remove();
+
+                        const startOfWeekVal = card.querySelector('.remove-staff-form input[name="startOfWeek"]')?.value || '@monday.ToString("yyyy-MM-dd")';
+                        const token = card.querySelector('.remove-staff-form input[name="__RequestVerificationToken"]')?.value || verificationToken;
+                        
+                        const item = result.data;
+                        const staffHtml = `
+                            <div class="staff-item d-flex align-items-start" id="staff-item-${item.id}">
+                                <div class="staff-avatar-placeholder bg-gradient-primary text-white">
+                                    ${item.initials}
+                                </div>
+                                <div class="staff-info">
+                                    <div class="staff-name">${item.fullName}</div>
+                                    <div class="staff-username">${item.userName}</div>
+                                    <span class="attendance-badge badge-secondary text-white">Lên lịch</span>
+                                </div>
+                                <form class="remove-staff-form" action="/Admin/WorkSchedules/RemoveStaff" method="post" data-staff-id="${item.staffId}" data-fullname="${item.fullName}">
+                                    <input type="hidden" name="id" value="${item.id}" />
+                                    <input type="hidden" name="startOfWeek" value="${startOfWeekVal}" />
+                                    <input type="hidden" name="__RequestVerificationToken" value="${token}" />
+                                    <button type="submit" class="btn-remove-staff" title="Hủy phân ca"><i class="fas fa-trash-alt"></i></button>
+                                </form>
+                            </div>
+                        `;
+                        staffListDiv.insertAdjacentHTML('beforeend', staffHtml);
+
+                        const emptyPlaceholder = staffListDiv.querySelector('.placeholder-empty');
+                        if (emptyPlaceholder) {
+                            emptyPlaceholder.remove();
+                        }
+
+                        const maxStaff = parseInt(card.getAttribute('data-max-staff'));
+                        let currentCount = parseInt(card.getAttribute('data-current-staff')) + 1;
+                        card.setAttribute('data-current-staff', currentCount);
+
+                        const capacityBadge = card.querySelector('.badge-capacity');
+                        capacityBadge.innerText = `${currentCount}/${maxStaff} NV`;
+                        if (currentCount >= maxStaff) {
+                            capacityBadge.className = 'badge badge-capacity badge-danger';
+                            const assignContainer = card.querySelector('.btn-assign-container');
+                            if (assignContainer) assignContainer.classList.add('d-none');
+                        }
+
+                        const progressBar = card.querySelector('.progress-bar');
+                        progressBar.style.width = `${(currentCount / maxStaff) * 100}%`;
+                        progressBar.setAttribute('aria-valuenow', currentCount);
+                        if (currentCount >= maxStaff) {
+                            progressBar.className = 'progress-bar bg-danger';
+                        }
+                    } else {
+                        showToast(result.message, 'danger');
+                    }
+                })
+                .catch(err => {
+                    submitBtn.disabled = false;
+                    showToast('Đã xảy ra lỗi hệ thống.', 'danger');
+                    console.error(err);
+                });
+            }
+
+            function handleRejectRegistration(form) {
+                if (!confirm('Bạn muốn từ chối ca đăng ký này?')) return;
+
+                const submitBtn = form.querySelector('button[type="submit"]');
+                submitBtn.disabled = true;
+
+                const formData = new FormData(form);
+                const actionUrl = form.action || form.getAttribute('action');
+
+                fetch(actionUrl, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(result => {
+                    submitBtn.disabled = false;
+
+                    if (result.success) {
+                        showToast(result.message, 'success');
+
+                        const regItem = form.closest('.staff-item-pending');
+                        const card = form.closest('.shift-card');
+                        
+                        regItem.remove();
+
+                        const staffListDiv = card.querySelector('.staff-list');
+                        if (staffListDiv.children.length === 0) {
+                            const emptyHtml = `
+                                <div class="text-center text-muted py-3 text-xs bg-light rounded placeholder-empty" style="border: 1px dashed #eaecf4;">
+                                    Trống ca làm
+                                </div>
+                            `;
+                            staffListDiv.innerHTML = emptyHtml;
+                        }
+                    } else {
+                        showToast(result.message, 'danger');
+                    }
+                })
+                .catch(err => {
+                    submitBtn.disabled = false;
+                    showToast('Đã xảy ra lỗi hệ thống.', 'danger');
+                    console.error(err);
+                });
+            }
+        });
+    </script>
+}

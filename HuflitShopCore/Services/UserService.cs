@@ -57,6 +57,8 @@ namespace HuflitShopCore.Services
                 PasswordHash = dto.Password, //
                 UserName = dto.Email,
                 Avatar = "", //
+                AvatarPublicId = "",
+                AvatarVersion = "",
                 Role = "Customer" // Mặc định là khách hàng
             };
 
