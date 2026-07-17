@@ -54,6 +54,25 @@ namespace HuflitShopCore.DTOs
         public List<ProductSummaryItem> ProductSummaries { get; set; } = new();
         public List<TopProductRevenueItem> TopRevenueProducts { get; set; } = new();
         public List<ProductProfitItem> ProductProfits { get; set; } = new(); // Lãi/lỗ từng SP (MỚI)
+        public List<LotProfitItem> LotProfits { get; set; } = new(); // Lãi/lỗ từng lô hàng (MỚI)
+    }
+
+    public class LotProfitItem
+    {
+        public string LotId { get; set; } = string.Empty;
+        public string ProductName { get; set; } = string.Empty;
+        public string VariantName { get; set; } = string.Empty;
+        public string SupplierName { get; set; } = string.Empty;
+        public DateTime ReceivedDate { get; set; }
+        public int OriginalQty { get; set; }
+        public int RemainingQty { get; set; }
+        public int SoldQty { get; set; }
+        public decimal UnitCost { get; set; }
+        public decimal TotalCost { get; set; }           // Tổng tiền nhập = OriginalQty * UnitCost
+        public decimal COGS { get; set; }                // Giá vốn hàng đã bán = SoldQty * UnitCost
+        public decimal Revenue { get; set; }             // Doanh thu từ lô hàng này
+        public decimal GrossProfit { get; set; }          // Lợi nhuận gộp từ lô hàng = Revenue - COGS
+        public double ProfitMargin { get; set; }          // Tỷ suất lợi nhuận gộp (%)
     }
 
     public class MonthlyTrendItem

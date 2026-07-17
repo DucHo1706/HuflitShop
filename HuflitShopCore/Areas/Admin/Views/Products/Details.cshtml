@@ -1,4 +1,4 @@
-﻿@model HuflitShopCore.DTOs.ProductDTO
+@model HuflitShopCore.DTOs.ProductDTO
 
 @{
     ViewData["Title"] = "Chi tiết sản phẩm";
@@ -54,6 +54,9 @@
                 <li class="nav-item">
                     <a class="nav-link" id="images-tab" data-toggle="tab" href="#images" role="tab" aria-controls="images" aria-selected="false"><i class="fas fa-images mr-2"></i>Quản lý Hình ảnh</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="price-history-tab" data-toggle="tab" href="#price-history" role="tab" aria-controls="price-history" aria-selected="false"><i class="fas fa-history mr-2"></i>Lịch sử thay đổi giá</a>
+                </li>
             </ul>
         </div>
         <div class="card-body">
@@ -68,6 +71,12 @@
                     <!-- Placeholder for Images Partial View -->
                     <div id="images-placeholder">
                         <div class="text-center p-5"><i class="fas fa-spinner fa-spin fa-3x"></i><p>Đang tải hình ảnh...</p></div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="price-history" role="tabpanel" aria-labelledby="price-history-tab">
+                    <!-- Placeholder for Price History Partial View -->
+                    <div id="price-history-placeholder">
+                        <div class="text-center p-5"><i class="fas fa-spinner fa-spin fa-3x"></i><p>Đang tải lịch sử giá...</p></div>
                     </div>
                 </div>
             </div>
@@ -155,6 +164,24 @@
             $('#images-placeholder').load('/Admin/Products/ImagesPartial?productId=' + productId, function(response, status, xhr) {
                 if (status == "error") {
                     $(this).html("<p class='alert alert-danger'>Lỗi tải dữ liệu hình ảnh: " + xhr.status + " " + xhr.statusText + "</p>");
+                }
+            });
+
+            // Load Price History Partial View via AJAX
+            $('#price-history-placeholder').load('/Admin/Products/PriceHistoryPartial?productId=' + productId, function(response, status, xhr) {
+                if (status == "error") {
+                    $(this).html("<p class='alert alert-danger'>Lỗi tải dữ liệu lịch sử giá: " + xhr.status + " " + xhr.statusText + "</p>");
+                } else {
+                    // Kích hoạt DataTable cho bảng lịch sử giá
+                    $('#price-history-table').DataTable({
+                        "language": {
+                            "url": "//cdn.datatables.net/plug-ins/1.11.3/i18n/vi.json"
+                        },
+                        "pageLength": 5, // Hiển thị 5 dòng mỗi trang
+                        "lengthMenu": [ [5, 10, 25, -1], [5, 10, 25, "Tất cả"] ],
+                        "order": [], // Giữ nguyên thứ tự sắp xếp từ server
+                        "destroy": true // Cho phép khởi tạo lại table
+                    });
                 }
             });
 

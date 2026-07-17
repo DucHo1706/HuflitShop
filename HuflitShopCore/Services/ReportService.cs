@@ -5,22 +5,31 @@ using System.Threading.Tasks;
 using HuflitShopCore.Data;
 using HuflitShopCore.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace HuflitShopCore.Services
 {
     public class ReportService
     {
         private readonly AppDbContext _context;
+        private readonly IMemoryCache _cache;
 
-        public ReportService(AppDbContext context)
+        public ReportService(AppDbContext context, IMemoryCache cache)
         {
             _context = context;
+            _cache = cache;
         }
 
         // 0. Lấy dữ liệu cho trang Dashboard chính
         public async Task<DTOs.DashboardDTO> GetDashboardDataAsync(string userId)
         {
-            var isAdmin = await _context.UserRoles.AnyAsync(r => r.UserId == userId && (r.RoleId == "1" || r.RoleId == "ROLE-ADMIN"));
+            string cacheKey = $"DashboardData_{userId}";
+            if (_cache.TryGetValue(cacheKey, out DTOs.DashboardDTO? cachedDashboard))
+            {
+                if (cachedDashboard != null) return cachedDashboard;
+            }
+
+            var isAdmin = await _context.UserRoles.AsNoTracking().AnyAsync(r => r.UserId == userId && (r.RoleId == "1" || r.RoleId == "ROLE-ADMIN"));
             int currentYear = DateTime.Now.Year;
             int currentMonth = DateTime.Now.Month;
 
@@ -43,8 +52,8 @@ namespace HuflitShopCore.Services
             double stockPercentage = 0;
             try
             {
-                var totalVariants = await _context.ProductVariants.CountAsync();
-                var inStockVariants = await _context.ProductVariants.Where(pv => pv.StockQuantity > 0).CountAsync();
+                var totalVariants = await _context.ProductVariants.AsNoTracking().CountAsync();
+                var inStockVariants = await _context.ProductVariants.AsNoTracking().Where(pv => pv.StockQuantity > 0).CountAsync();
                 if (totalVariants > 0)
                 {
                     stockPercentage = Math.Round((double)inStockVariants * 100 / totalVariants, 1);
@@ -60,7 +69,7 @@ namespace HuflitShopCore.Services
             }
 
             // Reviews stats
-            var reviews = await _context.Reviews.Where(r => !r.IsDeleted).ToListAsync();
+            var reviews = await _context.Reviews.AsNoTracking().Where(r => !r.IsDeleted).ToListAsync();
             var totalReviews = reviews.Count;
             
             double star5 = 0, star4 = 0, star3 = 0, star2 = 0, star1 = 0;
@@ -84,7 +93,7 @@ namespace HuflitShopCore.Services
             }
 
             // Promotion stats
-            var activePromo = await _context.Promotions
+            var activePromo = await _context.Promotions.AsNoTracking()
                 .Where(p => p.StartDate <= DateTime.Now && p.EndDate >= DateTime.Now && p.IsActive)
                 .FirstOrDefaultAsync();
 
@@ -115,7 +124,7 @@ namespace HuflitShopCore.Services
                 totalProfit = totalRevenue * 0.40m;
             }
 
-            return new DTOs.DashboardDTO
+            var result = new DTOs.DashboardDTO
             {
                 IsAdmin = isAdmin,
                 CurrentMonthRevenue = currentMonthRevenue,
@@ -134,6 +143,12 @@ namespace HuflitShopCore.Services
                 ActivePromotionValue = promoVal,
                 ActivePromotionType = promoType
             };
+
+            var cacheEntryOptions = new MemoryCacheEntryOptions()
+                .SetAbsoluteExpiration(TimeSpan.FromMinutes(2)); // Cache 2 phút
+            _cache.Set(cacheKey, result, cacheEntryOptions);
+
+            return result;
         }
 
         // Mock data generator for fallback if database has < 5 orders
@@ -198,7 +213,7 @@ namespace HuflitShopCore.Services
 
         public async Task<List<Order>> GetBaseOrdersAsync(int year)
         {
-            var actualOrdersCount = await _context.Orders.CountAsync();
+            var actualOrdersCount = await _context.Orders.AsNoTracking().CountAsync();
             if (actualOrdersCount < 5)
             {
                 return GetMockOrders(year);
@@ -207,6 +222,7 @@ namespace HuflitShopCore.Services
             return await _context.Orders
                 .Include(o => o.OrderDetails)
                 .Where(o => o.OrderDate.Year == year && o.OrderStatus == 3) // Completed orders
+                .AsNoTracking()
                 .ToListAsync();
         }
 
@@ -351,10 +367,18 @@ namespace HuflitShopCore.Services
         // 6. Báo cáo Nhập - Xuất - Tồn (Warehouse BI Dashboard)
         public async Task<DTOs.WarehouseReportDTO> GetWarehouseReportDataAsync(int year, int month, string? supplierId, string? categoryId, string? productId)
         {
+            string cacheKey = $"WarehouseReport_{year}_{month}_{supplierId ?? "All"}_{categoryId ?? "All"}_{productId ?? "All"}";
+            if (_cache.TryGetValue(cacheKey, out DTOs.WarehouseReportDTO? cachedReport))
+            {
+                if (cachedReport != null) return cachedReport;
+            }
+
             var isMock = await IsUsingMockDataAsync();
             if (isMock)
             {
-                return GetMockWarehouseReportData(year, month, supplierId, categoryId, productId);
+                var mockResult = GetMockWarehouseReportData(year, month, supplierId, categoryId, productId);
+                _cache.Set(cacheKey, mockResult, TimeSpan.FromMinutes(5)); // Cache mock data 5 phút
+                return mockResult;
             }
 
             var startDate = new DateTime(year, month, 1);
@@ -733,6 +757,91 @@ namespace HuflitShopCore.Services
                 .ToList();
             report.ProductProfits = productProfits;
 
+            // 10. Lãi/Lỗ chi tiết từng lô hàng (LotProfits)
+            var lotsQuery = _context.InventoryLots
+                .Include(l => l.ProductVariant)
+                .ThenInclude(v => v.Product)
+                .Include(l => l.ProductVariant)
+                .ThenInclude(v => v.Size)
+                .Include(l => l.ProductVariant)
+                .ThenInclude(v => v.Color)
+                .Include(l => l.StockReceivedDetail)
+                .ThenInclude(d => d.StockReceived)
+                .ThenInclude(s => s.Supplier)
+                .AsNoTracking();
+
+            // Áp dụng bộ lọc giống như variants
+            if (!string.IsNullOrEmpty(categoryId) && categoryId != "All")
+            {
+                lotsQuery = lotsQuery.Where(l => l.ProductVariant.Product != null && l.ProductVariant.Product.CategoryId == categoryId);
+            }
+
+            if (!string.IsNullOrEmpty(productId) && productId != "All")
+            {
+                lotsQuery = lotsQuery.Where(l => l.ProductVariant.ProductId == productId);
+            }
+
+            if (!string.IsNullOrEmpty(supplierId) && supplierId != "All")
+            {
+                lotsQuery = lotsQuery.Where(l => l.StockReceivedDetail != null && l.StockReceivedDetail.StockReceived.SupplierId == supplierId);
+            }
+
+            var dbLots = await lotsQuery.ToListAsync();
+            var dbLotIds = dbLots.Select(l => l.Id).ToList();
+
+            // Lấy tất cả OrderDetailLots cho các lô này
+            var odlDetails = await _context.OrderDetailLots
+                .Include(odl => odl.OrderDetail)
+                .Where(odl => dbLotIds.Contains(odl.InventoryLotId))
+                .AsNoTracking()
+                .ToListAsync();
+
+            var lotProfitsList = new List<DTOs.LotProfitItem>();
+            foreach (var lot in dbLots)
+            {
+                var lotOdlList = odlDetails.Where(odl => odl.InventoryLotId == lot.Id).ToList();
+                int soldQty = lotOdlList.Sum(odl => odl.Quantity);
+                
+                decimal lotRevenue = 0;
+                foreach (var odl in lotOdlList)
+                {
+                    if (odl.OrderDetail != null && odl.OrderDetail.Quantity > 0)
+                    {
+                        // Giá bán ròng mỗi sản phẩm = (purchasedPrice * quantity - discount) / quantity
+                        decimal netPrice = (odl.OrderDetail.Quantity * odl.OrderDetail.PurchasedPrice - odl.OrderDetail.DiscountAllocation) / odl.OrderDetail.Quantity;
+                        lotRevenue += odl.Quantity * netPrice;
+                    }
+                }
+
+                decimal lotCOGS = soldQty * lot.UnitCost;
+                decimal lotGrossProfit = lotRevenue - lotCOGS;
+                double lotMargin = lotRevenue > 0 ? (double)Math.Round((lotGrossProfit / lotRevenue) * 100, 2) : 0;
+
+                lotProfitsList.Add(new DTOs.LotProfitItem
+                {
+                    LotId = lot.Id,
+                    ProductName = lot.ProductVariant?.Product?.ProductName ?? "Sản phẩm",
+                    VariantName = $"{lot.ProductVariant?.Size?.SizeName} - {lot.ProductVariant?.Color?.ColorName}",
+                    SupplierName = lot.StockReceivedDetail?.StockReceived?.Supplier?.SupplierName ?? "N/A",
+                    ReceivedDate = lot.ReceivedDate,
+                    OriginalQty = lot.OriginalQuantity,
+                    RemainingQty = lot.RemainingQuantity,
+                    SoldQty = soldQty,
+                    UnitCost = lot.UnitCost,
+                    TotalCost = lot.OriginalQuantity * lot.UnitCost,
+                    COGS = lotCOGS,
+                    Revenue = lotRevenue,
+                    GrossProfit = lotGrossProfit,
+                    ProfitMargin = lotMargin
+                });
+            }
+
+            report.LotProfits = lotProfitsList.OrderByDescending(l => l.ReceivedDate).ToList();
+
+            var cacheEntryOptions = new MemoryCacheEntryOptions()
+                .SetAbsoluteExpiration(TimeSpan.FromMinutes(3)); // Cache báo cáo thực tế trong 3 phút
+            _cache.Set(cacheKey, report, cacheEntryOptions);
+
             return report;
         }
 
@@ -887,6 +996,62 @@ namespace HuflitShopCore.Services
                 {
                     ProductName = prodNames[i],
                     Revenue = prodRevs[i]
+                });
+            }
+
+            // 6. Product profits for mock:
+            for (int i = 0; i < prodNames.Length; i++)
+            {
+                decimal pGross = prodRevs[i];
+                decimal pDiscount = Math.Round(pGross * 0.05m, 0);
+                decimal pNet = pGross - pDiscount;
+                decimal pCOGS = prodExps[i];
+                decimal pProfit = pNet - pCOGS;
+
+                report.ProductProfits.Add(new DTOs.ProductProfitItem
+                {
+                    ProductName = prodNames[i],
+                    TotalSold = Math.Max(1, (int)(pGross / 120000)), // average price 120k
+                    GrossRevenue = pGross,
+                    DiscountAllocated = pDiscount,
+                    NetRevenue = pNet,
+                    COGS = pCOGS,
+                    GrossProfit = pProfit,
+                    ProfitMargin = pNet > 0 ? (double)Math.Round((pProfit / pNet) * 100, 2) : 0
+                });
+            }
+
+            // 7. Lot profits for mock:
+            string[] sizes = { "M", "L", "S", "Free" };
+            string[] colors = { "Đen", "Trắng", "Xanh", "Hồng" };
+            for (int i = 0; i < prodNames.Length; i++)
+            {
+                decimal pGross = prodRevs[i];
+                decimal pDiscount = Math.Round(pGross * 0.05m, 0);
+                decimal pNet = pGross - pDiscount;
+                decimal pCOGS = prodExps[i];
+                decimal pProfit = pNet - pCOGS;
+
+                int totalOriginal = Math.Max(10, (int)(prodImps[i] / 50000m));
+                int totalSold = Math.Max(5, (int)(pGross / 120000m));
+                int remaining = Math.Max(0, totalOriginal - totalSold);
+
+                report.LotProfits.Add(new DTOs.LotProfitItem
+                {
+                    LotId = $"LOT-2026-03-{i+1:00}",
+                    ProductName = prodNames[i],
+                    VariantName = $"{sizes[i % sizes.Length]} - {colors[i % colors.Length]}",
+                    SupplierName = supplierNames[i % supplierNames.Length],
+                    ReceivedDate = new DateTime(2026, 3, 1).AddDays(i),
+                    OriginalQty = totalOriginal,
+                    RemainingQty = remaining,
+                    SoldQty = totalSold,
+                    UnitCost = 50000m,
+                    TotalCost = totalOriginal * 50000m,
+                    COGS = pCOGS,
+                    Revenue = pNet,
+                    GrossProfit = pProfit,
+                    ProfitMargin = pNet > 0 ? (double)Math.Round((pProfit / pNet) * 100, 2) : 0
                 });
             }
 

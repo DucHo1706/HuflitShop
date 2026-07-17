@@ -3,6 +3,7 @@ using HuflitShopCore.DTOs;
 using HuflitShopCore.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,11 +15,13 @@ namespace HuflitShopCore.Services
     {
         private readonly AppDbContext _context;
         private readonly IConfiguration _configuration;
+        private readonly Microsoft.AspNetCore.SignalR.IHubContext<HuflitShopCore.Hubs.ChatHub> _hubContext;
 
-        public OrderService(AppDbContext context, IConfiguration configuration)
+        public OrderService(AppDbContext context, IConfiguration configuration, Microsoft.AspNetCore.SignalR.IHubContext<HuflitShopCore.Hubs.ChatHub> hubContext)
         {
             _context = context;
             _configuration = configuration;
+            _hubContext = hubContext;
         }
 
         public async Task<List<OrderDTO>> GetAllOrdersAsync()
@@ -28,6 +31,7 @@ namespace HuflitShopCore.Services
                 .Include(o => o.PaymentMethod)
                 .Include(o => o.OrderDetails) // Tải chi tiết đơn hàng (sản phẩm) để tìm kiếm/lọc nâng cao
                 .OrderByDescending(o => o.OrderDate)
+                .AsNoTracking()
                 .ToListAsync();
 
             return orders.Select(o => MapToDTO(o, true)).ToList();
@@ -40,7 +44,8 @@ namespace HuflitShopCore.Services
                 .Include(o => o.PaymentMethod)
                 .Include(o => o.OrderDetails) // Tải chi tiết đơn hàng (sản phẩm) để tìm kiếm/lọc nâng cao
                 .Where(o => o.OrderStatus == 0) // Lọc đơn "Chờ duyệt"
-                .OrderBy(o => o.OrderDate)
+                .OrderByDescending(o => o.OrderDate)
+                .AsNoTracking()
                 .ToListAsync();
 
             return orders.Select(o => MapToDTO(o, true)).ToList();
@@ -559,6 +564,25 @@ namespace HuflitShopCore.Services
 
             _context.Orders.Add(order);
             await _context.SaveChangesAsync();
+
+            // Real-time Notification to Admin/Staff
+            try
+            {
+                var customerName = string.IsNullOrEmpty(shippingFullName) ? "Khách hàng" : shippingFullName;
+                await _hubContext.Clients.Group("Admins").SendAsync("ReceiveSystemNotification", new
+                {
+                    title = "Đơn hàng mới!",
+                    message = $"Khách hàng {customerName} vừa đặt đơn #{order.Id.Substring(0, 8).ToUpper()} trị giá {order.FinalAmount.ToString("N0")} đ.",
+                    icon = "success",
+                    type = "NewOrder",
+                    orderId = order.Id,
+                    customerName = customerName,
+                    amount = order.FinalAmount,
+                    date = order.OrderDate.ToString("dd/MM/yyyy HH:mm"),
+                    shippingFullName = order.ShippingFullName
+                });
+            }
+            catch { /* Ignore error to ensure transaction safety */ }
 
             foreach (var c in items)
             {

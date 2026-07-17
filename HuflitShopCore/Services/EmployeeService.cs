@@ -69,6 +69,7 @@ namespace HuflitShopCore.Services
                         Gender = u.Gender,
                         DateOfBirth = u.DateOfBirth,
                         IsActive = u.IsActive,
+                        HourlyRate = u.HourlyRate,
                         FullAddress = a == null ? string.Empty : $"{a.City}, {a.District}, {a.SpecificAddress}"
                     };
                 })
@@ -91,6 +92,7 @@ namespace HuflitShopCore.Services
                 Gender = user.Gender,
                 DateOfBirth = user.DateOfBirth,
                 IsActive = user.IsActive,
+                HourlyRate = user.HourlyRate,
                 FullAddress = address == null ? string.Empty : $"{address.City}, {address.District}, {address.SpecificAddress}",
                 City = address?.City ?? string.Empty,
                 District = address?.District ?? string.Empty,
@@ -125,6 +127,7 @@ namespace HuflitShopCore.Services
                 Gender = dto.Gender,
                 DateOfBirth = dto.DateOfBirth,
                 IsActive = true,
+                HourlyRate = dto.HourlyRate,
 
                 // DB đang NOT NULL
                 AvatarPublicId = dto.Email,
@@ -167,6 +170,7 @@ namespace HuflitShopCore.Services
             user.Gender = dto.Gender;
             user.DateOfBirth = dto.DateOfBirth;
             user.IsActive = dto.IsActive;
+            user.HourlyRate = dto.HourlyRate;
 
             _context.Users.Update(user);
 

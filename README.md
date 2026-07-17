@@ -12,6 +12,9 @@ HuflitShopCore là một nền tảng thương mại điện tử thời trang c
 * **Tài khoản Khách hàng:** 
   * Email: `khach@gmail.com`
   * Mật khẩu: `123`
+**Tài khoản Nhân viên:**
+* Email: `nhanvien@gmail.com`
+* Mật khẩu: `123456`
 
 ---
 

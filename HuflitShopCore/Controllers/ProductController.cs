@@ -21,8 +21,9 @@ namespace HuflitShopCore.Controllers
         private readonly ReviewService _reviewService;
         private readonly AppDbContext _context;
         private readonly IConfiguration _configuration;
+        private readonly IAprioriService _aprioriService;
 
-        public ProductController(ProductService productService, CategoryService categoryService, CartService cartService, ReviewService reviewService, AppDbContext context, IConfiguration configuration)
+        public ProductController(ProductService productService, CategoryService categoryService, CartService cartService, ReviewService reviewService, AppDbContext context, IConfiguration configuration, IAprioriService aprioriService)
         {
             _productService = productService;
             _categoryService = categoryService;
@@ -30,6 +31,7 @@ namespace HuflitShopCore.Controllers
             _reviewService = reviewService;
             _context = context;
             _configuration = configuration;
+            _aprioriService = aprioriService;
         }
 
         // NOTE: Home layout used by views expects ViewBag.Categories.
@@ -148,27 +150,30 @@ namespace HuflitShopCore.Controllers
                 }
             }
 
-            // Lấy tối đa 8 sản phẩm liên quan (cùng danh mục, loại trừ chính nó)
-            var relatedProducts = await _context.Products
-                .Include(p => p.ProductImages)
-                .Where(p => p.CategoryId == product.CategoryId && p.Id != id && !p.IsDeleted)
-                .OrderByDescending(p => p.CreatedAt)
-                .Take(8)
+            // Lấy tối đa 8 sản phẩm liên quan sử dụng thuật toán gợi ý Apriori (các sản phẩm thường được mua cùng nhau)
+            var relatedProducts = await _aprioriService.GetRecommendationsAsync(id, 8);
+            ViewBag.RelatedProducts = relatedProducts;
+
+            // Giao kết khuyến mãi combo dựa trên thuật toán gợi ý Apriori
+            var nowTime = DateTime.Now;
+            var comboPromos = await _context.Promotions
+                .Where(p => p.IsActive && p.StartDate <= nowTime && p.EndDate >= nowTime && !string.IsNullOrEmpty(p.ComboProductIds))
                 .ToListAsync();
 
-            // Nếu số lượng sản phẩm cùng danh mục ít hơn 8, bù thêm các sản phẩm mới nhất từ các danh mục khác
-            if (relatedProducts.Count < 8)
+            var activeCombos = new List<object>();
+            foreach (var rep in relatedProducts)
             {
-                var existingIds = relatedProducts.Select(rp => rp.Id).Append(id).ToList();
-                var additionalProducts = await _context.Products
-                    .Include(p => p.ProductImages)
-                    .Where(p => !p.IsDeleted && !existingIds.Contains(p.Id))
-                    .OrderByDescending(p => p.CreatedAt)
-                    .Take(8 - relatedProducts.Count)
-                    .ToListAsync();
-                relatedProducts.AddRange(additionalProducts);
+                var matchingPromo = comboPromos.FirstOrDefault(p => 
+                    p.ComboProductIds.Contains(id) && p.ComboProductIds.Contains(rep.Id));
+                if (matchingPromo != null)
+                {
+                    activeCombos.Add(new {
+                        Promo = matchingPromo,
+                        TargetProduct = rep
+                    });
+                }
             }
-            ViewBag.RelatedProducts = relatedProducts;
+            ViewBag.ActiveCombos = activeCombos;
 
             return View(product);
         }
@@ -214,29 +219,40 @@ namespace HuflitShopCore.Controllers
         {
             try
             {
+                string targetVariantId = string.Empty;
+
+                // Kiểm tra xem khách có truyền vào phân loại (màu, size) không
                 if (!string.IsNullOrWhiteSpace(productVariantId))
                 {
                     var pv = await _productService.GetActiveVariantByIdAsync(productVariantId);
+                    if (pv == null) return Json(new { success = false, message = "Phân loại sản phẩm không tồn tại hoặc đã ngừng bán!" });
 
-                    if (pv == null) return RedirectToAction("Index", "Home");
+                    targetVariantId = pv.Id;
+                }
+                else
+                {
+                    // Nếu bấm từ trang danh sách (không có chọn màu/size), tự động lấy phân loại đầu tiên
+                    var variant = await _productService.GetFirstActiveVariantByProductIdAsync(id);
+                    if (variant == null) return Json(new { success = false, message = "Sản phẩm hiện đang hết hàng hoặc không khả dụng!" });
 
-                    await AddOrUpdateCartItemAsync(pv.Id, Math.Max(1, quantity));
-                    return RedirectToAction("Cart", "Cart");
+                    targetVariantId = variant.Id;
                 }
 
-                // Fallback: Home/Index.cshtml truyền ProductId.
-                var variant = await _productService.GetFirstActiveVariantByProductIdAsync(id);
+                // 1. Thêm vào giỏ hàng và nhận lại Cookie Session ID (dành cho khách chưa đăng nhập)
+                string? guestCartId = await AddOrUpdateCartItemAsync(targetVariantId, Math.Max(1, quantity));
 
-                if (variant == null)
-                    return RedirectToAction("Index", "Home");
+                // 2. Lấy thông tin user hiện tại để đếm tổng số lượng
+                var isAuth = User.Identity != null && User.Identity.IsAuthenticated;
+                var userId = isAuth ? (User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("Id")) : null;
 
-                await AddOrUpdateCartItemAsync(variant.Id, Math.Max(1, quantity));
-                return RedirectToAction("Cart", "Cart");
+                int count = await _cartService.GetCartCountAsync(userId, guestCartId);
+
+                // 3. BẮT BUỘC trả về JSON để AJAX Javascript nhận diện được
+                return Json(new { success = true, newCartCount = count, message = "Đã thêm vào giỏ hàng thành công!" });
             }
             catch (System.Exception ex)
             {
-                TempData["ErrorMessage"] = ex.Message;
-                return RedirectToAction("Details", new { id = id });
+                return Json(new { success = false, message = ex.Message });
             }
         }
 
@@ -310,11 +326,10 @@ namespace HuflitShopCore.Controllers
 
 
 
-        private async Task AddOrUpdateCartItemAsync(string productVariantId, int delta)
+        private async Task<string?> AddOrUpdateCartItemAsync(string productVariantId, int delta)
         {
             var isAuth = User.Identity != null && User.Identity.IsAuthenticated;
-            var userId = isAuth ? User.FindFirstValue(ClaimTypes.NameIdentifier) : null;
-
+            var userId = isAuth ? (User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("Id")) : null;
             string? guestCartId = Request.Cookies["GuestCartId"];
             if (string.IsNullOrEmpty(guestCartId))
             {
@@ -331,6 +346,9 @@ namespace HuflitShopCore.Controllers
             var cartKeySessionId = isAuth ? null : guestCartId;
 
             await _cartService.AddOrUpdateCartItemAsync(cartKeyUserId, cartKeySessionId, productVariantId, delta);
+
+            // Trả về guestCartId để dùng cho việc đếm số lượng ngay lập tức
+            return guestCartId;
         }
         [HttpGet]
         public async Task<IActionResult> SearchSuggestions(string term)
@@ -381,8 +399,7 @@ namespace HuflitShopCore.Controllers
         public async Task<IActionResult> TrackBehavior(string productId, int durationSeconds)
         {
             var isAuth = User.Identity != null && User.Identity.IsAuthenticated;
-            var userId = isAuth ? User.FindFirstValue(ClaimTypes.NameIdentifier) : null;
-
+            var userId = isAuth ? (User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("Id")) : null;
             if (string.IsNullOrEmpty(userId))
             {
                 return Json(new { success = false, message = "Không xác thực" });
@@ -414,8 +431,7 @@ namespace HuflitShopCore.Controllers
         public async Task<IActionResult> GetPersonalizedRecommendations()
         {
             var isAuth = User.Identity != null && User.Identity.IsAuthenticated;
-            var userId = isAuth ? User.FindFirstValue(ClaimTypes.NameIdentifier) : null;
-
+            var userId = isAuth ? (User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("Id")) : null;
             var cloudName = _configuration["Cloudinary:CloudName"] ?? _configuration["CloudinarySettings:CloudName"] ?? "dsamboqwp";
 
             if (string.IsNullOrEmpty(userId))
@@ -451,63 +467,68 @@ namespace HuflitShopCore.Controllers
                 return Json(guestResult);
             }
 
-            // Lấy toàn bộ log xem sản phẩm của User này kèm Category
-            var logs = await _context.ProductViewsLogs
-                .Include(l => l.Product)
-                .Where(l => l.UserId == userId && l.Product != null && !l.Product.IsDeleted)
-                .ToListAsync();
-
+            // 1. Kiểm tra giỏ hàng của user trước để chạy gợi ý mua kèm Apriori
+            var cartItems = await _cartService.GetCartItemsAsync(userId, null);
             List<Product> recommendedProducts = new List<Product>();
 
-            if (logs.Any())
+            if (cartItems != null && cartItems.Any())
             {
-                // Tính tổng thời lượng xem theo từng CategoryId
-                var categoryDurations = new Dictionary<string, int>();
-                foreach (var log in logs)
+                var cartProductIds = cartItems.Select(c => c.ProductVariant.ProductId).Distinct().ToList();
+                recommendedProducts = await _aprioriService.GetCartRecommendationsAsync(cartProductIds, 8);
+            }
+
+            // 2. Nếu giỏ hàng trống hoặc gợi ý Apriori trả về ít hơn 8 sản phẩm, sử dụng dữ liệu Log thời gian xem để gợi ý thêm
+            if (recommendedProducts.Count < 8)
+            {
+                var existingIds = recommendedProducts.Select(rp => rp.Id).ToList();
+                var logs = await _context.ProductViewsLogs
+                    .Include(l => l.Product)
+                    .Where(l => l.UserId == userId && l.Product != null && !l.Product.IsDeleted && !existingIds.Contains(l.ProductId))
+                    .ToListAsync();
+
+                if (logs.Any())
                 {
-                    var catId = log.Product.CategoryId;
-                    int duration = 5; // Mặc định 5s
-                    if (!string.IsNullOrEmpty(log.UserAgent) && log.UserAgent.Contains("Duration:"))
+                    var categoryDurations = new Dictionary<string, int>();
+                    foreach (var log in logs)
                     {
-                        var parts = log.UserAgent.Split('|');
-                        if (parts.Length > 1)
+                        var catId = log.Product.CategoryId;
+                        int duration = 5;
+                        if (!string.IsNullOrEmpty(log.UserAgent) && log.UserAgent.Contains("Duration:"))
                         {
-                            var durStr = parts[1].Replace("Duration:", "").Replace("s", "").Trim();
-                            int.TryParse(durStr, out duration);
+                            var parts = log.UserAgent.Split('|');
+                            if (parts.Length > 1)
+                            {
+                                var durStr = parts[1].Replace("Duration:", "").Replace("s", "").Trim();
+                                int.TryParse(durStr, out duration);
+                            }
                         }
+
+                        if (categoryDurations.ContainsKey(catId))
+                            categoryDurations[catId] += duration;
+                        else
+                            categoryDurations[catId] = duration;
                     }
 
-                    if (categoryDurations.ContainsKey(catId))
+                    var sortedCategories = categoryDurations.OrderByDescending(x => x.Value).Select(x => x.Key).ToList();
+
+                    foreach (var catId in sortedCategories)
                     {
-                        categoryDurations[catId] += duration;
+                        if (recommendedProducts.Count >= 8) break;
+
+                        var currentIds = recommendedProducts.Select(rp => rp.Id).ToList();
+                        var catProducts = await _context.Products
+                            .Include(p => p.ProductImages)
+                            .Where(p => p.CategoryId == catId && !p.IsDeleted && !currentIds.Contains(p.Id))
+                            .OrderByDescending(p => p.CreatedAt)
+                            .Take(8 - recommendedProducts.Count)
+                            .ToListAsync();
+
+                        recommendedProducts.AddRange(catProducts);
                     }
-                    else
-                    {
-                        categoryDurations[catId] = duration;
-                    }
-                }
-
-                // Sắp xếp các danh mục theo tổng thời lượng xem giảm dần
-                var sortedCategories = categoryDurations.OrderByDescending(x => x.Value).Select(x => x.Key).ToList();
-
-                // Lấy sản phẩm từ các danh mục này theo thứ tự ưu tiên
-                foreach (var catId in sortedCategories)
-                {
-                    if (recommendedProducts.Count >= 8) break;
-
-                    var existingIds = recommendedProducts.Select(rp => rp.Id).ToList();
-                    var catProducts = await _context.Products
-                        .Include(p => p.ProductImages)
-                        .Where(p => p.CategoryId == catId && !p.IsDeleted && !existingIds.Contains(p.Id))
-                        .OrderByDescending(p => p.CreatedAt)
-                        .Take(8 - recommendedProducts.Count)
-                        .ToListAsync();
-
-                    recommendedProducts.AddRange(catProducts);
                 }
             }
 
-            // Nếu không có log hoặc số sản phẩm gợi ý ít hơn 8, bù thêm các sản phẩm mới nhất từ các danh mục khác
+            // 3. Nếu vẫn chưa đủ 8 sản phẩm, bù thêm sản phẩm mới nhất
             if (recommendedProducts.Count < 8)
             {
                 var existingIds = recommendedProducts.Select(rp => rp.Id).ToList();

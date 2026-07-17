@@ -64,10 +64,17 @@
                                 <input asp-for="PhoneNumber" class="form-control-modern" />
                                 <span asp-validation-for="PhoneNumber" class="text-danger small font-weight-bold mt-1 d-block"></span>
                             </div>
-                            <div class="col-md-6 mb-4">
-                                <label asp-for="DateOfBirth" class="form-label-modern"></label>
-                                <input asp-for="DateOfBirth" class="form-control-modern" type="date" />
-                                <span asp-validation-for="DateOfBirth" class="text-danger small font-weight-bold mt-1 d-block"></span>
+                            <div class="row col-md-12">
+                                <div class="col-md-6 mb-4">
+                                    <label asp-for="DateOfBirth" class="form-label-modern">Ngày sinh</label>
+                                    <input asp-for="DateOfBirth" class="form-control-modern" type="date" />
+                                    <span asp-validation-for="DateOfBirth" class="text-danger small font-weight-bold mt-1 d-block"></span>
+                                </div>
+                                <div class="col-md-6 mb-4">
+                                    <label asp-for="HourlyRate" class="form-label-modern">Mức lương theo giờ (VNĐ/h)</label>
+                                    <input asp-for="HourlyRate" class="form-control-modern" type="number" min="0" step="5000" />
+                                    <span asp-validation-for="HourlyRate" class="text-danger small font-weight-bold mt-1 d-block"></span>
+                                </div>
                             </div>
 
                             <div class="col-md-6 mb-4 mb-md-0">
