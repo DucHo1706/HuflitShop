@@ -21,6 +21,9 @@ namespace HuflitShopCore.DTOs
         public int? ManufactureYear { get; set; }
         public string? Origin { get; set; }
         public string? Trademark { get; set; }
+
+        [Range(1, 50000, ErrorMessage = "Khối lượng phải từ 1 đến 50.000 gram")]
+        public int WeightGrams { get; set; } = 300;
         
         public bool IsDeleted { get; set; }
     }

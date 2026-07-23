@@ -34,6 +34,9 @@ namespace HuflitShopCore.Models
         [StringLength(255)]
         public string? Trademark { get; set; }
 
+        [Range(1, 50000)]
+        public int WeightGrams { get; set; } = 300;
+
         public int ViewCount { get; set; } = 0;
         public bool IsDeleted { get; set; } = false;
         public DateTime CreatedAt { get; set; } = DateTime.Now;

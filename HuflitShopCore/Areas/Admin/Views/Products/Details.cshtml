@@ -36,6 +36,8 @@
                 <div class="col-md-9 mb-3">@(Model.Trademark ?? "---")</div>
                 <div class="col-md-3 font-weight-bold">Xuất xứ:</div>
                 <div class="col-md-9 mb-3">@(Model.Origin ?? "---")</div>
+                <div class="col-md-3 font-weight-bold">Cân nặng GHN:</div>
+                <div class="col-md-9 mb-3">@Model.WeightGrams gram</div>
                 <div class="col-md-3 font-weight-bold">Trạng thái:</div>
                 <div class="col-md-9 mb-3">@(Model.IsDeleted ? "Đã khóa (Ngừng kinh doanh)" : "Đang kinh doanh")</div>
                 <div class="col-md-3 font-weight-bold">Mô tả:</div>

@@ -34,6 +34,7 @@ namespace HuflitShopCore.Services
                     Origin = p.Origin,
                     Trademark = p.Trademark,
                     Description = p.Description,
+                    WeightGrams = p.WeightGrams,
                     IsDeleted = p.IsDeleted
                 })
                 .ToListAsync();
@@ -58,6 +59,7 @@ namespace HuflitShopCore.Services
                 Trademark = product.Trademark,
                 Origin = product.Origin,
                 Description = product.Description,
+                WeightGrams = product.WeightGrams,
                 IsDeleted = product.IsDeleted
             };
         }
@@ -74,6 +76,7 @@ namespace HuflitShopCore.Services
                 Trademark = dto.Trademark,
                 Origin = dto.Origin,
                 Description = dto.Description,
+                WeightGrams = dto.WeightGrams,
                 IsDeleted = false // Mặc định sản phẩm mới không bị xóa
             };
 
@@ -117,6 +120,7 @@ namespace HuflitShopCore.Services
             product.Trademark = dto.Trademark;
             product.Origin = dto.Origin;
             product.Description = dto.Description;
+            product.WeightGrams = dto.WeightGrams;
 
             await _context.SaveChangesAsync();
             return true;

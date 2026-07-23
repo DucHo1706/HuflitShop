@@ -14,14 +14,21 @@ namespace HuflitShopCore.Controllers
         private readonly OrderService _orderService;
         private readonly PromotionService _promotionService;
         private readonly VnPayService _vnPayService;
-        private readonly GrabExpressService _grabExpressService;
+        private readonly GhnService _ghnService;
+        private readonly GeoapifyService _geoapifyService;
 
-        public OrderController(OrderService orderService, PromotionService promotionService, VnPayService vnPayService, GrabExpressService grabExpressService)
+        public OrderController(
+            OrderService orderService,
+            PromotionService promotionService,
+            VnPayService vnPayService,
+            GhnService ghnService,
+            GeoapifyService geoapifyService)
         {
             _orderService = orderService;
             _promotionService = promotionService;
             _vnPayService = vnPayService;
-            _grabExpressService = grabExpressService;
+            _ghnService = ghnService;
+            _geoapifyService = geoapifyService;
         }
 
         [Authorize]
@@ -43,8 +50,7 @@ namespace HuflitShopCore.Controllers
             var finalProductTotal = Math.Max(0, itemTotalAfterDirect - comboDiscount);
             var originalTotal = items.Sum(c => (c.ProductVariant?.Product?.CurrentPrice ?? 0) * c.Quantity);
 
-            // Mặc định phí ship ban đầu là 25k (tiêu chuẩn ở HCM) hoặc tính lại qua AJAX khi chọn địa chỉ
-            decimal shippingFee = 25000m;
+            decimal shippingFee = 0m;
 
             ViewBag.OriginalTotal = originalTotal;
             ViewBag.AutoDiscount = originalTotal - finalProductTotal;
@@ -66,22 +72,87 @@ namespace HuflitShopCore.Controllers
         }
 
         [Authorize]
-        [HttpPost]
-        public async Task<IActionResult> GetShippingFee(string city, string district, string specificAddress, decimal orderTotal)
+        [HttpGet]
+        public async Task<IActionResult> GetProvinces(CancellationToken cancellationToken)
         {
-            if (string.IsNullOrEmpty(city) || string.IsNullOrEmpty(district))
-            {
-                return Json(new { success = false, message = "Vui lòng chọn tỉnh/thành phố và quận/huyện." });
-            }
+            try { return Json(new { success = true, data = await _ghnService.GetProvincesAsync(cancellationToken) }); }
+            catch (GhnApiException ex) { return Json(new { success = false, message = ex.Message }); }
+        }
 
-            var quotes = await _grabExpressService.GetQuotesAsync(city, district, specificAddress ?? "", orderTotal);
-            return Json(new { success = true, quotes = quotes });
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> GetDistricts(int provinceId, CancellationToken cancellationToken)
+        {
+            try { return Json(new { success = true, data = await _ghnService.GetDistrictsAsync(provinceId, cancellationToken) }); }
+            catch (GhnApiException ex) { return Json(new { success = false, message = ex.Message }); }
+        }
+
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> GetWards(int districtId, CancellationToken cancellationToken)
+        {
+            try { return Json(new { success = true, data = await _ghnService.GetWardsAsync(districtId, cancellationToken) }); }
+            catch (GhnApiException ex) { return Json(new { success = false, message = ex.Message }); }
+        }
+
+        [Authorize]
+        [HttpGet]
+        [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+        public async Task<IActionResult> SuggestAddresses(
+            string query,
+            string? ward,
+            string? district,
+            string? province,
+            CancellationToken cancellationToken)
+        {
+            if (!_geoapifyService.IsConfigured)
+                return Json(new { success = true, configured = false, data = Array.Empty<object>() });
+
+            var suggestions = await _geoapifyService.SuggestAsync(
+                query ?? string.Empty,
+                ward,
+                district,
+                province,
+                cancellationToken);
+
+            return Json(new { success = true, configured = true, data = suggestions });
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> GetShippingFee(int districtId, string wardCode, string? buyNowVariantId, int buyNowQty = 1, CancellationToken cancellationToken = default)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+            if (districtId <= 0 || string.IsNullOrWhiteSpace(wardCode))
+                return Json(new { success = false, message = "Vui lòng chọn đầy đủ địa chỉ nhận hàng." });
+
+            try
+            {
+                var items = await _orderService.GetCheckoutItemsAsync(userId, buyNowVariantId, buyNowQty);
+                var package = _ghnService.BuildPackage(items);
+                var insuranceValue = items.Sum(x => (x.ProductVariant?.Product?.CurrentPrice ?? 0) * x.Quantity);
+                var quotes = await _ghnService.GetQuotesAsync(districtId, wardCode, package, insuranceValue, cancellationToken);
+                return Json(new
+                {
+                    success = true,
+                    quotes = quotes.Select(x => new
+                    {
+                        x.ServiceId,
+                        x.ServiceTypeId,
+                        x.ServiceName,
+                        x.ShippingFee,
+                        expectedDeliveryTime = x.ExpectedDeliveryTime?.ToString("dd/MM/yyyy")
+                    })
+                });
+            }
+            catch (GhnApiException ex) { return Json(new { success = false, message = ex.Message }); }
         }
 
         [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> PlaceOrder(Address address, string paymentMethodId, string? shippingFullName, string? shippingPhoneNumber, string? appliedPromoCode, string? buyNowVariantId, decimal shippingFee, string shippingCarrier, int buyNowQty = 1)
+        public async Task<IActionResult> PlaceOrder(Address address, string paymentMethodId, string? shippingFullName, string? shippingPhoneNumber, string? appliedPromoCode, string? buyNowVariantId, int shippingServiceId, int shippingServiceTypeId, int buyNowQty = 1, CancellationToken cancellationToken = default)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId)) return RedirectToAction("Login", "Login");
@@ -93,11 +164,6 @@ namespace HuflitShopCore.Controllers
                 paymentMethodId = "pm-cod";
             }
 
-            if (string.IsNullOrEmpty(shippingCarrier))
-            {
-                shippingCarrier = "Tiêu chuẩn";
-            }
-
             var items = await _orderService.GetCheckoutItemsAsync(userId, buyNowVariantId, buyNowQty);
             if (items.Count == 0)
             {
@@ -107,6 +173,15 @@ namespace HuflitShopCore.Controllers
             address.UserId = userId;
             ModelState.Remove("UserId");
             ModelState.Remove("Id");
+
+            if (address.ProvinceId <= 0)
+                ModelState.AddModelError(nameof(Address.ProvinceId), "Vui lòng chọn Tỉnh/Thành phố.");
+            if (address.DistrictId <= 0)
+                ModelState.AddModelError(nameof(Address.DistrictId), "Vui lòng chọn Quận/Huyện.");
+            if (string.IsNullOrWhiteSpace(address.Ward) || string.IsNullOrWhiteSpace(address.WardCode))
+                ModelState.AddModelError(nameof(Address.WardCode), "Vui lòng chọn Phường/Xã.");
+            if (shippingServiceId <= 0 || shippingServiceTypeId <= 0)
+                ModelState.AddModelError(string.Empty, "Vui lòng chọn dịch vụ giao hàng GHN.");
 
             if (!ModelState.IsValid)
             {
@@ -132,6 +207,15 @@ namespace HuflitShopCore.Controllers
             {
                 var fullName = !string.IsNullOrWhiteSpace(shippingFullName) ? shippingFullName : (User.FindFirstValue("Name") ?? "");
                 var phone = !string.IsNullOrWhiteSpace(shippingPhoneNumber) ? shippingPhoneNumber : (User.FindFirstValue("Phone") ?? "");
+                var destination = await _ghnService.ResolveDestinationAsync(address.ProvinceId, address.DistrictId, address.WardCode, cancellationToken);
+                address.City = destination.ProvinceName;
+                address.District = destination.DistrictName;
+                address.Ward = destination.WardName;
+                var package = _ghnService.BuildPackage(items);
+                var insuranceValue = items.Sum(x => (x.ProductVariant?.Product?.CurrentPrice ?? 0) * x.Quantity);
+                var quotes = await _ghnService.GetQuotesAsync(address.DistrictId, address.WardCode, package, insuranceValue, cancellationToken);
+                var selectedQuote = quotes.FirstOrDefault(x => x.ServiceId == shippingServiceId && x.ServiceTypeId == shippingServiceTypeId)
+                    ?? throw new InvalidOperationException("Dịch vụ GHN đã chọn không còn khả dụng. Vui lòng chọn lại.");
 
                 order = await _orderService.CreateOrderAsync(
                     userId, 
@@ -142,26 +226,7 @@ namespace HuflitShopCore.Controllers
                     fullName, 
                     phone, 
                     buyNowVariantId,
-                    shippingFee,
-                    shippingCarrier);
-
-                // Book GrabExpress hoặc Ahamove hỏa tốc nếu được chọn
-                if (shippingCarrier.Contains("GrabExpress", StringComparison.OrdinalIgnoreCase) || 
-                    shippingCarrier.Contains("Ahamove", StringComparison.OrdinalIgnoreCase))
-                {
-                    var bookResult = await _grabExpressService.BookDeliveryAsync(
-                        shippingCarrier, 
-                        fullName, 
-                        phone, 
-                        $"{address.SpecificAddress}, {address.District}, {address.City}");
-
-                    if (bookResult.Success)
-                    {
-                        // Lưu thông tin vận đơn bổ sung vào địa chỉ ship
-                        order.ShippingAddress += $" | Tracking: {bookResult.TrackingNumber} | Driver: {bookResult.DriverName} ({bookResult.DriverPhone}) - {bookResult.LicensePlate} | Link: {bookResult.TrackingUrl}";
-                        await _orderService.UpdateOrderAsync(order);
-                    }
-                }
+                    selectedQuote);
             }
             catch (Exception ex)
             {
@@ -319,7 +384,10 @@ namespace HuflitShopCore.Controllers
             ViewBag.FinalAmount = order.FinalAmount;
             ViewBag.ShippingCity = order.ShippingCity;
             ViewBag.ShippingDistrict = order.ShippingDistrict;
+            ViewBag.ShippingWard = order.ShippingWard;
             ViewBag.ShippingAddress = order.ShippingAddress;
+            ViewBag.CarrierOrderCode = order.Shipment?.CarrierOrderCode;
+            ViewBag.ShippingStatus = order.Shipment?.Status;
             ViewBag.PaymentMethodName = order.PaymentMethod?.MethodName ?? "Chưa xác định";
             ViewBag.PaymentSuccess = paymentSuccess;
 
@@ -331,64 +399,8 @@ namespace HuflitShopCore.Controllers
         {
             if (string.IsNullOrEmpty(id)) return NotFound();
             var order = await _orderService.GetOrderByTrackingNumberAsync(id);
-            
-            string driverName = "Nguyễn Văn Hùng";
-            string driverPhone = "0903829103";
-            string licensePlate = "59-K1 829.12";
-            string cleanAddress = "828 Sư Vạn Hạnh, Phường 13, Quận 10";
-            string district = "Quận 10";
-            string city = "Hồ Chí Minh";
-            string carrierName = "GrabExpress Hỏa Tốc";
-
-            if (order != null)
-            {
-                district = order.ShippingDistrict;
-                city = order.ShippingCity;
-
-                string originalAddress = order.ShippingAddress ?? "";
-                cleanAddress = originalAddress;
-                
-                if (originalAddress.Contains(" | "))
-                {
-                    var parts = originalAddress.Split('|');
-                    cleanAddress = parts[0].Trim();
-                    foreach (var part in parts)
-                    {
-                        var trimmed = part.Trim();
-                        if (trimmed.StartsWith("Vận chuyển:"))
-                        {
-                            carrierName = trimmed.Replace("Vận chuyển:", "").Trim();
-                        }
-                        else if (trimmed.StartsWith("Driver:"))
-                        {
-                            var driverInfo = trimmed.Replace("Driver:", "").Trim();
-                            var phoneIndex = driverInfo.IndexOf('(');
-                            var plateIndex = driverInfo.IndexOf(" - ");
-                            if (phoneIndex != -1 && plateIndex != -1)
-                            {
-                                driverName = driverInfo.Substring(0, phoneIndex).Trim();
-                                driverPhone = driverInfo.Substring(phoneIndex + 1, plateIndex - phoneIndex - 2).Trim();
-                                licensePlate = driverInfo.Substring(plateIndex + 3).Trim();
-                            }
-                            else
-                            {
-                                driverName = driverInfo;
-                            }
-                        }
-                    }
-                }
-            }
-
-            ViewBag.TrackingNumber = id;
-            ViewBag.DriverName = driverName;
-            ViewBag.DriverPhone = driverPhone;
-            ViewBag.LicensePlate = licensePlate;
-            ViewBag.Address = cleanAddress;
-            ViewBag.District = district;
-            ViewBag.City = city;
-            ViewBag.CarrierName = carrierName;
-
-            return View();
+            if (order == null) return NotFound();
+            return Redirect("https://donhang.ghn.vn/?order_code=" + Uri.EscapeDataString(id));
         }
     }
 }

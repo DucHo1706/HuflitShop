@@ -8,12 +8,12 @@ namespace HuflitShopCore.Areas.Admin.Controllers
     public class OrderController : Controller
     {
         private readonly OrderService _orderService;
-        private readonly IServiceProvider _serviceProvider;
+        private readonly ShipmentService _shipmentService;
 
-        public OrderController(OrderService orderService, IServiceProvider serviceProvider)
+        public OrderController(OrderService orderService, ShipmentService shipmentService)
         {
             _orderService = orderService;
-            _serviceProvider = serviceProvider;
+            _shipmentService = shipmentService;
         }
 
         public async Task<IActionResult> Index(bool pendingOnly = false)
@@ -34,41 +34,43 @@ namespace HuflitShopCore.Areas.Admin.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateStatus(string id, int status)
         {
-            await _orderService.UpdateOrderStatusAsync(id, status);
-
-            // Giả lập giao hàng tự động cho GrabExpress/Ahamove khi Admin chuyển sang "Đang giao" (2)
-            if (status == 2)
+            try
             {
-                // Chạy ngầm mô phỏng giao hàng mà không chặn luồng chính của Admin
-                _ = Task.Run(async () =>
-                {
-                    try
-                    {
-                        // Giả lập thời gian tài xế di chuyển (30 giây)
-                        await Task.Delay(30000);
-
-                        using (var scope = _serviceProvider.CreateScope())
-                        {
-                            var orderService = scope.ServiceProvider.GetRequiredService<OrderService>();
-                            var order = await orderService.GetOrderByIdAsync(id);
-                            
-                            // Chỉ tự động hoàn thành nếu đơn hàng đang ở trạng thái Đang giao (2)
-                            if (order != null && order.OrderStatus == 2)
-                            {
-                                await orderService.UpdateOrderStatusAsync(id, 3); // 3: Hoàn thành
-                            }
-                        }
-                    }
-                    catch
-                    {
-                        // Nuốt lỗi nếu có để tránh crash tiến trình chạy ngầm
-                    }
-                });
+                if (status == 4) await _shipmentService.CancelGhnOrderAsync(id);
+                await _orderService.UpdateOrderStatusAsync(id, status);
             }
+            catch (Exception ex) { TempData["ErrorMessage"] = ex.Message; }
 
             return RedirectToAction(nameof(Details), new { id = id });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateShipment(string id, CancellationToken cancellationToken)
+        {
+            try
+            {
+                await _shipmentService.CreateGhnOrderAsync(id, cancellationToken);
+                TempData["SuccessMessage"] = "Đã tạo vận đơn GHN thành công.";
+            }
+            catch (Exception ex) { TempData["ErrorMessage"] = ex.Message; }
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SyncShipment(string id, CancellationToken cancellationToken)
+        {
+            try
+            {
+                await _shipmentService.SynchronizeGhnOrderAsync(id, cancellationToken);
+                TempData["SuccessMessage"] = "Đã đồng bộ trạng thái mới nhất từ GHN.";
+            }
+            catch (Exception ex) { TempData["ErrorMessage"] = ex.Message; }
+            return RedirectToAction(nameof(Details), new { id });
         }
     }
 }

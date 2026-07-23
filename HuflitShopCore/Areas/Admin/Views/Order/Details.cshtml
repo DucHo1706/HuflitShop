@@ -88,6 +88,14 @@
 </style>
 
 <div class="container-fluid mt-4">
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    }
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <div>
             <h1 class="h3 mb-0 text-gray-800 font-weight-bold">Chi tiết đơn hàng: <span class="text-primary">#@Model.Id.Substring(0, 8).ToUpper()</span></h1>
@@ -212,8 +220,35 @@
                     <div class="info-label">Địa chỉ giao hàng</div>
                     <div class="info-value">
                         @cleanAddress<br />
-                        @Model.ShippingDistrict, @Model.ShippingCity
+                        @Model.ShippingWard, @Model.ShippingDistrict, @Model.ShippingCity
                     </div>
+
+                    @if (!string.IsNullOrEmpty(Model.ShippingProvider))
+                    {
+                        <div class="info-label mt-2">Dịch vụ vận chuyển</div>
+                        <div class="info-value font-weight-bold text-success">@Model.ShippingServiceName</div>
+                        <div class="info-label">Trạng thái GHN</div>
+                        <div class="info-value"><span class="badge badge-info text-white">@Model.ShippingStatus</span></div>
+                        @if (!string.IsNullOrEmpty(Model.CarrierOrderCode))
+                        {
+                            <div class="info-label">Mã vận đơn</div>
+                            <div class="info-value font-weight-bold">@Model.CarrierOrderCode</div>
+                            <form asp-action="SyncShipment" method="post" class="mb-2">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@Model.Id" />
+                                <button class="btn btn-sm btn-outline-info" type="submit"><i class="fas fa-sync-alt mr-1"></i>Đồng bộ GHN</button>
+                                <a class="btn btn-sm btn-outline-success" target="_blank" href="https://donhang.ghn.vn/?order_code=@Model.CarrierOrderCode">Tra cứu GHN</a>
+                            </form>
+                        }
+                        else if (Model.OrderStatus == 1)
+                        {
+                            <form asp-action="CreateShipment" method="post" class="mb-2">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@Model.Id" />
+                                <button class="btn btn-success btn-sm" type="submit"><i class="fas fa-truck-loading mr-1"></i>Tạo vận đơn GHN</button>
+                            </form>
+                        }
+                    }
 
                     @if (!string.IsNullOrEmpty(carrier))
                     {

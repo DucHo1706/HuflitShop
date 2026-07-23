@@ -26,5 +26,15 @@ namespace HuflitShopCore.Models
         [Required(ErrorMessage = "Vui lòng chọn Quận/Huyện")]
         [Column(TypeName = "nvarchar(255)")]
         public string District { get; set; } = string.Empty;
+
+        [Column(TypeName = "nvarchar(255)")]
+        public string Ward { get; set; } = string.Empty;
+
+        public int ProvinceId { get; set; }
+
+        public int DistrictId { get; set; }
+
+        [StringLength(20)]
+        public string WardCode { get; set; } = string.Empty;
     }
 }
