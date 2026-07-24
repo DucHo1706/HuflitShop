@@ -159,6 +159,13 @@
         color: #1f2937;
         font-weight: 700;
     }
+    .timeline-time {
+        margin-top: 0.25rem;
+        color: #6b7280;
+        font-size: 0.75rem;
+        line-height: 1.35;
+        text-align: center;
+    }
     .timeline-step.cancelled .timeline-label {
         color: #dc2626;
         font-weight: 700;
@@ -300,77 +307,71 @@
         
         @{
             int status = Model.OrderStatus;
-            string percent = "0%";
-            if (status == 1) percent = "33%";
-            else if (status == 2) percent = "66%";
-            else if (status == 3 || status == 5) percent = "100%";
+            int completedSteps = Model.CompletedAt.HasValue ? 4
+                : Model.ShippingStartedAt.HasValue ? 3
+                : Model.PackingStartedAt.HasValue ? 2
+                : Model.ApprovedAt.HasValue ? 1
+                : 0;
+            string percent = $"{completedSteps * 25}%";
         }
         
+        <div class="timeline-container">
+            <div class="timeline-line-bg"></div>
+            <div class="timeline-line-fill" style="width: @percent;"></div>
+
+            <div class="timeline-step active">
+                <div class="timeline-icon-box"><i class="fas fa-shopping-cart"></i></div>
+                <div class="timeline-label">Đặt hàng</div>
+                <div class="timeline-time">@Model.OrderDate.ToString("dd/MM/yyyy HH:mm")</div>
+            </div>
+            <div class="timeline-step @(Model.ApprovedAt.HasValue ? "active" : "")">
+                <div class="timeline-icon-box"><i class="fas fa-clipboard-check"></i></div>
+                <div class="timeline-label">Shop duyệt đơn</div>
+                @if (Model.ApprovedAt.HasValue)
+                {
+                    <div class="timeline-time">@Model.ApprovedAt.Value.ToString("dd/MM/yyyy HH:mm")</div>
+                }
+            </div>
+            <div class="timeline-step @(Model.PackingStartedAt.HasValue ? "active" : "")">
+                <div class="timeline-icon-box"><i class="fas fa-box"></i></div>
+                <div class="timeline-label">Shop đóng gói</div>
+                @if (Model.PackingStartedAt.HasValue)
+                {
+                    <div class="timeline-time">@Model.PackingStartedAt.Value.ToString("dd/MM/yyyy HH:mm")</div>
+                }
+            </div>
+            <div class="timeline-step @(Model.ShippingStartedAt.HasValue ? "active" : "")">
+                <div class="timeline-icon-box"><i class="fas fa-truck-loading"></i></div>
+                <div class="timeline-label">Bàn giao vận chuyển</div>
+                @if (Model.ShippingStartedAt.HasValue)
+                {
+                    <div class="timeline-time">@Model.ShippingStartedAt.Value.ToString("dd/MM/yyyy HH:mm")</div>
+                }
+            </div>
+            <div class="timeline-step @(Model.CompletedAt.HasValue ? "active" : "")">
+                <div class="timeline-icon-box"><i class="fas fa-check"></i></div>
+                <div class="timeline-label">Giao thành công</div>
+                @if (Model.CompletedAt.HasValue)
+                {
+                    <div class="timeline-time">@Model.CompletedAt.Value.ToString("dd/MM/yyyy HH:mm")</div>
+                }
+            </div>
+        </div>
+
+        @if (Model.ExpectedDeliveryTime.HasValue && status != 4)
+        {
+            <div class="alert alert-info mt-4 mb-0 py-2 text-center">
+                <i class="far fa-calendar-check mr-1"></i>
+                <strong>Thời gian giao dự kiến:</strong> @Model.ExpectedDeliveryTime.Value.ToString("dd/MM/yyyy HH:mm")
+            </div>
+        }
         @if (status == 4)
         {
-            <div class="timeline-container" style="justify-content: space-around;">
-                <div class="timeline-line-bg" style="display:none;"></div>
-                <div class="timeline-step active">
-                    <div class="timeline-icon-box"><i class="fas fa-shopping-cart"></i></div>
-                    <div class="timeline-label">Đặt hàng thành công</div>
-                </div>
-                <div class="timeline-step cancelled">
-                    <div class="timeline-icon-box"><i class="fas fa-times"></i></div>
-                    <div class="timeline-label">Đơn hàng đã hủy</div>
-                </div>
-            </div>
+            <div class="alert alert-danger mt-4 mb-0 py-2 text-center"><i class="fas fa-times mr-1"></i>Đơn hàng đã hủy</div>
         }
         else if (status == 5)
         {
-            <div class="timeline-container">
-                <div class="timeline-line-bg"></div>
-                <div class="timeline-line-fill" style="width: 100%; background-color:#7c3aed;"></div>
-                
-                <div class="timeline-step active">
-                    <div class="timeline-icon-box"><i class="fas fa-shopping-cart"></i></div>
-                    <div class="timeline-label">Đã đặt</div>
-                </div>
-                <div class="timeline-step active">
-                    <div class="timeline-icon-box"><i class="fas fa-box"></i></div>
-                    <div class="timeline-label">Đóng gói</div>
-                </div>
-                <div class="timeline-step active">
-                    <div class="timeline-icon-box"><i class="fas fa-truck"></i></div>
-                    <div class="timeline-label">Đang giao</div>
-                </div>
-                <div class="timeline-step active">
-                    <div class="timeline-icon-box"><i class="fas fa-check"></i></div>
-                    <div class="timeline-label">Hoàn thành</div>
-                </div>
-                <div class="timeline-step refunded">
-                    <div class="timeline-icon-box"><i class="fas fa-undo"></i></div>
-                    <div class="timeline-label">Yêu cầu hoàn tiền</div>
-                </div>
-            </div>
-        }
-        else
-        {
-            <div class="timeline-container">
-                <div class="timeline-line-bg"></div>
-                <div class="timeline-line-fill" style="width: @percent;"></div>
-                
-                <div class="timeline-step @(status >= 0 ? "active" : "")">
-                    <div class="timeline-icon-box"><i class="fas fa-shopping-cart"></i></div>
-                    <div class="timeline-label">Đã đặt</div>
-                </div>
-                <div class="timeline-step @(status >= 1 ? "active" : "")">
-                    <div class="timeline-icon-box"><i class="fas fa-box"></i></div>
-                    <div class="timeline-label">Đóng gói</div>
-                </div>
-                <div class="timeline-step @(status >= 2 ? "active" : "")">
-                    <div class="timeline-icon-box"><i class="fas fa-truck"></i></div>
-                    <div class="timeline-label">Đang giao</div>
-                </div>
-                <div class="timeline-step @(status >= 3 ? "active" : "")">
-                    <div class="timeline-icon-box"><i class="fas fa-check"></i></div>
-                    <div class="timeline-label">Hoàn thành</div>
-                </div>
-            </div>
+            <div class="alert alert-warning mt-4 mb-0 py-2 text-center"><i class="fas fa-undo mr-1"></i>Khách hàng đã yêu cầu hoàn tiền</div>
         }
     </div>
 
@@ -382,9 +383,28 @@
                 <div style="font-size: 0.95rem; line-height: 1.7; color: #4b5563;">
                     <div style="font-size:1.1rem; font-weight: 700; color:#1f2937;" class="mb-2">@Model.CustomerName</div>
                     <div><strong>Số điện thoại:</strong> @Model.ShippingPhoneNumber</div>
-                    <div><strong>Địa chỉ giao nhận:</strong> @cleanAddress, @Model.ShippingDistrict, @Model.ShippingCity</div>
+                    <div><strong>Địa chỉ giao nhận:</strong> @cleanAddress, @Model.ShippingWard, @Model.ShippingDistrict, @Model.ShippingCity</div>
 
-                    @if (!string.IsNullOrEmpty(carrier))
+                    @if (!string.IsNullOrWhiteSpace(Model.ShippingProvider))
+                    {
+                        <div class="mt-2 pt-2 border-top">
+                            <div><strong>Vận chuyển:</strong> <span class="text-success font-weight-bold">@Model.ShippingProvider</span></div>
+                            @if (!string.IsNullOrWhiteSpace(Model.ShippingServiceName))
+                            {
+                                <div><strong>Dịch vụ:</strong> @Model.ShippingServiceName</div>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(Model.CarrierOrderCode))
+                            {
+                                <div><strong>Mã vận đơn:</strong> <span class="badge badge-secondary">@Model.CarrierOrderCode</span></div>
+                            }
+                            <div><strong>Trạng thái giao hàng:</strong> <span class="text-primary font-weight-bold">@Model.CustomerShippingStatusName</span></div>
+                            @if (Model.ExpectedDeliveryTime.HasValue)
+                            {
+                                <div><strong>Giao hàng dự kiến:</strong> <span class="text-primary font-weight-bold">@Model.ExpectedDeliveryTime.Value.ToString("dd/MM/yyyy HH:mm")</span></div>
+                            }
+                        </div>
+                    }
+                    else if (!string.IsNullOrEmpty(carrier))
                     {
                         <div class="mt-2 pt-2 border-top">
                             <div><strong>Vận chuyển:</strong> <span class="text-success font-weight-bold">@carrier</span></div>

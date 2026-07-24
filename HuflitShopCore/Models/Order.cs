@@ -26,6 +26,10 @@ namespace HuflitShopCore.Models
         public DateTime OrderDate { get; set; } = DateTime.Now;
         public int OrderStatus { get; set; } = 0; // 0: Chờ duyệt, 1: Đóng gói, 2: Đang giao, 3: Hoàn thành, 4: Hủy
         public int PaymentStatus { get; set; } = 0; // 0: Chưa thanh toán, 1: Đã thanh toán
+        public DateTime? ApprovedAt { get; set; }
+        public DateTime? PackingStartedAt { get; set; }
+        public DateTime? ShippingStartedAt { get; set; }
+        public DateTime? CompletedAt { get; set; }
 
         [Required]
         [Column(TypeName = "decimal(18,2)")]
@@ -60,6 +64,17 @@ namespace HuflitShopCore.Models
         [StringLength(255)]
         public string ShippingDistrict { get; set; }
 
+        [Required]
+        [StringLength(255)]
+        public string ShippingWard { get; set; } = string.Empty;
+
+        public int ShippingProvinceId { get; set; }
+        public int ShippingDistrictId { get; set; }
+
+        [Required]
+        [StringLength(20)]
+        public string ShippingWardCode { get; set; } = string.Empty;
+
         [ForeignKey("UserId")]
         public virtual AppUser User { get; set; }
 
@@ -70,5 +85,6 @@ namespace HuflitShopCore.Models
         public virtual Promotion Promotion { get; set; }
 
         public virtual ICollection<OrderDetail> OrderDetails { get; set; }
+        public virtual Shipment? Shipment { get; set; }
     }
 }

@@ -29,6 +29,7 @@ namespace HuflitShopCore.Services
             var orders = await _context.Orders
                 .Include(o => o.User)
                 .Include(o => o.PaymentMethod)
+                .Include(o => o.Shipment)
                 .Include(o => o.OrderDetails) // Tải chi tiết đơn hàng (sản phẩm) để tìm kiếm/lọc nâng cao
                 .OrderByDescending(o => o.OrderDate)
                 .AsNoTracking()
@@ -42,6 +43,7 @@ namespace HuflitShopCore.Services
             var orders = await _context.Orders
                 .Include(o => o.User)
                 .Include(o => o.PaymentMethod)
+                .Include(o => o.Shipment)
                 .Include(o => o.OrderDetails) // Tải chi tiết đơn hàng (sản phẩm) để tìm kiếm/lọc nâng cao
                 .Where(o => o.OrderStatus == 0) // Lọc đơn "Chờ duyệt"
                 .OrderByDescending(o => o.OrderDate)
@@ -57,6 +59,7 @@ namespace HuflitShopCore.Services
                 .Include(o => o.User)
                 .Include(o => o.PaymentMethod)
                 .Include(o => o.Promotion)
+                .Include(o => o.Shipment)
                 .Include(o => o.OrderDetails).ThenInclude(od => od.ProductVariant).ThenInclude(pv => pv.Product).ThenInclude(p => p.ProductImages)
                 .FirstOrDefaultAsync(o => o.Id == id);
 
@@ -110,6 +113,21 @@ namespace HuflitShopCore.Services
 
             int oldStatus = order.OrderStatus;
             if (oldStatus == status) return true;
+
+            var statusChangedAt = DateTime.Now;
+            if (status is 1 or 2 or 3)
+            {
+                order.ApprovedAt ??= statusChangedAt;
+                order.PackingStartedAt ??= statusChangedAt;
+            }
+            if (status is 2 or 3)
+            {
+                order.ShippingStartedAt ??= statusChangedAt;
+            }
+            if (status == 3)
+            {
+                order.CompletedAt ??= statusChangedAt;
+            }
 
             order.OrderStatus = status;
             // Nếu đơn hoàn thành (3), ta đánh dấu luôn là đã thanh toán (1)
@@ -174,6 +192,10 @@ namespace HuflitShopCore.Services
                 OrderDate = o.OrderDate,
                 OrderStatus = o.OrderStatus,
                 PaymentStatus = o.PaymentStatus,
+                ApprovedAt = o.ApprovedAt,
+                PackingStartedAt = o.PackingStartedAt,
+                ShippingStartedAt = o.ShippingStartedAt,
+                CompletedAt = o.CompletedAt,
                 TotalAmount = o.TotalAmount,
                 DiscountAmount = o.DiscountAmount,
                 ShippingFee = o.ShippingFee,
@@ -182,7 +204,14 @@ namespace HuflitShopCore.Services
                 ShippingPhoneNumber = o.ShippingPhoneNumber ?? string.Empty,
                 ShippingAddress = o.ShippingAddress ?? string.Empty,
                 ShippingCity = o.ShippingCity ?? string.Empty,
-                ShippingDistrict = o.ShippingDistrict ?? string.Empty
+                ShippingDistrict = o.ShippingDistrict ?? string.Empty,
+                ShippingWard = o.ShippingWard ?? string.Empty,
+                ShippingProvider = o.Shipment?.Provider ?? string.Empty,
+                ShippingServiceName = o.Shipment?.ServiceName ?? string.Empty,
+                CarrierOrderCode = o.Shipment?.CarrierOrderCode,
+                ShippingStatus = o.Shipment?.Status ?? string.Empty,
+                ActualShippingFee = o.Shipment?.ActualFee,
+                ExpectedDeliveryTime = o.Shipment?.ExpectedDeliveryTime
             };
 
             if (includeDetails && o.OrderDetails != null)
@@ -453,7 +482,7 @@ namespace HuflitShopCore.Services
             return await _context.PaymentMethods.AsNoTracking().ToListAsync();
         }
 
-        public async Task<Order> CreateOrderAsync(string userId, Address address, string paymentMethodId, string? appliedPromoCode, List<Cart> items, string? shippingFullName, string? shippingPhoneNumber, string? buyNowVariantId, decimal shippingFee = 40000m, string shippingCarrier = "Tiêu chuẩn")
+        public async Task<Order> CreateOrderAsync(string userId, Address address, string paymentMethodId, string? appliedPromoCode, List<Cart> items, string? shippingFullName, string? shippingPhoneNumber, string? buyNowVariantId, GhnQuote shippingQuote)
         {
             var paymentMethod = await _context.PaymentMethods.FindAsync(paymentMethodId);
             if (paymentMethod == null) throw new InvalidOperationException("Phương thức thanh toán không hợp lệ.");
@@ -518,7 +547,7 @@ namespace HuflitShopCore.Services
                 }
             }
 
-            var finalAmount = orderTotal - discountAmount + shippingFee;
+            var finalAmount = orderTotal - discountAmount + shippingQuote.ShippingFee;
 
             // Phân bổ giảm giá xuống từng SP theo tỉ lệ giá trị
             var discountAllocations = new Dictionary<string, decimal>();
@@ -548,21 +577,40 @@ namespace HuflitShopCore.Services
                 UserId = userId,
                 PaymentMethodId = paymentMethod.Id,
                 PromotionId = promotionId,
-                OrderDate = DateTime.UtcNow,
+                OrderDate = DateTime.Now,
                 OrderStatus = 0,
                 PaymentStatus = 0, // 0: Chưa thanh toán
                 TotalAmount = orderTotal,
                 DiscountAmount = discountAmount,
-                ShippingFee = shippingFee,
+                ShippingFee = shippingQuote.ShippingFee,
                 FinalAmount = finalAmount,
                 ShippingFullName = !string.IsNullOrWhiteSpace(shippingFullName) ? shippingFullName : "",
                 ShippingPhoneNumber = !string.IsNullOrWhiteSpace(shippingPhoneNumber) ? shippingPhoneNumber : "",
-                ShippingAddress = $"{address.SpecificAddress} | Vận chuyển: {shippingCarrier}",
+                ShippingAddress = address.SpecificAddress,
                 ShippingCity = address.City,
                 ShippingDistrict = address.District,
+                ShippingWard = address.Ward,
+                ShippingProvinceId = address.ProvinceId,
+                ShippingDistrictId = address.DistrictId,
+                ShippingWardCode = address.WardCode,
             };
 
             _context.Orders.Add(order);
+            _context.Shipments.Add(new Shipment
+            {
+                OrderId = order.Id,
+                Provider = "GHN",
+                ServiceId = shippingQuote.ServiceId,
+                ServiceTypeId = shippingQuote.ServiceTypeId,
+                ServiceName = shippingQuote.ServiceName,
+                Status = "quoted",
+                QuotedFee = shippingQuote.ShippingFee,
+                WeightGrams = shippingQuote.Package.Weight,
+                LengthCm = shippingQuote.Package.Length,
+                WidthCm = shippingQuote.Package.Width,
+                HeightCm = shippingQuote.Package.Height,
+                ExpectedDeliveryTime = shippingQuote.ExpectedDeliveryTime
+            });
             await _context.SaveChangesAsync();
 
             // Real-time Notification to Admin/Staff
@@ -683,6 +731,7 @@ namespace HuflitShopCore.Services
         {
             return await _context.Orders
                 .Include(o => o.PaymentMethod)
+                .Include(o => o.Shipment)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(o => o.Id == id);
         }
@@ -697,6 +746,7 @@ namespace HuflitShopCore.Services
         {
             var orders = await _context.Orders
                 .Include(o => o.PaymentMethod)
+                .Include(o => o.Shipment)
                 .Where(o => o.UserId == userId)
                 .OrderByDescending(o => o.OrderDate)
                 .AsNoTracking()
@@ -732,7 +782,8 @@ namespace HuflitShopCore.Services
         {
             return await _context.Orders
                 .Include(o => o.PaymentMethod)
-                .FirstOrDefaultAsync(o => o.ShippingAddress.Contains($"Tracking: {trackingNumber}"));
+                .Include(o => o.Shipment)
+                .FirstOrDefaultAsync(o => o.Shipment != null && o.Shipment.CarrierOrderCode == trackingNumber);
         }
 
         public async Task<(decimal ItemTotal, decimal ComboDiscount, List<string> ComboDetails)> CalculateAutoPromotionsAsync(List<Cart> items)

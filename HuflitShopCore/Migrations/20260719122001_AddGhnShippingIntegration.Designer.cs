@@ -4,6 +4,7 @@ using HuflitShopCore.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HuflitShopCore.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260719122001_AddGhnShippingIntegration")]
+    partial class AddGhnShippingIntegration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -394,12 +397,6 @@ namespace HuflitShopCore.Migrations
                     b.Property<decimal>("DiscountAmount")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTime?>("ApprovedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("CompletedAt")
-                        .HasColumnType("datetime2");
-
                     b.Property<decimal>("FinalAmount")
                         .HasColumnType("decimal(18,2)");
 
@@ -417,9 +414,6 @@ namespace HuflitShopCore.Migrations
                     b.Property<int>("PaymentStatus")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("PackingStartedAt")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("PromotionId")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
@@ -427,9 +421,6 @@ namespace HuflitShopCore.Migrations
                     b.Property<string>("ShippingAddress")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("ShippingStartedAt")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("ShippingCity")
                         .IsRequired()
@@ -633,9 +624,7 @@ namespace HuflitShopCore.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("WeightGrams")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(300);
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 

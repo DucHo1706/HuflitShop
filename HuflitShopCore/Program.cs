@@ -7,10 +7,27 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Tránh Windows Event Log yêu cầu quyền Administrator và làm đóng request khi ghi log.
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddSignalR();
 builder.Services.AddMemoryCache();
+builder.Services.Configure<GhnOptions>(builder.Configuration.GetSection(GhnOptions.SectionName));
+builder.Services.AddHttpClient<GhnService>((serviceProvider, client) =>
+{
+    var options = serviceProvider.GetRequiredService<Microsoft.Extensions.Options.IOptions<GhnOptions>>().Value;
+    client.BaseAddress = new Uri(options.BaseUrl.EndsWith('/') ? options.BaseUrl : options.BaseUrl + "/");
+    client.Timeout = TimeSpan.FromSeconds(15);
+});
+builder.Services.AddHttpClient<GeoapifyService>(client =>
+{
+    client.BaseAddress = new Uri("https://api.geoapify.com/");
+    client.Timeout = TimeSpan.FromSeconds(10);
+});
 
 // 2. Cấu hình DbContext kết nối SQL Server
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -46,7 +63,7 @@ builder.Services.AddScoped<SupplierService>();
 builder.Services.AddScoped<StockReceiptService>();
 builder.Services.AddScoped<PromotionService>();
 builder.Services.AddScoped<OrderService>();
-builder.Services.AddScoped<GrabExpressService>();
+builder.Services.AddScoped<ShipmentService>();
 builder.Services.AddScoped<ReviewService>();
 builder.Services.AddScoped<ReportService>();
 builder.Services.AddScoped<ChatService>();

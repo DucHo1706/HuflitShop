@@ -31,6 +31,10 @@ namespace HuflitShopCore.Data
                 .HasIndex(pv => new { pv.ProductId, pv.SizeId, pv.ColorId })
                 .IsUnique();
 
+            builder.Entity<Product>()
+                .Property(p => p.WeightGrams)
+                .HasDefaultValue(300);
+
             // Cấu hình Quan hệ cho InventoryLot và OrderDetailLot để tránh Cascade Cycles
             builder.Entity<InventoryLot>()
                 .HasOne(il => il.StockReceivedDetail)
@@ -66,6 +70,21 @@ namespace HuflitShopCore.Data
             // Tối ưu hóa chỉ mục (Indexes)
             builder.Entity<Order>()
                 .HasIndex(o => new { o.OrderDate, o.OrderStatus });
+
+            builder.Entity<Shipment>()
+                .HasIndex(s => s.OrderId)
+                .IsUnique();
+
+            builder.Entity<Shipment>()
+                .HasIndex(s => s.CarrierOrderCode)
+                .IsUnique()
+                .HasFilter("[CarrierOrderCode] IS NOT NULL");
+
+            builder.Entity<Shipment>()
+                .HasOne(s => s.Order)
+                .WithOne(o => o.Shipment)
+                .HasForeignKey<Shipment>(s => s.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<InventoryTransaction>()
                 .HasIndex(t => t.TransactionDate);
@@ -106,6 +125,7 @@ namespace HuflitShopCore.Data
         public DbSet<Cart> Carts { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderDetail> OrderDetails { get; set; }
+        public DbSet<Shipment> Shipments { get; set; }
 
         // Nhóm 5: Tương tác, Lịch sử xem & Chat (Logs)
         public DbSet<Reviews> Reviews { get; set; }

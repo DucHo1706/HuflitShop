@@ -108,6 +108,41 @@
             box-shadow: none;
         }
 
+    .address-autocomplete {
+        position: relative;
+    }
+
+    .address-suggestions {
+        position: absolute;
+        top: calc(100% + 4px);
+        left: 0;
+        right: 0;
+        z-index: 1050;
+        max-height: 280px;
+        overflow-y: auto;
+        background: #fff;
+        border: 1px solid #cbd5e1;
+        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.14);
+    }
+
+    .address-suggestion-item {
+        display: block;
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 0;
+        border-bottom: 1px solid #f1f5f9;
+        background: #fff;
+        color: #1f2937;
+        text-align: left;
+        cursor: pointer;
+    }
+
+    .address-suggestion-item:hover,
+    .address-suggestion-item:focus {
+        background: #eff6ff;
+        outline: none;
+    }
+
     /* Bảng Sản phẩm */
     .product-table th {
         border-top: none;
@@ -385,10 +420,11 @@
     <form asp-action="PlaceOrder" asp-controller="Order" method="post" id="checkoutForm">
         @Html.AntiForgeryToken()
         <input type="hidden" name="appliedPromoCode" id="appliedPromoCode" value="" />
-        <input type="hidden" name="buyNowVariantId" value="@ViewBag.BuyNowVariantId" />
-        <input type="hidden" name="buyNowQty" value="@ViewBag.BuyNowQty" />
-        <input type="hidden" name="shippingFee" id="shippingFeeInput" value="@shippingFee" />
-        <input type="hidden" name="shippingCarrier" id="shippingCarrierInput" value="Giao hàng Tiêu chuẩn (GHN/GHTK)" />
+        <input type="hidden" name="buyNowVariantId" id="buyNowVariantId" value="@ViewBag.BuyNowVariantId" />
+        <input type="hidden" name="buyNowQty" id="buyNowQty" value="@ViewBag.BuyNowQty" />
+        <input type="hidden" id="shippingFeeInput" value="@shippingFee" />
+        <input type="hidden" name="shippingServiceId" id="shippingServiceId" value="0" />
+        <input type="hidden" name="shippingServiceTypeId" id="shippingServiceTypeId" value="0" />
 
         <div class="row">
             <div class="col-lg-8">
@@ -415,26 +451,52 @@
                         <div class="col-md-12">
                             <div class="form-group mb-4">
                                 <label asp-for="SpecificAddress" class="form-label font-weight-bold text-dark text-uppercase small">Địa chỉ cụ thể</label>
-                                <input asp-for="SpecificAddress" class="form-control form-control-lg form-control-modern" placeholder="Số nhà, Tên đường..." />
+                                <div class="address-autocomplete">
+                                    <input asp-for="SpecificAddress"
+                                           class="form-control form-control-lg form-control-modern"
+                                           placeholder="Ví dụ: 828 Sư Vạn Hạnh"
+                                           autocomplete="off"
+                                           aria-autocomplete="list"
+                                           aria-controls="addressSuggestions" />
+                                    <div id="addressSuggestions" class="address-suggestions" role="listbox" hidden></div>
+                                </div>
+                                <small id="addressSuggestionHelp" class="form-text text-muted">
+                                    Chọn tỉnh, quận và phường trước, sau đó nhập ít nhất 3 ký tự để nhận gợi ý.
+                                </small>
                                 <span asp-validation-for="SpecificAddress" class="text-danger small font-weight-bold mt-1"></span>
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <input asp-for="City" type="hidden" id="City" />
+                        <input asp-for="ProvinceId" type="hidden" id="ProvinceId" />
+                        <input asp-for="District" type="hidden" id="District" />
+                        <input asp-for="DistrictId" type="hidden" id="DistrictId" />
+                        <input asp-for="Ward" type="hidden" id="Ward" />
+                        <input asp-for="WardCode" type="hidden" id="WardCode" />
+                        <div class="col-md-4">
                             <div class="form-group mb-3">
                                 <label asp-for="City" class="form-label font-weight-bold text-dark text-uppercase small">Tỉnh / Thành phố</label>
-                                <select asp-for="City" name="City" class="form-control form-control-lg form-control-modern billing_address_1" required>
+                                <select id="ghnProvince" class="form-control form-control-lg form-control-modern" required>
                                     <option value="">Chọn tỉnh / thành phố</option>
                                 </select>
                                 <span asp-validation-for="City" class="text-danger small font-weight-bold mt-1"></span>
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <div class="form-group mb-3">
                                 <label asp-for="District" class="form-label font-weight-bold text-dark text-uppercase small">Quận / Huyện</label>
-                                <select asp-for="District" name="District" class="form-control form-control-lg form-control-modern billing_address_2" required>
+                                <select id="ghnDistrict" class="form-control form-control-lg form-control-modern" required disabled>
                                     <option value="">Chọn quận / huyện</option>
                                 </select>
                                 <span asp-validation-for="District" class="text-danger small font-weight-bold mt-1"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group mb-3">
+                                <label asp-for="Ward" class="form-label font-weight-bold text-dark text-uppercase small">Phường / Xã</label>
+                                <select id="ghnWard" class="form-control form-control-lg form-control-modern" required disabled>
+                                    <option value="">Chọn phường / xã</option>
+                                </select>
+                                <span asp-validation-for="Ward" class="text-danger small font-weight-bold mt-1"></span>
                             </div>
                         </div>
                     </div>
@@ -655,6 +717,8 @@
             // Đảm bảo lấy giá trị orderTotal an toàn dưới dạng decimal -> js number
             var orderTotal = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(total));
             var shippingFee = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(shippingFee));
+            var buyNowVariantId = document.getElementById("buyNowVariantId").value || "";
+            var buyNowQty = parseInt(document.getElementById("buyNowQty").value) || 1;
 
             // Voucher Modal Handler
             var btnOpenModal = document.getElementById("btnOpenVoucherModal");
@@ -672,8 +736,8 @@
                     type: "GET",
                     data: {
                         orderTotal: orderTotal,
-                        buyNowVariantId: '@ViewBag.BuyNowVariantId',
-                        buyNowQty: @(ViewBag.BuyNowQty is int qty1 ? qty1 : 1)
+                        buyNowVariantId: buyNowVariantId,
+                        buyNowQty: buyNowQty
                     },
                     success: function (vouchers) {
                         loadingSpinner.style.display = "none";
@@ -750,8 +814,8 @@
                     data: {
                         promoCode: code,
                         orderTotal: orderTotal,
-                        buyNowVariantId: '@ViewBag.BuyNowVariantId',
-                        buyNowQty: @(ViewBag.BuyNowQty is int qty2 ? qty2 : 1)
+                        buyNowVariantId: buyNowVariantId,
+                        buyNowQty: buyNowQty
                     },
                     headers: {
                         "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
@@ -781,13 +845,164 @@
                 });
             });
 
-            // Ajax loading shipping rates
-            window.loadShippingRates = function () {
-                var city = $('select[name="City"]').val();
-                var district = $('select[name="District"]').val();
-                var specificAddress = $('#SpecificAddress').val();
+            function showAddressError(message) {
+                $('#shippingMethodCard').show();
+                $('#shippingOptionsContainer').html("<div class='text-center py-4 text-danger font-weight-bold'><i class='fas fa-exclamation-circle mr-1'></i>" + message + "</div>");
+            }
 
-                if (!city || !district) {
+            var addressInput = document.getElementById('SpecificAddress');
+            var addressSuggestions = document.getElementById('addressSuggestions');
+            var addressSuggestionHelp = document.getElementById('addressSuggestionHelp');
+            var addressSuggestionTimer = null;
+            var addressSuggestionRequest = null;
+
+            function closeAddressSuggestions() {
+                addressSuggestions.hidden = true;
+                addressSuggestions.replaceChildren();
+            }
+
+            function resetAddressSuggestionState() {
+                closeAddressSuggestions();
+                addressSuggestionHelp.className = 'form-text text-muted';
+                addressSuggestionHelp.textContent = 'Nhập ít nhất 3 ký tự để nhận gợi ý đúng khu vực đã chọn.';
+            }
+
+            addressInput.addEventListener('input', function () {
+                clearTimeout(addressSuggestionTimer);
+                closeAddressSuggestions();
+                addressSuggestionHelp.className = 'form-text text-muted';
+
+                var query = addressInput.value.trim();
+                var ward = $('#Ward').val();
+                var district = $('#District').val();
+                var province = $('#City').val();
+
+                if (!ward || !district || !province) {
+                    addressSuggestionHelp.textContent = 'Vui lòng chọn tỉnh, quận và phường trước khi tìm tên đường.';
+                    return;
+                }
+                if (query.length < 3) {
+                    addressSuggestionHelp.textContent = 'Nhập cả số nhà và tên đường để nhận gợi ý chính xác hơn.';
+                    return;
+                }
+
+                addressSuggestionHelp.textContent = 'Đang tìm địa chỉ phù hợp...';
+                addressSuggestionTimer = setTimeout(async function () {
+                    if (addressSuggestionRequest) addressSuggestionRequest.abort();
+                    addressSuggestionRequest = new AbortController();
+
+                    var url = new URL('/Order/SuggestAddresses', window.location.origin);
+                    url.searchParams.set('query', query);
+                    url.searchParams.set('ward', ward);
+                    url.searchParams.set('district', district);
+                    url.searchParams.set('province', province);
+
+                    try {
+                        var response = await fetch(url, { signal: addressSuggestionRequest.signal });
+                        var result = await response.json();
+                        closeAddressSuggestions();
+
+                        if (!result.configured) {
+                            addressSuggestionHelp.textContent = 'Bạn vẫn có thể nhập địa chỉ thủ công.';
+                            return;
+                        }
+                        if (!result.success || !result.data || result.data.length === 0) {
+                            addressSuggestionHelp.textContent = 'Không tìm thấy gợi ý phù hợp; hãy kiểm tra lại số nhà và tên đường.';
+                            return;
+                        }
+
+                        result.data.forEach(function (suggestion) {
+                            var button = document.createElement('button');
+                            button.type = 'button';
+                            button.className = 'address-suggestion-item';
+                            button.setAttribute('role', 'option');
+                            button.textContent = suggestion.label;
+                            button.addEventListener('click', function () {
+                                addressInput.value = suggestion.value;
+                                closeAddressSuggestions();
+                                addressSuggestionHelp.className = 'form-text text-success font-weight-bold';
+                                addressSuggestionHelp.textContent = 'Đã chọn địa chỉ từ gợi ý Geoapify.';
+                            });
+                            addressSuggestions.appendChild(button);
+                        });
+
+                        var attribution = document.createElement('div');
+                        attribution.className = 'px-3 py-1 text-right text-muted small';
+                        attribution.textContent = 'powered by Geoapify';
+                        addressSuggestions.appendChild(attribution);
+                        addressSuggestions.hidden = false;
+                        addressSuggestionHelp.textContent = 'Chọn một địa chỉ phù hợp trong danh sách.';
+                    } catch (error) {
+                        if (error.name !== 'AbortError') {
+                            addressSuggestionHelp.textContent = 'Không thể tải gợi ý lúc này; bạn vẫn có thể nhập thủ công.';
+                        }
+                    }
+                }, 450);
+            });
+
+            document.addEventListener('click', function (event) {
+                if (!event.target.closest('.address-autocomplete')) closeAddressSuggestions();
+            });
+
+            function loadProvinces() {
+                $.get('/Order/GetProvinces').done(function (res) {
+                    if (!res.success) { showAddressError(res.message); return; }
+                    var options = '<option value="">Chọn tỉnh / thành phố</option>';
+                    res.data.forEach(function (p) { options += '<option value="' + p.provinceId + '">' + p.provinceName + '</option>'; });
+                    $('#ghnProvince').html(options);
+                }).fail(function () { showAddressError('Không thể tải địa chỉ từ GHN.'); });
+            }
+
+            $('#ghnProvince').on('change', function () {
+                resetAddressSuggestionState();
+                var option = this.options[this.selectedIndex];
+                $('#ProvinceId').val(this.value || 0);
+                $('#City').val(option && this.value ? option.text : '');
+                $('#DistrictId').val(0); $('#District').val(''); $('#WardCode').val(''); $('#Ward').val('');
+                $('#ghnDistrict').prop('disabled', true).html('<option value="">Đang tải...</option>');
+                $('#ghnWard').prop('disabled', true).html('<option value="">Chọn phường / xã</option>');
+                $('#shippingMethodCard').hide();
+                if (!this.value) return;
+
+                $.get('/Order/GetDistricts', { provinceId: this.value }).done(function (res) {
+                    if (!res.success) { showAddressError(res.message); return; }
+                    var options = '<option value="">Chọn quận / huyện</option>';
+                    res.data.forEach(function (d) { options += '<option value="' + d.districtId + '">' + d.districtName + '</option>'; });
+                    $('#ghnDistrict').html(options).prop('disabled', false);
+                }).fail(function () { showAddressError('Không thể tải quận/huyện từ GHN.'); });
+            });
+
+            $('#ghnDistrict').on('change', function () {
+                resetAddressSuggestionState();
+                var option = this.options[this.selectedIndex];
+                $('#DistrictId').val(this.value || 0);
+                $('#District').val(option && this.value ? option.text : '');
+                $('#WardCode').val(''); $('#Ward').val('');
+                $('#ghnWard').prop('disabled', true).html('<option value="">Đang tải...</option>');
+                $('#shippingMethodCard').hide();
+                if (!this.value) return;
+
+                $.get('/Order/GetWards', { districtId: this.value }).done(function (res) {
+                    if (!res.success) { showAddressError(res.message); return; }
+                    var options = '<option value="">Chọn phường / xã</option>';
+                    res.data.forEach(function (w) { options += '<option value="' + w.wardCode + '">' + w.wardName + '</option>'; });
+                    $('#ghnWard').html(options).prop('disabled', false);
+                }).fail(function () { showAddressError('Không thể tải phường/xã từ GHN.'); });
+            });
+
+            $('#ghnWard').on('change', function () {
+                resetAddressSuggestionState();
+                var option = this.options[this.selectedIndex];
+                $('#WardCode').val(this.value || '');
+                $('#Ward').val(option && this.value ? option.text : '');
+                loadShippingRates();
+            });
+
+            // Báo giá được tính lại ở server khi đặt hàng; hidden input chỉ dùng để cập nhật giao diện.
+            window.loadShippingRates = function () {
+                var districtId = parseInt($('#DistrictId').val()) || 0;
+                var wardCode = $('#WardCode').val();
+                if (!districtId || !wardCode) {
                     $('#shippingMethodCard').hide();
                     return;
                 }
@@ -798,7 +1013,7 @@
                     '  <div class="spinner-border" style="color: var(--vibrantCyan);" role="status">' +
                     '    <span class="sr-only">Đang tính phí ship...</span>' +
                     '  </div>' +
-                    '  <p class="text-muted mt-2 mb-0 font-weight-bold" style="font-size: 0.9rem;">Đang tìm dịch vụ GrabExpress và tính phí ship...</p>' +
+                    '  <p class="text-muted mt-2 mb-0 font-weight-bold" style="font-size: 0.9rem;">Đang lấy phí và thời gian giao từ GHN...</p>' +
                     '</div>'
                 );
 
@@ -806,26 +1021,23 @@
                     url: "/Order/GetShippingFee",
                     type: "POST",
                     data: {
-                        city: city,
-                        district: district,
-                        specificAddress: specificAddress,
-                        orderTotal: orderTotal
+                        districtId: districtId,
+                        wardCode: wardCode,
+                        buyNowVariantId: buyNowVariantId,
+                        buyNowQty: buyNowQty
                     },
                     success: function (res) {
                         if (res.success && res.quotes && res.quotes.length > 0) {
                             var html = "";
                             res.quotes.forEach(function (q) {
-                                var isGrab = q.serviceCode.indexOf("grab") !== -1;
-                                var iconClass = isGrab ? "fas fa-motorcycle" : "fas fa-shipping-fast";
-                                var iconColor = isGrab ? "#10b981" : "var(--vibrantBlue)";
-                                
-                                html += '<div class="shipping-option-card" onclick="selectShippingOption(this)" data-code="' + q.serviceCode + '" data-fee="' + q.shippingFee + '" data-name="' + q.serviceName + '">' +
+                                var eta = q.expectedDeliveryTime || 'GHN cập nhật sau khi tạo vận đơn';
+                                html += '<div class="shipping-option-card" onclick="selectShippingOption(this)" data-service-id="' + q.serviceId + '" data-service-type-id="' + q.serviceTypeId + '" data-fee="' + q.shippingFee + '">' +
                                     '  <div class="d-flex align-items-center justify-content-between w-100">' +
                                     '    <div class="d-flex align-items-center gap-3">' +
-                                    '      <div style="font-size: 1.8rem; color: ' + iconColor + ';"><i class="' + iconClass + '"></i></div>' +
+                                    '      <div style="font-size: 1.8rem; color: var(--vibrantBlue);"><i class="fas fa-shipping-fast"></i></div>' +
                                     '      <div>' +
                                     '        <div class="font-weight-bold text-dark text-uppercase" style="font-size: 0.95rem;">' + q.serviceName + '</div>' +
-                                    '        <small class="text-muted"><i class="far fa-clock mr-1"></i>Dự kiến: ' + q.estimatedTime + '</small>' +
+                                    '        <small class="text-muted"><i class="far fa-clock mr-1"></i>Dự kiến: ' + eta + '</small>' +
                                     '      </div>' +
                                     '    </div>' +
                                     '    <div class="font-weight-bold text-danger" style="font-size: 1.1rem;">' + q.shippingFee.toLocaleString("vi-VN") + ' đ</div>' +
@@ -841,11 +1053,19 @@
                                 selectShippingOption(firstCard[0]);
                             }
                         } else {
-                            $('#shippingOptionsContainer').html("<div class='text-center py-4 text-danger font-weight-bold'><i class='fas fa-exclamation-circle mr-1'></i>Không thể tải danh sách dịch vụ vận chuyển.</div>");
+                            var message = res.message || 'Không thể tải danh sách dịch vụ vận chuyển.';
+                            var errorBox = $('<div class="text-center py-4 text-danger font-weight-bold"></div>').text(message);
+                            errorBox.prepend('<i class="fas fa-exclamation-circle mr-1"></i>');
+                            $('#shippingOptionsContainer').empty().append(errorBox);
                         }
                     },
-                    error: function () {
-                        $('#shippingOptionsContainer').html("<div class='text-center py-4 text-danger font-weight-bold'><i class='fas fa-exclamation-circle mr-1'></i>Không thể kết nối dịch vụ vận chuyển.</div>");
+                    error: function (xhr) {
+                        var message = xhr.responseJSON && xhr.responseJSON.message
+                            ? xhr.responseJSON.message
+                            : 'Không thể kết nối dịch vụ vận chuyển.';
+                        var errorBox = $('<div class="text-center py-4 text-danger font-weight-bold"></div>').text(message);
+                        errorBox.prepend('<i class="fas fa-exclamation-circle mr-1"></i>');
+                        $('#shippingOptionsContainer').empty().append(errorBox);
                     }
                 });
             };
@@ -855,10 +1075,9 @@
                 $(el).addClass('selected');
 
                 var fee = parseFloat($(el).attr('data-fee')) || 0;
-                var name = $(el).attr('data-name') || "Tiêu chuẩn";
-
                 $('#shippingFeeInput').val(fee);
-                $('#shippingCarrierInput').val(name);
+                $('#shippingServiceId').val($(el).attr('data-service-id'));
+                $('#shippingServiceTypeId').val($(el).attr('data-service-type-id'));
 
                 // Cập nhật giao diện
                 $('#shippingFeeVal').text(fee.toLocaleString("vi-VN") + " đ");
@@ -870,21 +1089,7 @@
                 $('#finalPayVal').text(finalAmount.toLocaleString("vi-VN") + " đ");
             };
 
-            // Lắng nghe sự kiện thay đổi địa chỉ
-            $('select[name="City"]').on('change', function () {
-                setTimeout(loadShippingRates, 250);
-            });
-
-            $('select[name="District"]').on('change', function () {
-                loadShippingRates();
-            });
-
-            $('#SpecificAddress').on('blur', function () {
-                loadShippingRates();
-            });
-
-            // Tự động load khi có sẵn địa chỉ từ localStorage
-            setTimeout(loadShippingRates, 650);
+            loadProvinces();
         });
     </script>
 }
