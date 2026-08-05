@@ -1,146 +1,181 @@
 @{
-    ViewData["Title"] = "Hướng dẫn sử dụng hệ thống";
+    ViewData["Title"] = "Hướng dẫn vận hành hệ thống";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container-fluid mt-4">
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --admin-ocean: #2563eb;
+        --admin-cyan: #06b6d4;
+        --admin-dark: #0f172a;
+        --admin-bg: #f8fafc;
+        --admin-card-border: #e2e8f0;
+        --admin-gradient: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%);
+    }
+
+    body {
+        font-family: 'Jost', sans-serif;
+        background-color: var(--admin-bg);
+        color: var(--admin-dark);
+    }
+
+    /* Guide Banner */
+    .guide-banner {
+        background: #ffffff;
+        border: 1px solid var(--admin-card-border);
+        border-left: 4px solid var(--admin-ocean);
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 20px -5px rgba(15, 23, 42, 0.04);
+    }
+
+    /* Step Section Box */
+    .guide-box {
+        background: #ffffff;
+        border: 1px solid var(--admin-card-border);
+        border-radius: 0.5rem;
+        padding: 1.75rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 20px -5px rgba(15, 23, 42, 0.04);
+    }
+
+    .guide-step-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--admin-ocean);
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--admin-card-border);
+    }
+
+    .guide-subbox {
+        background: #f8fafc;
+        border: 1px solid var(--admin-card-border);
+        padding: 1.25rem;
+        margin-top: 1rem;
+    }
+
+    /* Status Badges */
+    .badge-status-guide {
+        font-size: 0.75rem;
+        font-weight: 700;
+        padding: 0.35rem 0.75rem;
+        text-transform: uppercase;
+        border-radius: 0;
+    }
+</style>
+
+<div class="container-fluid pt-4">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800"><i class="fas fa-book-open text-primary"></i> Hướng dẫn vận hành Hệ thống Admin từ A - Z</h1>
+        <h1 class="h3 mb-0 text-dark font-weight-bold">
+            <i class="fas fa-book-reader mr-2" style="color: var(--admin-ocean);"></i> Hướng Dẫn Vận Hành Hệ Thống A - Z
+        </h1>
     </div>
 
-    <div class="alert alert-info shadow-sm mb-4">
-        <strong><i class="fas fa-lightbulb"></i> Quy tắc cốt lõi:</strong> Hãy tạo dữ liệu từ những bảng cơ sở (không phụ thuộc) trước, sau đó mới tạo các bảng phức tạp. Hệ thống sử dụng cơ chế <b>Khóa/Mở khóa (Soft Delete)</b> thay vì xóa hẳn để bảo toàn dữ liệu hóa đơn trong quá khứ.
+    <!-- Rule Note Banner -->
+    <div class="guide-banner">
+        <h6 class="font-weight-bold text-dark mb-2"><i class="fas fa-lightbulb text-warning mr-2"></i>Quy Tắc Vận Hành Cốt Lõi</h6>
+        <p class="mb-0 text-muted" style="line-height: 1.6;">
+            Hãy khởi tạo dữ liệu từ các danh mục cơ sở trước (Danh mục, Kích thước, Màu sắc), sau đó mới tạo sản phẩm và biến thể. Hệ thống sử dụng cơ chế <b>Khóa / Mở khóa (Soft Delete)</b> để bảo vệ lịch sử đơn hàng và dữ liệu hóa đơn giao dịch.
+        </p>
     </div>
 
     <div class="row">
-        <!-- Cột trái: Lộ trình các bước -->
+        <!-- Main Steps Column -->
         <div class="col-lg-8">
-            <div class="card shadow mb-4 border-left-primary">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Lộ trình vận hành chuẩn (Theo thứ tự)</h6>
+            <!-- Step 1 -->
+            <div class="guide-box">
+                <div class="guide-step-title">
+                    <i class="fas fa-database"></i> Bước 1: Thiết Lập Dữ Liệu Nền Tảng
                 </div>
-                <div class="card-body">
-                    
-                    <h5 class="font-weight-bold text-dark mt-2">Bước 1: Thiết lập dữ liệu nền tảng</h5>
-                    <p>Trước khi kinh doanh, bạn cần tạo các dữ liệu phụ trợ cơ bản:</p>
-                    <ul>
-                        <li><b>Danh mục:</b> Tạo các loại hàng (Áo, Quần, Váy...).</li>
-                        <li><b>Màu sắc & Kích thước:</b> Khai báo các Size (S, M, L) và Màu (Đỏ, Xanh...) có thể bán.</li>
-                        <li><b>Nhà cung cấp:</b> Tạo thông tin xưởng/đại lý để sau này nhập kho.</li>
-                    </ul>
-                    <hr />
+                <p class="text-muted">Trước khi tạo sản phẩm bán ra, bạn cần tạo trước các thông tin hỗ trợ cơ bản:</p>
+                <ul class="text-muted">
+                    <li><b>Danh mục:</b> Loại sản phẩm (Áo, Quần, Phụ kiện...).</li>
+                    <li><b>Màu sắc & Kích thước:</b> Khai báo danh sách Size (S, M, L) và Màu (Đỏ, Đen, Xanh...).</li>
+                    <li><b>Nhà cung cấp:</b> Thông tin các xưởng hoặc đơn vị cung ứng hàng.</li>
+                </ul>
+            </div>
 
-                    <h5 class="font-weight-bold text-dark mt-4">Bước 2: Hướng dẫn chi tiết tạo 1 Sản phẩm bán được từ A - Z</h5>
-                    <p>Giả sử bạn muốn bán <b>"Áo Polo thể thao"</b> (Gồm 2 màu: Đỏ, Đen - 2 Size: M, L), bạn làm theo trình tự:</p>
-                    
-                    <div class="alert alert-secondary text-dark">
-                        <strong>Giai đoạn 2.1: Tạo "Vỏ" sản phẩm (Thông tin chung)</strong>
-                        <ol class="mt-2 mb-0">
-                            <li>Vào menu <b>Sản phẩm</b>, bấm <i>Thêm sản phẩm mới</i>.</li>
-                            <li><b>Tên sản phẩm:</b> Đặt tên rõ ràng (VD: <i>Áo Polo thể thao nam vải cá sấu</i>).</li>
-                            <li><b>Giá bán:</b> Nhập số tiền bán cho khách (VD: <i>200000</i>). Tuyệt đối không nhập số âm.</li>
-                            <li><b>Mô tả sản phẩm:</b> Đây là lời chào hàng. Gợi ý cấu trúc chuẩn:
-                                <ul class="mb-2">
-                                    <li><i>Điểm nổi bật:</i> Chất liệu vải gì? (Mát, thấm mồ hôi).</li>
-                                    <li><i>Kiểu dáng:</i> Form dáng ra sao? Phù hợp mặc đi đâu? (Đi làm, đi chơi).</li>
-                                    <li><i>Bảo quản:</i> Có được giặt máy không? Có ủi nhiệt độ cao không?</li>
-                                </ul>
-                            </li>
-                            <li>Bấm <b>Thêm sản phẩm</b> để lưu lại.</li>
-                        </ol>
-                    </div>
-                    
-                    <div class="alert alert-secondary text-dark">
-                        <strong>Giai đoạn 2.2: Tạo Phân loại (Biến thể) & Hình ảnh</strong>
-                        <p class="mb-1">Sau khi lưu, bạn đang ở màn hình Danh sách sản phẩm. Hãy tìm cái áo vừa tạo và bấm vào nút <b>Chi tiết</b> (Màu xanh dương).</p>
-                        <ol class="mt-0 mb-0">
-                            <li>Cuộn xuống dưới, bấm <b>Quản lý kho biến thể</b>. Lần lượt thêm các tổ hợp: M-Đỏ, M-Đen, L-Đỏ, L-Đen. <i>(Lưu ý: Tồn kho lúc này vẫn bằng 0, khách chưa thể mua)</i>.</li>
-                            <li>Trở lại trang Chi tiết sản phẩm, bấm <b>Quản lý hình ảnh</b>. Tải lên 3-4 góc chụp chân thực của sản phẩm.</li>
-                        </ol>
-                    </div>
-                    <hr />
-
-                    <h5 class="font-weight-bold text-dark mt-4">Bước 3: Nhập Kho (Cực kỳ quan trọng)</h5>
-                    <p>Sản phẩm chỉ xuất hiện trên Website và cho phép Khách mua khi nó có <b>Tồn kho > 0</b>.</p>
-                    <ul>
-                        <li>Vào <b>Quản lý Kho -> Nhập kho</b>. Tạo phiếu nhập mới, chọn Nhà cung cấp.</li>
-                        <li>Ở bước thêm chi tiết, tìm chọn đúng "Áo Polo - Đỏ - M", nhập Số lượng nhập (VD: 50) và Giá vốn nhập vào. Bấm (+).</li>
-                        <li><i>Hệ thống sẽ tự động cộng số lượng vào tồn kho. Lúc này chiếc áo Polo đã chính thức sẵn sàng lên kệ!</i></li>
-                    </ul>
-                    <hr />
-
-                    <h5 class="font-weight-bold text-dark mt-4">Bước 4: Marketing & Bán hàng</h5>
-                    <ul>
-                        <li>Tạo các <b>Chương trình Khuyến mãi</b> (Mã giảm giá theo % hoặc tiền mặt) để kích cầu.</li>
-                        <li>Theo dõi các <b>Đơn hàng</b> mới: Duyệt đơn -> Đóng gói -> Đang giao -> Hoàn thành.</li>
-                        <li>Kiểm duyệt <b>Phản hồi (Reviews)</b> của khách hàng. Xóa các đánh giá vi phạm chuẩn mực.</li>
-                    </ul>
-                    <hr />
-
-                    <h5 class="font-weight-bold text-dark mt-4">Bước 5: Tư vấn trực tuyến & Chăm sóc khách hàng</h5>
-                    <p>Hệ thống tích hợp <b>SignalR Chat thời gian thực</b> giúp bạn trao đổi trực tiếp với khách hàng:</p>
-                    <ul>
-                        <li>Vào menu <b>Tư vấn khách hàng</b>. Cột bên trái hiển thị danh sách khách hàng đang hoạt động hoặc vừa gửi tin nhắn mới nhất.</li>
-                        <li>Nhấp vào một khách hàng để mở khung chat, xem lịch sử và gõ tin nhắn phản hồi trực tiếp.</li>
-                        <li>Khi có tin nhắn mới từ khách hàng, trình duyệt sẽ tự động phát âm thanh thông báo bíp và nhấp nháy badge để bạn không bỏ lỡ.</li>
-                    </ul>
-                    <hr />
-
-                    <h5 class="font-weight-bold text-dark mt-4">Bước 6: Xem báo cáo doanh thu & Phân tích doanh số đa chiều</h5>
-                    <p>Mục <b>Thống kê doanh thu</b> cung cấp các biểu đồ Chart.js trực quan sinh động gộp chung trên cùng một trang tiện lợi:</p>
-                    <ul>
-                        <li><b>Doanh thu theo Tháng & Quý:</b> Biểu đồ đường thể hiện biến động doanh thu 12 tháng và biểu đồ tròn thể hiện tỷ trọng doanh số theo từng Quý.</li>
-                        <li><b>Cơ cấu theo Mùa & Năm:</b> Phân tích doanh số theo 4 mùa (Xuân, Hạ, Thu, Đông) và so sánh tổng doanh số giữa 3 năm gần đây.</li>
-                        <li><b>Sản phẩm bán chạy nhất:</b> Biểu đồ và bảng xếp hạng Top 5 sản phẩm đạt sản lượng tiêu thụ tốt nhất năm.</li>
-                        <li><i>Lưu ý: Nếu dữ liệu thật dưới 5 đơn hàng, hệ thống tự động chạy chế độ mô phỏng số liệu kinh doanh để bạn dễ dàng hình dung cấu trúc biểu đồ. Dữ liệu thật sẽ tự động nạp khi có giao dịch phát sinh.</i></li>
-                    </ul>
-                    <hr />
-
-                    <h5 class="font-weight-bold text-dark mt-4">Bước 7: Quản trị đánh giá khách hàng (Review Interaction)</h5>
-                    <p>Tương tác với khách hàng thông qua tính năng phản hồi và bình chọn đánh giá hữu ích:</p>
-                    <ul>
-                        <li>Vào menu <b>Phản hồi</b> để xem toàn bộ danh sách đánh giá sao và nội dung của khách hàng ngoài trang chi tiết sản phẩm.</li>
-                        <li>Bấm nút <b>Trả lời</b> trên mỗi dòng đánh giá để mở ô soạn thảo gửi lời cảm ơn hoặc giải trình đến khách hàng. Câu trả lời của bạn sẽ hiển thị lồng ghép bên dưới bình luận của họ.</li>
-                        <li>Khách hàng ngoài website có thể nhấn nút <b>Hữu ích (Thumbs up)</b> cho các đánh giá chất lượng để tăng mức độ uy tín của sản phẩm.</li>
-                    </ul>
+            <!-- Step 2 -->
+            <div class="guide-box">
+                <div class="guide-step-title">
+                    <i class="fas fa-tshirt"></i> Bước 2: Tạo Sản Phẩm & Biến Thể
                 </div>
+                <p class="text-muted">Ví dụ khởi tạo mẫu <b>"Áo Polo Thể Thao Nam"</b>:</p>
+
+                <div class="guide-subbox">
+                    <strong class="text-dark">Giai đoạn 2.1: Tạo vỏ sản phẩm</strong>
+                    <ol class="mt-2 mb-0 text-muted">
+                        <li>Vào menu <b>Sản phẩm</b> &rarr; Bấm <i>Thêm sản phẩm mới</i>.</li>
+                        <li><b>Tên sản phẩm:</b> Nhập tên chi tiết rõ ràng.</li>
+                        <li><b>Giá bán:</b> Nhập giá tiền bán niêm yết ngoài cửa hàng.</li>
+                        <li><b>Mô tả:</b> Nhập chất liệu, kiểu dáng và hướng dẫn bảo quản.</li>
+                    </ol>
+                </div>
+
+                <div class="guide-subbox">
+                    <strong class="text-dark">Giai đoạn 2.2: Tạo Phân loại & Hình ảnh</strong>
+                    <ol class="mt-2 mb-0 text-muted">
+                        <li>Tìm sản phẩm vừa tạo trong danh sách &rarr; Chọn <b>Chi tiết</b>.</li>
+                        <li>Bấm <b>Quản lý kho biến thể</b> để thêm từng cặp Size - Màu (VD: M-Đen, L-Đỏ...).</li>
+                        <li>Chọn <b>Quản lý hình ảnh</b> để tải lên các góc chụp chân thực của sản phẩm.</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="guide-box">
+                <div class="guide-step-title">
+                    <i class="fas fa-warehouse"></i> Bước 3: Nhập Kho Hàng
+                </div>
+                <p class="text-muted mb-0">Sản phẩm chỉ hiển thị bán ngoài Website khi có số lượng <b>Tồn kho > 0</b>. Vào menu <b>Quản lý Kho &rarr; Nhập kho</b>, chọn Nhà cung cấp và nhập số lượng tồn cho từng biến thể cụ thể.</p>
+            </div>
+
+            <!-- Step 4 & 5 -->
+            <div class="guide-box">
+                <div class="guide-step-title">
+                    <i class="fas fa-headset"></i> Bước 4 & 5: Xử Lý Đơn Hàng & Tư Vấn Realtime
+                </div>
+                <ul class="text-muted mb-0">
+                    <li class="mb-2"><b>Bán hàng & Khuyến mãi:</b> Thiết lập mã giảm giá để kích cầu người mua. Duyệt đơn hàng theo trình tự: Duyệt &rarr; Đóng gói &rarr; Đang giao &rarr; Hoàn thành.</li>
+                    <li><b>Tư vấn SignalR:</b> Menu <i>Tư vấn khách hàng</i> hỗ trợ phản hồi tin nhắn trực tiếp ngoài website tức thì. Hệ thống sẽ có chuông báo hiệu khi có tin nhắn mới.</li>
+                </ul>
             </div>
         </div>
 
-        <!-- Cột phải: Tính năng và Lưu ý -->
+        <!-- Sidebar Rules Column -->
         <div class="col-lg-4">
-            <div class="card shadow mb-4 border-bottom-danger">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-danger"><i class="fas fa-exclamation-triangle"></i> Giải thích tính năng Khóa / Xóa</h6>
-                </div>
-                <div class="card-body">
-                    <p class="text-justify">
-                        Trong quá trình vận hành, đôi khi một sản phẩm hết hạn bán, nhân viên nghỉ việc hoặc ngừng hợp tác với nhà cung cấp. 
-                    </p>
-                    <p class="text-justify">
-                        Hệ thống cung cấp nút bấm <b><i class="fas fa-unlock text-success"></i> Mở khóa</b> / <b><i class="fas fa-lock text-danger"></i> Khóa</b> thay vì Xóa vĩnh viễn. Việc "Khóa" mang lại lợi ích:
-                    </p>
-                    <ul>
-                        <li class="mb-2">Ẩn sản phẩm khỏi khách hàng ngoài Website.</li>
-                        <li class="mb-2">Nhân viên bị khóa không thể đăng nhập Admin.</li>
-                        <li class="mb-2"><b>Bảo vệ lịch sử:</b> Đơn hàng cũ, phiếu nhập cũ chứa sản phẩm bị khóa vẫn có thể xem được bình thường mà không bị lỗi.</li>
-                    </ul>
-                </div>
+            <!-- Lock vs Delete Rule -->
+            <div class="guide-box" style="border-top: 3px solid #ef4444;">
+                <h6 class="font-weight-bold text-danger text-uppercase mb-3"><i class="fas fa-lock mr-2"></i>Cơ Chế Khóa Dữ Liệu</h6>
+                <p class="text-muted small" style="line-height: 1.6;">
+                    Khi sản phẩm ngừng kinh doanh hoặc nhân viên nghỉ việc, hãy sử dụng tính năng <b>Khóa / Mở khóa</b> thay vì xóa hẳn.
+                </p>
+                <ul class="text-muted small pl-3 mb-0">
+                    <li class="mb-2">Ẩn ngay lập tức khỏi gian hàng khách xem.</li>
+                    <li class="mb-2">Bảo toàn nguyên vẹn lịch sử đơn hàng cũ.</li>
+                    <li class="mb-0">Tránh lỗi dữ liệu liên kết trên hệ thống.</li>
+                </ul>
             </div>
-            
-            <div class="card shadow mb-4 border-bottom-success">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-success"><i class="fas fa-check-circle"></i> Trạng thái Đơn hàng</h6>
-                </div>
-                <div class="card-body">
-                    <ul class="list-unstyled">
-                        <li class="mb-2"><span class="badge bg-warning text-dark">Chờ duyệt</span>: Khách vừa đặt.</li>
-                        <li class="mb-2"><span class="badge bg-info text-white">Đóng gói</span>: Đang xuất kho.</li>
-                        <li class="mb-2"><span class="badge bg-primary text-white">Đang giao</span>: Giao cho Shipper.</li>
-                        <li class="mb-2"><span class="badge bg-success text-white">Hoàn thành</span>: Khách nhận được hàng, cập nhật thành "Đã thanh toán".</li>
-                        <li class="mb-2"><span class="badge bg-danger text-white">Đã hủy</span>: Đơn bị hủy bỏ.</li>
-                    </ul>
-                </div>
+
+            <!-- Order Status Explanation -->
+            <div class="guide-box" style="border-top: 3px solid #10b981;">
+                <h6 class="font-weight-bold text-success text-uppercase mb-3"><i class="fas fa-tasks mr-2"></i>Trạng Thái Đơn Hàng</h6>
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-2"><span class="badge badge-warning badge-status-guide">Chờ duyệt</span> Khách vừa tạo đơn</li>
+                    <li class="mb-2"><span class="badge badge-info badge-status-guide">Đóng gói</span> Đang xuất kho</li>
+                    <li class="mb-2"><span class="badge badge-primary badge-status-guide">Đang giao</span> Đã giao cho shipper</li>
+                    <li class="mb-2"><span class="badge badge-success badge-status-guide">Hoàn thành</span> Đã giao & nhận tiền</li>
+                    <li class="mb-0"><span class="badge badge-danger badge-status-guide">Đã hủy</span> Đơn bị hủy bỏ</li>
+                </ul>
             </div>
         </div>
     </div>

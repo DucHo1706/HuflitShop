@@ -1,6 +1,6 @@
 @model int
 @{
-    ViewData["Title"] = "Thống kê doanh thu";
+    ViewData["Title"] = "Thống kê doanh thu BI";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 
     var monthlyRevenue = ViewBag.MonthlyRevenue as decimal[];
@@ -11,80 +11,178 @@
     bool isMockData = ViewBag.IsMockData ?? false;
 }
 
-<div class="container-fluid mt-4">
-    <!-- Header -->
+<style>
+    /* Premium BI Styles */
+    .report-card {
+        border: 1px solid var(--admin-border, #e2e8f0);
+        border-radius: 0.75rem;
+        background: #ffffff;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+        .report-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px -10px rgba(15, 23, 42, 0.08) !important;
+        }
+
+    .kpi-icon-box {
+        width: 48px;
+        height: 48px;
+        border-radius: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+    }
+
+    /* Tabs Styling */
+    .custom-nav-pills {
+        background: #f1f5f9;
+        padding: 0.35rem;
+        border-radius: 0.65rem;
+        border: 1px solid #e2e8f0;
+    }
+
+        .custom-nav-pills .nav-link {
+            border-radius: 0.5rem;
+            color: #64748b;
+            font-weight: 600;
+            font-size: 0.875rem;
+            padding: 0.75rem 1rem;
+            transition: all 0.2s ease;
+            border: none !important;
+        }
+
+            .custom-nav-pills .nav-link.active {
+                background: #ffffff !important;
+                color: #2563eb !important;
+                box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+            }
+
+    /* Ranking Table Styling */
+    .rank-badge {
+        width: 26px;
+        height: 26px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        font-weight: 700;
+        font-size: 0.75rem;
+    }
+
+    .rank-1 {
+        background: #fef3c7;
+        color: #d97706;
+    }
+
+    .rank-2 {
+        background: #e0f2fe;
+        color: #0284c7;
+    }
+
+    .rank-3 {
+        background: #f1f5f9;
+        color: #475569;
+    }
+
+    .rank-other {
+        background: #f8fafc;
+        color: #94a3b8;
+    }
+</style>
+
+<div class="container-fluid py-2">
+
+    <!-- Page Header & Year Filter -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800"><i class="fas fa-chart-line text-primary mr-2"></i>Thống kê doanh thu năm @Model</h1>
-        
-        <!-- Year Selection Dropdown -->
-        <form method="get" class="form-inline">
-            <label class="mr-2 font-weight-bold text-muted">Chọn năm báo cáo:</label>
-            <select name="year" class="form-control form-control-sm shadow-sm" onchange="this.form.submit()" style="border-radius: 6px;">
-                @for (int y = DateTime.Now.Year - 4; y <= DateTime.Now.Year; y++)
-                {
-                    if (y == Model)
+        <div>
+            <h1 class="h3 mb-1 text-dark font-weight-bold" style="letter-spacing: -0.5px;">
+                <i class="fas fa-chart-line text-primary mr-2"></i>Thống Kê Doanh Thu BI
+            </h1>
+            <p class="text-muted small mb-0">Báo cáo phân tích doanh thu & hiệu suất kinh doanh năm <strong>@Model</strong></p>
+        </div>
+
+        <form method="get" class="form-inline mt-3 mt-sm-0">
+            <div class="input-group shadow-sm" style="border-radius: 0.5rem; overflow: hidden;">
+                <div class="input-group-prepend">
+                    <span class="input-group-text bg-white border-right-0 text-muted small font-weight-bold">
+                        <i class="far fa-calendar-alt mr-1 text-primary"></i> Kỳ báo cáo:
+                    </span>
+                </div>
+                <select name="year" class="form-control form-control-sm border-left-0 font-weight-bold text-dark" onchange="this.form.submit()" style="height: 38px;">
+                    @for (int y = DateTime.Now.Year - 4; y <= DateTime.Now.Year; y++)
                     {
-                        <option value="@y" selected>Năm @y</option>
+                        if (y == Model)
+                        {
+                            <option value="@y" selected>Năm @y</option>
+                        }
+                        else
+                        {
+                            <option value="@y">Năm @y</option>
+                        }
                     }
-                    else
-                    {
-                        <option value="@y">Năm @y</option>
-                    }
-                }
-            </select>
+                </select>
+            </div>
         </form>
     </div>
 
-    <!-- Alert for mock data -->
+    <!-- Alert for Mock Data Simulation -->
     @if (isMockData)
     {
-        <div class="alert alert-warning shadow-sm border-left-warning mb-4" role="alert">
+        <div class="alert border-0 shadow-sm mb-4" role="alert" style="background: #fffbeb; border-left: 4px solid #f59e0b !important; border-radius: 0.5rem;">
             <div class="d-flex align-items-center">
-                <i class="fas fa-exclamation-triangle fa-2x mr-3 text-warning"></i>
+                <div class="mr-3 text-warning">
+                    <i class="fas fa-magic fa-2x"></i>
+                </div>
                 <div>
-                    <strong><i class="fas fa-info-circle"></i> Chế độ Mô phỏng dữ liệu đang hoạt động:</strong> Do cơ sở dữ liệu của bạn hiện có ít hơn 5 đơn hàng, hệ thống đã tự động kích hoạt bộ tạo số liệu kinh doanh giả lập để các biểu đồ Chart.js hiển thị đầy đủ các cấu trúc mùa, tháng và sản phẩm. Dữ liệu thật sẽ tự động nạp thay thế khi cửa hàng phát sinh nhiều giao dịch hơn.
+                    <h6 class="font-weight-bold text-dark mb-1">Chế độ mô phỏng dữ liệu thông minh đang bật</h6>
+                    <p class="mb-0 text-muted small">
+                        Do cơ sở dữ liệu hệ thống hiện có ít hơn 5 đơn hàng hoàn tất, ERP đã kích hoạt thuật toán tạo mẫu doanh thu kinh doanh giả lập để hiển thị đầy đủ trực quan hóa biểu đồ. Dữ liệu thực tế sẽ tự động ghi đè ngay khi cửa hàng phát sinh đủ giao dịch.
+                    </p>
                 </div>
             </div>
         </div>
     }
 
-    <!-- Cards Row (Overall year stats) -->
-    <div class="row">
-        <!-- Tổng doanh thu năm card -->
-        <div class="col-xl-4 col-md-6 mb-4">
-            <div class="card border-left-primary shadow h-100 py-2">
+    <!-- Top KPI Cards Row -->
+    <div class="row mb-4">
+
+        <!-- Tổng doanh thu năm -->
+        <div class="col-xl-4 col-md-6 mb-3 mb-xl-0">
+            <div class="card report-card shadow-sm h-100 py-2">
                 <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Tổng doanh thu năm @Model</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                @(monthlyRevenue?.Sum().ToString("N0") ?? "0") VNĐ
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="text-xs font-weight-bold text-uppercase text-muted mb-1" style="letter-spacing: 0.5px;">Tổng doanh thu năm @Model</div>
+                            <div class="h3 mb-0 font-weight-bold text-dark">
+                                @(monthlyRevenue?.Sum().ToString("N0") ?? "0") <small class="text-muted font-weight-normal" style="font-size: 0.9rem;">VNĐ</small>
                             </div>
                         </div>
-                        <div class="col-auto">
-                            <i class="fas fa-wallet fa-2x text-gray-300"></i>
+                        <div class="kpi-icon-box" style="background: #eff6ff; color: #2563eb;">
+                            <i class="fas fa-wallet"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Mùa đắt khách nhất card -->
+        <!-- Mùa đạt doanh thu cao nhất -->
         @if (seasonalRevenue != null && seasonalRevenue.Any())
         {
             var topSeason = seasonalRevenue.OrderByDescending(kv => kv.Value).First();
-            <div class="col-xl-4 col-md-6 mb-4">
-                <div class="card border-left-success shadow h-100 py-2">
+            <div class="col-xl-4 col-md-6 mb-3 mb-xl-0">
+                <div class="card report-card shadow-sm h-100 py-2">
                     <div class="card-body">
-                        <div class="row no-gutters align-items-center">
-                            <div class="col mr-2">
-                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Mùa đạt doanh thu cao nhất</div>
-                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <div class="text-xs font-weight-bold text-uppercase text-muted mb-1" style="letter-spacing: 0.5px;">Mùa cao điểm kinh doanh</div>
+                                <div class="h3 mb-0 font-weight-bold text-dark">
                                     @topSeason.Key
                                 </div>
                             </div>
-                            <div class="col-auto">
-                                <i class="fas fa-cloud-sun fa-2x text-gray-300"></i>
+                            <div class="kpi-icon-box" style="background: #ecfdf5; color: #10b981;">
+                                <i class="fas fa-cloud-sun"></i>
                             </div>
                         </div>
                     </div>
@@ -92,19 +190,19 @@
             </div>
         }
 
-        <!-- Tổng số sản phẩm bán ra card -->
-        <div class="col-xl-4 col-md-6 mb-4">
-            <div class="card border-left-info shadow h-100 py-2">
+        <!-- Top 5 Sản phẩm bán ra -->
+        <div class="col-xl-4 col-md-6 mb-3 mb-xl-0">
+            <div class="card report-card shadow-sm h-100 py-2">
                 <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Sản phẩm đã bán (Top 5)</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                @(topProducts?.Sum(p => p.Value) ?? 0) sản phẩm
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="text-xs font-weight-bold text-uppercase text-muted mb-1" style="letter-spacing: 0.5px;">Sản phẩm tiêu thụ (Top 5)</div>
+                            <div class="h3 mb-0 font-weight-bold text-dark">
+                                @(topProducts?.Sum(p => p.Value) ?? 0) <small class="text-muted font-weight-normal" style="font-size: 0.9rem;">sản phẩm</small>
                             </div>
                         </div>
-                        <div class="col-auto">
-                            <i class="fas fa-shopping-bag fa-2x text-gray-300"></i>
+                        <div class="kpi-icon-box" style="background: #ecfeff; color: #06b6d4;">
+                            <i class="fas fa-shopping-bag"></i>
                         </div>
                     </div>
                 </div>
@@ -112,60 +210,61 @@
         </div>
     </div>
 
-    <!-- Navigation Tabs -->
-    <ul class="nav nav-tabs mb-4 shadow-sm p-1 bg-white rounded" id="reportTabs" role="tablist" style="border: none;">
-        <li class="nav-item" role="presentation" style="flex: 1; text-align: center;">
-            <button class="nav-link active font-weight-bold text-uppercase py-3" id="month-tab" data-bs-toggle="tab" data-bs-target="#month" type="button" role="tab" aria-controls="month" aria-selected="true" style="border: none; width: 100%; border-radius: 4px;">
-                <i class="fas fa-calendar-alt mr-2"></i>Doanh thu theo Tháng & Quý
+    <!-- Custom Navigation Tabs -->
+    <ul class="nav custom-nav-pills nav-justified mb-4" id="reportTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="month-tab" data-bs-toggle="tab" data-bs-target="#month" type="button" role="tab" aria-controls="month" aria-selected="true">
+                <i class="fas fa-chart-area mr-2"></i>Doanh Thu Theo Tháng & Quý
             </button>
         </li>
-        <li class="nav-item" role="presentation" style="flex: 1; text-align: center;">
-            <button class="nav-link font-weight-bold text-uppercase py-3" id="season-tab" data-bs-toggle="tab" data-bs-target="#season" type="button" role="tab" aria-controls="season" aria-selected="false" style="border: none; width: 100%; border-radius: 4px;">
-                <i class="fas fa-cloud-sun mr-2"></i>Cơ cấu theo Mùa & Năm
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="season-tab" data-bs-toggle="tab" data-bs-target="#season" type="button" role="tab" aria-controls="season" aria-selected="false">
+                <i class="fas fa-chart-bar mr-2"></i>Cơ Cấu Mùa & So Sánh Năm
             </button>
         </li>
-        <li class="nav-item" role="presentation" style="flex: 1; text-align: center;">
-            <button class="nav-link font-weight-bold text-uppercase py-3" id="product-tab" data-bs-toggle="tab" data-bs-target="#product" type="button" role="tab" aria-controls="product" aria-selected="false" style="border: none; width: 100%; border-radius: 4px;">
-                <i class="fas fa-tshirt mr-2"></i>Sản phẩm bán chạy nhất
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="product-tab" data-bs-toggle="tab" data-bs-target="#product" type="button" role="tab" aria-controls="product" aria-selected="false">
+                <i class="fas fa-award mr-2"></i>Top Sản Phẩm Bán Chạy
             </button>
         </li>
     </ul>
 
     <!-- Tab Contents -->
     <div class="tab-content" id="reportTabsContent">
-        
-        <!-- Tab 1: Tháng & Quý -->
+
+        <!-- TAB 1: Tháng & Quý -->
         <div class="tab-pane fade show active" id="month" role="tabpanel" aria-labelledby="month-tab">
             <div class="row">
-                <!-- Doanh thu 12 tháng (Line Chart) -->
-                <div class="col-xl-8 col-lg-7">
-                    <div class="card shadow mb-4">
-                        <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-chart-line mr-1"></i>Biến động Doanh thu 12 tháng năm @Model</h6>
+                <!-- Line Chart: 12 Tháng -->
+                <div class="col-xl-8 col-lg-7 mb-4">
+                    <div class="card report-card shadow-sm h-100">
+                        <div class="card-header bg-transparent border-0 py-3 d-flex align-items-center justify-content-between">
+                            <h6 class="m-0 font-weight-bold text-dark"><i class="fas fa-chart-line text-primary mr-2"></i>Biến động Doanh thu 12 tháng năm @Model</h6>
+                            <span class="badge badge-light text-muted border">Đơn vị: VNĐ</span>
                         </div>
                         <div class="card-body">
-                            <div class="chart-area" style="position: relative; height: 350px;">
+                            <div class="chart-area" style="position: relative; height: 340px;">
                                 <canvas id="monthlyRevenueChart"></canvas>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Phân bổ Doanh thu theo Quý (Doughnut Chart) -->
-                <div class="col-xl-4 col-lg-5">
-                    <div class="card shadow mb-4">
-                        <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-chart-pie mr-1"></i>Doanh thu theo Quý</h6>
+                <!-- Doughnut Chart: Theo Quý -->
+                <div class="col-xl-4 col-lg-5 mb-4">
+                    <div class="card report-card shadow-sm h-100">
+                        <div class="card-header bg-transparent border-0 py-3">
+                            <h6 class="m-0 font-weight-bold text-dark"><i class="fas fa-chart-pie text-cyan mr-2" style="color: #06b6d4;"></i>Tỷ trọng Doanh thu theo Quý</h6>
                         </div>
-                        <div class="card-body">
-                            <div class="chart-pie pt-4 pb-2" style="position: relative; height: 260px;">
+                        <div class="card-body d-flex flex-column justify-content-between">
+                            <div class="chart-pie pt-2" style="position: relative; height: 250px;">
                                 <canvas id="quarterlyRevenueChart"></canvas>
                             </div>
-                            <div class="mt-4 text-center small">
-                                <span class="mr-2"><i class="fas fa-circle text-primary"></i> Quý I</span>
-                                <span class="mr-2"><i class="fas fa-circle text-success"></i> Quý II</span>
-                                <span class="mr-2"><i class="fas fa-circle text-info"></i> Quý III</span>
-                                <span class="mr-2"><i class="fas fa-circle text-warning"></i> Quý IV</span>
+                            <div class="mt-3 text-center small font-weight-bold">
+                                <span class="mr-3"><i class="fas fa-circle mr-1" style="color: #0f172a;"></i> Quý I</span>
+                                <span class="mr-3"><i class="fas fa-circle mr-1" style="color: #2563eb;"></i> Quý II</span>
+                                <span class="mr-3"><i class="fas fa-circle mr-1" style="color: #06b6d4;"></i> Quý III</span>
+                                <span><i class="fas fa-circle mr-1" style="color: #f59e0b;"></i> Quý IV</span>
                             </div>
                         </div>
                     </div>
@@ -173,31 +272,31 @@
             </div>
         </div>
 
-        <!-- Tab 2: Mùa & Năm -->
+        <!-- TAB 2: Mùa & So sánh Năm -->
         <div class="tab-pane fade" id="season" role="tabpanel" aria-labelledby="season-tab">
             <div class="row">
-                <!-- Doanh thu theo 4 Mùa (Bar Chart) -->
-                <div class="col-xl-6 col-lg-6">
-                    <div class="card shadow mb-4">
-                        <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-umbrella-beach mr-1"></i>Doanh thu theo 4 mùa năm @Model</h6>
+                <!-- Bar Chart: 4 Mùa -->
+                <div class="col-xl-6 col-lg-6 mb-4">
+                    <div class="card report-card shadow-sm h-100">
+                        <div class="card-header bg-transparent border-0 py-3">
+                            <h6 class="m-0 font-weight-bold text-dark"><i class="fas fa-sun text-warning mr-2"></i>Doanh thu theo 4 Mùa thời trang năm @Model</h6>
                         </div>
                         <div class="card-body">
-                            <div class="chart-bar" style="position: relative; height: 350px;">
+                            <div class="chart-bar" style="position: relative; height: 340px;">
                                 <canvas id="seasonalRevenueChart"></canvas>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- So sánh Doanh thu qua các Năm (Bar Chart) -->
-                <div class="col-xl-6 col-lg-6">
-                    <div class="card shadow mb-4">
-                        <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-history mr-1"></i>So sánh doanh thu các năm gần đây</h6>
+                <!-- Bar Chart: So sánh các năm -->
+                <div class="col-xl-6 col-lg-6 mb-4">
+                    <div class="card report-card shadow-sm h-100">
+                        <div class="card-header bg-transparent border-0 py-3">
+                            <h6 class="m-0 font-weight-bold text-dark"><i class="fas fa-history text-primary mr-2"></i>So sánh Doanh thu các năm gần đây</h6>
                         </div>
                         <div class="card-body">
-                            <div class="chart-bar" style="position: relative; height: 350px;">
+                            <div class="chart-bar" style="position: relative; height: 340px;">
                                 <canvas id="yearlyComparisonChart"></canvas>
                             </div>
                         </div>
@@ -206,27 +305,27 @@
             </div>
         </div>
 
-        <!-- Tab 3: Sản phẩm bán chạy -->
+        <!-- TAB 3: Sản phẩm bán chạy -->
         <div class="tab-pane fade" id="product" role="tabpanel" aria-labelledby="product-tab">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-star mr-1"></i>Top 5 Sản phẩm đạt doanh số tốt nhất năm @Model</h6>
+            <div class="card report-card shadow-sm mb-4">
+                <div class="card-header bg-transparent border-0 py-3">
+                    <h6 class="m-0 font-weight-bold text-dark"><i class="fas fa-crown text-warning mr-2"></i>Top 5 Sản phẩm đạt doanh số tốt nhất năm @Model</h6>
                 </div>
                 <div class="card-body">
                     <div class="row align-items-center">
                         <div class="col-lg-6 mb-4 mb-lg-0">
-                            <div class="chart-bar" style="position: relative; height: 300px;">
+                            <div class="chart-bar" style="position: relative; height: 320px;">
                                 <canvas id="topProductsChart"></canvas>
                             </div>
                         </div>
                         <div class="col-lg-6">
                             <div class="table-responsive">
-                                <table class="table table-hover table-striped borderless-table">
-                                    <thead class="bg-primary text-white">
-                                        <tr>
-                                            <th>Hạng</th>
-                                            <th>Tên Sản phẩm</th>
-                                            <th class="text-center">Số lượng đã bán</th>
+                                <table class="table table-hover align-middle mb-0" style="border-collapse: separate; border-spacing: 0 8px;">
+                                    <thead>
+                                        <tr class="text-muted text-uppercase small">
+                                            <th style="border: none;" class="text-center">Thứ hạng</th>
+                                            <th style="border: none;">Tên Sản phẩm</th>
+                                            <th style="border: none;" class="text-right">Đã bán</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -235,12 +334,12 @@
                                             int rank = 1;
                                             foreach (var kv in topProducts)
                                             {
-                                                <tr>
-                                                    <td class="font-weight-bold text-center" style="width: 80px;">
-                                                        <span class="badge badge-pill @(rank == 1 ? "badge-danger" : rank == 2 ? "badge-warning" : "badge-secondary")">@rank</span>
+                                                <tr class="bg-light rounded">
+                                                    <td class="text-center" style="border: none; border-radius: 0.5rem 0 0 0.5rem;">
+                                                        <span class="rank-badge @(rank == 1 ? "rank-1" : rank == 2 ? "rank-2" : rank == 3 ? "rank-3" : "rank-other")">@rank</span>
                                                     </td>
-                                                    <td class="font-weight-bold text-dark">@kv.Key</td>
-                                                    <td class="text-center font-weight-bold text-primary">@kv.Value cái</td>
+                                                    <td class="font-weight-bold text-dark" style="border: none;">@kv.Key</td>
+                                                    <td class="text-right font-weight-bold text-primary" style="border: none; border-radius: 0 0.5rem 0.5rem 0;">@kv.Value cái</td>
                                                 </tr>
                                                 rank++;
                                             }
@@ -248,7 +347,7 @@
                                         else
                                         {
                                             <tr>
-                                                <td colspan="3" class="text-center text-muted">Chưa có dữ liệu bán sản phẩm.</td>
+                                                <td colspan="3" class="text-center text-muted py-4">Chưa có dữ liệu bán sản phẩm trong kỳ báo cáo này.</td>
                                             </tr>
                                         }
                                     </tbody>
@@ -267,7 +366,7 @@
     <!-- CDN Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Data from Razor
+        // Data Serialization from C# Razor
         var monthlyData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(monthlyRevenue));
         var quarterlyData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(quarterlyRevenue));
         var seasonalLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(seasonalRevenue?.Keys.ToList() ?? new List<string>()));
@@ -277,28 +376,30 @@
         var topProductNames = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(topProducts?.Select(p => p.Key).ToList() ?? new List<string>()));
         var topProductQuantities = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(topProducts?.Select(p => p.Value).ToList() ?? new List<int>()));
 
-        // Chart Font Style Override
-        Chart.defaults.font.family = 'Outfit, Nunito, -apple-system, sans-serif';
+        // Chart Font Style Override matching Jost / Modern ERP Font
+        Chart.defaults.font.family = 'Jost, -apple-system, sans-serif';
+        Chart.defaults.color = '#64748b';
 
-        // 1. Monthly Revenue Chart (Line)
+        // 1. Monthly Revenue Chart (Line Chart with Ocean Royal theme)
         var ctxLine = document.getElementById('monthlyRevenueChart').getContext('2d');
         var monthlyRevenueChart = new Chart(ctxLine, {
             type: 'line',
             data: {
-                labels: ["Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"],
+                labels: ["T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8", "T9", "T10", "T11", "T12"],
                 datasets: [{
                     label: "Doanh thu (VNĐ)",
-                    lineTension: 0.3,
-                    backgroundColor: "rgba(30, 64, 175, 0.05)",
-                    borderColor: "rgba(30, 64, 175, 1)",
+                    tension: 0.35,
+                    backgroundColor: "rgba(37, 99, 235, 0.08)",
+                    borderColor: "#2563eb",
+                    borderWidth: 2.5,
                     pointRadius: 4,
-                    pointBackgroundColor: "rgba(30, 64, 175, 1)",
-                    pointBorderColor: "rgba(255, 255, 255, 0.8)",
+                    pointBackgroundColor: "#2563eb",
+                    pointBorderColor: "#ffffff",
                     pointHoverRadius: 6,
-                    pointHoverBackgroundColor: "rgba(30, 64, 175, 1)",
-                    pointHoverBorderColor: "rgba(255, 255, 255, 1)",
-                    pointHitRadius: 10,
+                    pointHoverBackgroundColor: "#2563eb",
+                    pointHoverBorderColor: "#ffffff",
                     pointBorderWidth: 2,
+                    fill: true,
                     data: monthlyData,
                 }],
             },
@@ -306,20 +407,28 @@
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: false }
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return 'Doanh thu: ' + context.parsed.y.toLocaleString() + ' VNĐ';
+                            }
+                        }
+                    }
                 },
                 scales: {
                     x: { grid: { display: false } },
                     y: {
+                        grid: { color: '#f1f5f9' },
                         ticks: {
-                            callback: function(value) { return value.toLocaleString() + 'đ'; }
+                            callback: function (value) { return (value / 1000000).toLocaleString() + 'M'; }
                         }
                     }
                 }
             }
         });
 
-        // 2. Quarterly Revenue Chart (Doughnut)
+        // 2. Quarterly Revenue Chart (Doughnut Chart with Luxury Tech Palette)
         var ctxPie = document.getElementById('quarterlyRevenueChart').getContext('2d');
         var quarterlyRevenueChart = new Chart(ctxPie, {
             type: 'doughnut',
@@ -327,9 +436,10 @@
                 labels: ["Quý I", "Quý II", "Quý III", "Quý IV"],
                 datasets: [{
                     data: quarterlyData,
-                    backgroundColor: ['#0d1e3d', '#1e40af', '#06b6d4', '#eab308'],
-                    hoverBackgroundColor: ['#09152b', '#1d3557', '#0891b2', '#ca8a04'],
-                    hoverBorderColor: "rgba(234, 236, 244, 1)",
+                    backgroundColor: ['#0f172a', '#2563eb', '#06b6d4', '#f59e0b'],
+                    borderWidth: 3,
+                    borderColor: '#ffffff',
+                    hoverOffset: 6
                 }],
             },
             options: {
@@ -338,11 +448,11 @@
                 plugins: {
                     legend: { display: false }
                 },
-                cutout: '70%'
+                cutout: '72%'
             }
         });
 
-        // 3. Seasonal Revenue Chart (Bar)
+        // 3. Seasonal Revenue Chart (Bar Chart)
         var ctxSeasonal = document.getElementById('seasonalRevenueChart').getContext('2d');
         var seasonalRevenueChart = new Chart(ctxSeasonal, {
             type: 'bar',
@@ -350,30 +460,28 @@
                 labels: seasonalLabels,
                 datasets: [{
                     label: "Doanh thu (VNĐ)",
-                    backgroundColor: ["#0284c7", "#eab308", "#f97316", "#3b82f6"],
-                    borderColor: ["#0369a1", "#ca8a04", "#ea580c", "#2563eb"],
-                    borderWidth: 1,
+                    backgroundColor: ["#0284c7", "#f59e0b", "#f97316", "#2563eb"],
+                    borderRadius: 6,
                     data: seasonalValues,
                 }],
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
-                },
+                plugins: { legend: { display: false } },
                 scales: {
                     x: { grid: { display: false } },
                     y: {
+                        grid: { color: '#f1f5f9' },
                         ticks: {
-                            callback: function(value) { return value.toLocaleString() + 'đ'; }
+                            callback: function (value) { return (value / 1000000).toLocaleString() + 'Mđ'; }
                         }
                     }
                 }
             }
         });
 
-        // 4. Yearly Comparison Chart (Bar)
+        // 4. Yearly Comparison Chart (Bar Chart)
         var ctxYearly = document.getElementById('yearlyComparisonChart').getContext('2d');
         var yearlyComparisonChart = new Chart(ctxYearly, {
             type: 'bar',
@@ -381,41 +489,39 @@
                 labels: yearlyLabels,
                 datasets: [{
                     label: "Doanh thu (VNĐ)",
-                    backgroundColor: "rgba(30, 64, 175, 0.8)",
-                    hoverBackgroundColor: "rgba(13, 30, 61, 1)",
-                    borderColor: "rgba(30, 64, 175, 1)",
-                    borderWidth: 1,
+                    backgroundColor: "rgba(37, 99, 235, 0.85)",
+                    hoverBackgroundColor: "#0f172a",
+                    borderRadius: 6,
                     data: yearlyValues,
                 }],
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
-                },
+                plugins: { legend: { display: false } },
                 scales: {
                     x: { grid: { display: false } },
                     y: {
+                        grid: { color: '#f1f5f9' },
                         ticks: {
-                            callback: function(value) { return value.toLocaleString() + 'đ'; }
+                            callback: function (value) { return (value / 1000000).toLocaleString() + 'Mđ'; }
                         }
                     }
                 }
             }
         });
 
-        // 5. Top Products Chart (Horizontal Bar)
+        // 5. Top Products Chart (Horizontal Bar Chart)
         var ctxBar = document.getElementById('topProductsChart').getContext('2d');
         var topProductsChart = new Chart(ctxBar, {
             type: 'bar',
             data: {
-                labels: topProductNames.map(name => name.length > 20 ? name.substring(0, 18) + '...' : name),
+                labels: topProductNames.map(name => name.length > 22 ? name.substring(0, 20) + '...' : name),
                 datasets: [{
                     label: "Số lượng đã bán",
-                    backgroundColor: "rgba(30, 64, 175, 0.85)",
-                    hoverBackgroundColor: "rgba(13, 30, 61, 1)",
-                    borderColor: "rgba(30, 64, 175, 1)",
+                    backgroundColor: "#06b6d4",
+                    hoverBackgroundColor: "#2563eb",
+                    borderRadius: 6,
                     data: topProductQuantities,
                 }],
             },
@@ -423,11 +529,9 @@
                 indexAxis: 'y',
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
-                },
+                plugins: { legend: { display: false } },
                 scales: {
-                    x: { grid: { display: false } },
+                    x: { grid: { color: '#f1f5f9' } },
                     y: { grid: { display: false } }
                 }
             }

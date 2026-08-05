@@ -1,84 +1,321 @@
 @model IEnumerable<HuflitShopCore.Models.ShiftRegistration>
 @{
-    ViewData["Title"] = "Duyệt Đăng ký Ca làm";
+    ViewData["Title"] = "Duyệt Đăng Ký Ca Làm";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+
+    int pendingCount = Model?.Count(x => x.Status == "Pending") ?? 0;
+    int approvedCount = Model?.Count(x => x.Status == "Approved") ?? 0;
+    int rejectedCount = Model?.Count(x => x.Status == "Rejected") ?? 0;
 }
 
-<div class="container-fluid">
+<style>
+    /* Card Premium Styling */
+    .shift-card {
+        border: 1px solid var(--admin-border, #e2e8f0);
+        border-radius: 0.75rem;
+        background: #ffffff;
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
+    }
+
+    .kpi-icon-box {
+        width: 44px;
+        height: 44px;
+        border-radius: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+    }
+
+    /* Soft Badges */
+    .badge-soft-warning {
+        background-color: #fffbeb;
+        color: #d97706;
+        border: 1px solid #fef3c7;
+        font-weight: 600;
+    }
+
+    .badge-soft-success {
+        background-color: #ecfdf5;
+        color: #059669;
+        border: 1px solid #d1fae5;
+        font-weight: 600;
+    }
+
+    .badge-soft-danger {
+        background-color: #fef2f2;
+        color: #dc2626;
+        border: 1px solid #fee2e2;
+        font-weight: 600;
+    }
+
+    .badge-soft-info {
+        background-color: #f0f9ff;
+        color: #0284c7;
+        border: 1px solid #e0f2fe;
+        font-weight: 600;
+    }
+
+    /* Anti-break layouts for table buttons */
+    .action-btn-group {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 6px !important;
+        white-space: nowrap !important;
+    }
+
+    .btn-action-custom {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 0.35rem 0.75rem !important;
+        font-size: 0.8rem !important;
+        font-weight: 600 !important;
+        border-radius: 0.375rem !important;
+        line-height: 1.2 !important;
+        white-space: nowrap !important;
+        transition: all 0.2s ease;
+    }
+
+        .btn-action-custom:hover {
+            transform: translateY(-1px);
+        }
+
+    /* Force Table Cell Alignment */
+    .nowrap-cell {
+        white-space: nowrap !important;
+    }
+</style>
+
+<div class="container-fluid py-2">
+    <!-- Header -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Duyệt Đăng Ký Ca Làm</h1>
+        <div>
+            <h1 class="h3 mb-1 text-dark font-weight-bold" style="letter-spacing: -0.5px;">
+                <i class="fas fa-calendar-check text-primary mr-2"></i>Duyệt Đăng Ký Ca Làm
+            </h1>
+            <p class="text-muted small mb-0">Quản lý và phê duyệt lịch làm việc của nhân viên toàn hệ thống ERP</p>
+        </div>
     </div>
 
-    <div class="card shadow mb-4">
-        <div class="card-header py-3 d-flex justify-content-between align-items-center">
-            <h6 class="m-0 font-weight-bold text-primary">Danh sách nhân viên đăng ký ca</h6>
-            <form method="get" class="form-inline">
-                <input type="date" name="dateFilter" class="form-control mr-2" value="@ViewBag.DateFilter" />
-                <button type="submit" class="btn btn-primary btn-sm">Lọc theo ngày</button>
-                <a asp-action="Index" class="btn btn-secondary btn-sm ml-2">Xem tất cả từ hôm nay</a>
+    <!-- Quick Stats Cards Row -->
+    <div class="row mb-4">
+        <div class="col-xl-4 col-md-6 mb-3 mb-xl-0">
+            <div class="card shift-card h-100 py-2" style="border-left: 4px solid #f59e0b !important;">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="text-xs font-weight-bold text-uppercase text-muted mb-1" style="letter-spacing: 0.5px;">Chờ phê duyệt</div>
+                            <div class="h3 mb-0 font-weight-bold text-dark">
+                                @pendingCount <small class="text-muted font-weight-normal" style="font-size: 0.85rem;">đơn yêu cầu</small>
+                            </div>
+                        </div>
+                        <div class="kpi-icon-box" style="background: #fffbeb; color: #d97706;">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-md-6 mb-3 mb-xl-0">
+            <div class="card shift-card h-100 py-2" style="border-left: 4px solid #10b981 !important;">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="text-xs font-weight-bold text-uppercase text-muted mb-1" style="letter-spacing: 0.5px;">Đã chốt lịch làm</div>
+                            <div class="h3 mb-0 font-weight-bold text-dark">
+                                @approvedCount <small class="text-muted font-weight-normal" style="font-size: 0.85rem;">ca chốt</small>
+                            </div>
+                        </div>
+                        <div class="kpi-icon-box" style="background: #ecfdf5; color: #10b981;">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-md-6 mb-3 mb-xl-0">
+            <div class="card shift-card h-100 py-2" style="border-left: 4px solid #ef4444 !important;">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="text-xs font-weight-bold text-uppercase text-muted mb-1" style="letter-spacing: 0.5px;">Từ chối / Hủy duyệt</div>
+                            <div class="h3 mb-0 font-weight-bold text-dark">
+                                @rejectedCount <small class="text-muted font-weight-normal" style="font-size: 0.85rem;">đơn từ chối</small>
+                            </div>
+                        </div>
+                        <div class="kpi-icon-box" style="background: #fef2f2; color: #ef4444;">
+                            <i class="fas fa-times-circle"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main List Card -->
+    <div class="card shift-card mb-4">
+        <!-- Card Header chuẩn đẹp không méo bộ lọc -->
+        <div class="card-header bg-transparent py-3 d-flex flex-column flex-md-row justify-content-between align-items-md-center border-bottom">
+            <h6 class="m-0 font-weight-bold text-dark mb-3 mb-md-0">
+                <i class="fas fa-list text-primary mr-1"></i> Danh Sách Đơn Đăng Ký Ca
+            </h6>
+
+            <!-- Fixed Filter Form -->
+            <!-- Redesigned Date Filter Form -->
+            <form method="get" class="m-0">
+                <div class="d-flex align-items-center" style="gap: 8px;">
+                    <div class="input-group input-group-sm bg-white shadow-sm" style="border: 1px solid #e2e8f0; border-radius: 0.5rem; overflow: hidden;">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text bg-white border-0 text-muted font-weight-bold px-3" style="height: 38px; font-size: 0.85rem;">
+                                <i class="far fa-calendar-alt text-primary mr-2"></i>Lọc ngày:
+                            </span>
+                        </div>
+                        <input type="date"
+                               name="dateFilter"
+                               class="form-control border-0 font-weight-bold text-dark px-2"
+                               value="@ViewBag.DateFilter"
+                               style="height: 38px; min-width: 150px; font-size: 0.875rem; background-color: transparent;" />
+                        <div class="input-group-append">
+                            <button type="submit"
+                                    class="btn btn-primary font-weight-bold px-3 border-0 d-inline-flex align-items-center"
+                                    style="height: 38px; font-size: 0.85rem; background: var(--admin-gradient, linear-gradient(135deg, #2563eb 0%, #06b6d4 100%));">
+                                <i class="fas fa-filter mr-1.5"></i> Lọc
+                            </button>
+                        </div>
+                    </div>
+
+                    <a asp-action="Index"
+                       class="btn btn-sm btn-light border font-weight-bold px-3 text-secondary d-inline-flex align-items-center shadow-sm"
+                       style="height: 38px; border-radius: 0.5rem; font-size: 0.85rem; white-space: nowrap; transition: all 0.2s ease;"
+                       title="Xóa bộ lọc ngày">
+                        <i class="fas fa-redo-alt mr-1.5 text-muted"></i> Xem tất cả
+                    </a>
+                </div>
             </form>
         </div>
-        <div class="card-body">
+
+        <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-bordered table-hover" width="100%" cellspacing="0">
-                    <thead class="thead-light">
+                <table class="table table-hover align-middle mb-0 text-dark" width="100%" cellspacing="0">
+                    <thead class="bg-light text-muted small text-uppercase font-weight-bold">
                         <tr>
-                            <th>Nhân viên</th>
-                            <th>Ngày đăng ký</th>
-                            <th>Ca làm</th>
-                            <th>Trạng thái</th>
-                            <th>Ngày gửi đơn</th>
-                            <th>Hành động</th>
+                            <th class="pl-4 py-3 border-0">Nhân viên</th>
+                            <th class="py-3 border-0 nowrap-cell">Ngày ca làm</th>
+                            <th class="py-3 border-0 nowrap-cell">Khung giờ ca</th>
+                            <th class="py-3 border-0 nowrap-cell">Trạng thái</th>
+                            <th class="py-3 border-0 nowrap-cell">Ngày gửi đơn</th>
+                            <th class="text-center py-3 pr-4 border-0 nowrap-cell">Hành động phê duyệt</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var item in Model) {
-                            <tr>
-                                <td>
-                                    <strong>@item.Staff?.FullName</strong><br/>
-                                    <small class="text-muted">@item.Staff?.UserName</small>
-                                </td>
-                                <td>@item.RegistrationDate.ToString("dd/MM/yyyy")</td>
-                                <td><span class="badge badge-info" style="font-size:13px;">@item.Shift?.Name</span> (@item.Shift?.StartTime.ToString(@"hh\:mm") - @item.Shift?.EndTime.ToString(@"hh\:mm"))</td>
-                                <td>
-                                    @if (item.Status == "Pending")
-                                    {
-                                        <span class="badge badge-warning text-dark">Đang chờ duyệt</span>
-                                    }
-                                    else if (item.Status == "Approved")
-                                    {
-                                        <span class="badge badge-success">Đã chốt ca</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge badge-danger">Đã từ chối</span>
-                                    }
-                                </td>
-                                <td>@item.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
-                                <td>
-                                    @if (item.Status == "Pending")
-                                    {
-                                        <div class="btn-group" role="group">
-                                            <form asp-action="Approve" asp-route-id="@item.Id" method="post" style="display:inline;">
-                                                <button type="submit" class="btn btn-sm btn-success mr-1" title="Duyệt"><i class="fas fa-check"></i> Duyệt</button>
-                                            </form>
-                                            <form asp-action="Reject" asp-route-id="@item.Id" method="post" style="display:inline;" onsubmit="return confirm('Từ chối đơn này?');">
-                                                <button type="submit" class="btn btn-sm btn-danger" title="Từ chối"><i class="fas fa-times"></i></button>
-                                            </form>
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var item in Model)
+                            {
+                                <tr>
+                                    <!-- Nhân viên -->
+                                    <td class="pl-4 align-middle">
+                                        <div class="d-flex align-items-center">
+                                            <div class="kpi-icon-box mr-2" style="width: 36px; height: 36px; background: #e0f2fe; color: #0284c7; font-size: 0.9rem; flex-shrink: 0;">
+                                                <i class="fas fa-user-tie"></i>
+                                            </div>
+                                            <div>
+                                                <strong class="text-dark d-block" style="font-size: 0.92rem;">@(item.Staff?.FullName ?? "N/A")</strong>
+                                                <small class="text-muted">@@@(item.Staff?.UserName ?? "user")</small>
+                                            </div>
                                         </div>
-                                    }
-                                    else if (item.Status == "Approved")
-                                    {
-                                        <form asp-action="Reject" asp-route-id="@item.Id" method="post" style="display:inline;" onsubmit="return confirm('Hủy ca này? Nhân viên sẽ bị xóa khỏi lịch làm chính thức.');">
-                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Hủy ca"><i class="fas fa-ban"></i> Hủy duyệt</button>
-                                        </form>
-                                    }
-                                    else
-                                    {
-                                        <form asp-action="Approve" asp-route-id="@item.Id" method="post" style="display:inline;">
-                                            <button type="submit" class="btn btn-sm btn-outline-success" title="Duyệt lại"><i class="fas fa-undo"></i> Duyệt lại</button>
-                                        </form>
-                                    }
+                                    </td>
+
+                                    <!-- Ngày đăng ký làm -->
+                                    <td class="align-middle font-weight-bold text-dark nowrap-cell">
+                                        <i class="far fa-calendar text-muted mr-1"></i>
+                                        @item.RegistrationDate.ToString("dd/MM/yyyy")
+                                    </td>
+
+                                    <!-- Ca làm & Giờ -->
+                                    <td class="align-middle nowrap-cell">
+                                        <span class="badge badge-soft-info px-2 py-1 mr-1" style="font-size: 0.85rem;">
+                                            @(item.Shift?.Name ?? "Ca làm")
+                                        </span>
+                                        <small class="text-muted font-weight-bold">
+                                            (@(item.Shift?.StartTime.ToString(@"hh\:mm") ?? "00:00") - @(item.Shift?.EndTime.ToString(@"hh\:mm") ?? "00:00"))
+                                        </small>
+                                    </td>
+
+                                    <!-- Trạng thái -->
+                                    <td class="align-middle nowrap-cell">
+                                        @if (item.Status == "Pending")
+                                        {
+                                            <span class="badge badge-soft-warning px-2.5 py-1.5 rounded-pill">
+                                                <i class="fas fa-spinner fa-spin mr-1"></i>Đang chờ duyệt
+                                            </span>
+                                        }
+                                        else if (item.Status == "Approved")
+                                        {
+                                            <span class="badge badge-soft-success px-2.5 py-1.5 rounded-pill">
+                                                <i class="fas fa-check-circle mr-1"></i>Đã chốt ca
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-soft-danger px-2.5 py-1.5 rounded-pill">
+                                                <i class="fas fa-times-circle mr-1"></i>Từ chối
+                                            </span>
+                                        }
+                                    </td>
+
+                                    <!-- Ngày gửi đơn -->
+                                    <td class="align-middle small text-muted nowrap-cell">
+                                        @item.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                                    </td>
+
+                                    <!-- Thao tác duyệt (Sửa lỗi vỡ form) -->
+                                    <td class="text-center align-middle pr-4 nowrap-cell">
+                                        <div class="action-btn-group">
+                                            @if (item.Status == "Pending")
+                                            {
+                                                <form asp-action="Approve" asp-route-id="@item.Id" method="post" class="m-0 p-0">
+                                                    <button type="submit" class="btn btn-success btn-action-custom shadow-sm" title="Duyệt ca làm này">
+                                                        <i class="fas fa-check mr-1"></i> Duyệt
+                                                    </button>
+                                                </form>
+                                                <form asp-action="Reject" asp-route-id="@item.Id" method="post" class="m-0 p-0" onsubmit="return confirm('Bạn có chắc muốn từ chối đơn đăng ký ca này không?');">
+                                                    <button type="submit" class="btn btn-outline-danger btn-action-custom" title="Từ chối đơn">
+                                                        <i class="fas fa-times mr-1"></i> Từ chối
+                                                    </button>
+                                                </form>
+                                            }
+                                            else if (item.Status == "Approved")
+                                            {
+                                                <form asp-action="Reject" asp-route-id="@item.Id" method="post" class="m-0 p-0" onsubmit="return confirm('Hủy ca này? Nhân viên sẽ bị gỡ khỏi lịch phân ca chính thức.');">
+                                                    <button type="submit" class="btn btn-outline-danger btn-action-custom" title="Hủy duyệt ca làm">
+                                                        <i class="fas fa-ban mr-1"></i> Hủy chốt ca
+                                                    </button>
+                                                </form>
+                                            }
+                                            else
+                                            {
+                                                <form asp-action="Approve" asp-route-id="@item.Id" method="post" class="m-0 p-0">
+                                                    <button type="submit" class="btn btn-outline-success btn-action-custom" title="Duyệt lại đơn này">
+                                                        <i class="fas fa-undo mr-1"></i> Duyệt lại
+                                                    </button>
+                                                </form>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center py-5 text-muted font-italic">
+                                    <i class="far fa-folder-open fa-2x mb-2 text-gray-400 d-block"></i>
+                                    Không có đơn đăng ký ca làm nào trong danh sách.
                                 </td>
                             </tr>
                         }

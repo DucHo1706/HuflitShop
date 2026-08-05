@@ -22,14 +22,8 @@
         foreach (var part in parts)
         {
             var trimmed = part.Trim();
-            if (trimmed.StartsWith("Vận chuyển:"))
-            {
-                carrier = trimmed.Replace("Vận chuyển:", "").Trim();
-            }
-            else if (trimmed.StartsWith("Tracking:"))
-            {
-                trackingNumber = trimmed.Replace("Tracking:", "").Trim();
-            }
+            if (trimmed.StartsWith("Vận chuyển:")) { carrier = trimmed.Replace("Vận chuyển:", "").Trim(); }
+            else if (trimmed.StartsWith("Tracking:")) { trackingNumber = trimmed.Replace("Tracking:", "").Trim(); }
             else if (trimmed.StartsWith("Driver:"))
             {
                 var driverInfo = trimmed.Replace("Driver:", "").Trim();
@@ -41,74 +35,104 @@
                     driverPhone = driverInfo.Substring(phoneIndex + 1, plateIndex - phoneIndex - 2).Trim();
                     licensePlate = driverInfo.Substring(plateIndex + 3).Trim();
                 }
-                else
-                {
-                    driverName = driverInfo;
-                }
+                else { driverName = driverInfo; }
             }
-            else if (trimmed.StartsWith("Link:"))
-            {
-                trackingUrl = trimmed.Replace("Link:", "").Trim();
-            }
+            else if (trimmed.StartsWith("Link:")) { trackingUrl = trimmed.Replace("Link:", "").Trim(); }
         }
     }
 }
 
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
+
 <style>
+    :root {
+        --font-heading: 'Playfair Display', serif;
+        --font-body: 'Jost', sans-serif;
+        --color-primary: #1c1c1c;
+        --color-gold: #c5a059;
+        --color-bg: #faf9f6;
+        --color-blue: #0033ff;
+        --color-border: #e2e8f0;
+        --transition-slow: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
     body {
-        background-color: #f5f5f5 !important;
+        font-family: var(--font-body);
+        background-color: var(--color-bg) !important;
+        color: var(--color-primary);
     }
+
+    h1, h2, h3, h4, h5, h6 {
+        font-family: var(--font-heading);
+    }
+
     .order-detail-container {
-        max-width: 1000px;
-        margin: 2rem auto;
-        padding: 0 1rem;
+        max-width: 1100px;
+        margin: 2.5rem auto;
+        padding: 0 1.5rem;
     }
+
     .card-custom {
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        background: #ffffff;
+        border: 1px solid var(--color-border);
+        box-shadow: 0 5px 20px rgba(0,0,0,0.02);
         padding: 2rem;
         margin-bottom: 1.5rem;
+        transition: var(--transition-slow);
     }
+
+        .card-custom:hover {
+            box-shadow: 0 8px 25px rgba(0,0,0,0.05);
+        }
+
     .card-title-custom {
-        font-size: 1.15rem;
-        font-weight: 700;
-        color: #1f2937;
-        border-bottom: 1px solid #f3f4f6;
+        font-family: var(--font-heading);
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--color-primary);
+        border-bottom: 1px solid var(--color-border);
         padding-bottom: 0.75rem;
         margin-bottom: 1.25rem;
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.6rem;
     }
-    
+
+        .card-title-custom i {
+            color: var(--color-gold);
+        }
+
     /* Timeline Progress Tracker */
     .timeline-container {
         display: flex;
         justify-content: space-between;
         align-items: center;
         position: relative;
-        margin: 2rem 0;
+        margin: 2.5rem 0 1.5rem 0;
         padding: 0 1rem;
     }
+
     .timeline-line-bg {
         position: absolute;
-        top: 25px;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background-color: #e5e7eb;
+        top: 22px;
+        left: 5%;
+        right: 5%;
+        height: 2px;
+        background-color: var(--color-border);
         z-index: 1;
     }
+
     .timeline-line-fill {
         position: absolute;
-        top: 25px;
-        left: 0;
-        height: 4px;
-        background-color: #16a34a;
+        top: 22px;
+        left: 5%;
+        height: 2px;
+        background-color: var(--color-gold);
         z-index: 2;
         transition: width 0.4s ease;
     }
+
     .timeline-step {
         display: flex;
         flex-direction: column;
@@ -117,136 +141,166 @@
         z-index: 3;
         flex: 1;
     }
+
     .timeline-icon-box {
-        width: 50px;
-        height: 50px;
+        width: 44px;
+        height: 44px;
         border-radius: 50%;
-        background-color: white;
-        border: 4px solid #e5e7eb;
-        color: #9ca3af;
+        background-color: #ffffff;
+        border: 2px solid var(--color-border);
+        color: #888;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.2rem;
-        transition: all 0.3s;
+        font-size: 1rem;
+        transition: var(--transition-slow);
     }
+
     .timeline-step.active .timeline-icon-box {
-        border-color: #16a34a;
-        background-color: #16a34a;
-        color: white;
-        box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.15);
+        border-color: var(--color-gold);
+        background-color: var(--color-gold);
+        color: #ffffff;
     }
+
     .timeline-step.cancelled .timeline-icon-box {
         border-color: #dc2626;
         background-color: #dc2626;
-        color: white;
-        box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.15);
+        color: #ffffff;
     }
+
     .timeline-step.refunded .timeline-icon-box {
         border-color: #7c3aed;
         background-color: #7c3aed;
-        color: white;
-        box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.15);
-    }
-    .timeline-label {
-        font-size: 0.85rem;
-        font-weight: 600;
-        color: #6b7280;
-        margin-top: 0.5rem;
-        text-align: center;
-    }
-    .timeline-step.active .timeline-label {
-        color: #1f2937;
-        font-weight: 700;
-    }
-    .timeline-time {
-        margin-top: 0.25rem;
-        color: #6b7280;
-        font-size: 0.75rem;
-        line-height: 1.35;
-        text-align: center;
-    }
-    .timeline-step.cancelled .timeline-label {
-        color: #dc2626;
-        font-weight: 700;
-    }
-    .timeline-step.refunded .timeline-label {
-        color: #7c3aed;
-        font-weight: 700;
+        color: #ffffff;
     }
 
-    /* Product Grid List */
+    .timeline-label {
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: #777;
+        margin-top: 0.6rem;
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .timeline-step.active .timeline-label {
+        color: var(--color-primary);
+        font-weight: 600;
+    }
+
+    .timeline-time {
+        color: #888;
+        font-size: 0.75rem;
+        text-align: center;
+        margin-top: 0.2rem;
+    }
+
+    /* Product List Item */
     .product-list-item {
         display: flex;
         align-items: center;
         justify-content: space-between;
         padding: 1rem 0;
-        border-bottom: 1px solid #f3f4f6;
+        border-bottom: 1px solid var(--color-border);
     }
-    .product-list-item:last-child {
-        border-bottom: none;
-    }
+
+        .product-list-item:last-child {
+            border-bottom: none;
+        }
+
     .item-img {
-        width: 70px;
-        height: 70px;
+        width: 75px;
+        height: 75px;
         object-fit: cover;
-        border-radius: 6px;
-        border: 1px solid #e5e7eb;
+        border: 1px solid var(--color-border);
     }
-    
-    /* Recommendations */
-    .suggested-title {
-        font-size: 1.3rem;
-        font-weight: 700;
-        color: #1f2937;
-        margin-top: 3rem;
-        margin-bottom: 1.5rem;
-        text-align: center;
+
+    /* Buttons */
+    .btn-luxury-sm {
+        display: inline-block;
+        padding: 12px 28px;
+        background: var(--color-primary);
+        color: #ffffff;
+        border: none;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        font-size: 0.8rem;
+        transition: var(--transition-slow);
+        text-decoration: none !important;
+        cursor: pointer;
     }
+
+        .btn-luxury-sm:hover {
+            background: var(--color-blue);
+            color: #ffffff;
+        }
+
+    .btn-luxury-outline-sm {
+        display: inline-block;
+        padding: 12px 28px;
+        background: transparent;
+        color: var(--color-primary);
+        border: 1px solid var(--color-primary);
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        font-size: 0.8rem;
+        transition: var(--transition-slow);
+        text-decoration: none !important;
+        cursor: pointer;
+    }
+
+        .btn-luxury-outline-sm:hover {
+            background: var(--color-primary);
+            color: #ffffff;
+        }
+
+    .btn-danger-outline-sm {
+        display: inline-block;
+        padding: 12px 28px;
+        background: transparent;
+        color: #dc2626;
+        border: 1px solid #dc2626;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        font-size: 0.8rem;
+        transition: var(--transition-slow);
+        cursor: pointer;
+    }
+
+        .btn-danger-outline-sm:hover {
+            background: #dc2626;
+            color: #ffffff;
+        }
+
+    /* Suggested Cards */
     .suggested-card {
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        overflow: hidden;
-        transition: transform 0.2s, box-shadow 0.2s;
+        background: #ffffff;
+        border: 1px solid var(--color-border);
+        transition: var(--transition-slow);
         height: 100%;
     }
-    .suggested-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 4px 6px rgba(0,0,0,0.08);
-    }
+
+        .suggested-card:hover {
+            box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+            transform: translateY(-3px);
+        }
+
     .suggested-img-box {
         width: 100%;
-        padding-top: 100%;
-        position: relative;
-        background-color: #f9fafb;
-    }
-    .suggested-img-box img {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-    .suggested-body {
-        padding: 1rem;
-    }
-    .suggested-name {
-        font-size: 0.95rem;
-        font-weight: 600;
-        color: #1f2937;
-        margin-bottom: 0.5rem;
-        height: 40px;
+        aspect-ratio: 3/4;
         overflow: hidden;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
     }
-    .suggested-price {
-        color: #ef4444;
-        font-weight: 700;
-        font-size: 1rem;
+
+        .suggested-img-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: var(--transition-slow);
+        }
+
+    .suggested-card:hover .suggested-img-box img {
+        transform: scale(1.05);
     }
 
     /* Print styling */
@@ -254,17 +308,20 @@
         header, footer, nav, .btn-no-print, .suggested-section, .alert {
             display: none !important;
         }
+
         body {
-            background-color: white !important;
+            background-color: #ffffff !important;
         }
+
         .order-detail-container {
             margin: 0 !important;
             padding: 0 !important;
             max-width: 100% !important;
         }
+
         .card-custom {
             box-shadow: none !important;
-            border: 1px solid #e5e7eb !important;
+            border: 1px solid #e2e8f0 !important;
             padding: 1.5rem !important;
         }
     }
@@ -272,19 +329,19 @@
 
 <div class="order-detail-container">
     <!-- Back & Print Header -->
-    <div class="d-flex align-items-center justify-content-between mb-4 btn-no-print">
-        <a class="btn btn-outline-secondary font-weight-bold" asp-controller="Profile" asp-action="Index" style="border-radius: 6px;">
-            <i class="fas fa-arrow-left mr-2"></i>Quay lại trang cá nhân
+    <div class="d-flex align-items-center justify-content-between mb-4 btn-no-print" data-aos="fade-up">
+        <a class="btn-luxury-outline-sm py-2 px-3" asp-controller="Profile" asp-action="Index">
+            <i class="fas fa-arrow-left mr-2"></i>Trang cá nhân
         </a>
-        <button type="button" class="btn btn-outline-dark font-weight-bold" onclick="window.print()" style="border-radius: 6px;">
-            <i class="fas fa-print mr-2"></i>In hóa đơn biên nhận
+        <button type="button" class="btn-luxury-outline-sm py-2 px-3" onclick="window.print()">
+            <i class="fas fa-print mr-2"></i>In hóa đơn
         </button>
     </div>
 
     <!-- Feedback Alerts -->
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="alert alert-success alert-dismissible fade show btn-no-print" role="alert" style="border-radius: 6px; margin-bottom: 1.5rem;">
+        <div class="alert alert-success alert-dismissible fade show btn-no-print mb-4" role="alert" data-aos="fade-up">
             <i class="fas fa-check-circle mr-2"></i>@TempData["SuccessMessage"]
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
@@ -293,7 +350,7 @@
     }
     @if (TempData["ErrorMessage"] != null)
     {
-        <div class="alert alert-danger alert-dismissible fade show btn-no-print" role="alert" style="border-radius: 6px; margin-bottom: 1.5rem;">
+        <div class="alert alert-danger alert-dismissible fade show btn-no-print mb-4" role="alert" data-aos="fade-up">
             <i class="fas fa-exclamation-circle mr-2"></i>@TempData["ErrorMessage"]
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
@@ -302,19 +359,21 @@
     }
 
     <!-- Timeline Progress -->
-    <div class="card-custom btn-no-print">
-        <h3 class="card-title-custom" style="border:none; margin-bottom:0;"><i class="fas fa-shipping-fast text-primary"></i>Hành trình kiện hàng</h3>
-        
+    <div class="card-custom btn-no-print" data-aos="fade-up">
+        <h3 class="card-title-custom" style="border:none; margin-bottom:0;">
+            <i class="fas fa-shipping-fast"></i>Trạng Thái Kiện Hàng
+        </h3>
+
         @{
             int status = Model.OrderStatus;
             int completedSteps = Model.CompletedAt.HasValue ? 4
-                : Model.ShippingStartedAt.HasValue ? 3
-                : Model.PackingStartedAt.HasValue ? 2
-                : Model.ApprovedAt.HasValue ? 1
-                : 0;
+            : Model.ShippingStartedAt.HasValue ? 3
+            : Model.PackingStartedAt.HasValue ? 2
+            : Model.ApprovedAt.HasValue ? 1
+            : 0;
             string percent = $"{completedSteps * 25}%";
         }
-        
+
         <div class="timeline-container">
             <div class="timeline-line-bg"></div>
             <div class="timeline-line-fill" style="width: @percent;"></div>
@@ -326,7 +385,7 @@
             </div>
             <div class="timeline-step @(Model.ApprovedAt.HasValue ? "active" : "")">
                 <div class="timeline-icon-box"><i class="fas fa-clipboard-check"></i></div>
-                <div class="timeline-label">Shop duyệt đơn</div>
+                <div class="timeline-label">Duyệt đơn</div>
                 @if (Model.ApprovedAt.HasValue)
                 {
                     <div class="timeline-time">@Model.ApprovedAt.Value.ToString("dd/MM/yyyy HH:mm")</div>
@@ -334,15 +393,15 @@
             </div>
             <div class="timeline-step @(Model.PackingStartedAt.HasValue ? "active" : "")">
                 <div class="timeline-icon-box"><i class="fas fa-box"></i></div>
-                <div class="timeline-label">Shop đóng gói</div>
+                <div class="timeline-label">Đóng gói</div>
                 @if (Model.PackingStartedAt.HasValue)
                 {
                     <div class="timeline-time">@Model.PackingStartedAt.Value.ToString("dd/MM/yyyy HH:mm")</div>
                 }
             </div>
             <div class="timeline-step @(Model.ShippingStartedAt.HasValue ? "active" : "")">
-                <div class="timeline-icon-box"><i class="fas fa-truck-loading"></i></div>
-                <div class="timeline-label">Bàn giao vận chuyển</div>
+                <div class="timeline-icon-box"><i class="fas fa-truck"></i></div>
+                <div class="timeline-label">Vận chuyển</div>
                 @if (Model.ShippingStartedAt.HasValue)
                 {
                     <div class="timeline-time">@Model.ShippingStartedAt.Value.ToString("dd/MM/yyyy HH:mm")</div>
@@ -350,7 +409,7 @@
             </div>
             <div class="timeline-step @(Model.CompletedAt.HasValue ? "active" : "")">
                 <div class="timeline-icon-box"><i class="fas fa-check"></i></div>
-                <div class="timeline-label">Giao thành công</div>
+                <div class="timeline-label">Hoàn thành</div>
                 @if (Model.CompletedAt.HasValue)
                 {
                     <div class="timeline-time">@Model.CompletedAt.Value.ToString("dd/MM/yyyy HH:mm")</div>
@@ -360,102 +419,72 @@
 
         @if (Model.ExpectedDeliveryTime.HasValue && status != 4)
         {
-            <div class="alert alert-info mt-4 mb-0 py-2 text-center">
-                <i class="far fa-calendar-check mr-1"></i>
-                <strong>Thời gian giao dự kiến:</strong> @Model.ExpectedDeliveryTime.Value.ToString("dd/MM/yyyy HH:mm")
+            <div class="alert alert-light mt-3 mb-0 py-2 text-center border" style="font-size: 0.9rem;">
+                <i class="far fa-calendar-check mr-2" style="color: var(--color-gold);"></i>
+                <strong>Dự kiến giao hàng:</strong> @Model.ExpectedDeliveryTime.Value.ToString("dd/MM/yyyy HH:mm")
             </div>
         }
         @if (status == 4)
         {
-            <div class="alert alert-danger mt-4 mb-0 py-2 text-center"><i class="fas fa-times mr-1"></i>Đơn hàng đã hủy</div>
+            <div class="alert alert-danger mt-3 mb-0 py-2 text-center" style="font-size: 0.9rem;"><i class="fas fa-times mr-2"></i>Đơn hàng đã được hủy</div>
         }
         else if (status == 5)
         {
-            <div class="alert alert-warning mt-4 mb-0 py-2 text-center"><i class="fas fa-undo mr-1"></i>Khách hàng đã yêu cầu hoàn tiền</div>
+            <div class="alert alert-warning mt-3 mb-0 py-2 text-center" style="font-size: 0.9rem;"><i class="fas fa-undo mr-2"></i>Đã gửi yêu cầu hoàn tiền</div>
         }
     </div>
 
-    <!-- Shipping & Payment Address Info -->
+    <!-- Info Section -->
     <div class="row">
-        <div class="col-md-6">
-            <div class="card-custom" style="min-height: 230px;">
-                <h4 class="card-title-custom"><i class="fas fa-map-marker-alt text-primary"></i>Địa chỉ nhận hàng</h4>
-                <div style="font-size: 0.95rem; line-height: 1.7; color: #4b5563;">
-                    <div style="font-size:1.1rem; font-weight: 700; color:#1f2937;" class="mb-2">@Model.CustomerName</div>
+        <div class="col-md-6" data-aos="fade-up">
+            <div class="card-custom" style="min-height: 240px;">
+                <h4 class="card-title-custom"><i class="fas fa-map-marker-alt"></i>Địa Chỉ Nhận Hàng</h4>
+                <div style="font-size: 0.95rem; line-height: 1.7; color: #555;">
+                    <div style="font-family: var(--font-heading); font-size: 1.15rem; font-weight: 600; color: var(--color-primary);" class="mb-2">@Model.CustomerName</div>
                     <div><strong>Số điện thoại:</strong> @Model.ShippingPhoneNumber</div>
-                    <div><strong>Địa chỉ giao nhận:</strong> @cleanAddress, @Model.ShippingWard, @Model.ShippingDistrict, @Model.ShippingCity</div>
+                    <div><strong>Địa chỉ:</strong> @cleanAddress, @Model.ShippingWard, @Model.ShippingDistrict, @Model.ShippingCity</div>
 
                     @if (!string.IsNullOrWhiteSpace(Model.ShippingProvider))
                     {
                         <div class="mt-2 pt-2 border-top">
-                            <div><strong>Vận chuyển:</strong> <span class="text-success font-weight-bold">@Model.ShippingProvider</span></div>
-                            @if (!string.IsNullOrWhiteSpace(Model.ShippingServiceName))
-                            {
-                                <div><strong>Dịch vụ:</strong> @Model.ShippingServiceName</div>
-                            }
+                            <div><strong>Đơn vị vận chuyển:</strong> <span style="color: var(--color-blue); font-weight: 600;">@Model.ShippingProvider</span></div>
                             @if (!string.IsNullOrWhiteSpace(Model.CarrierOrderCode))
                             {
                                 <div><strong>Mã vận đơn:</strong> <span class="badge badge-secondary">@Model.CarrierOrderCode</span></div>
                             }
-                            <div><strong>Trạng thái giao hàng:</strong> <span class="text-primary font-weight-bold">@Model.CustomerShippingStatusName</span></div>
-                            @if (Model.ExpectedDeliveryTime.HasValue)
-                            {
-                                <div><strong>Giao hàng dự kiến:</strong> <span class="text-primary font-weight-bold">@Model.ExpectedDeliveryTime.Value.ToString("dd/MM/yyyy HH:mm")</span></div>
-                            }
-                        </div>
-                    }
-                    else if (!string.IsNullOrEmpty(carrier))
-                    {
-                        <div class="mt-2 pt-2 border-top">
-                            <div><strong>Vận chuyển:</strong> <span class="text-success font-weight-bold">@carrier</span></div>
-                            @if (!string.IsNullOrEmpty(trackingNumber))
-                            {
-                                <div><strong>Mã vận đơn:</strong> <span class="badge badge-secondary">@trackingNumber</span></div>
-                            }
-                            @if (!string.IsNullOrEmpty(driverName))
-                            {
-                                <div><strong>Tài xế:</strong> @driverName (@driverPhone) - <strong>@licensePlate</strong></div>
-                            }
-                            @if (!string.IsNullOrEmpty(trackingUrl))
-                            {
-                                <div class="mt-2">
-                                    <a href="@trackingUrl" target="_blank" class="btn btn-xs btn-outline-success font-weight-bold px-3 py-1" style="border-radius: 15px; font-size: 0.8rem;">
-                                        <i class="fas fa-motorcycle mr-1"></i> Theo dõi tài xế
-                                    </a>
-                                </div>
-                            }
+                            <div><strong>Trạng thái:</strong> @Model.CustomerShippingStatusName</div>
                         </div>
                     }
                 </div>
             </div>
         </div>
-        
-        <div class="col-md-6">
-            <div class="card-custom" style="min-height: 230px;">
-                <h4 class="card-title-custom"><i class="fas fa-credit-card text-primary"></i>Thông tin thanh toán</h4>
-                <div style="font-size: 0.95rem; line-height: 1.7; color: #4b5563;">
+
+        <div class="col-md-6" data-aos="fade-up" data-aos-delay="50">
+            <div class="card-custom" style="min-height: 240px;">
+                <h4 class="card-title-custom"><i class="fas fa-credit-card"></i>Thông Tin Thanh Toán</h4>
+                <div style="font-size: 0.95rem; line-height: 1.8; color: #555;">
                     <div class="mb-2"><strong>Hình thức:</strong> @Model.PaymentMethodName</div>
                     <div class="mb-2">
-                        <strong>Trạng thái:</strong> 
+                        <strong>Trạng thái:</strong>
                         @if (Model.PaymentStatus == 1)
                         {
-                            <span class="badge-payment-paid"><i class="fas fa-check-circle mr-1"></i>Đã thanh toán</span>
+                            <span class="badge-payment-paid"><i class="fas fa-check mr-1"></i>Đã thanh toán</span>
                         }
                         else
                         {
                             <span class="badge-payment-unpaid"><i class="fas fa-clock mr-1"></i>Chưa thanh toán</span>
                         }
                     </div>
-                    <div><strong>Thời gian lập đơn:</strong> @Model.OrderDate.ToString("dd/MM/yyyy HH:mm:ss")</div>
+                    <div><strong>Thời gian đặt hàng:</strong> @Model.OrderDate.ToString("dd/MM/yyyy HH:mm:ss")</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Product list -->
-    <div class="card-custom">
-        <h4 class="card-title-custom"><i class="fas fa-shopping-basket text-primary"></i>Sản phẩm đã đặt</h4>
-        
+    <!-- Product List -->
+    <div class="card-custom" data-aos="fade-up">
+        <h4 class="card-title-custom"><i class="fas fa-shopping-bag"></i>Sản Phẩm Đã Đặt</h4>
+
         <div class="product-list-wrapper">
             @foreach (var od in Model.OrderDetails)
             {
@@ -463,21 +492,21 @@
                     <div class="d-flex align-items-center flex-grow-1 mr-3">
                         <img src="@HuflitShopCore.Helpers.ImageRouteHelper.Resolve(od.ProductImageUrl)" alt="@od.ProductNameSnapshot" class="item-img mr-3" />
                         <div>
-                            <div style="font-weight: 700; color: #1f2937; font-size: 1.05rem;">@od.ProductNameSnapshot</div>
-                            <div style="font-size: 0.85rem; color: #6b7280;" class="mt-1">
+                            <div style="font-family: var(--font-heading); font-weight: 600; color: var(--color-primary); font-size: 1.05rem;">@od.ProductNameSnapshot</div>
+                            <div style="font-size: 0.85rem; color: #777;" class="mt-1">
                                 Phân loại: @(string.IsNullOrEmpty(od.ColorNameSnapshot) && string.IsNullOrEmpty(od.SizeNameSnapshot) ? "Mặc định" : $"{od.ColorNameSnapshot} - {od.SizeNameSnapshot}")
                             </div>
-                            <div style="font-size: 0.85rem; color: #9ca3af;">Số lượng: @od.Quantity</div>
+                            <div style="font-size: 0.85rem; color: #888;">Số lượng: @od.Quantity</div>
                         </div>
                     </div>
-                    
+
                     <div class="d-flex flex-column align-items-end justify-content-between" style="min-height: 70px;">
-                        <div style="font-weight: 700; color: #ef4444; font-size: 1.1rem;">@((od.TotalPrice).ToString("N0")) đ</div>
-                        <div style="font-size: 0.8rem; color: #9ca3af;">@od.PurchasedPrice.ToString("N0") đ/sản phẩm</div>
-                        
+                        <div style="font-weight: 600; color: var(--color-gold); font-size: 1.1rem;">@((od.TotalPrice).ToString("N0"))₫</div>
+                        <div style="font-size: 0.8rem; color: #888;">@od.PurchasedPrice.ToString("N0")₫ / sản phẩm</div>
+
                         @if (!string.IsNullOrEmpty(od.ProductId) && status == 3)
                         {
-                            <a class="btn btn-sm btn-outline-warning btn-no-print mt-2" href="@Url.Action("Details", "Product", new { id = od.ProductId })#starRatingSelector" style="border-radius: 4px; font-weight: 600; font-size: 0.75rem;">
+                            <a class="btn-luxury-outline-sm mt-2" href="@Url.Action("Details", "Product", new { id = od.ProductId })#starRatingSelector" style="padding: 4px 10px; font-size: 0.7rem;">
                                 <i class="fas fa-star mr-1"></i>Viết đánh giá
                             </a>
                         }
@@ -485,59 +514,56 @@
                 </div>
             }
         </div>
-        
-        <!-- Total Bills Summary -->
+
+        <!-- Summary -->
         <div class="mt-4 pt-3 border-top d-flex justify-content-end">
-            <div style="width: 320px; font-size: 0.95rem; line-height: 2; color: #4b5563;">
+            <div style="width: 300px; font-size: 0.95rem; line-height: 2; color: #555;">
                 <div class="d-flex justify-content-between">
                     <span>Tổng tiền hàng:</span>
-                    <span style="font-weight: 600; color: #1f2937;">@Model.TotalAmount.ToString("N0") đ</span>
+                    <span style="font-weight: 600; color: var(--color-primary);">@Model.TotalAmount.ToString("N0")₫</span>
                 </div>
                 <div class="d-flex justify-content-between">
-                    <span>Voucher giảm giá:</span>
-                    <span class="text-success" style="font-weight: 600;">-@Model.DiscountAmount.ToString("N0") đ</span>
+                    <span>Khuyến mãi:</span>
+                    <span style="color: var(--color-blue); font-weight: 600;">-@Model.DiscountAmount.ToString("N0")₫</span>
                 </div>
                 <div class="d-flex justify-content-between border-top pt-2 mt-2" style="font-size: 1.25rem;">
-                    <span style="font-weight: 700; color: #1f2937;">Thành tiền:</span>
-                    <span style="font-weight: 800; color: #ef4444;">@Model.FinalAmount.ToString("N0") đ</span>
+                    <span style="font-family: var(--font-heading); font-weight: 600;">Tổng thanh toán:</span>
+                    <span style="font-family: var(--font-heading); font-weight: 700; color: var(--color-gold);">@Model.FinalAmount.ToString("N0")₫</span>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- General Action Buttons -->
-    <div class="d-flex flex-wrap gap-3 btn-no-print justify-content-end">
-        <!-- Contact Seller -->
-        <a class="btn btn-outline-secondary font-weight-bold" href="tel:0123456789" style="border-radius: 6px; padding: 0.75rem 2rem;">
-            <i class="fas fa-headset mr-2"></i>Liên hệ người bán
+    <!-- Actions -->
+    <div class="d-flex flex-wrap gap-3 btn-no-print justify-content-end mb-5" data-aos="fade-up">
+        <a class="btn-luxury-outline-sm" href="tel:0123456789">
+            <i class="fas fa-headset mr-2"></i>Liên hệ hỗ trợ
         </a>
 
-        <!-- Refund Button -->
         @if (status == 3)
         {
-            <form asp-controller="Profile" asp-action="RequestRefund" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn yêu cầu hoàn trả tiền cho đơn hàng này?')">
+            <form asp-controller="Profile" asp-action="RequestRefund" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn gửi yêu cầu hoàn trả đơn hàng này?')">
                 @Html.AntiForgeryToken()
-                <button type="submit" class="btn btn-outline-danger font-weight-bold" style="border-radius: 6px; padding: 0.75rem 2rem;">
-                    <i class="fas fa-hand-holding-usd mr-2"></i>Yêu cầu hoàn tiền
+                <button type="submit" class="btn-danger-outline-sm">
+                    <i class="fas fa-undo mr-2"></i>Yêu cầu hoàn tiền
                 </button>
             </form>
         }
 
-        <!-- Reorder Button -->
         <form asp-controller="Profile" asp-action="ReOrder" asp-route-id="@Model.Id" method="post">
             @Html.AntiForgeryToken()
-            <button type="submit" class="btn btn-primary font-weight-bold" style="border-radius: 6px; padding: 0.75rem 2.5rem;">
+            <button type="submit" class="btn-luxury-sm">
                 <i class="fas fa-redo-alt mr-2"></i>Mua lại đơn hàng
             </button>
         </form>
     </div>
 
-    <!-- Suggestions "You May Also Like" -->
+    <!-- Suggestions -->
     @if (suggestedProducts.Any())
     {
-        <div class="suggested-section btn-no-print">
-            <h3 class="suggested-title"><i class="fas fa-thumbs-up mr-2 text-warning"></i>Có thể bạn cũng thích</h3>
-            
+        <div class="suggested-section btn-no-print" data-aos="fade-up">
+            <h3 class="text-center mb-4" style="font-family: var(--font-heading); font-size: 1.8rem; font-weight: 600;">Có Thể Bạn Cũng Thích</h3>
+
             <div class="row">
                 @foreach (var p in suggestedProducts)
                 {
@@ -548,16 +574,16 @@
                         var firstImg = pImages.OrderBy(img => img.ImageOrder).First();
                         pImgUrl = HuflitShopCore.Helpers.ImageRouteHelper.Resolve(firstImg.PublicId);
                     }
-                    
+
                     <div class="col-lg-3 col-md-6 col-6 mb-4">
                         <div class="suggested-card">
                             <a href="@Url.Action("Details", "Product", new { id = p.Id })" style="text-decoration: none;">
                                 <div class="suggested-img-box">
                                     <img src="@pImgUrl" alt="@p.ProductName" />
                                 </div>
-                                <div class="suggested-body">
-                                    <h4 class="suggested-name">@p.ProductName</h4>
-                                    <div class="suggested-price">@p.CurrentPrice.ToString("N0") đ</div>
+                                <div class="p-3 text-center">
+                                    <h4 style="font-family: var(--font-heading); font-size: 1rem; color: var(--color-primary); margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">@p.ProductName</h4>
+                                    <div style="font-weight: 600; color: var(--color-gold); font-size: 1rem;">@p.CurrentPrice.ToString("N0")₫</div>
                                 </div>
                             </a>
                         </div>
@@ -567,3 +593,12 @@
         </div>
     }
 </div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <script>
+        $(document).ready(function () {
+            AOS.init({ once: true, offset: 50, duration: 800 });
+        });
+    </script>
+}

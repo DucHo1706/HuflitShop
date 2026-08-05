@@ -3,13 +3,13 @@
 @inject Microsoft.Extensions.Configuration.IConfiguration Configuration
 @{
     Layout = "_Layout";
-    ViewData["Title"] = "Giỏ hàng";
+    ViewData["Title"] = "Giỏ hàng của bạn";
     var cloudName = Configuration["CloudinarySettings:CloudName"] ?? "Tên_Cloud_Của_Bạn";
 
     var items = ViewBag.Items as IEnumerable<CartController.CartItemViewModel>;
     decimal total = ViewBag.Total is decimal d ? d : 0m;
 
-    // Kiểm tra bỏ quên giỏ hàng (Datamining - để 30 giây để dễ dàng test demo)
+    // Kiểm tra bỏ quên giỏ hàng (Datamining)
     var hasAbandonedCart = false;
     if (items != null && items.Any())
     {
@@ -22,219 +22,316 @@
     }
 }
 
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
+
 <style>
     :root {
-        --vibrantBlue: #2563eb;
-        --vibrantBlueHover: #1d4ed8;
-        --vibrantCyan: #06b6d4;
-        --oceanGradient: linear-gradient(135deg, #2563eb, #06b6d4);
-        --dangerGradient: linear-gradient(135deg, #ef4444, #f43f5e);
+        --font-heading: 'Playfair Display', serif;
+        --font-body: 'Jost', sans-serif;
+        --color-primary: #0f172a;
+        --color-ocean: #2563eb;
+        --color-cyan: #06b6d4;
+        --ocean-gradient: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%);
+        --color-bg: #f8fafc;
+        --color-border: #e2e8f0;
+        --transition-slow: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    body {
+        font-family: var(--font-body);
+        background-color: var(--color-bg) !important;
+        color: var(--color-primary);
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        font-family: var(--font-heading);
     }
 
     .cart-container {
-        max-width: 1200px;
-        margin: 2rem auto;
-        padding: 0 1rem;
+        max-width: 1280px;
+        margin: 2.5rem auto;
+        padding: 0 1.5rem;
     }
 
-    /* Các Card thông tin (Minimalist & High-contrast) */
-    .cart-card {
-        background: #ffffff;
-        border: 1px solid #e2e8f0;
-        border-radius: 0 !important;
-        padding: 2rem;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-        border-top: 4px solid var(--vibrantBlue);
+    /* Page Header */
+    .cart-header {
+        text-align: center;
+        margin-bottom: 3rem;
     }
 
-    /* Bảng Sản phẩm */
-    .cart-table th {
-        border-top: none;
-        color: #64748b;
-        font-weight: 700;
-        font-size: 0.9rem;
-        text-transform: uppercase;
-        border-bottom: 2px solid #f1f5f9;
-        padding-bottom: 1rem;
+    .cart-header__title {
+        font-size: 2.5rem;
+        font-weight: 600;
         letter-spacing: 0.5px;
+        color: var(--color-primary);
+        padding-top: 50px;
     }
 
-    .cart-row td {
-        vertical-align: middle;
-        border-bottom: 1px solid #f1f5f9;
-        padding: 1.5rem 0;
+    .cart-header__line {
+        width: 60px;
+        height: 2px;
+        background: var(--ocean-gradient);
+        margin: 1rem auto 0 auto;
     }
 
-    .cart-prod-img {
-        width: 80px;
-        height: 100px;
-        border: 1px solid #e2e8f0;
-        background: #f8fafc;
+    /* Modern Luxury Card Container */
+    .cart-glass-card {
+        background: #ffffff;
+        border: 1px solid var(--color-border);
+        box-shadow: 0 4px 25px -5px rgba(15, 23, 42, 0.03);
+        padding: 2rem;
+        transition: var(--transition-slow);
+    }
+
+    /* Single Cart Item Card */
+    .cart-item-row {
         display: flex;
         align-items: center;
-        justify-content: center;
-        overflow: hidden;
+        padding: 1.5rem 0;
+        border-bottom: 1px solid var(--color-border);
+        transition: var(--transition-slow);
     }
 
-        .cart-prod-img img {
+        .cart-item-row:last-child {
+            border-bottom: none;
+        }
+
+    .cart-prod-thumb {
+        width: 90px;
+        height: 115px;
+        border: 1px solid var(--color-border);
+        background: #f8fafc;
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+
+        .cart-prod-thumb img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            transition: var(--transition-slow);
         }
 
-    /* Số lượng vuông vức */
-    .qty-modern {
-        border-radius: 0;
-        overflow: hidden;
-        transition: border-color 0.2s;
-        display: inline-flex;
-        border: 1px solid #cbd5e1;
-        background: #fff;
+    .cart-item-row:hover .cart-prod-thumb img {
+        transform: scale(1.06);
     }
 
-        .qty-modern:focus-within {
-            border-color: var(--vibrantBlue) !important;
+    .cart-prod-info {
+        flex-grow: 1;
+        padding: 0 1.5rem;
+    }
+
+    .cart-prod-title {
+        font-family: var(--font-heading);
+        font-size: 1.15rem;
+        font-weight: 600;
+        color: var(--color-primary);
+        line-height: 1.4;
+        margin-bottom: 0.4rem;
+        text-decoration: none !important;
+        display: block;
+        transition: var(--transition-slow);
+    }
+
+        .cart-prod-title:hover {
+            color: var(--color-ocean);
         }
 
-        .qty-modern input {
-            width: 45px;
+    .cart-prod-meta {
+        font-size: 0.85rem;
+        color: #64748b;
+        letter-spacing: 0.3px;
+    }
+
+    /* Quantity Switcher */
+    .qty-control {
+        display: inline-flex;
+        align-items: center;
+        border: 1px solid var(--color-border);
+        background: #ffffff;
+        transition: var(--transition-slow);
+    }
+
+        .qty-control:focus-within {
+            border-color: var(--color-ocean);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .qty-control input {
+            width: 42px;
+            height: 36px;
             text-align: center;
             border: none;
             outline: none;
-            font-weight: 700;
+            font-weight: 600;
+            font-size: 0.95rem;
             background: transparent;
-            color: #0f172a;
+            color: var(--color-primary);
         }
 
-        .qty-modern button {
+        .qty-control button {
+            width: 32px;
+            height: 36px;
             background: transparent;
             border: none;
-            padding: 0.25rem 0.75rem;
-            font-weight: bold;
+            font-size: 1.1rem;
+            font-weight: 600;
             cursor: pointer;
-            color: #334155;
-            transition: background 0.2s;
+            color: #64748b;
+            transition: var(--transition-slow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-            .qty-modern button:hover {
-                color: var(--vibrantBlue);
+            .qty-control button:hover {
+                color: var(--color-ocean);
                 background: #f1f5f9;
             }
 
-    /* Nút Xóa */
-    .btn-delete-cart {
+    /* Price Display */
+    .price-original {
+        text-decoration: line-through;
+        color: #94a3b8;
+        font-size: 0.825rem;
+        display: block;
+    }
+
+    .price-final {
+        font-weight: 700;
+        color: var(--color-primary);
+        font-size: 1.05rem;
+    }
+
+    .price-line-total {
+        font-weight: 700;
+        color: #ef4444;
+        font-size: 1.15rem;
+        text-align: right;
+    }
+
+    /* Delete Button */
+    .btn-cart-remove {
         background: transparent;
         border: none;
-        color: #94a3b8;
-        font-size: 1.2rem;
-        transition: all 0.2s ease;
-        padding: 8px;
+        color: #cbd5e1;
+        font-size: 1.1rem;
+        padding: 0.5rem;
+        cursor: pointer;
+        transition: var(--transition-slow);
     }
 
-        .btn-delete-cart:hover {
-            transform: scale(1.1);
+        .btn-cart-remove:hover {
             color: #ef4444;
+            transform: scale(1.15);
         }
 
-    /* Buttons Đồng bộ */
-    .btn-ocean-primary {
-        background: var(--oceanGradient) !important;
-        border: none !important;
-        color: #fff !important;
-        font-size: 1rem;
-        font-weight: 700;
-        letter-spacing: 1px;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2);
-        padding: 0.8rem 2rem;
-        border-radius: 0;
-    }
-
-        .btn-ocean-primary:hover {
-            background: linear-gradient(135deg, #1d4ed8, #0891b2) !important;
-            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35);
-            transform: translateY(-1px);
-            color: #fff !important;
-            text-decoration: none;
-        }
-
-    .btn-ocean-outline {
-        background-color: transparent !important;
-        border: 2px solid var(--vibrantBlue) !important;
-        color: var(--vibrantBlue) !important;
-        font-size: 0.9rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        transition: all 0.3s ease;
-        padding: 0.8rem 1.5rem;
-        border-radius: 0;
-    }
-
-        .btn-ocean-outline:hover {
-            background: var(--vibrantBlue) !important;
-            color: #fff !important;
-            text-decoration: none;
-        }
-
-    /* Thanh thanh toán cuối trang (Sticky Bottom Bar) */
-    .cart-summary-bar {
+    /* Sticky Summary Sidebar */
+    .summary-sidebar {
         position: sticky;
-        bottom: 0;
-        background: #fff;
-        padding: 1.5rem 2rem;
-        border: 1px solid #e2e8f0;
-        border-top: 4px solid var(--vibrantBlue);
+        top: 100px;
+        background: #ffffff;
+        border: 1px solid var(--color-border);
+        border-top: 3px solid var(--color-ocean);
+        padding: 2rem;
+        box-shadow: 0 10px 30px -10px rgba(0,0,0,0.04);
+    }
+
+    .summary-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--color-border);
+        margin-bottom: 1.5rem;
+    }
+
+    .summary-row {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        box-shadow: 0 -10px 25px rgba(0,0,0,0.05);
-        z-index: 100;
-        margin-top: 2rem;
+        margin-bottom: 1rem;
+        font-size: 0.95rem;
     }
 
-    .cart-summary-total-label {
-        font-size: 1.1rem;
-        color: #64748b;
-        font-weight: 600;
-        margin-right: 15px;
+    /* Buttons */
+    .btn-luxury-ocean {
+        display: block;
+        width: 100%;
+        padding: 14px;
+        background: var(--ocean-gradient);
+        color: #ffffff !important;
+        border: none;
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        transition: var(--transition-slow);
+        text-decoration: none !important;
+        box-shadow: 0 4px 15px rgba(37, 99, 235, 0.25);
+        cursor: pointer;
     }
 
-    .cart-summary-total-price {
-        font-size: 1.8rem;
-        font-weight: 800;
-        color: var(--vibrantBlue);
-    }
-
-    /* Responsive cho mobile */
-    @@media (max-width: 768px) {
-        .cart-summary-bar {
-            flex-direction: column;
-            gap: 1rem;
-            padding: 1rem;
+        .btn-luxury-ocean:hover {
+            background: linear-gradient(135deg, #1d4ed8 0%, #0891b2 100%);
+            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4);
+            transform: translateY(-1px);
         }
 
-            .cart-summary-bar > div {
-                width: 100%;
-                justify-content: space-between;
-            }
+    .btn-luxury-outline {
+        display: inline-block;
+        padding: 10px 20px;
+        background: transparent;
+        color: var(--color-ocean);
+        border: 1px solid var(--color-ocean);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        transition: var(--transition-slow);
+        text-decoration: none !important;
+    }
 
-        .btn-ocean-primary {
+        .btn-luxury-outline:hover {
+            background: var(--color-ocean);
+            color: #ffffff !important;
+        }
+
+    /* Responsive */
+    @@media (max-width: 991px) {
+        .cart-item-row {
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .cart-prod-info {
+            padding: 0;
+            width: calc(100% - 110px);
+        }
+
+        .cart-item-actions {
             width: 100%;
-            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px dashed var(--color-border);
+            padding-top: 0.75rem;
         }
     }
 </style>
 
-<div class="cart-container">
-    <h3 class="font-weight-bolder text-dark text-uppercase mb-4" style="letter-spacing: 0.5px;">
-        <i class="fas fa-shopping-bag mr-2" style="color: var(--vibrantCyan);"></i>Giỏ hàng của bạn
-    </h3>
+<div class="cart-header" data-aos="fade-up">
+    <h1 class="cart-header__title">Giỏ Hàng Của Bạn</h1>
+    <div class="cart-header__line"></div>
+</div>
 
+<div class="cart-container">
     @if (TempData["ErrorMessage"] != null)
     {
-        <div class="alert alert-dark alert-dismissible fade show shadow-sm rounded-0 border-0 text-white" role="alert" style="background-color: #1e293b;">
+        <div class="alert alert-dark alert-dismissible fade show rounded-0 shadow-sm border-0 text-white font-weight-bold mb-4" role="alert" style="background-color: #0f172a;" data-aos="fade-up">
             <i class="fas fa-exclamation-circle mr-2 text-danger"></i>@TempData["ErrorMessage"]
             <button type="button" class="close text-white" data-dismiss="alert" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
@@ -244,128 +341,169 @@
 
     @if (items == null || !items.Any())
     {
-        <div class="cart-card text-center py-5">
-            <div class="mb-4" style="font-size: 4rem; color: #cbd5e1;">
-                <i class="fas fa-shopping-basket"></i>
+        <div class="cart-glass-card text-center py-5" data-aos="fade-up">
+            <div class="mb-4" style="font-size: 3.5rem; color: #cbd5e1;">
+                <i class="fas fa-shopping-bag"></i>
             </div>
-            <h4 class="text-dark font-weight-bold mb-4">Giỏ hàng của bạn đang trống</h4>
-            <a class="btn btn-ocean-primary text-uppercase" asp-controller="Product" asp-action="Product">
-                <i class="fas fa-arrow-left mr-2"></i>Tiếp tục mua sắm
+            <h3 class="font-weight-bold mb-2">Giỏ Hàng Đang Trống</h3>
+            <p class="text-muted mb-4">Chưa có sản phẩm nào được chọn trong giỏ hàng của bạn.</p>
+            <a class="btn-luxury-ocean d-inline-block px-5" style="width: auto;" asp-controller="Product" asp-action="Product">
+                <i class="fas fa-arrow-left mr-2"></i>Khám Phá Bộ Sưu Tập
             </a>
         </div>
     }
     else
     {
-        <div class="cart-card px-4">
-            <div class="table-responsive">
-                <table class="table cart-table mb-0">
-                    <thead>
-                        <tr>
-                            <th class="pl-0" style="width: 45%;">Sản phẩm</th>
-                            <th class="text-center">Đơn giá</th>
-                            <th class="text-center" style="width: 150px;">Số lượng</th>
-                            <th class="text-right">Số tiền</th>
-                            <th class="text-center pr-0" style="width: 80px;">Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in items)
-                        {
-                            var pv = _context.ProductVariants
-                            .FirstOrDefault(v => v.Id == item.ProductVariantId);
-                            var defaultImage = pv != null
-                            ? _context.ProductImages
-                            .Where(i => i.ProductId == pv.ProductId)
-                            .OrderBy(i => i.ImageOrder)
-                            .FirstOrDefault()
-                            : null;
+        <div class="row">
+            <!-- Danh sách Sản phẩm -->
+            <div class="col-lg-8 mb-4" data-aos="fade-up">
+                <div class="cart-glass-card">
+                    <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-2">
+                        <span class="text-uppercase font-weight-bold small text-muted" style="letter-spacing: 1px;">Sản phẩm trong giỏ (@items.Sum(i => i.Quantity))</span>
+                        <a asp-controller="Product" asp-action="Product" class="text-decoration-none small font-weight-bold" style="color: var(--color-ocean);">
+                            <i class="fas fa-plus mr-1"></i>Thêm sản phẩm khác
+                        </a>
+                    </div>
 
-                            var imageUrl = HuflitShopCore.Helpers.ImageRouteHelper.Resolve(defaultImage?.PublicId);
+                    @foreach (var item in items)
+                    {
+                        var pv = _context.ProductVariants.FirstOrDefault(v => v.Id == item.ProductVariantId);
+                        var defaultImage = pv != null
+                        ? _context.ProductImages
+                        .Where(i => i.ProductId == pv.ProductId)
+                        .OrderBy(i => i.ImageOrder)
+                        .FirstOrDefault()
+                        : null;
 
-                            <tr class="cart-row">
-                                <td class="pl-0">
-                                    <div class="d-flex align-items-center gap-3">
-                                        <div class="cart-prod-img">
-                                            <img src="@imageUrl" alt="@item.ProductName" />
-                                        </div>
-                                        <div>
-                                            <div class="font-weight-bold text-dark" style="font-size: 1.05rem; line-height: 1.4; margin-bottom: 4px;">
-                                                <a asp-controller="Product" asp-action="Details" asp-route-id="@pv?.ProductId" class="text-dark text-decoration-none">
-                                                    @item.ProductName
-                                                </a>
-                                            </div>
-                                            <div class="text-muted font-italic small">
-                                                Phân loại: @item.ColorName - Size @item.SizeName
-                                            </div>
-                                               </td>
-                                <td class="text-center">
+                        var imageUrl = HuflitShopCore.Helpers.ImageRouteHelper.Resolve(defaultImage?.PublicId);
+
+                        <div class="cart-item-row">
+                            <div class="cart-prod-thumb">
+                                <img src="@imageUrl" alt="@item.ProductName" />
+                            </div>
+
+                            <div class="cart-prod-info">
+                                <a asp-controller="Product" asp-action="Details" asp-route-id="@pv?.ProductId" class="cart-prod-title">
+                                    @item.ProductName
+                                </a>
+                                <div class="cart-prod-meta">
+                                    Màu: <strong class="text-dark">@item.ColorName</strong> &bull; Size: <strong class="text-dark">@item.SizeName</strong>
+                                </div>
+                                <div class="mt-2 d-md-none">
                                     @if (item.DiscountAmount > 0)
                                     {
-                                        <span class="text-muted text-decoration-line-through small" style="text-decoration: line-through; display: block; font-size: 0.85rem;">@item.OriginalPrice.ToString("N0") đ</span>
-                                        <span class="text-danger font-weight-bold">@item.Price.ToString("N0") đ</span>
+                                        <span class="price-original">@item.OriginalPrice.ToString("N0")₫</span>
                                     }
-                                    else
+                                    <span class="price-final">@item.Price.ToString("N0")₫</span>
+                                </div>
+                            </div>
+
+                            <div class="cart-item-actions d-none d-md-flex align-items-center gap-4">
+                                <div class="text-right mr-3">
+                                    @if (item.DiscountAmount > 0)
                                     {
-                                        <span>@item.Price.ToString("N0") đ</span>
+                                        <span class="price-original">@item.OriginalPrice.ToString("N0")₫</span>
                                     }
-                                </td>
-                                <td class="text-center">
-                                    <form asp-action="UpdateQuantity" asp-controller="Cart" method="post" id="qtyForm_@item.CartId" class="d-flex align-items-center justify-content-center m-0">
-                                        @Html.AntiForgeryToken()
-                                        <input type="hidden" name="cartId" value="@item.CartId" />
-                                        <div class="qty-modern">
-                                            <button type="button" onclick="changeCartQty('@item.CartId', -1)">-</button>
-                                            <input type="text" name="quantity" id="qtyInput_@item.CartId" value="@item.Quantity" readonly />
-                                            <button type="button" onclick="changeCartQty('@item.CartId', 1)">+</button>
-                                        </div>
-                                    </form>
-                                </td>
-                                <td class="text-right font-weight-bold text-danger" style="font-size: 1.1rem;">@item.LineTotal.ToString("N0") đ</td>
-                                <td class="text-center pr-0">
+                                    <span class="price-final">@item.Price.ToString("N0")₫</span>
+                                </div>
+
+                                <form asp-action="UpdateQuantity" asp-controller="Cart" method="post" id="qtyForm_@item.CartId" class="m-0">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="cartId" value="@item.CartId" />
+                                    <div class="qty-control">
+                                        <button type="button" onclick="changeCartQty('@item.CartId', -1)">-</button>
+                                        <input type="text" name="quantity" id="qtyInput_@item.CartId" value="@item.Quantity" readonly />
+                                        <button type="button" onclick="changeCartQty('@item.CartId', 1)">+</button>
+                                    </div>
+                                </form>
+
+                                <div class="price-line-total min-w-100 text-right ml-3" style="min-width: 110px;">
+                                    @item.LineTotal.ToString("N0")₫
+                                </div>
+
+                                <form asp-action="Remove" asp-controller="Cart" method="post" class="m-0">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="cartId" value="@item.CartId" />
+                                    <button class="btn-cart-remove" type="submit" title="Xóa khỏi giỏ">
+                                        <i class="far fa-trash-alt"></i>
+                                    </button>
+                                </form>
+                            </div>
+
+                            <!-- Layout Mobile View -->
+                            <div class="cart-item-actions d-md-none">
+                                <form asp-action="UpdateQuantity" asp-controller="Cart" method="post" id="qtyForm_mob_@item.CartId" class="m-0">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="cartId" value="@item.CartId" />
+                                    <div class="qty-control">
+                                        <button type="button" onclick="changeCartQty('@item.CartId', -1)">-</button>
+                                        <input type="text" name="quantity" id="qtyInput_mob_@item.CartId" value="@item.Quantity" readonly />
+                                        <button type="button" onclick="changeCartQty('@item.CartId', 1)">+</button>
+                                    </div>
+                                </form>
+
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="price-line-total">@item.LineTotal.ToString("N0")₫</span>
                                     <form asp-action="Remove" asp-controller="Cart" method="post" class="m-0">
                                         @Html.AntiForgeryToken()
                                         <input type="hidden" name="cartId" value="@item.CartId" />
-                                        <button class="btn-delete-cart" type="submit" title="Xóa sản phẩm">
-                                            <i class="fas fa-trash-alt"></i>
+                                        <button class="btn-cart-remove" type="submit">
+                                            <i class="far fa-trash-alt"></i>
                                         </button>
                                     </form>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Sticky bar at bottom -->
-        <div class="cart-summary-bar flex-column align-items-end" style="height: auto; padding: 1.5rem 2rem;">
-            @if (ViewBag.ComboDiscount is decimal comboDisc && comboDisc > 0)
-            {
-                <div class="d-flex flex-column align-items-end w-100 mb-2 border-bottom pb-2 text-muted" style="font-size: 0.95rem;">
-                    <div>Tạm tính: <span class="font-weight-bold text-dark">@(((decimal)ViewBag.SubTotal).ToString("N0")) đ</span></div>
-                    <div class="text-danger">Giảm giá Combo: <span>-@(comboDisc.ToString("N0")) đ</span></div>
-                    @if (ViewBag.ComboDetails is List<string> details && details.Any())
-                    {
-                        <div class="small font-italic text-success">
-                            Combo áp dụng: @string.Join(", ", details)
+                                </div>
+                            </div>
                         </div>
                     }
                 </div>
-            }
-            <div class="d-flex justify-content-between align-items-center w-100 flex-wrap gap-3">
-                <div>
-                    <a class="btn btn-ocean-outline" asp-controller="Product" asp-action="Product">
-                        <i class="fas fa-arrow-left mr-2"></i>Mua thêm
-                    </a>
-                </div>
-                <div class="d-flex align-items-center flex-wrap justify-content-end gap-3" style="gap: 1.5rem !important;">
-                    <div class="cart-summary-price-box d-flex align-items-center">
-                        <span class="cart-summary-total-label">Tổng thanh toán (<span class="text-dark">@items.Sum(i => i.Quantity)</span> sản phẩm):</span>
-                        <span class="cart-summary-total-price">@total.ToString("N0") đ</span>
+            </div>
+
+            <!-- Tổng Tiền & Đặt Hàng -->
+            <div class="col-lg-4" data-aos="fade-up" data-aos-delay="100">
+                <div class="summary-sidebar">
+                    <h4 class="summary-title">Tóm Tắt Đơn Hàng</h4>
+
+                    <div class="summary-row text-muted">
+                        <span>Số lượng sản phẩm:</span>
+                        <span class="font-weight-bold text-dark">@items.Sum(i => i.Quantity)</span>
                     </div>
-                    <a class="btn btn-ocean-primary text-uppercase" asp-controller="Order" asp-action="Checkout">
-                        Thanh Toán Ngay
+
+                    @if (ViewBag.SubTotal is decimal subTotal)
+                    {
+                        <div class="summary-row text-muted">
+                            <span>Tạm tính:</span>
+                            <span class="font-weight-bold text-dark">@subTotal.ToString("N0")₫</span>
+                        </div>
+                    }
+
+                    @if (ViewBag.ComboDiscount is decimal comboDisc && comboDisc > 0)
+                    {
+                        <div class="summary-row text-danger">
+                            <span>Ưu đãi Combo:</span>
+                            <span class="font-weight-bold">-@comboDisc.ToString("N0")₫</span>
+                        </div>
+                        @if (ViewBag.ComboDetails is List<string> details && details.Any())
+                        {
+                            <div class="p-2 mb-3 bg-light border text-muted small">
+                                <i class="fas fa-tags mr-1" style="color: var(--color-cyan);"></i>@string.Join(", ", details)
+                            </div>
+                        }
+                    }
+
+                    <div class="summary-row pt-3 border-top mt-3" style="font-size: 1.1rem;">
+                        <span class="font-weight-bold text-uppercase">Tổng thanh toán:</span>
+                        <span class="font-weight-bold" style="font-family: var(--font-heading); font-size: 1.6rem; color: #ef4444;">
+                            @total.ToString("N0")₫
+                        </span>
+                    </div>
+
+                    <a class="btn-luxury-ocean mt-4" asp-controller="Order" asp-action="Checkout">
+                        Tiến Hành Thanh Toán
                     </a>
+
+                    <div class="text-center mt-3">
+                        <small class="text-muted"><i class="fas fa-shield-alt mr-1" style="color: var(--color-cyan);"></i>Thanh toán an toàn & bảo mật 100%</small>
+                    </div>
                 </div>
             </div>
         </div>
@@ -375,28 +513,30 @@
 @if (hasAbandonedCart)
 {
     <!-- Abandoned Cart Promo Modal -->
-    <div class="modal fade show" id="abandonedCartModal" tabindex="-1" role="dialog" style="display: block; background: rgba(0,0,0,0.6); z-index: 1050;" aria-modal="true">
+    <div class="modal fade show" id="abandonedCartModal" tabindex="-1" role="dialog" style="display: block; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 1050;" aria-modal="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content border-0 rounded-lg shadow-lg overflow-hidden" style="border-radius: 12px;">
-                <div class="modal-header border-0 text-white p-4" style="background: linear-gradient(135deg, var(--vibrantBlue), var(--vibrantCyan));">
-                    <h5 class="modal-title font-weight-bold text-white"><i class="fas fa-gift mr-2"></i>ƯU ĐÃI ĐẶC BIỆT DÀNH CHO BẠN!</h5>
-                    <button type="button" class="close text-white" onclick="closeAbandonedCartModal()" aria-label="Close" style="background: none; border: none; font-size: 1.5rem; line-height: 1;">
+            <div class="modal-content border-0 shadow-2xl overflow-hidden" style="border-radius: 0;">
+                <div class="modal-header border-0 text-white p-4" style="background: var(--ocean-gradient);">
+                    <h5 class="modal-title font-weight-bold text-white" style="font-family: var(--font-heading); text-transform: uppercase; letter-spacing: 1px;">
+                        <i class="fas fa-gift mr-2"></i>Ưu Đãi Dành Riêng Cho Bạn
+                    </h5>
+                    <button type="button" class="close text-white opacity-100" onclick="closeAbandonedCartModal()" aria-label="Close" style="outline: none;">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body p-4 text-center">
-                    <div class="mb-3" style="font-size: 3.5rem; color: var(--vibrantCyan);">
+                    <div class="mb-3" style="font-size: 3rem; color: var(--color-cyan);">
                         <i class="fas fa-shopping-basket"></i>
                     </div>
-                    <h5 class="font-weight-bold text-dark mb-3">Bạn bỏ quên giỏ hàng?</h5>
-                    <p class="text-secondary mb-4" style="line-height: 1.6;">Chúng tôi thấy sản phẩm vẫn đang chờ bạn trong giỏ hàng. Tặng bạn mã giảm giá **10%** để hoàn tất đơn hàng ngay!</p>
-                    <div class="p-3 bg-light border border-dashed border-primary rounded mb-3 d-inline-block" style="border: 2px dashed var(--vibrantBlue); border-radius: 8px;">
-                        <code class="font-weight-bold text-primary" style="font-size: 1.5rem; letter-spacing: 1px; font-family: monospace;">QUENGIORHANG</code>
+                    <h4 class="font-weight-bold text-dark mb-2" style="font-family: var(--font-heading);">Bạn Bỏ Quên Sản Phẩm?</h4>
+                    <p class="text-muted mb-4" style="line-height: 1.6; font-size: 0.95rem;">Hoàn tất đơn hàng ngay trong hôm nay và nhập mã giảm giá bên dưới để nhận ngay ưu đãi **10%**!</p>
+                    <div class="p-3 mb-3 d-inline-block" style="border: 2px dashed var(--color-ocean); background: #f0f9ff;">
+                        <code class="font-weight-bold" style="font-size: 1.4rem; letter-spacing: 2px; color: var(--color-ocean);">QUENGIORHANG</code>
                     </div>
                 </div>
                 <div class="modal-footer border-0 p-4 justify-content-center">
-                    <button type="button" class="btn btn-ocean-primary text-uppercase px-4 font-weight-bold" onclick="copyAndClose()" style="padding: 12px 24px;">
-                        Sao chép và Thanh toán ngay
+                    <button type="button" class="btn-luxury-ocean" onclick="copyAndClose()">
+                        Sao chép mã & Thanh toán
                     </button>
                 </div>
             </div>
@@ -404,39 +544,45 @@
     </div>
 }
 
-<script>
-    function changeCartQty(cartId, delta) {
-        const input = document.getElementById('qtyInput_' + cartId);
-        let val = parseInt(input.value) || 1;
-        val += delta;
-
-        // Không cho giảm xuống dưới 1
-        if (val < 1) val = 1;
-
-        // Nếu giá trị không đổi thì không submit
-        if (val === parseInt(input.value)) return;
-
-        input.value = val;
-
-        // Auto submit form to save changes
-        document.getElementById('qtyForm_' + cartId).submit();
-    }
-
-    function closeAbandonedCartModal() {
-        const modal = document.getElementById('abandonedCartModal');
-        if (modal) {
-            modal.style.display = 'none';
-            modal.classList.remove('show');
-        }
-    }
-
-    function copyAndClose() {
-        navigator.clipboard.writeText("QUENGIORHANG").then(function() {
-            alert("Đã sao chép mã giảm giá: QUENGIORHANG");
-            closeAbandonedCartModal();
-        }, function() {
-            alert("Vui lòng nhớ mã giảm giá: QUENGIORHANG");
-            closeAbandonedCartModal();
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <script>
+        $(document).ready(function () {
+            AOS.init({ once: true, offset: 50, duration: 800 });
         });
-    }
-</script>
+
+        function changeCartQty(cartId, delta) {
+            const input = document.getElementById('qtyInput_' + cartId) || document.getElementById('qtyInput_mob_' + cartId);
+            if (!input) return;
+
+            let val = parseInt(input.value) || 1;
+            val += delta;
+
+            if (val < 1) val = 1;
+            if (val === parseInt(input.value)) return;
+
+            input.value = val;
+
+            const form = document.getElementById('qtyForm_' + cartId) || document.getElementById('qtyForm_mob_' + cartId);
+            if (form) form.submit();
+        }
+
+        function closeAbandonedCartModal() {
+            const modal = document.getElementById('abandonedCartModal');
+            if (modal) {
+                modal.style.display = 'none';
+                modal.classList.remove('show');
+            }
+        }
+
+        function copyAndClose() {
+            navigator.clipboard.writeText("QUENGIORHANG").then(function () {
+                alert("Đã sao chép mã giảm giá: QUENGIORHANG");
+                closeAbandonedCartModal();
+            }, function () {
+                alert("Mã giảm giá của bạn là: QUENGIORHANG");
+                closeAbandonedCartModal();
+            });
+        }
+    </script>
+}

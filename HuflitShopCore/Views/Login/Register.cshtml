@@ -4,47 +4,133 @@
     ViewData["Title"] = "Đăng ký";
 }
 
-<h1 class="auth-form-box__title">Tạo tài khoản</h1>
-<p class="auth-form-box__sub">Đăng ký để trải nghiệm mua sắm cao cấp cùng Huflit Shop</p>
+<style>
+    .title {
+        text-align: center;
+        font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande", "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+        margin: 0 0 20px 0;
+        font-size: 28px;
+        font-weight: 800;
+        color: #000;
+    }
+
+    .form-uiverse {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        margin-bottom: 15px;
+    }
+
+    .input-uiverse {
+        border-radius: 20px;
+        border: 1px solid #c0c0c0;
+        outline: 0 !important;
+        box-sizing: border-box;
+        padding: 12px 15px;
+        width: 100%;
+        font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande", "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+        font-size: 13px;
+        transition: border-color 0.2s;
+    }
+
+        .input-uiverse:focus {
+            border-color: teal;
+        }
+
+    .form-btn {
+        padding: 12px 15px;
+        font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande", "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+        border-radius: 20px;
+        border: 0 !important;
+        outline: 0 !important;
+        background: teal;
+        color: white;
+        cursor: pointer;
+        box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+        font-weight: 700;
+        font-size: 13px;
+        transition: all 0.2s ease;
+        width: 100%;
+    }
+
+        .form-btn:active {
+            box-shadow: none;
+        }
+
+    .sign-up-label {
+        margin: 12px 0 0 0;
+        font-size: 11px;
+        color: #747474;
+        text-align: center;
+        font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande", "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+    }
+
+    .sign-up-link {
+        margin-left: 4px;
+        font-size: 11px;
+        text-decoration: underline;
+        text-decoration-color: teal;
+        color: teal;
+        cursor: pointer;
+        font-weight: 800;
+        font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande", "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+    }
+
+    .auth-error-box {
+        font-size: 11px;
+        color: #d9534f;
+        margin-bottom: 12px;
+        font-family: sans-serif;
+    }
+
+        .auth-error-box ul {
+            padding-left: 15px;
+            margin-bottom: 0;
+        }
+</style>
+
+<p class="title">Create Account</p>
 
 @if (!ViewData.ModelState.IsValid)
 {
-    <div class="auth-alert">
+    <div class="auth-error-box">
         <div asp-validation-summary="ModelOnly"></div>
     </div>
 }
 
-<form method="post" id="form-register" asp-action="Register">
+<form class="form-uiverse" method="post" id="form-register" asp-action="Register">
     @Html.AntiForgeryToken()
-    <div class="auth-field">
-        <label>Họ và tên</label>
-        <input asp-for="Name" type="text" placeholder="Nguyễn Thị Lan" autocomplete="name" />
-        <span asp-validation-for="Name" class="text-danger"></span>
-    </div>
-    <div class="auth-field">
-        <label>Số điện thoại</label>
-        <input asp-for="PhoneNumber" type="tel" placeholder="0912 345 678" autocomplete="tel" />
-        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
-    </div>
-    <div class="auth-field">
-        <label>Email</label>
-        <input asp-for="Email" type="email" placeholder="example@email.com" autocomplete="email" />
-        <span asp-validation-for="Email" class="text-danger"></span>
-    </div>
-    <div class="auth-field">
-        <label>Mật khẩu</label>
-        <input asp-for="Password" type="password" placeholder="Tối thiểu 6 ký tự" autocomplete="new-password" />
-        <span asp-validation-for="Password" class="text-danger"></span>
-    </div>
-    <div class="auth-field">
-        <label>Nhập lại mật khẩu</label>
-        <input asp-for="ConfirmPassword" type="password" placeholder="••••••••" autocomplete="new-password" />
-        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+
+    <div>
+        <input asp-for="Name" type="text" class="input-uiverse" placeholder="Full Name" required autocomplete="name" />
+        <span asp-validation-for="Name" class="text-danger small"></span>
     </div>
 
-    <button type="submit" class="auth-submit" style="margin-top: 8px;">Tạo tài khoản</button>
+    <div>
+        <input asp-for="PhoneNumber" type="tel" class="input-uiverse" placeholder="Phone Number" required autocomplete="tel" />
+        <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+    </div>
+
+    <div>
+        <input asp-for="Email" type="email" class="input-uiverse" placeholder="Email" required autocomplete="email" />
+        <span asp-validation-for="Email" class="text-danger small"></span>
+    </div>
+
+    <div>
+        <input asp-for="Password" type="password" class="input-uiverse" placeholder="Password" required autocomplete="new-password" />
+        <span asp-validation-for="Password" class="text-danger small"></span>
+    </div>
+
+    <div>
+        <input asp-for="ConfirmPassword" type="password" class="input-uiverse" placeholder="Confirm Password" required autocomplete="new-password" />
+        <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+    </div>
+
+    <button type="submit" class="form-btn" style="margin-top: 5px;">Sign up</button>
 </form>
 
-<p class="auth-switch">
-    Đã có tài khoản? <a asp-controller="Login" asp-action="Login">Đăng nhập</a>
+<p class="sign-up-label">
+    Already have an account?
+    <a asp-controller="Login" asp-action="Login" class="sign-up-link">Log in</a>
 </p>

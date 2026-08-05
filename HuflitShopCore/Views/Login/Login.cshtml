@@ -4,39 +4,196 @@
     ViewData["Title"] = "Đăng nhập";
 }
 
-<h1 class="auth-form-box__title">Đăng nhập</h1>
-<p class="auth-form-box__sub">Chào mừng bạn trở lại Huflit Shop!</p>
+<style>
+    .title {
+        text-align: center;
+        font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande", "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+        margin: 0 0 25px 0;
+        font-size: 28px;
+        font-weight: 800;
+        color: #000;
+    }
+
+    .form-uiverse {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        margin-bottom: 15px;
+    }
+
+    .input-uiverse {
+        border-radius: 20px;
+        border: 1px solid #c0c0c0;
+        outline: 0 !important;
+        box-sizing: border-box;
+        padding: 12px 15px;
+        width: 100%;
+        font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande", "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+        font-size: 13px;
+        transition: border-color 0.2s;
+    }
+
+        .input-uiverse:focus {
+            border-color: teal;
+        }
+
+    .page-link-label {
+        cursor: pointer;
+        font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande", "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+        font-size: 11px;
+        font-weight: 700;
+        color: #747474;
+        text-decoration: none;
+    }
+
+        .page-link-label:hover {
+            color: #000;
+            text-decoration: underline;
+        }
+
+    .form-btn {
+        padding: 12px 15px;
+        font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande", "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+        border-radius: 20px;
+        border: 0 !important;
+        outline: 0 !important;
+        background: teal;
+        color: white;
+        cursor: pointer;
+        box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+        font-weight: 700;
+        font-size: 13px;
+        transition: all 0.2s ease;
+        width: 100%;
+    }
+
+        .form-btn:active {
+            box-shadow: none;
+        }
+
+    .sign-up-label {
+        margin: 10px 0 0 0;
+        font-size: 11px;
+        color: #747474;
+        text-align: center;
+        font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande", "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+    }
+
+    .sign-up-link {
+        margin-left: 4px;
+        font-size: 11px;
+        text-decoration: underline;
+        text-decoration-color: teal;
+        color: teal;
+        cursor: pointer;
+        font-weight: 800;
+        font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande", "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+    }
+
+    .buttons-container {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        margin-top: 18px;
+        gap: 12px;
+    }
+
+    .google-login-button {
+        border-radius: 20px;
+        box-sizing: border-box;
+        padding: 10px 15px;
+        box-shadow: rgba(0, 0, 0, 0.16) 0px 10px 36px 0px, rgba(0, 0, 0, 0.06) 0px 0px 0px 1px;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande", "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+        font-size: 11px;
+        gap: 8px;
+        background-color: #fff;
+        border: 2px solid #747474;
+        color: #000;
+        text-decoration: none !important;
+        font-weight: 700;
+    }
+
+        .google-login-button:hover {
+            background-color: #f8f9fa;
+            color: #000;
+        }
+
+    .google-icon {
+        font-size: 18px;
+        margin-bottom: 1px;
+    }
+
+    .auth-error-box {
+        font-size: 11px;
+        color: #d9534f;
+        margin-bottom: 12px;
+        font-family: sans-serif;
+    }
+
+        .auth-error-box ul {
+            padding-left: 15px;
+            margin-bottom: 0;
+        }
+</style>
+
+<p class="title">Welcome back</p>
 
 @if (!ViewData.ModelState.IsValid)
 {
-    <div class="auth-alert">
+    <div class="auth-error-box">
         <div asp-validation-summary="All"></div>
     </div>
 }
 
-<form method="post" id="form-login">
+<form class="form-uiverse" method="post" id="form-login">
     @Html.AntiForgeryToken()
-    <div class="auth-field">
-        <label>Email đăng nhập</label>
-        <input asp-for="Email" type="email" placeholder="example@email.com" autocomplete="email" />
-        <span asp-validation-for="Email" class="text-danger"></span>
-    </div>
-    <div class="auth-field">
-        <label>Mật khẩu</label>
-        <input asp-for="Password" type="password" placeholder="••••••••" autocomplete="current-password" />
-        <span asp-validation-for="Password" class="text-danger"></span>
+
+    <div>
+        <input asp-for="Email" type="email" class="input-uiverse" placeholder="Email" required autocomplete="email" />
+        <span asp-validation-for="Email" class="text-danger small"></span>
     </div>
 
-    <div class="auth-options">
-        <label>
-            <input type="checkbox" asp-for="RememberMe" /> Ghi nhớ tôi
+    <div>
+        <input asp-for="Password" type="password" class="input-uiverse" placeholder="Password" required autocomplete="current-password" />
+        <span asp-validation-for="Password" class="text-danger small"></span>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center">
+        <label style="font-size: 11px; color: #747474; font-family: 'Lucida Sans', sans-serif; cursor: pointer; margin: 0;">
+            <input type="checkbox" asp-for="RememberMe" style="accent-color: teal;" /> Remember me
         </label>
-        <a asp-controller="Login" asp-action="ForgotPassword">Quên mật khẩu?</a>
+        <p style="margin: 0;">
+            <a asp-controller="Login" asp-action="ForgotPassword" class="page-link-label">Forgot Password?</a>
+        </p>
     </div>
 
-    <button type="submit" class="auth-submit">Đăng nhập</button>
+    <button type="submit" class="form-btn">Log in</button>
 </form>
 
-<p class="auth-switch">
-    Chưa có tài khoản? <a asp-controller="Login" asp-action="Register">Đăng ký ngay</a>
+<p class="sign-up-label">
+    Don't have an account?
+    <a asp-controller="Login" asp-action="Register" class="sign-up-link">Sign up</a>
 </p>
+
+<div class="buttons-container">
+    <a asp-controller="Login" asp-action="GoogleLogin" class="google-login-button">
+        <svg stroke="currentColor" fill="currentColor" stroke-width="0" version="1.1" x="0px" y="0px" class="google-icon" viewBox="0 0 48 48" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+            <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12
+	c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24
+	c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"></path>
+            <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657
+	C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"></path>
+            <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36
+	c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"></path>
+            <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571
+	c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"></path>
+        </svg>
+        <span>Log in with Google</span>
+    </a>
+</div>

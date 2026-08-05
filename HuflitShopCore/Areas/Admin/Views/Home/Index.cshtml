@@ -1,434 +1,454 @@
 @model HuflitShopCore.DTOs.DashboardDTO
 @{
-    ViewData["Title"] = "Tổng quan";
+    ViewData["Title"] = "Tổng quan quản trị";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
 
-<!-- Content Row -->
-<div class="row mt-4">
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
+<style>
+    :root {
+        --admin-ocean: #2563eb;
+        --admin-cyan: #06b6d4;
+        --admin-dark: #0f172a;
+        --admin-bg: #f8fafc;
+        --admin-card-border: #e2e8f0;
+        --admin-gradient: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%);
+        --admin-transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    body {
+        font-family: 'Jost', sans-serif;
+        background-color: var(--admin-bg);
+        color: var(--admin-dark);
+    }
+
+    /* Summary Stat Cards */
+    .stat-card-luxury {
+        background: #ffffff;
+        border: 1px solid var(--admin-card-border);
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        box-shadow: 0 4px 20px -5px rgba(15, 23, 42, 0.05);
+        transition: var(--admin-transition);
+        position: relative;
+        overflow: hidden;
+    }
+
+        .stat-card-luxury:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.12);
+            border-color: var(--admin-cyan);
+        }
+
+        .stat-card-luxury::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--admin-gradient);
+        }
+
+    .stat-card-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 0.5rem;
+        background: rgba(37, 99, 235, 0.08);
+        color: var(--admin-ocean);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+    }
+
+    .stat-card-title {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #64748b;
+        margin-bottom: 0.35rem;
+    }
+
+    .stat-card-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--admin-dark);
+    }
+
+    /* Custom Chart & Content Cards */
+    .dashboard-card {
+        background: #ffffff;
+        border: 1px solid var(--admin-card-border);
+        border-radius: 0.5rem;
+        box-shadow: 0 4px 20px -5px rgba(15, 23, 42, 0.05);
+        margin-bottom: 1.75rem;
+    }
+
+    .dashboard-card-header {
+        background: #ffffff;
+        border-bottom: 1px solid var(--admin-card-border);
+        padding: 1.25rem 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .dashboard-card-title {
+        font-size: 1rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--admin-dark);
+        margin: 0;
+    }
+
+    .dashboard-card-body {
+        padding: 1.5rem;
+    }
+
+    /* Custom Rating Progress Bar */
+    .star-progress-label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--admin-dark);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 0.4rem;
+    }
+
+    .progress-bar-luxury {
+        height: 8px;
+        border-radius: 4px;
+        background-color: #f1f5f9;
+        overflow: hidden;
+        margin-bottom: 1.25rem;
+    }
+
+    .progress-bar-fill {
+        height: 100%;
+        background: var(--admin-gradient);
+        border-radius: 4px;
+        transition: width 1s ease-in-out;
+    }
+
+    .star-gold {
+        color: #f59e0b;
+    }
+</style>
+
+<div class="container-fluid pt-4">
+    <!-- Top Greeting Banner -->
     @if (!Model.IsAdmin)
     {
-        <div class="col-12">
-            <div class="alert alert-info">
-                <h5>Xin chào, Nhân viên!</h5>
-                <p>Chào mừng bạn đến với trang quản trị. Tại đây, bạn có thể xem và đăng ký ca làm việc, chấm công cũng như theo dõi bảng lương của mình ở menu bên trái.</p>
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="alert shadow-sm border-0 text-white p-4" style="background: var(--admin-gradient); border-radius: 0.5rem;">
+                    <h5 class="font-weight-bold mb-2"><i class="fas fa-user-shield mr-2"></i>Xin chào, Nhân viên!</h5>
+                    <p class="mb-0 opacity-90">Chào mừng bạn đến với bảng điều khiển. Bạn có thể sử dụng menu bên trái để quản lý ca làm việc, chấm công và kiểm tra thông tin cá nhân.</p>
+                </div>
             </div>
         </div>
     }
+
+    <!-- Stat Cards Overview Row -->
+    <div class="row">
+        @if (Model.IsAdmin)
+        {
+            <!-- Monthly Revenue -->
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="stat-card-luxury">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="stat-card-title">Doanh Thu Tháng @DateTime.Now.Month</div>
+                            <div class="stat-card-value">@Model.CurrentMonthRevenue.ToString("N0")₫</div>
+                        </div>
+                        <div class="stat-card-icon">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Revenue -->
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="stat-card-luxury">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="stat-card-title">Doanh Thu Năm @DateTime.Now.Year</div>
+                            <div class="stat-card-value">@Model.TotalRevenue.ToString("N0")₫</div>
+                        </div>
+                        <div class="stat-card-icon" style="background: rgba(6, 182, 212, 0.1); color: var(--admin-cyan);">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- Stock Percentage -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="stat-card-luxury">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="w-100 mr-3">
+                        <div class="stat-card-title">Tỷ Lệ Tồn Kho</div>
+                        <div class="stat-card-value mb-2">@Model.StockPercentage%</div>
+                        <div class="progress-bar-luxury mb-0">
+                            <div class="progress-bar-fill" style="width: @Model.StockPercentage%"></div>
+                        </div>
+                    </div>
+                    <div class="stat-card-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">
+                        <i class="fas fa-boxes"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Reviews -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="stat-card-luxury">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="stat-card-title">Phản Hồi & Đánh Giá</div>
+                        <div class="stat-card-value">@Model.TotalReviews</div>
+                    </div>
+                    <div class="stat-card-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     @if (Model.IsAdmin)
     {
-        <!-- Earnings (Monthly) Card Example -->
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-primary shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                Doanh thu tháng @DateTime.Now.Month
-                            </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.CurrentMonthRevenue.ToString("N0") Đ</div>
+        <!-- Charts Row -->
+        <div class="row">
+            <!-- Line Chart Area -->
+            <div class="col-xl-8 col-lg-7">
+                <div class="dashboard-card">
+                    <div class="dashboard-card-header">
+                        <h6 class="dashboard-card-title"><i class="fas fa-chart-area mr-2" style="color: var(--admin-ocean);"></i>Biểu Đồ Doanh Thu @DateTime.Now.Year</h6>
+                    </div>
+                    <div class="dashboard-card-body">
+                        <div style="height: 320px; position: relative;">
+                            <canvas id="myAreaChart"></canvas>
                         </div>
-                        <div class="col-auto">
-                            <i class="fas fa-dollar-sign fa-2x" style="color: #f6c23e;"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pie Chart Area -->
+            <div class="col-xl-4 col-lg-5">
+                <div class="dashboard-card">
+                    <div class="dashboard-card-header">
+                        <h6 class="dashboard-card-title"><i class="fas fa-chart-pie mr-2" style="color: var(--admin-cyan);"></i>Cơ Cấu Tháng @DateTime.Now.Month</h6>
+                    </div>
+                    <div class="dashboard-card-body">
+                        <div style="height: 240px; position: relative;" class="pt-2">
+                            <canvas id="myPieChart"></canvas>
+                        </div>
+                        <div class="mt-4 text-center small d-flex justify-content-around">
+                            <span><i class="fas fa-circle mr-1" style="color: #2563eb;"></i> Doanh thu</span>
+                            <span><i class="fas fa-circle mr-1" style="color: #10b981;"></i> Lợi nhuận</span>
+                            <span><i class="fas fa-circle mr-1" style="color: #06b6d4;"></i> Vốn</span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Earnings (Monthly) Card Example -->
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-success shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                Doanh thu năm @DateTime.Now.Year
-                            </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalRevenue.ToString("N0") Đ</div>
+        <!-- Analytics Details Row -->
+        <div class="row">
+            <!-- Store Ratings BreakDown -->
+            <div class="col-lg-6 mb-4">
+                <div class="dashboard-card h-100 mb-0">
+                    <div class="dashboard-card-header">
+                        <h6 class="dashboard-card-title"><i class="fas fa-star mr-2 star-gold"></i>Phân Phối Đánh Giá Khách Hàng</h6>
+                    </div>
+                    <div class="dashboard-card-body">
+                        <div class="star-progress-label">
+                            <span>
+                                <i class="fas fa-star star-gold"></i><i class="fas fa-star star-gold"></i><i class="fas fa-star star-gold"></i><i class="fas fa-star star-gold"></i><i class="fas fa-star star-gold"></i>
+                                <span class="ml-2 font-weight-bold">5 Sao</span>
+                            </span>
+                            <span class="font-weight-bold">@Model.FiveStarPercentage%</span>
                         </div>
-                        <div class="col-auto">
-                            <i class="fas fa-dollar-sign fa-2x" style="color: #f6c23e;"></i>
+                        <div class="progress-bar-luxury">
+                            <div class="progress-bar-fill" style="width: @Model.FiveStarPercentage%;"></div>
                         </div>
+
+                        <div class="star-progress-label">
+                            <span>
+                                <i class="fas fa-star star-gold"></i><i class="fas fa-star star-gold"></i><i class="fas fa-star star-gold"></i><i class="fas fa-star star-gold"></i>
+                                <span class="ml-2 font-weight-bold">4 Sao</span>
+                            </span>
+                            <span class="font-weight-bold">@Model.FourStarPercentage%</span>
+                        </div>
+                        <div class="progress-bar-luxury">
+                            <div class="progress-bar-fill" style="width: @Model.FourStarPercentage%;"></div>
+                        </div>
+
+                        <div class="star-progress-label">
+                            <span>
+                                <i class="fas fa-star star-gold"></i><i class="fas fa-star star-gold"></i><i class="fas fa-star star-gold"></i>
+                                <span class="ml-2 font-weight-bold">3 Sao</span>
+                            </span>
+                            <span class="font-weight-bold">@Model.ThreeStarPercentage%</span>
+                        </div>
+                        <div class="progress-bar-luxury">
+                            <div class="progress-bar-fill" style="width: @Model.ThreeStarPercentage%;"></div>
+                        </div>
+
+                        <div class="star-progress-label">
+                            <span>
+                                <i class="fas fa-star star-gold"></i><i class="fas fa-star star-gold"></i>
+                                <span class="ml-2 font-weight-bold">2 Sao</span>
+                            </span>
+                            <span class="font-weight-bold">@Model.TwoStarPercentage%</span>
+                        </div>
+                        <div class="progress-bar-luxury">
+                            <div class="progress-bar-fill" style="width: @Model.TwoStarPercentage%;"></div>
+                        </div>
+
+                        <div class="star-progress-label mb-1">
+                            <span>
+                                <i class="fas fa-star star-gold"></i>
+                                <span class="ml-2 font-weight-bold">1 Sao</span>
+                            </span>
+                            <span class="font-weight-bold">@Model.OneStarPercentage%</span>
+                        </div>
+                        <div class="progress-bar-luxury mb-0">
+                            <div class="progress-bar-fill" style="width: @Model.OneStarPercentage%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Promotion Banner -->
+            <div class="col-lg-6 mb-4">
+                <div class="dashboard-card h-100 mb-0">
+                    <div class="dashboard-card-header">
+                        <h6 class="dashboard-card-title"><i class="fas fa-bullhorn mr-2" style="color: var(--admin-ocean);"></i>Chương Trình Khuyến Mãi</h6>
+                    </div>
+                    <div class="dashboard-card-body text-center d-flex flex-column justify-content-center align-items-center">
+                        <div class="mb-3">
+                            <i class="fas fa-ticket-alt text-primary" style="font-size: 3.5rem;"></i>
+                        </div>
+                        @if (!Model.HasActivePromotion)
+                        {
+                            <p class="text-muted font-weight-bold">Hiện chưa có chương trình khuyến mãi nào được kích hoạt.</p>
+                        }
+                        else
+                        {
+                            string displayValue = Model.ActivePromotionType == "Percent" ? Model.ActivePromotionValue.ToString("0.##") + "%" : Model.ActivePromotionValue.ToString("N0") + "₫";
+                            <h5 class="font-weight-bold text-dark mb-2">Đang Áp Dụng Khuyến Mãi</h5>
+                            <p class="text-muted">Cửa hàng đang ưu đãi giảm trực tiếp <strong class="text-danger">@displayValue</strong> trên các đơn hàng đủ điều kiện.</p>
+                        }
+
+                        <a class="btn text-white px-4 py-2 mt-2 font-weight-bold text-uppercase" style="background: var(--admin-gradient); font-size: 0.8rem; letter-spacing: 1px;" asp-action="Index" asp-controller="Promotions" asp-area="Admin">
+                            Quản lý khuyến mãi &rarr;
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
     }
-
-
-    <!-- Earnings (Monthly) Card Example -->
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-info shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                            Tồn kho
-                        </div>
-                        <div class="row no-gutters align-items-center">
-                            <div class="col-auto">
-                                <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">@Model.StockPercentage%</div>
-                            </div>
-                            <div class="col">
-                                <div class="progress progress-sm mr-2">
-                                    <div class="progress-bar bg-info" role="progressbar"
-                                         style="width: @Model.StockPercentage%" aria-valuenow="@Model.StockPercentage" aria-valuemin="0"
-                                         aria-valuemax="100"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="fas fa-clipboard-list fa-2x" style="color: #2E2EFE;"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Pending Requests Card Example -->
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-warning shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                            Phản hồi
-                        </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalReviews</div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="fas fa-comments fa-2x" style="color: #088A08;"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
-
-
-
-@if (Model.IsAdmin)
-{
-    <!-- Content Row -->
-
-    <div class="row">
-
-        <!-- Area Chart -->
-        <div class="col-xl-8 col-lg-7">
-            <div class="card shadow mb-4">
-                <!-- Card Header - Dropdown -->
-                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary">Thống kê doanh thu @DateTime.Now.Year</h6>
-                </div>
-                <!-- Card Body -->
-                <div class="card-body">
-                    <div class="chart-area">
-                        <canvas id="myAreaChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Pie Chart -->
-        <div class="col-xl-4 col-lg-5">
-            <div class="card shadow mb-4">
-                <!-- Card Header - Dropdown -->
-                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary">Thống kê tháng @DateTime.Now.Month</h6>
-                </div>
-                <!-- Card Body -->
-                <div class="card-body">
-                    <div class="chart-pie pt-4 pb-2">
-                        <canvas id="myPieChart"></canvas>
-                    </div>
-                    <div class="mt-4 text-center small">
-                        <span class="mr-2">
-                            <i class="fas fa-circle text-primary"></i> Doanh thu
-                        </span>
-                        <span class="mr-2">
-                            <i class="fas fa-circle text-success"></i> Lợi nhuận
-                        </span>
-                        <span class="mr-2">
-                            <i class="fas fa-circle text-info"></i> Vốn
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-}
-
-
-@if (Model.IsAdmin)
-{
-    <!-- Content Row -->
-    <div class="row">
-
-        <!-- Content Column -->
-        <div class="col-lg-6 mb-4">
-
-            <!-- Project Card Example -->
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Đánh giá shop</h6>
-                </div>
-                <div class="card-body">
-                    <h4 class="small font-weight-bold">
-                        <i class="fas fa-star" style="color: #D7DF01;"></i>
-                        <i class="fas fa-star" style="color: #D7DF01;"></i>
-                        <i class="fas fa-star" style="color: #D7DF01;"></i>
-                        <i class="fas fa-star" style="color: #D7DF01;"></i>
-                        <i class="fas fa-star" style="color: #D7DF01;"></i>
-                        <span class="float-right">@Model.FiveStarPercentage%</span>
-                    </h4>
-                    <div class="progress mb-4">
-                        <div class="progress-bar bg-danger" role="progressbar" style="width: @Model.FiveStarPercentage%"
-                             aria-valuenow="@Model.FiveStarPercentage" aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
-                    <h4 class="small font-weight-bold">
-                        <i class="fas fa-star" style="color: #D7DF01;"></i>
-                        <i class="fas fa-star" style="color: #D7DF01;"></i>
-                        <i class="fas fa-star" style="color: #D7DF01;"></i>
-                        <i class="fas fa-star" style="color: #D7DF01;"></i>
-                        <span class="float-right">@Model.FourStarPercentage%</span>
-                    </h4>
-                    <div class="progress mb-4">
-                        <div class="progress-bar bg-warning" role="progressbar" style="width: @Model.FourStarPercentage%"
-                             aria-valuenow="@Model.FourStarPercentage" aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
-                    <h4 class="small font-weight-bold">
-                        <i class="fas fa-star" style="color: #D7DF01;"></i>
-                        <i class="fas fa-star" style="color: #D7DF01;"></i>
-                        <i class="fas fa-star" style="color: #D7DF01;"></i>
-                        <span class="float-right">@Model.ThreeStarPercentage%</span>
-                    </h4>
-                    <div class="progress mb-4">
-                        <div class="progress-bar" role="progressbar" style="width: @Model.ThreeStarPercentage%"
-                             aria-valuenow="@Model.ThreeStarPercentage" aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
-                    <h4 class="small font-weight-bold">
-                        <i class="fas fa-star" style="color: #D7DF01;"></i>
-                        <i class="fas fa-star" style="color: #D7DF01;"></i>
-                        <span class="float-right">@Model.TwoStarPercentage%</span>
-                    </h4>
-                    <div class="progress mb-4">
-                        <div class="progress-bar bg-info" role="progressbar" style="width: @Model.TwoStarPercentage%"
-                             aria-valuenow="@Model.TwoStarPercentage" aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
-                    <h4 class="small font-weight-bold">
-                        <i class="fas fa-star" style="color: #D7DF01;"></i>
-                        <span class="float-right">@Model.OneStarPercentage%</span>
-                    </h4>
-                    <div class="progress">
-                        <div class="progress-bar bg-success" role="progressbar" style="width: @Model.OneStarPercentage%"
-                             aria-valuenow="@Model.OneStarPercentage" aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-6 mb-4">
-
-
-            <!-- Illustrations -->
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Chương trình khuyến mãi</h6>
-                </div>
-                <div class="card-body">
-                    <div class="text-center">
-                        <img class="img-fluid px-3 px-sm-4 mt-3 mb-4" style="width: 25rem;"
-                             src="~/Admin/img/promotion.jpg" alt="...">
-                    </div>
-                    @if (!Model.HasActivePromotion)
-                    {
-                        <p>Chưa có chương trình khuyến mãi nào.</p>
-                    }
-                    else
-                    {
-                        string displayValue = Model.ActivePromotionType == "Percent" ? Model.ActivePromotionValue.ToString("0.##") + "%" : Model.ActivePromotionValue.ToString("N0") + "đ";
-                        <p>Shop đang áp dụng chương trình khuyến mãi giảm <strong>@displayValue</strong>.</p>
-                    }
-
-                    <a target="_blank" rel="nofollow" asp-action="Index" asp-controller="Promotions" asp-area="Admin">
-                        Xem tất cả &rarr;
-                    </a>
-                </div>
-            </div>
-
-        </div>
-    </div>
-}
 
 @section Scripts
 {
-    <!--Biểu đồ đường-->
     <script>
-        // Set new default font family and font color to mimic Bootstrap's default styling
-        Chart.defaults.global.defaultFontFamily = 'Nunito', '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
-        Chart.defaults.global.defaultFontColor = '#858796';
+        Chart.defaults.global.defaultFontFamily = "'Jost', -apple-system, sans-serif";
+        Chart.defaults.global.defaultFontColor = '#64748b';
 
-        function number_format(number, decimals, dec_point, thousands_sep) {
-            // *     example: number_format(1234.56, 2, ',', ' ');
-            // *     return: '1 234,56'
-            number = (number + '').replace(',', '').replace(' ', '');
-            var n = !isFinite(+number) ? 0 : +number,
-                prec = !isFinite(+decimals) ? 0 : Math.abs(decimals),
-                sep = (typeof thousands_sep === 'undefined') ? ',' : thousands_sep,
-                dec = (typeof dec_point === 'undefined') ? '.' : dec_point,
-                s = '',
-                toFixedFix = function (n, prec) {
-                    var k = Math.pow(10, prec);
-                    return '' + Math.round(n * k) / k;
-                };
-            // Fix for IE parseFloat(0.55).toFixed(0) = 0;
-            s = (prec ? toFixedFix(n, prec) : '' + Math.round(n)).split('.');
-            if (s[0].length > 3) {
-                s[0] = s[0].replace(/\B(?=(?:\d{3})+(?!\d))/g, sep);
-            }
-            if ((s[1] || '').length < prec) {
-                s[1] = s[1] || '';
-                s[1] += new Array(prec - s[1].length + 1).join('0');
-            }
-            return s.join(dec);
+        function number_format(number) {
+            return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         }
 
-        // Area Chart Example
-        var ctx = document.getElementById("myAreaChart");
-        var myLineChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: ["Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"],
-                datasets: [{
-                    label: "Doanh thu",
-                    lineTension: 0.3,
-                    backgroundColor: "rgba(78, 115, 223, 0.05)",
-                    borderColor: "rgba(78, 115, 223, 1)",
-                    pointRadius: 3,
-                    pointBackgroundColor: "rgba(78, 115, 223, 1)",
-                    pointBorderColor: "rgba(78, 115, 223, 1)",
-                    pointHoverRadius: 3,
-                    pointHoverBackgroundColor: "rgba(78, 115, 223, 1)",
-                    pointHoverBorderColor: "rgba(78, 115, 223, 1)",
-                    pointHitRadius: 10,
-                    pointBorderWidth: 2,
-                    data: [
-                        @Model.MonthlyRevenueList[0], @Model.MonthlyRevenueList[1], @Model.MonthlyRevenueList[2], @Model.MonthlyRevenueList[3], @Model.MonthlyRevenueList[4], @Model.MonthlyRevenueList[5],
-                        @Model.MonthlyRevenueList[6], @Model.MonthlyRevenueList[7], @Model.MonthlyRevenueList[8], @Model.MonthlyRevenueList[9], @Model.MonthlyRevenueList[10], @Model.MonthlyRevenueList[11]
-                    ],
-                }],
-            },
-            options: {
-                maintainAspectRatio: false,
-                layout: {
-                    padding: {
-                        left: 10,
-                        right: 25,
-                        top: 25,
-                        bottom: 0
-                    }
-                },
-                scales: {
-                    xAxes: [{
-                        time: {
-                            unit: 'ngày'
-                        },
-                        gridLines: {
-                            display: false,
-                            drawBorder: false
-                        },
-                        ticks: {
-                            maxTicksLimit: 12
-                        }
+        // Area Line Chart
+        var ctxLine = document.getElementById("myAreaChart");
+        if (ctxLine) {
+            new Chart(ctxLine, {
+                type: 'line',
+                data: {
+                    labels: ["T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8", "T9", "T10", "T11", "T12"],
+                    datasets: [{
+                        label: "Doanh thu",
+                        lineTension: 0.35,
+                        backgroundColor: "rgba(37, 99, 235, 0.08)",
+                        borderColor: "#2563eb",
+                        pointRadius: 4,
+                        pointBackgroundColor: "#2563eb",
+                        pointBorderColor: "#ffffff",
+                        pointHoverRadius: 6,
+                        pointHoverBackgroundColor: "#06b6d4",
+                        data: [
+        @Model.MonthlyRevenueList[0], @Model.MonthlyRevenueList[1], @Model.MonthlyRevenueList[2], @Model.MonthlyRevenueList[3], @Model.MonthlyRevenueList[4], @Model.MonthlyRevenueList[5],
+        @Model.MonthlyRevenueList[6], @Model.MonthlyRevenueList[7], @Model.MonthlyRevenueList[8], @Model.MonthlyRevenueList[9], @Model.MonthlyRevenueList[10], @Model.MonthlyRevenueList[11]
+                                ],
                     }],
-                    yAxes: [{
-                        ticks: {
-                            min: 0,
-                            max: 20000000,
-                            maxTicksLimit: 5,
-                            padding: 10,
-                            // Include a dollar sign in the ticks
-                            callback: function (value, index, values) {
-                                return '$' + number_format(value);
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        xAxes: [{ gridLines: { display: false } }],
+                        yAxes: [{
+                            ticks: {
+                                callback: function (value) { return number_format(value) + '₫'; }
+                            },
+                            gridLines: { color: "#f1f5f9", zeroLineColor: "#f1f5f9" }
+                        }]
+                    },
+                    legend: { display: false },
+                    tooltips: {
+                        backgroundColor: "#0f172a",
+                        bodyFontColor: "#ffffff",
+                        titleFontColor: '#06b6d4',
+                        borderColor: '#1e293b',
+                        borderWidth: 1,
+                        xPadding: 12, yPadding: 12,
+                        callbacks: {
+                            label: function (tooltipItem) {
+                                return ' Doanh thu: ' + number_format(tooltipItem.yLabel) + '₫';
                             }
-                        },
-                        gridLines: {
-                            color: "rgb(234, 236, 244)",
-                            zeroLineColor: "rgb(234, 236, 244)",
-                            drawBorder: false,
-                            borderDash: [1],
-                            zeroLineBorderDash: [1]
-                        }
-                    }],
-                },
-                legend: {
-                    display: false
-                },
-                tooltips: {
-                    backgroundColor: "rgb(255,255,255)",
-                    bodyFontColor: "#858796",
-                    titleMarginBottom: 10,
-                    titleFontColor: '#6e707e',
-                    titleFontSize: 14,
-                    borderColor: '#dddfeb',
-                    borderWidth: 1,
-                    xPadding: 15,
-                    yPadding: 15,
-                    displayColors: false,
-                    intersect: false,
-                    mode: 'index',
-                    caretPadding: 10,
-                    callbacks: {
-                        label: function (tooltipItem, chart) {
-                            var datasetLabel = chart.datasets[tooltipItem.datasetIndex].label || '';
-                            return datasetLabel + ': $' + number_format(tooltipItem.yLabel);
                         }
                     }
                 }
-            }
-        });
-    </script>
+            });
+        }
 
-    <!--Biểu đồ hình vành khăn-->
-    <script>
-        // Set new default font family and font color to mimic Bootstrap's default styling
-        Chart.defaults.global.defaultFontFamily = 'Nunito', '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
-        Chart.defaults.global.defaultFontColor = '#858796';
-
-        // Pie Chart Example
-        var ctx = document.getElementById("myPieChart");
-        var myPieChart = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: ["Doanh thu", "Lợi nhuận", "Vốn"],
-                datasets: [{
-                    data: [@Model.CurrentMonthRevenue, @Model.TotalProfit, @Model.TotalCost],
-                    backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc'],
-                    hoverBackgroundColor: ['#2e59d9', '#17a673', '#2c9faf'],
-                    hoverBorderColor: "rgba(234, 236, 244, 1)",
-                }],
-            },
-            options: {
-                maintainAspectRatio: false,
-                tooltips: {
-                    backgroundColor: "rgb(255,255,255)",
-                    bodyFontColor: "#858796",
-                    borderColor: '#dddfeb',
-                    borderWidth: 1,
-                    xPadding: 15,
-                    yPadding: 15,
-                    displayColors: false,
-                    caretPadding: 10,
+        // Doughnut Pie Chart
+        var ctxPie = document.getElementById("myPieChart");
+        if (ctxPie) {
+            new Chart(ctxPie, {
+                type: 'doughnut',
+                data: {
+                    labels: ["Doanh thu", "Lợi nhuận", "Vốn"],
+                    datasets: [{
+                        data: [@Model.CurrentMonthRevenue, @Model.TotalProfit, @Model.TotalCost],
+                        backgroundColor: ['#2563eb', '#10b981', '#06b6d4'],
+                        hoverBackgroundColor: ['#1d4ed8', '#059669', '#0891b2'],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }],
                 },
-                legend: {
-                    display: false
+                options: {
+                    maintainAspectRatio: false,
+                    legend: { display: false },
+                    cutoutPercentage: 75,
+                    tooltips: {
+                        backgroundColor: "#0f172a",
+                        bodyFontColor: "#ffffff",
+                        borderColor: '#1e293b',
+                        borderWidth: 1,
+                        xPadding: 12, yPadding: 12
+                    }
                 },
-                cutoutPercentage: 80,
-            },
-        });
+            });
+        }
     </script>
 }

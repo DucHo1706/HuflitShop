@@ -3,6 +3,7 @@ using HuflitShopCore.DTOs;
 using HuflitShopCore.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HuflitShopCore.Controllers
@@ -26,44 +27,104 @@ namespace HuflitShopCore.Controllers
             var user = await _userService.AuthenticateAsync(dto.Email, dto.Password);
             if (user != null)
             {
-                // Tạo danh sách các thông tin (Claims) để lưu vào Cookie
-                var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.NameIdentifier, user.Id),
-                    new Claim("UserName", user.UserName), 
-                    new Claim("Name", user.FullName), 
-                    new Claim("Phone", user.PhoneNumber ?? ""), 
-                    new Claim("Avatar", user.Avatar ?? "")
-                };
-
-                // Lấy danh sách RoleId từ bảng UserRoles và nạp vào claims
-                var userRoles = await _userService.GetUserRolesAsync(user.Id);
-                foreach (var role in userRoles)
-                {
-                    claims.Add(new Claim(ClaimTypes.Role, role));
-                }
-
-                // Fallback nếu không có role trong bảng trung gian thì lấy theo AppUser.Role hoặc Customer
-                if (!string.IsNullOrEmpty(user.Role) && !userRoles.Contains(user.Role))
-                {
-                    claims.Add(new Claim(ClaimTypes.Role, user.Role));
-                }
-                else if (!userRoles.Any())
-                {
-                    claims.Add(new Claim(ClaimTypes.Role, "Customer"));
-                }
-
-                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                var authProperties = new AuthenticationProperties { IsPersistent = dto.RememberMe };
-
-                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, 
-                    new ClaimsPrincipal(claimsIdentity), authProperties);
-
+                await SignInUserAsync(user, dto.RememberMe);
                 return RedirectToAction("Index", "Home");
             }
 
             ModelState.AddModelError("", "Email hoặc mật khẩu không đúng.");
             return View(dto);
+        }
+
+        // --- ĐĂNG NHẬP GOOGLE ---
+        [HttpGet]
+        public IActionResult GoogleLogin()
+        {
+            var redirectUrl = Url.Action("GoogleResponse", "Login");
+            var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
+            return Challenge(properties, GoogleDefaults.AuthenticationScheme);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GoogleResponse()
+        {
+            var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            if (!result.Succeeded || result.Principal == null)
+            {
+                ModelState.AddModelError("", "Xác thực Google thất bại.");
+                return RedirectToAction("Login");
+            }
+
+            var claims = result.Principal.Claims;
+            var email = claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            var name = claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
+
+            if (string.IsNullOrEmpty(email))
+            {
+                ModelState.AddModelError("", "Không thể lấy Email từ Google.");
+                return RedirectToAction("Login");
+            }
+
+            // Kiểm tra user đã tồn tại chưa
+            var user = await _userService.GetUserByEmailAsync(email);
+            if (user == null)
+            {
+                var registerDto = new RegisterDTO
+                {
+                    Email = email,
+                    Name = string.IsNullOrWhiteSpace(name) ? "Khách hàng Google" : name,
+                    PhoneNumber = "",
+                    Password = "GAuth_" + Guid.NewGuid().ToString("N").Substring(0, 8)
+                };
+
+                var created = await _userService.RegisterAsync(registerDto);
+                if (created)
+                {
+                    user = await _userService.GetUserByEmailAsync(email);
+                }
+            }
+
+            if (user != null)
+            {
+                await SignInUserAsync(user, isPersistent: true);
+                return RedirectToAction("Index", "Home");
+            }
+
+            ModelState.AddModelError("", "Đăng nhập Google không thành công.");
+            return RedirectToAction("Login");
+        }
+
+        // Helper cấp Cookie Claims đồng bộ với hệ thống hiện tại của dự án
+        private async Task SignInUserAsync(dynamic user, bool isPersistent)
+        {
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id),
+                new Claim("UserName", user.UserName ?? user.Email),
+                new Claim("Name", user.FullName ?? "Khách hàng"),
+                new Claim("Phone", user.PhoneNumber ?? ""),
+                new Claim("Avatar", user.Avatar ?? "")
+            };
+
+            var userRoles = await _userService.GetUserRolesAsync(user.Id);
+            foreach (var role in userRoles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
+
+            if (!string.IsNullOrEmpty(user.Role) && !userRoles.Contains(user.Role))
+            {
+                claims.Add(new Claim(ClaimTypes.Role, user.Role));
+            }
+            else if (!userRoles.Any())
+            {
+                claims.Add(new Claim(ClaimTypes.Role, "Customer"));
+            }
+
+            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var authProperties = new AuthenticationProperties { IsPersistent = isPersistent };
+
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(claimsIdentity), authProperties);
         }
 
         [HttpGet]
@@ -91,7 +152,6 @@ namespace HuflitShopCore.Controllers
             var user = await _userService.GetUserByEmailAsync(dto.Email);
             if (user != null)
             {
-                // Logic gửi email token ở đây
                 dto.EmailSent = true;
             }
             return View(dto);
@@ -132,7 +192,6 @@ namespace HuflitShopCore.Controllers
         [HttpPost]
         public async Task<IActionResult> ConfirmEmail(EmailConfirmDTO dto)
         {
-            // Tái gửi email xác thực
             dto.EmailSent = true;
             return View(dto);
         }

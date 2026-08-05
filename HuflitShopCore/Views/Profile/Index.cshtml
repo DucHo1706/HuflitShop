@@ -6,69 +6,105 @@
     var firstChar = string.IsNullOrEmpty(Model.FullName) ? "U" : Model.FullName.Substring(0, 1).ToUpper();
 }
 
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
+
 <style>
     :root {
-        --vibrantBlue: #2563eb;
-        --vibrantBlueHover: #1d4ed8;
-        --vibrantCyan: #06b6d4;
-        --oceanGradient: linear-gradient(135deg, #2563eb, #06b6d4);
-        --dangerGradient: linear-gradient(135deg, #ef4444, #f43f5e);
+        --font-heading: 'Playfair Display', serif;
+        --font-body: 'Jost', sans-serif;
+        --color-primary: #1c1c1c;
+        --color-gold: #c5a059;
+        --color-bg: #faf9f6;
+        --color-blue: #0033ff;
+        --color-border: #e2e8f0;
+        --transition-slow: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
 
     body {
-        background-color: #f8fafc !important;
+        font-family: var(--font-body);
+        background-color: var(--color-bg) !important;
+        color: var(--color-primary);
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        font-family: var(--font-heading);
     }
 
     .profile-container {
-        max-width: 1200px;
-        margin: 2rem auto;
-        padding: 0 1rem;
+        max-width: 1280px;
+        margin: 2.5rem auto;
+        padding: 0 1.5rem;
     }
 
+    /* Luxury Header */
+    .profile-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .profile-header__title {
+        font-size: 2.5rem;
+        font-weight: 600;
+        color: var(--color-primary);
+        padding-top: 50px;
+    }
+
+    .profile-header__line {
+        width: 60px;
+        height: 1px;
+        background: var(--color-gold);
+        margin: 1rem auto 0 auto;
+    }
+
+    /* Sidebar Profile Card */
     .profile-card {
-        background: white;
-        border-radius: 0;
-        border: 1px solid #e2e8f0;
-        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-        border-top: 4px solid var(--vibrantBlue);
+        background: #ffffff;
+        border: 1px solid var(--color-border);
+        box-shadow: 0 5px 20px rgba(0,0,0,0.02);
         padding: 2rem;
         margin-bottom: 1.5rem;
+        transition: var(--transition-slow);
     }
+
+        .profile-card:hover {
+            box-shadow: 0 8px 25px rgba(0,0,0,0.05);
+        }
 
     .profile-sidebar {
         text-align: center;
-        padding: 2rem 1.5rem;
+        padding: 2.5rem 1.5rem;
+        border-top: 3px solid var(--color-gold);
     }
 
     .profile-avatar-circle {
-        width: 100px;
-        height: 100px;
+        width: 90px;
+        height: 90px;
         border-radius: 50%;
-        background: var(--oceanGradient);
-        color: white;
-        font-size: 2.5rem;
-        font-weight: 800;
+        background: var(--color-primary);
+        color: var(--color-gold);
+        font-family: var(--font-heading);
+        font-size: 2.2rem;
+        font-weight: 600;
         display: flex;
         align-items: center;
         justify-content: center;
         margin: 0 auto 1.25rem;
-        box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+        border: 2px solid var(--color-gold);
     }
 
     .profile-name {
-        font-size: 1.3rem;
-        font-weight: 800;
-        color: #0f172a;
+        font-family: var(--font-heading);
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: var(--color-primary);
         margin-bottom: 0.25rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
     }
 
     .profile-email {
-        font-size: 0.95rem;
-        color: #64748b;
+        font-size: 0.9rem;
+        color: #777;
         margin-bottom: 2rem;
-        font-weight: 500;
     }
 
     .profile-menu {
@@ -87,97 +123,115 @@
         align-items: center;
         gap: 0.75rem;
         width: 100%;
-        padding: 1rem 1.25rem;
-        background: #f8fafc;
-        border: 1px solid transparent;
-        border-radius: 0;
-        font-size: 0.95rem;
-        font-weight: 700;
-        color: #475569;
+        padding: 0.9rem 1.2rem;
+        background: #faf9f6;
+        border: 1px solid var(--color-border);
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: #555;
         cursor: pointer;
-        transition: all 0.2s ease;
+        transition: var(--transition-slow);
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        letter-spacing: 1px;
     }
 
-    .profile-menu-btn:hover {
-        background-color: #f1f5f9;
-        color: var(--vibrantBlue);
-        border-color: #e2e8f0;
-    }
+        .profile-menu-btn i {
+            color: var(--color-gold);
+        }
 
-    .profile-menu-btn.active {
-        background: var(--oceanGradient);
-        color: white;
-        border-color: transparent;
-        box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
-    }
+        .profile-menu-btn:hover {
+            background-color: var(--color-primary);
+            color: #ffffff;
+            border-color: var(--color-primary);
+        }
 
+        .profile-menu-btn.active {
+            background: var(--color-primary);
+            color: #ffffff;
+            border-color: var(--color-primary);
+        }
+
+            .profile-menu-btn.active i {
+                color: var(--color-gold);
+            }
+
+    /* Tab Panes */
     .tab-pane {
         display: none;
     }
 
-    .tab-pane.active {
-        display: block;
-        animation: fadeIn 0.3s ease;
-    }
+        .tab-pane.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
 
     @@keyframes fadeIn {
-        from { opacity: 0; transform: translateY(5px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 
     .section-title {
-        font-weight: 800;
-        color: #0f172a;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+        font-family: var(--font-heading);
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: var(--color-primary);
         margin-bottom: 2rem;
-        padding-bottom: 1rem;
-        border-bottom: 2px solid #f1f5f9;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid var(--color-border);
         display: flex;
         align-items: center;
-        gap: 0.75rem;
+        gap: 0.6rem;
     }
 
+        .section-title i {
+            color: var(--color-gold);
+        }
+
+    /* Form Inputs */
     .form-group-custom {
         margin-bottom: 1.5rem;
     }
 
-    .form-group-custom label {
-        display: block;
-        font-size: 0.85rem;
-        font-weight: 700;
-        color: #64748b;
-        margin-bottom: 0.5rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
+        .form-group-custom label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
 
     .form-control-custom {
         width: 100%;
         padding: 0.8rem 1rem;
-        font-size: 1rem;
-        font-weight: 600;
-        color: #0f172a;
-        border: 1px solid #cbd5e1;
-        border-radius: 0;
+        font-size: 0.95rem;
+        color: var(--color-primary);
+        border: 1px solid var(--color-border);
         outline: none;
-        transition: all 0.2s ease;
-        background: #ffffff;
+        transition: var(--transition-slow);
+        background: #faf9f6;
     }
 
-    .form-control-custom:focus {
-        border-color: var(--vibrantBlue);
-    }
+        .form-control-custom:focus {
+            border-color: var(--color-blue);
+            background: #ffffff;
+        }
 
-    .form-control-custom:disabled {
-        background-color: #f1f5f9;
-        color: #94a3b8;
-        cursor: not-allowed;
-        border-color: #e2e8f0;
-    }
+        .form-control-custom:disabled {
+            background-color: #f1f5f9;
+            color: #94a3b8;
+            cursor: not-allowed;
+        }
 
+    /* Order Table */
     .table-responsive-custom {
         overflow-x: auto;
     }
@@ -187,129 +241,151 @@
         border-collapse: collapse;
     }
 
-    .order-table th {
-        background-color: #f8fafc;
-        color: #64748b;
-        font-weight: 700;
-        text-align: left;
-        padding: 1rem;
-        border-bottom: 2px solid #e2e8f0;
-        text-transform: uppercase;
-        font-size: 0.85rem;
-        letter-spacing: 0.5px;
-    }
+        .order-table th {
+            background-color: #faf9f6;
+            color: #666;
+            font-weight: 600;
+            text-align: left;
+            padding: 1rem;
+            border-bottom: 1px solid var(--color-border);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+        }
 
-    .order-table td {
-        padding: 1.25rem 1rem;
-        border-bottom: 1px solid #f1f5f9;
-        vertical-align: middle;
-        font-size: 0.95rem;
-        color: #334155;
-    }
+        .order-table td {
+            padding: 1.25rem 1rem;
+            border-bottom: 1px solid var(--color-border);
+            vertical-align: middle;
+            font-size: 0.95rem;
+        }
 
+    /* Badges */
     .badge-status {
         display: inline-block;
-        padding: 0.4rem 0.75rem;
-        border-radius: 0;
+        padding: 0.3rem 0.6rem;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .badge-status-pending {
+        background-color: #fef3c7;
+        color: #d97706;
+    }
+
+    .badge-status-packing {
+        background-color: #e0f2fe;
+        color: #0284c7;
+    }
+
+    .badge-status-shipping {
+        background-color: #dbeafe;
+        color: #2563eb;
+    }
+
+    .badge-status-completed {
+        background-color: #dcfce7;
+        color: #16a34a;
+    }
+
+    .badge-status-cancelled {
+        background-color: #fee2e2;
+        color: #dc2626;
+    }
+
+    .badge-status-refunded {
+        background-color: #f3e8ff;
+        color: #7c3aed;
+    }
+
+    .badge-payment-paid {
+        background-color: #dcfce7;
+        color: #16a34a;
+        font-size: 0.7rem;
+        font-weight: 600;
+        padding: 0.3rem 0.6rem;
+        text-transform: uppercase;
+        display: inline-block;
+    }
+
+    .badge-payment-unpaid {
+        background-color: #fee2e2;
+        color: #dc2626;
+        font-size: 0.7rem;
+        font-weight: 600;
+        padding: 0.3rem 0.6rem;
+        text-transform: uppercase;
+        display: inline-block;
+    }
+
+    /* Buttons */
+    .btn-luxury-sm {
+        display: inline-block;
+        padding: 10px 24px;
+        background: var(--color-primary);
+        color: #ffffff;
+        border: none;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        font-size: 0.8rem;
+        transition: var(--transition-slow);
+        text-decoration: none !important;
+        cursor: pointer;
+    }
+
+        .btn-luxury-sm:hover {
+            background: var(--color-blue);
+            color: #ffffff;
+        }
+
+    .btn-luxury-outline-sm {
+        display: inline-block;
+        padding: 6px 14px;
+        background: transparent;
+        color: var(--color-primary);
+        border: 1px solid var(--color-primary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
         font-size: 0.75rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+        transition: var(--transition-slow);
+        text-decoration: none !important;
     }
 
-    .badge-status-pending { background-color: #fef3c7; color: #d97706; }
-    .badge-status-packing { background-color: #e0f2fe; color: #0284c7; }
-    .badge-status-shipping { background-color: #dbeafe; color: #2563eb; }
-    .badge-status-completed { background-color: #dcfce7; color: #16a34a; }
-    .badge-status-cancelled { background-color: #fee2e2; color: #dc2626; }
-    .badge-status-refunded { background-color: #f3e8ff; color: #7c3aed; }
+        .btn-luxury-outline-sm:hover {
+            background: var(--color-primary);
+            color: #ffffff;
+        }
 
-    .badge-payment-paid { 
-        background-color: #dcfce7; 
-        color: #16a34a; 
-        font-size: 0.75rem; 
-        font-weight: 700; 
-        padding: 0.4rem 0.75rem; 
-        border-radius: 0; 
-        text-transform: uppercase;
+    .btn-danger-outline-sm {
         display: inline-block;
-    }
-    
-    .badge-payment-unpaid { 
-        background-color: #fee2e2; 
-        color: #dc2626; 
-        font-size: 0.75rem; 
-        font-weight: 700; 
-        padding: 0.4rem 0.75rem; 
-        border-radius: 0; 
-        text-transform: uppercase;
-        display: inline-block;
-    }
-
-    .btn-ocean-primary {
-        background: var(--oceanGradient) !important;
-        border: none !important;
-        color: #fff !important;
-        font-size: 0.95rem;
-        font-weight: 700;
-        letter-spacing: 1px;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2);
-        padding: 0.9rem 2rem;
-        border-radius: 0;
-        text-transform: uppercase;
-    }
-
-    .btn-ocean-primary:hover {
-        background: linear-gradient(135deg, #1d4ed8, #0891b2) !important;
-        box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35);
-        transform: translateY(-1px);
-    }
-
-    .btn-action-outline {
+        padding: 6px 14px;
         background: transparent;
-        border: 2px solid var(--vibrantBlue);
-        color: var(--vibrantBlue);
-        font-weight: 700;
+        color: #dc2626;
+        border: 1px solid #dc2626;
         text-transform: uppercase;
-        font-size: 0.8rem;
-        padding: 0.5rem 1rem;
-        transition: all 0.2s ease;
-        border-radius: 0;
-        text-decoration: none;
-        display: inline-block;
         letter-spacing: 0.5px;
+        font-size: 0.75rem;
+        transition: var(--transition-slow);
+        cursor: pointer;
     }
 
-    .btn-action-outline:hover {
-        background: var(--vibrantBlue);
-        color: white;
-        text-decoration: none;
-    }
-
-    .btn-danger-outline {
-        background: transparent;
-        border: 2px solid #ef4444;
-        color: #ef4444;
-        font-weight: 700;
-        text-transform: uppercase;
-        font-size: 0.8rem;
-        padding: 0.5rem 1rem;
-        transition: all 0.2s ease;
-        border-radius: 0;
-        letter-spacing: 0.5px;
-    }
-
-    .btn-danger-outline:hover {
-        background: #ef4444;
-        color: white;
-    }
+        .btn-danger-outline-sm:hover {
+            background: #dc2626;
+            color: #ffffff;
+        }
 </style>
+
+<div class="profile-header" data-aos="fade-up">
+    <h1 class="profile-header__title">Tài Khoản Của Tôi</h1>
+    <div class="profile-header__line"></div>
+</div>
 
 <div class="profile-container">
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="alert alert-success alert-dismissible fade show rounded-0 shadow-sm border-0 font-weight-bold" role="alert">
+        <div class="alert alert-success alert-dismissible fade show rounded-0 shadow-sm border-0 font-weight-bold" role="alert" data-aos="fade-up">
             <i class="fas fa-check-circle mr-2"></i>@TempData["SuccessMessage"]
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
@@ -318,7 +394,7 @@
     }
     @if (TempData["ErrorMessage"] != null)
     {
-        <div class="alert alert-dark alert-dismissible fade show rounded-0 shadow-sm border-0 text-white font-weight-bold" role="alert" style="background-color: #1e293b;">
+        <div class="alert alert-dark alert-dismissible fade show rounded-0 shadow-sm border-0 text-white font-weight-bold" role="alert" style="background-color: #1c1c1c;" data-aos="fade-up">
             <i class="fas fa-exclamation-circle mr-2 text-danger"></i>@TempData["ErrorMessage"]
             <button type="button" class="close text-white" data-dismiss="alert" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
@@ -327,16 +403,17 @@
     }
 
     <div class="row">
-        <div class="col-lg-3 col-md-4">
+        <!-- Sidebar -->
+        <div class="col-lg-3 col-md-4 mb-4" data-aos="fade-up">
             <div class="profile-card profile-sidebar">
                 <div class="profile-avatar-circle">@firstChar</div>
                 <div class="profile-name">@Model.FullName</div>
                 <div class="profile-email">@Model.Email</div>
-                
+
                 <ul class="profile-menu">
                     <li class="profile-menu-item">
                         <button type="button" class="profile-menu-btn active" id="tabBtnAccount" onclick="switchTab('account')">
-                            <i class="fas fa-user-cog"></i>Tài khoản
+                            <i class="fas fa-user-cog"></i>Thông tin tài khoản
                         </button>
                     </li>
                     <li class="profile-menu-item">
@@ -348,13 +425,15 @@
             </div>
         </div>
 
-        <div class="col-lg-9 col-md-8">
-            <div class="profile-card" style="min-height: 500px;">
+        <!-- Content -->
+        <div class="col-lg-9 col-md-8 mb-4" data-aos="fade-up" data-aos-delay="50">
+            <div class="profile-card" style="min-height: 480px;">
+                <!-- Tab Account -->
                 <div class="tab-pane active" id="tabContentAccount">
                     <h3 class="section-title">
-                        <i class="fas fa-user-shield text-primary"></i> Thông tin tài khoản
+                        <i class="fas fa-user-shield"></i> Cập Nhật Thông Tin
                     </h3>
-                    
+
                     <form asp-controller="Profile" asp-action="UpdateProfile" method="post">
                         @Html.AntiForgeryToken()
                         <div class="row">
@@ -394,24 +473,25 @@
                             </div>
                         </div>
 
-                        <button type="submit" class="btn btn-ocean-primary mt-3">
+                        <button type="submit" class="btn-luxury-sm mt-3">
                             Lưu Thay Đổi
                         </button>
                     </form>
                 </div>
 
+                <!-- Tab Orders -->
                 <div class="tab-pane" id="tabContentOrders">
                     <h3 class="section-title">
-                        <i class="fas fa-box-open text-primary"></i> Lịch sử mua hàng
+                        <i class="fas fa-box-open"></i> Lịch Sử Đơn Hàng
                     </h3>
-                    
+
                     @if (!orders.Any())
                     {
-                        <div class="text-center py-5 mt-4 text-muted">
-                            <i class="fas fa-receipt fa-4x mb-4" style="color: #e2e8f0;"></i>
-                            <h5 class="font-weight-bold text-dark text-uppercase mb-3">Chưa có đơn hàng nào</h5>
-                            <p class="mb-4">Bạn chưa thực hiện bất kỳ giao dịch nào trên hệ thống.</p>
-                            <a asp-controller="Product" asp-action="Product" class="btn btn-ocean-primary">Bắt Đầu Mua Sắm</a>
+                        <div class="text-center py-5 mt-3 text-muted">
+                            <i class="fas fa-receipt fa-3x mb-3" style="color: #cbd5e1;"></i>
+                            <h4 class="font-weight-bold mb-3" style="font-family: var(--font-heading);">Chưa Có Đơn Hàng Nào</h4>
+                            <p class="mb-4">Bạn chưa thực hiện giao dịch nào tại Huflit Shop.</p>
+                            <a asp-controller="Product" asp-action="Product" class="btn-luxury-sm">Bắt Đầu Mua Sắm</a>
                         </div>
                     }
                     else
@@ -432,9 +512,9 @@
                                     @foreach (var o in orders)
                                     {
                                         <tr>
-                                            <td style="font-weight: 800; color: #0f172a;">#@o.Id.Substring(0, 8).ToUpper()</td>
-                                            <td style="font-weight: 600;">@o.OrderDate.ToString("dd/MM/yyyy HH:mm")</td>
-                                            <td style="font-weight: 800; color: #ef4444; font-size: 1.1rem;">@o.FinalAmount.ToString("N0") đ</td>
+                                            <td style="font-weight: 600;">#@o.Id.Substring(0, 8).ToUpper()</td>
+                                            <td style="color: #666;">@o.OrderDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                            <td style="font-weight: 600; color: var(--color-gold);">@o.FinalAmount.ToString("N0")₫</td>
                                             <td>
                                                 @if (o.PaymentStatus == 1)
                                                 {
@@ -473,14 +553,14 @@
                                             </td>
                                             <td>
                                                 <div class="d-flex flex-wrap gap-2">
-                                                    <a class="btn-action-outline" href="@Url.Action("OrderDetail", "Profile", new { id = o.Id })">
+                                                    <a class="btn-luxury-outline-sm" href="@Url.Action("OrderDetail", "Profile", new { id = o.Id })">
                                                         Xem
                                                     </a>
                                                     @if (o.OrderStatus == 0)
                                                     {
                                                         <form asp-controller="Profile" asp-action="CancelOrder" asp-route-id="@o.Id" method="post" class="m-0" onsubmit="return confirm('Bạn có chắc chắn muốn hủy đơn hàng này?')">
                                                             @Html.AntiForgeryToken()
-                                                            <button type="submit" class="btn-danger-outline">
+                                                            <button type="submit" class="btn-danger-outline-sm">
                                                                 Hủy
                                                             </button>
                                                         </form>
@@ -499,16 +579,23 @@
     </div>
 </div>
 
-<script>
-    function switchTab(tabName) {
-        document.querySelectorAll('.profile-menu-btn').forEach(btn => btn.classList.remove('active'));
-        document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
-        if (tabName === 'account') {
-            document.getElementById('tabBtnAccount').classList.add('active');
-            document.getElementById('tabContentAccount').classList.add('active');
-        } else if (tabName === 'orders') {
-            document.getElementById('tabBtnOrders').classList.add('active');
-            document.getElementById('tabContentOrders').classList.add('active');
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <script>
+        $(document).ready(function () {
+            AOS.init({ once: true, offset: 50, duration: 800 });
+        });
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.profile-menu-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+            if (tabName === 'account') {
+                document.getElementById('tabBtnAccount').classList.add('active');
+                document.getElementById('tabContentAccount').classList.add('active');
+            } else if (tabName === 'orders') {
+                document.getElementById('tabBtnOrders').classList.add('active');
+                document.getElementById('tabContentOrders').classList.add('active');
+            }
         }
-    }
-</script>
+    </script>
+}

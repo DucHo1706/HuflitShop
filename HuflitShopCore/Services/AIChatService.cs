@@ -7,14 +7,13 @@ using System.Threading.Tasks;
 using HuflitShopCore.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-// Đảm bảo include DbContext và Models của bạn ở đây
-// using YourProject.Data; 
+
 
 public class AIChatService
 {
     private readonly HttpClient _httpClient;
     private readonly string _apiKey;
-    private readonly AppDbContext _context; // Thay bằng tên DbContext của bạn
+    private readonly AppDbContext _context;
 
     public AIChatService(HttpClient httpClient, IConfiguration configuration, AppDbContext context)
     {
@@ -91,7 +90,7 @@ Hãy trả lời khách hàng ngay bây giờ:
 
             var payload = new
             {
-                model = "llama-3.1-8b-instant", // Model mượt, siêu nhanh và miễn phí
+                model = "llama-3.1-8b-instant", 
                 messages = new[]
                 {
                     new { role = "user", content = prompt }

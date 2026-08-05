@@ -18,14 +18,8 @@
         foreach (var part in parts)
         {
             var trimmed = part.Trim();
-            if (trimmed.StartsWith("Vận chuyển:"))
-            {
-                carrier = trimmed.Replace("Vận chuyển:", "").Trim();
-            }
-            else if (trimmed.StartsWith("Tracking:"))
-            {
-                trackingNumber = trimmed.Replace("Tracking:", "").Trim();
-            }
+            if (trimmed.StartsWith("Vận chuyển:")) { carrier = trimmed.Replace("Vận chuyển:", "").Trim(); }
+            else if (trimmed.StartsWith("Tracking:")) { trackingNumber = trimmed.Replace("Tracking:", "").Trim(); }
             else if (trimmed.StartsWith("Driver:"))
             {
                 var driverInfo = trimmed.Replace("Driver:", "").Trim();
@@ -37,276 +31,204 @@
                     driverPhone = driverInfo.Substring(phoneIndex + 1, plateIndex - phoneIndex - 2).Trim();
                     licensePlate = driverInfo.Substring(plateIndex + 3).Trim();
                 }
-                else
-                {
-                    driverName = driverInfo;
-                }
+                else { driverName = driverInfo; }
             }
-            else if (trimmed.StartsWith("Link:"))
-            {
-                trackingUrl = trimmed.Replace("Link:", "").Trim();
-            }
+            else if (trimmed.StartsWith("Link:")) { trackingUrl = trimmed.Replace("Link:", "").Trim(); }
         }
     }
 }
 
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
+
 <style>
     :root {
-        --vibrantBlue: #2563eb;
-        --vibrantBlueHover: #1d4ed8;
-        --vibrantCyan: #06b6d4;
-        --oceanGradient: linear-gradient(135deg, #2563eb, #06b6d4);
-        --dangerGradient: linear-gradient(135deg, #ef4444, #f43f5e);
+        --font-heading: 'Playfair Display', serif;
+        --font-body: 'Jost', sans-serif;
+        --color-primary: #1c1c1c;
+        --color-gold: #c5a059;
+        --color-bg: #faf9f6;
+        --color-blue: #0033ff;
+        --color-border: #e2e8f0;
+        --transition-slow: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    body {
+        font-family: var(--font-body);
+        background-color: var(--color-bg);
+        color: var(--color-primary);
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        font-family: var(--font-heading);
     }
 
     .success-container {
-        padding: 5rem 0;
-        background: #f8fafc;
+        padding: 4rem 1rem;
         min-height: 75vh;
         display: flex;
         align-items: center;
     }
 
-    /* Thẻ trạng thái đơn hàng vuông vức, bóng đổ nhẹ */
+    /* Status Luxury Card */
     .status-card {
         background: #ffffff;
-        border: 1px solid #e2e8f0;
-        border-radius: 0;
-        padding: 3.5rem 3rem;
-        box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
-        border-top: 4px solid var(--vibrantBlue);
+        border: 1px solid var(--color-border);
+        padding: 3.5rem 2.5rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+        border-top: 3px solid var(--color-gold);
     }
 
         .status-card.failed {
             border-top-color: #ef4444;
         }
 
-    /* Icon trạng thái nổi bật với Gradient */
     .icon-wrapper {
-        width: 80px;
-        height: 80px;
+        width: 75px;
+        height: 75px;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         margin: 0 auto 1.5rem;
-        font-size: 2.5rem;
+        font-size: 2.2rem;
         color: #fff;
     }
 
     .icon-success {
-        background: var(--oceanGradient);
-        box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+        background: var(--color-primary);
+        color: var(--color-gold);
+        border: 1px solid var(--color-gold);
     }
 
     .icon-failed {
-        background: var(--dangerGradient);
-        box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+        background: #ef4444;
     }
 
     .status-title {
-        font-size: 1.8rem;
-        font-weight: 800;
-        color: #0f172a;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+        font-size: 2.2rem;
+        font-weight: 600;
+        color: var(--color-primary);
         margin-bottom: 0.75rem;
     }
 
     .status-desc {
-        color: #64748b;
+        color: #666;
         font-size: 1rem;
-        max-width: 480px;
+        max-width: 520px;
         margin: 0 auto 2.5rem;
         line-height: 1.6;
     }
 
-    /* Box thông tin đơn hàng */
+    /* Info Box */
     .order-info-box {
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
+        background: #faf9f6;
+        border: 1px solid var(--color-border);
         padding: 2rem;
         margin-bottom: 2.5rem;
         text-align: left;
     }
 
     .order-info-header {
-        font-size: 1rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        color: var(--vibrantBlue);
+        font-family: var(--font-heading);
+        font-size: 1.15rem;
+        font-weight: 600;
+        color: var(--color-primary);
         margin-bottom: 1.5rem;
         padding-bottom: 0.75rem;
-        border-bottom: 2px solid #e2e8f0;
+        border-bottom: 1px solid var(--color-border);
         display: flex;
         align-items: center;
         gap: 0.5rem;
     }
 
+        .order-info-header i {
+            color: var(--color-gold);
+        }
+
     .info-label {
-        font-size: 0.8rem;
-        font-weight: 700;
+        font-size: 0.75rem;
+        font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
-        color: #94a3b8;
-        margin-bottom: 0.4rem;
+        letter-spacing: 1px;
+        color: #888;
+        margin-bottom: 0.3rem;
     }
 
     .info-value {
-        font-size: 1rem;
-        font-weight: 600;
-        color: #0f172a;
-        word-break: break-word;
+        font-size: 0.95rem;
+        font-weight: 500;
+        color: var(--color-primary);
     }
 
     .info-value-price {
         font-size: 1.5rem;
-        font-weight: 800;
-        color: var(--vibrantBlue);
+        font-weight: 600;
+        font-family: var(--font-heading);
+        color: var(--color-gold);
     }
 
-    /* Các nút điều hướng đồng bộ với trang Checkout và Details */
-    .btn-ocean-primary {
-        background: var(--oceanGradient) !important;
-        border: none !important;
-        color: #fff !important;
-        font-size: 0.95rem;
-        letter-spacing: 1px;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2);
-        padding: 0.9rem 1.8rem;
+    /* Luxury Buttons */
+    .btn-luxury-sm {
+        display: inline-block;
+        padding: 12px 28px;
+        background: var(--color-primary);
+        color: #fff;
+        border: none;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        font-size: 0.8rem;
+        transition: var(--transition-slow);
+        text-decoration: none !important;
     }
 
-        .btn-ocean-primary:hover {
-            background: linear-gradient(135deg, #1d4ed8, #0891b2) !important;
-            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35);
-            transform: translateY(-1px);
+        .btn-luxury-sm:hover {
+            background: var(--color-blue);
+            color: #fff;
         }
 
-    .btn-ocean-outline {
-        background-color: transparent !important;
-        border: 2px solid var(--vibrantBlue) !important;
-        color: var(--vibrantBlue) !important;
-        font-size: 0.95rem;
-        transition: all 0.3s ease;
-        padding: 0.9rem 1.8rem;
+    .btn-luxury-outline-sm {
+        display: inline-block;
+        padding: 12px 28px;
+        background: transparent;
+        color: var(--color-primary);
+        border: 1px solid var(--color-primary);
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        font-size: 0.8rem;
+        transition: var(--transition-slow);
+        text-decoration: none !important;
     }
 
-        .btn-ocean-outline:hover {
-            background: var(--vibrantBlue) !important;
-            color: #fff !important;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        .btn-luxury-outline-sm:hover {
+            background: var(--color-primary);
+            color: #fff;
         }
 
-    .btn-danger-primary {
-        background: var(--dangerGradient) !important;
-        border: none !important;
-        color: #fff !important;
-        font-size: 0.95rem;
-        letter-spacing: 1px;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(239, 68, 68, 0.2);
-        padding: 0.9rem 1.8rem;
-    }
-
-        .btn-danger-primary:hover {
-            background: linear-gradient(135deg, #dc2626, #e11d48) !important;
-            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.35);
-            transform: translateY(-1px);
-        }
-
-    /* GrabExpress Premium Tracking Card */
-    .grab-tracking-card {
+    /* Live Grab/Ahamove Tracking Card */
+    .express-tracking-card {
         background: #ffffff;
-        border: 1px solid #cbd5e1;
-        border-top: 5px solid #10b981;
-        padding: 2rem;
+        border: 1px solid var(--color-border);
+        border-top: 3px solid var(--color-gold);
+        padding: 1.75rem;
         margin: 2rem 0;
         text-align: left;
-        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.08);
     }
-    
-    .grab-header {
+
+    .express-header {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        border-bottom: 1px solid #e2e8f0;
+        border-bottom: 1px solid var(--color-border);
         padding-bottom: 1rem;
-        margin-bottom: 1.5rem;
-    }
-    
-    .grab-brand {
-        font-size: 1.25rem;
-        font-weight: 800;
-        color: #10b981;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-    
-    .grab-status-text {
-        font-weight: 700;
-        color: #475569;
-        font-size: 0.95rem;
+        margin-bottom: 1.25rem;
     }
 
-    .grab-driver-profile {
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        padding: 1.25rem;
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        margin-bottom: 1.5rem;
-    }
-    
-    .driver-avatar {
-        width: 50px;
-        height: 50px;
-        background: #10b981;
-        color: white;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.5rem;
-    }
-
-    .driver-info {
-        flex-grow: 1;
-    }
-
-    .driver-name {
-        font-weight: 700;
-        color: #0f172a;
-        font-size: 1.05rem;
-        margin-bottom: 0.2rem;
-    }
-
-    .driver-meta {
-        font-size: 0.85rem;
-        color: #64748b;
-        font-weight: 500;
-    }
-
-    .driver-call-btn {
-        background: #10b981;
-        color: white;
-        border: none;
-        border-radius: 50%;
-        width: 40px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-decoration: none;
-        transition: background 0.2s;
-    }
-    
-    .driver-call-btn:hover {
-        background: #059669;
-        color: white;
+    .express-brand {
+        font-family: var(--font-heading);
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--color-primary);
     }
 
     /* Delivery Progress Timeline */
@@ -314,28 +236,27 @@
         display: flex;
         justify-content: space-between;
         position: relative;
-        margin-bottom: 2rem;
-        padding: 0 1rem;
+        margin: 1.5rem 0;
     }
 
-    .delivery-timeline::before {
-        content: '';
-        position: absolute;
-        top: 15px;
-        left: 5%;
-        width: 90%;
-        height: 4px;
-        background: #e2e8f0;
-        z-index: 1;
-    }
+        .delivery-timeline::before {
+            content: '';
+            position: absolute;
+            top: 14px;
+            left: 5%;
+            width: 90%;
+            height: 2px;
+            background: var(--color-border);
+            z-index: 1;
+        }
 
     .timeline-progress-bar {
         position: absolute;
-        top: 15px;
+        top: 14px;
         left: 5%;
-        width: 10%; /* Will animate */
-        height: 4px;
-        background: #10b981;
+        width: 10%;
+        height: 2px;
+        background: var(--color-gold);
         z-index: 2;
         transition: width 1s linear;
     }
@@ -343,59 +264,43 @@
     .timeline-node {
         position: relative;
         z-index: 3;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
         text-align: center;
         width: 20%;
     }
 
     .node-dot {
-        width: 32px;
-        height: 32px;
-        background: #ffffff;
-        border: 3px solid #cbd5e1;
+        width: 28px;
+        height: 28px;
+        background: #fff;
+        border: 2px solid var(--color-border);
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 0.85rem;
-        color: #64748b;
-        font-weight: 700;
-        transition: all 0.3s;
+        font-size: 0.75rem;
+        margin: 0 auto;
+        transition: var(--transition-slow);
     }
 
-    .timeline-node.active .node-dot {
-        border-color: #10b981;
-        background: #10b981;
-        color: white;
-        box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
-    }
-    
-    .timeline-node.passed .node-dot {
-        border-color: #10b981;
-        background: #10b981;
-        color: white;
+    .timeline-node.active .node-dot, .timeline-node.passed .node-dot {
+        border-color: var(--color-gold);
+        background: var(--color-gold);
+        color: #fff;
     }
 
     .node-label {
-        margin-top: 0.5rem;
-        font-size: 0.8rem;
-        font-weight: 700;
-        color: #64748b;
+        margin-top: 0.4rem;
+        font-size: 0.75rem;
         text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
 
-    .timeline-node.active .node-label {
-        color: #10b981;
-    }
-
-    /* Live Animated Map Simulation */
+    /* Map Road */
     .map-simulation-box {
         position: relative;
-        height: 120px;
-        background: #f1f5f9;
-        border: 1px solid #cbd5e1;
+        height: 100px;
+        background: #faf9f6;
+        border: 1px solid var(--color-border);
         overflow: hidden;
         margin-top: 1rem;
     }
@@ -405,7 +310,7 @@
         top: 50%;
         left: 5%;
         width: 90%;
-        border-top: 4px dashed #94a3b8;
+        border-top: 2px dashed #bbb;
         transform: translateY(-50%);
     }
 
@@ -416,22 +321,10 @@
         z-index: 5;
     }
 
-    .marker-shop {
-        left: 5%;
-        color: #2563eb;
-        font-size: 1.5rem;
-    }
-
-    .marker-home {
-        right: 5%;
-        color: #ef4444;
-        font-size: 1.5rem;
-    }
-
     .marker-driver {
-        left: 5%; /* Will animate */
-        color: #10b981;
-        font-size: 1.8rem;
+        left: 5%;
+        color: var(--color-gold);
+        font-size: 1.6rem;
         transition: left 1s linear;
     }
 </style>
@@ -439,149 +332,99 @@
 <div class="success-container">
     <div class="container">
         <div class="row justify-content-center">
-            <div class="col-lg-8 col-md-10 text-center">
+            <div class="col-lg-8 col-md-10 text-center" data-aos="fade-up">
 
                 @if (ViewBag.PaymentSuccess == false)
                 {
-                    @* ── TRẠNG THÁI THẤT BẠI ── *@
                     <div class="status-card failed">
                         <div class="icon-wrapper icon-failed">
                             <i class="fas fa-times"></i>
                         </div>
-                        <h2 class="status-title" style="color: #ef4444;">Thanh toán thất bại</h2>
+                        <h2 class="status-title" style="color: #ef4444;">Thanh Toán Thất Bại</h2>
                         <p class="status-desc">
-                            Giao dịch qua VNPAY không thành công hoặc đã bị hủy. Đơn hàng của bạn đã bị hủy tự động trên hệ thống. Vui lòng kiểm tra lại số dư hoặc thử lại phương thức thanh toán khác.
+                            Giao dịch qua VNPAY không thành công hoặc đã bị hủy. Đơn hàng đã được tự động hủy trên hệ thống. Bạn vui lòng kiểm tra lại hoặc thử phương thức thanh toán khác.
                         </p>
 
                         <div class="d-flex justify-content-center gap-3 flex-wrap">
-                            <a asp-controller="Home" asp-action="Index" class="btn btn-ocean-outline rounded-0 font-weight-bold text-uppercase">Về trang chủ</a>
-                            <a asp-controller="Product" asp-action="Product" class="btn btn-danger-primary rounded-0 font-weight-bold text-uppercase">Tiếp tục mua sắm</a>
+                            <a asp-controller="Home" asp-action="Index" class="btn-luxury-outline-sm">Về trang chủ</a>
+                            <a asp-controller="Product" asp-action="Product" class="btn-luxury-sm">Tiếp tục mua sắm</a>
                         </div>
                     </div>
                 }
                 else
                 {
-                    @* ── TRẠNG THÁI THÀNH CÔNG ── *@
                     <div class="status-card">
                         <div class="icon-wrapper icon-success">
                             <i class="fas fa-check"></i>
                         </div>
-                        <h2 class="status-title">Đặt hàng thành công!</h2>
+                        <h2 class="status-title">Đặt Hàng Thành Công</h2>
                         <p class="status-desc">
                             @if (ViewBag.PaymentSuccess == true)
                             {
-                                <text>Thanh toán VNPAY thành công. Đơn hàng của bạn đã được ghi nhận và đang trong quá trình chuẩn bị.</text>
+                                <text>Cảm ơn bạn đã hoàn tất thanh toán VNPAY. Huflit Shop đang đóng gói sản phẩm và chuẩn bị bàn giao vận chuyển.</text>
                             }
                             else
                             {
-                                <text>Cảm ơn bạn đã mua sắm tại HuflitShop! Đơn hàng thanh toán khi nhận hàng (COD) của bạn sẽ được xử lý và giao đến bạn sớm nhất.</text>
+                                <text>Cảm ơn bạn đã tin tưởng Huflit Shop! Đơn hàng thanh toán khi nhận hàng (COD) đã được tiếp nhận và sẽ sớm giao đến bạn.</text>
                             }
                         </p>
 
                         @if (carrier.Contains("GrabExpress", StringComparison.OrdinalIgnoreCase) || carrier.Contains("Ahamove", StringComparison.OrdinalIgnoreCase))
                         {
                             bool isAha = carrier.Contains("Ahamove", StringComparison.OrdinalIgnoreCase);
-                            string brandCol = isAha ? "#f57224" : "#10b981";
-                            string brandLogoClass = isAha ? "fas fa-shipping-fast" : "fab fa-grab";
                             string brandNameText = isAha ? "Ahamove Hỏa Tốc" : "GrabExpress Hỏa Tốc";
-                            string carrierShortName = isAha ? "Ahamove" : "GrabExpress";
 
-                            <style>
-                                .grab-tracking-card { border-top-color: @brandCol !important; }
-                                .grab-brand { color: @brandCol !important; }
-                                .driver-avatar { background-color: @brandCol !important; }
-                                .driver-call-btn { background: @brandCol !important; }
-                                .driver-call-btn:hover { opacity: 0.9; }
-                                .timeline-progress-bar { background: @brandCol !important; }
-                                .timeline-node.active .node-dot { background: @brandCol !important; border-color: @brandCol !important; }
-                                .timeline-node.passed .node-dot { background: @brandCol !important; border-color: @brandCol !important; }
-                                .timeline-node.active .node-label { color: @brandCol !important; }
-                                .marker-driver { color: @brandCol !important; }
-                            </style>
-
-                            <!-- Dynamic Real-time Simulation Tracking Card -->
-                            <div class="grab-tracking-card">
-                                <div class="grab-header">
-                                    <div class="grab-brand">
-                                        <i class="@brandLogoClass mr-1"></i> @brandNameText
-                                    </div>
-                                    <div class="grab-status-text" id="statusLabel">
-                                        Đang tìm tài xế @carrierShortName...
-                                    </div>
+                            <div class="express-tracking-card" data-aos="fade-up">
+                                <div class="express-header">
+                                    <div class="express-brand"><i class="fas fa-shipping-fast mr-2" style="color: var(--color-gold);"></i>@brandNameText</div>
+                                    <div class="small font-weight-bold" id="statusLabel">Đang tìm tài xế...</div>
                                 </div>
 
-                                <div class="grab-driver-profile">
-                                    <div class="driver-avatar">
-                                        <i class="fas fa-user-tie"></i>
+                                <div class="d-flex align-items-center justify-content-between p-3 mb-3" style="background: #faf9f6; border: 1px solid var(--color-border);">
+                                    <div>
+                                        <div class="font-weight-bold" style="font-size: 1rem;">@driverName</div>
+                                        <small class="text-muted">Biển số: <strong>@licensePlate</strong> &bull; Mã VD: <strong>@trackingNumber</strong></small>
                                     </div>
-                                    <div class="driver-info">
-                                        <div class="driver-name">@driverName</div>
-                                        <div class="driver-meta">
-                                            <span>Mã vận đơn: <strong>@trackingNumber</strong></span> &bull; 
-                                            <span>Biển số: <strong>@licensePlate</strong></span>
-                                        </div>
-                                    </div>
-                                    <a href="tel:@driverPhone" class="driver-call-btn" title="Gọi tài xế">
-                                        <i class="fas fa-phone-alt"></i>
-                                    </a>
-                                    <a href="@trackingUrl" class="btn btn-sm btn-outline-success font-weight-bold ml-2" style="border-radius: 20px; font-size: 0.8rem; border-color: @brandCol; color: @brandCol; display: flex; align-items: center; justify-content: center; height: 40px; padding: 0 12px;" target="_blank">
-                                        <i class="fas fa-map-marked-alt mr-1"></i> Xem bản đồ
-                                    </a>
+                                    <a href="tel:@driverPhone" class="btn-luxury-outline-sm py-2 px-3" title="Gọi tài xế"><i class="fas fa-phone-alt"></i></a>
                                 </div>
 
-                                <!-- Timeline progress bar -->
                                 <div class="delivery-timeline">
                                     <div class="timeline-progress-bar" id="progressBar"></div>
-                                    
-                                    <div class="timeline-node active">
-                                        <div class="node-dot">1</div>
-                                        <div class="node-label">Tìm xe</div>
-                                    </div>
-                                    <div class="timeline-node">
-                                        <div class="node-dot">2</div>
-                                        <div class="node-label">Lấy hàng</div>
-                                    </div>
-                                    <div class="timeline-node">
-                                        <div class="node-dot">3</div>
-                                        <div class="node-label">Đang giao</div>
-                                    </div>
-                                    <div class="timeline-node">
-                                        <div class="node-dot">4</div>
-                                        <div class="node-label">Đã giao</div>
-                                    </div>
+                                    <div class="timeline-node active"><div class="node-dot">1</div><div class="node-label">Tìm xe</div></div>
+                                    <div class="timeline-node"><div class="node-dot">2</div><div class="node-label">Lấy hàng</div></div>
+                                    <div class="timeline-node"><div class="node-dot">3</div><div class="node-label">Đang giao</div></div>
+                                    <div class="timeline-node"><div class="node-dot">4</div><div class="node-label">Đã giao</div></div>
                                 </div>
 
-                                <!-- Simulated Map road -->
                                 <div class="map-simulation-box">
                                     <div class="map-road"></div>
-                                    <div class="map-marker marker-shop" title="Cửa hàng"><i class="fas fa-store"></i></div>
-                                    <div class="map-marker marker-home" title="Địa chỉ của bạn"><i class="fas fa-home"></i></div>
-                                    <div class="map-marker marker-driver" id="driverMarker" style="left: 5%;"><i class="fas fa-motorcycle"></i></div>
+                                    <div class="map-marker" style="left: 5%; color: var(--color-primary);"><i class="fas fa-store"></i></div>
+                                    <div class="map-marker" style="right: 5%; color: #ef4444;"><i class="fas fa-home"></i></div>
+                                    <div class="map-marker marker-driver" id="driverMarker"><i class="fas fa-motorcycle"></i></div>
                                 </div>
                             </div>
                         }
 
-                        @* Thông tin đơn hàng *@
-                        <div class="order-info-box">
+                        <div class="order-info-box" data-aos="fade-up">
                             <div class="order-info-header">
-                                <i class="fas fa-receipt" style="font-size: 1.2rem;"></i> Thông tin đơn hàng
+                                <i class="fas fa-receipt"></i> Thông Tin Đơn Hàng
                             </div>
                             <div class="row">
-                                <div class="col-sm-6 mb-4">
+                                <div class="col-sm-6 mb-3">
                                     <div class="info-label">Mã đơn hàng</div>
-                                    <div class="info-value">@ViewBag.OrderId</div>
+                                    <div class="info-value">#@ViewBag.OrderId</div>
                                 </div>
-                                <div class="col-sm-6 mb-4">
+                                <div class="col-sm-6 mb-3">
                                     <div class="info-label">Phương thức thanh toán</div>
                                     <div class="info-value">@ViewBag.PaymentMethodName</div>
                                 </div>
-                                <div class="col-sm-6 mb-4 mb-sm-0">
+                                <div class="col-sm-6 mb-3">
                                     <div class="info-label">Tổng thanh toán</div>
                                     <div class="info-value-price">@String.Format("{0:0,0}₫", (decimal)ViewBag.FinalAmount)</div>
                                 </div>
-                                <div class="col-sm-6">
+                                <div class="col-sm-6 mb-3">
                                     <div class="info-label">Địa chỉ giao hàng</div>
-                                    <div class="info-value" style="line-height: 1.5; font-size: 0.95rem;">
+                                    <div class="info-value">
                                         @cleanAddress<br>
                                         @ViewBag.ShippingWard, @ViewBag.ShippingDistrict, @ViewBag.ShippingCity
                                     </div>
@@ -590,8 +433,8 @@
                         </div>
 
                         <div class="d-flex justify-content-center gap-3 flex-wrap">
-                            <a asp-controller="Profile" asp-action="Index" class="btn btn-ocean-outline rounded-0 font-weight-bold text-uppercase">Đơn hàng của tôi</a>
-                            <a asp-controller="Product" asp-action="Product" class="btn btn-ocean-primary rounded-0 font-weight-bold text-uppercase">Tiếp tục mua sắm</a>
+                            <a asp-controller="Profile" asp-action="Index" class="btn-luxury-outline-sm">Đơn hàng của tôi</a>
+                            <a asp-controller="Product" asp-action="Product" class="btn-luxury-sm">Tiếp tục mua sắm</a>
                         </div>
                     </div>
                 }
@@ -601,59 +444,52 @@
     </div>
 </div>
 
-@if (carrier.Contains("GrabExpress", StringComparison.OrdinalIgnoreCase) || carrier.Contains("Ahamove", StringComparison.OrdinalIgnoreCase))
-{
-    string carrierShort = carrier.Contains("Ahamove", StringComparison.OrdinalIgnoreCase) ? "Ahamove" : "GrabExpress";
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            var driverMarker = document.getElementById("driverMarker");
-            var progressBar = document.getElementById("progressBar");
-            var statusLabel = document.getElementById("statusLabel");
-            var timelineNodes = document.querySelectorAll(".timeline-node");
-            
-            if (driverMarker) {
-                var steps = [
-                    { left: 5, progress: 0, status: "Tài xế @carrierShort đang chuẩn bị nhận hàng tại kho...", activeNode: 0 },
-                    { left: 30, progress: 25, status: "Tài xế đang lấy sản phẩm và chuẩn bị bàn giao...", activeNode: 1 },
-                    { left: 60, progress: 55, status: "Tài xế đã lấy hàng! Đang trên đường hỏa tốc đến địa chỉ của bạn...", activeNode: 2 },
-                    { left: 88, progress: 85, status: "Tài xế đã đến gần điểm giao hàng. Vui lòng chuẩn bị nghe điện thoại!", activeNode: 2 },
-                    { left: 95, progress: 100, status: "Giao hàng thành công! Cảm ơn bạn đã lựa chọn @carrierShort.", activeNode: 3 }
-                ];
-                
-                var currentStep = 0;
-                
-                function animateStep() {
-                    if (currentStep >= steps.length) return;
-                    var stepData = steps[currentStep];
-                    
-                    // Animate driver icon & progress bar
-                    driverMarker.style.left = stepData.left + "%";
-                    progressBar.style.width = stepData.progress + "%";
-                    statusLabel.innerText = stepData.status;
-                    
-                    // Update nodes progress classes
-                    timelineNodes.forEach(function(node, index) {
-                        node.classList.remove("active");
-                        if (index < stepData.activeNode) {
-                            node.classList.add("passed");
-                        } else if (index === stepData.activeNode) {
-                            node.classList.add("active");
-                            node.classList.remove("passed");
-                        } else {
-                            node.classList.remove("passed");
-                        }
-                    });
-                    
-                    currentStep++;
-                    
-                    // Simulate different delivery phases with delays
-                    var delay = currentStep === 1 ? 2500 : currentStep === 2 ? 4000 : currentStep === 3 ? 5000 : currentStep === 4 ? 4000 : 3000;
-                    setTimeout(animateStep, delay);
-                }
-                
-                // Start simulation
-                setTimeout(animateStep, 1200);
-            }
+        $(document).ready(function () {
+            AOS.init({ once: true, offset: 50, duration: 800 });
         });
     </script>
+
+    @if (carrier.Contains("GrabExpress", StringComparison.OrdinalIgnoreCase) || carrier.Contains("Ahamove", StringComparison.OrdinalIgnoreCase))
+    {
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                var driverMarker = document.getElementById("driverMarker");
+                var progressBar = document.getElementById("progressBar");
+                var statusLabel = document.getElementById("statusLabel");
+                var timelineNodes = document.querySelectorAll(".timeline-node");
+
+                if (driverMarker) {
+                    var steps = [
+                        { left: 5, progress: 0, status: "Tài xế đang chuẩn bị nhận hàng...", activeNode: 0 },
+                        { left: 35, progress: 30, status: "Tài xế đang lấy sản phẩm tại kho...", activeNode: 1 },
+                        { left: 65, progress: 60, status: "Tài xế đang trên đường hỏa tốc giao hàng...", activeNode: 2 },
+                        { left: 95, progress: 100, status: "Giao hàng thành công! Cảm ơn bạn.", activeNode: 3 }
+                    ];
+
+                    var currentStep = 0;
+                    function animateStep() {
+                        if (currentStep >= steps.length) return;
+                        var stepData = steps[currentStep];
+
+                        driverMarker.style.left = stepData.left + "%";
+                        progressBar.style.width = stepData.progress + "%";
+                        statusLabel.innerText = stepData.status;
+
+                        timelineNodes.forEach(function (node, index) {
+                            node.classList.remove("active");
+                            if (index < stepData.activeNode) node.classList.add("passed");
+                            else if (index === stepData.activeNode) { node.classList.add("active"); node.classList.remove("passed"); }
+                        });
+
+                        currentStep++;
+                        setTimeout(animateStep, 3500);
+                    }
+                    setTimeout(animateStep, 1000);
+                }
+            });
+        </script>
+    }
 }

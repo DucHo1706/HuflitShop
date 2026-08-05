@@ -1,48 +1,81 @@
+@using HuflitShopCore.Models
 @{
-    ViewData["Title"] = "Tạo đơn báo quên / Xin nghỉ";
+    ViewData["Title"] = "Tạo Đơn Báo Quên / Xin Nghỉ";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
     var schedules = ViewBag.Schedules as IEnumerable<HuflitShopCore.Models.WorkSchedule>;
 }
 
-<div class="container-fluid">
+<style>
+    .request-card {
+        border: 1px solid var(--admin-border, #e2e8f0);
+        border-radius: 0.75rem;
+        background: #ffffff;
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
+    }
+
+    .form-control-custom {
+        height: 42px;
+        border-radius: 0.5rem;
+        border: 1px solid #cbd5e1;
+        font-weight: 500;
+        color: #0f172a;
+    }
+
+    .form-control-custom:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+</style>
+
+<div class="container-fluid py-2">
+    <!-- Header -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Gửi Đơn từ & Yêu cầu mới</h1>
-        <a asp-action="MyRequests" class="btn btn-secondary shadow-sm">
-            <i class="fas fa-arrow-left fa-sm text-white-50"></i> Lịch sử đơn
+        <div>
+            <h1 class="h3 mb-1 text-dark font-weight-bold" style="letter-spacing: -0.5px;">
+                <i class="fas fa-paper-plane text-primary mr-2"></i>Gửi Đơn Từ & Yêu Cầu Mới
+            </h1>
+            <p class="text-muted small mb-0">Tạo yêu cầu báo quên Check-in hoặc xin nghỉ phép gửi lên Quản lý cấp cao</p>
+        </div>
+        <a asp-action="MyRequests" class="btn btn-sm btn-light border text-secondary font-weight-bold px-3 py-2" style="border-radius: 0.5rem;">
+            <i class="fas fa-history text-muted mr-1"></i> Lịch Sử Đơn Của Tôi
         </a>
     </div>
 
     @if (TempData["ErrorMessage"] != null)
     {
-        <div class="alert alert-danger font-weight-bold shadow-sm">
-            <i class="fas fa-exclamation-triangle"></i> @TempData["ErrorMessage"]
+        <div class="alert alert-danger font-weight-bold shadow-sm border-0 mb-4" style="border-radius: 0.5rem;">
+            <i class="fas fa-exclamation-triangle mr-1"></i> @TempData["ErrorMessage"]
         </div>
     }
 
     <div class="row justify-content-center">
         <div class="col-xl-8 col-lg-10">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Thông tin đơn</h6>
+            <div class="card request-card mb-4">
+                <div class="card-header bg-transparent py-3 border-bottom">
+                    <h6 class="m-0 font-weight-bold text-dark">
+                        <i class="fas fa-file-alt text-primary mr-2"></i> Thông Tin Đơn Yêu Cầu
+                    </h6>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-4">
                     <form asp-action="Create" method="post">
+                        <!-- Loại đơn -->
                         <div class="form-group mb-4">
-                            <label class="font-weight-bold text-dark">Loại đơn <span class="text-danger">*</span></label>
-                            <select name="requestType" class="form-control" required id="requestTypeSelect">
+                            <label class="font-weight-bold text-dark small text-uppercase">Loại đơn <span class="text-danger">*</span></label>
+                            <select name="requestType" class="form-control form-control-custom" required id="requestTypeSelect">
                                 <option value="" disabled selected>-- Chọn loại đơn --</option>
                                 <option value="ForgotCheckIn">Đơn báo quên Check-in (Xác nhận đi làm)</option>
-                                <option value="Leave">Đơn xin nghỉ phép (Hủy ca)</option>
+                                <option value="Leave">Đơn xin nghỉ phép (Hủy ca làm)</option>
                             </select>
-                            <small class="form-text text-muted">
-                                - <strong>Báo quên Check-in</strong>: Dùng khi bạn có đi làm nhưng quên chấm công hoặc lỗi mạng.<br />
-                                - <strong>Xin nghỉ phép</strong>: Dùng khi bạn có lịch làm nhưng đột xuất bận không thể đi làm được.
-                            </small>
+                            <div class="mt-2 p-3 bg-light rounded text-muted small border">
+                                <div class="mb-1"><strong class="text-dark"><i class="fas fa-check-circle text-info mr-1"></i> Báo quên Check-in:</strong> Dùng khi bạn có thực hiện đi làm thực tế nhưng quên chấm công hoặc ứng dụng lỗi mạng.</div>
+                                <div><strong class="text-dark"><i class="fas fa-calendar-times text-warning mr-1"></i> Xin nghỉ phép:</strong> Dùng khi bạn đã có lịch làm chính thức nhưng đột xuất bận không thể đi làm.</div>
+                            </div>
                         </div>
 
+                        <!-- Ca làm áp dụng -->
                         <div class="form-group mb-4">
-                            <label class="font-weight-bold text-dark">Ca làm việc áp dụng <span class="text-danger">*</span></label>
-                            <select name="workScheduleId" class="form-control" required>
+                            <label class="font-weight-bold text-dark small text-uppercase">Ca làm việc áp dụng <span class="text-danger">*</span></label>
+                            <select name="workScheduleId" class="form-control form-control-custom" required>
                                 <option value="" disabled selected>-- Chọn ca làm việc --</option>
                                 @if (schedules != null)
                                 {
@@ -52,19 +85,21 @@
                                     }
                                 }
                             </select>
-                            <small class="form-text text-muted">Chỉ hiển thị tối đa 30 ca gần đây nhất của bạn.</small>
+                            <small class="form-text text-muted"><i class="fas fa-info-circle mr-1"></i> Hiển thị tối đa 30 ca gần nhất của bạn.</small>
                         </div>
 
+                        <!-- Lý do chi tiết -->
                         <div class="form-group mb-4">
-                            <label class="font-weight-bold text-dark">Lý do chi tiết <span class="text-danger">*</span></label>
-                            <textarea name="reason" class="form-control" rows="4" required placeholder="Nhập lý do cụ thể (Ví dụ: Em quên mang điện thoại nên không Check-in được ca Sáng hôm nay...)"></textarea>
+                            <label class="font-weight-bold text-dark small text-uppercase">Lý do chi tiết <span class="text-danger">*</span></label>
+                            <textarea name="reason" class="form-control" rows="4" required placeholder="Nhập lý do chi tiết (Ví dụ: Em có đi làm ca Sáng nhưng điện thoại hết pin nên không Check-in kịp...)" style="border-radius: 0.5rem; border: 1px solid #cbd5e1; font-weight: 500;"></textarea>
                         </div>
 
-                        <hr class="mt-4 mb-4" />
+                        <hr class="my-4" />
 
-                        <div class="text-right">
-                            <button type="submit" class="btn btn-primary px-4 py-2 font-weight-bold">
-                                <i class="fas fa-paper-plane"></i> Gửi đơn cho Quản lý
+                        <div class="d-flex justify-content-end" style="gap: 10px;">
+                            <a asp-action="MyRequests" class="btn btn-light border font-weight-bold px-4 py-2" style="border-radius: 0.5rem;">Hủy bỏ</a>
+                            <button type="submit" class="btn btn-primary font-weight-bold px-4 py-2 shadow-sm" style="border-radius: 0.5rem;">
+                                <i class="fas fa-paper-plane mr-1"></i> Gửi Đơn Cho Quản Lý
                             </button>
                         </div>
                     </form>

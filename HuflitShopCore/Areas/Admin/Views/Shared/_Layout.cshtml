@@ -15,7 +15,7 @@
     string userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("Id") ?? "";
     bool isAdmin = User.IsInRole("1") || User.IsInRole("ROLE-ADMIN");
 
-    // Tối ưu hóa truy vấn: Lấy danh sách đơn hàng chờ duyệt trong 1 câu lệnh duy nhất không tracking
+    // Truy vấn đơn hàng chờ duyệt không tracking
     var pendingOrders = _context.Orders
         .AsNoTracking()
         .Where(o => o.OrderStatus == 0)
@@ -35,63 +35,210 @@
 <html lang="en">
 
 <head>
-
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
+    <meta name="description" content="HuflitShop ERP Dashboard">
+    <meta name="author" content="HuflitShop Team">
 
-    <title>@ViewData["title"] - Admin</title>
+    <title>@ViewData["title"] - Hệ Thống Quản Trị ERP</title>
 
-
-    <!-- Custom fonts for this template-->
+    <!-- Custom fonts -->
     <link href="~/lib/font-awesome/css/all.min.css" rel="stylesheet" type="text/css">
-    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
-          rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- Custom styles for this template-->
+    <!-- SB Admin 2 & Global Styles -->
     <link href="~/Admin/css/sb-admin-2.min.css" rel="stylesheet">
     <link href="~/Admin/css/admin-custom.css" rel="stylesheet">
 
-    <!-- Paging -->
+    <!-- DataTables CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.11.3/css/dataTables.bootstrap5.min.css" />
 
     <!-- Select2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <style>
-        /* Custom Select2 premium theme styles matching Excel Navy/sb-admin-2 theme */
-        .select2-container--default .select2-selection--single {
-            height: 38px !important;
-            border: 1px solid #d1d3e2 !important;
-            border-radius: 6px !important;
-            padding: 5px 10px !important;
-            display: flex;
-            align-items: center;
-        }
-        .select2-container--default .select2-selection--single .select2-selection__arrow {
-            height: 36px !important;
-        }
-        .select2-container--default .select2-selection--single .select2-selection__rendered {
-            line-height: 26px !important;
-            color: #6e707e !important;
-            padding-left: 0 !important;
-        }
-    </style>
-    
 
-    <!-- Custom CSS for Toast-like Alerts -->
     <style>
+        :root {
+            --admin-ocean: #2563eb;
+            --admin-cyan: #06b6d4;
+            --admin-dark: #0f172a;
+            --admin-bg: #f8fafc;
+            --admin-border: #e2e8f0;
+            --admin-gradient: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%);
+            --admin-sidebar-gradient: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+            --admin-transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        body {
+            font-family: 'Jost', sans-serif !important;
+            background-color: var(--admin-bg) !important;
+            color: var(--admin-dark);
+        }
+
+        /* Modernized Sidebar */
+        .sidebar-dark {
+            background: var(--admin-sidebar-gradient) !important;
+            border-right: 1px solid #1e293b;
+        }
+
+        .sidebar-brand {
+            height: 4.5rem !important;
+            background: rgba(255, 255, 255, 0.03);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .sidebar-brand-text {
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            background: var(--admin-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .sidebar-brand-icon i {
+            color: var(--admin-cyan);
+            font-size: 1.4rem;
+        }
+
+        .sidebar-dark .sidebar-heading {
+            color: #64748b !important;
+            font-size: 0.7rem !important;
+            font-weight: 700 !important;
+            letter-spacing: 1.2px !important;
+            text-transform: uppercase;
+            padding: 1.25rem 1rem 0.5rem 1rem !important;
+        }
+
+        .sidebar-dark .nav-item .nav-link {
+            padding: 0.8rem 1rem !important;
+            font-weight: 500;
+            color: #94a3b8 !important;
+            transition: var(--admin-transition);
+        }
+
+        .sidebar-dark .nav-item .nav-link i {
+            color: #64748b !important;
+            transition: var(--admin-transition);
+            width: 1.5rem;
+        }
+
+        .sidebar-dark .nav-item:hover .nav-link,
+        .sidebar-dark .nav-item.active .nav-link {
+            color: #ffffff !important;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .sidebar-dark .nav-item:hover .nav-link i,
+        .sidebar-dark .nav-item.active .nav-link i {
+            color: var(--admin-cyan) !important;
+        }
+
+        /* -------------------------------------------------------------
+           SỬA TRIỆT ĐỂ LỖI CHE KHUẤT DROPDOWN THÔNG BÁO (STACKING CONTEXT)
+           ------------------------------------------------------------- */
+        .topbar {
+            height: 4.5rem !important;
+            background: #ffffff !important;
+            border-bottom: 1px solid var(--admin-border);
+            box-shadow: 0 4px 20px -5px rgba(15, 23, 42, 0.03) !important;
+            position: relative !important;
+            z-index: 1040 !important; /* Đảm bảo thanh Topbar nổi trên toàn bộ Body */
+        }
+
+        .topbar .navbar-nav {
+            position: relative;
+            z-index: 1045 !important;
+        }
+
+        .topbar .nav-item {
+            position: relative !important;
+        }
+
+        .topbar .nav-item .nav-link {
+            height: 4.5rem !important;
+        }
+
+        /* Fix Menu Dropdown Thông Báo nổi tuyệt đối lên tầng cao nhất */
+        .topbar .dropdown-menu {
+            position: absolute !important;
+            z-index: 1060 !important; /* Cao hơn Topbar và các Card ở Body */
+        }
+
+        .topbar .dropdown-list {
+            width: 22rem !important;
+            padding: 0;
+            border: 1px solid var(--admin-border) !important;
+            box-shadow: 0 15px 35px -5px rgba(15, 23, 42, 0.2) !important;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            background: #ffffff !important;
+        }
+
+        .topbar .dropdown-list .dropdown-list-content {
+            max-height: 340px; /* Chiều cao cố định tạo scrollbar */
+            overflow-y: auto !important;
+        }
+
+        .topbar .dropdown-list .dropdown-list-content::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .topbar .dropdown-list .dropdown-list-content::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        /* Custom Badge */
+        .badge-counter-ocean {
+            background: #ef4444;
+            color: #ffffff;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 0.25em 0.55em;
+            border-radius: 10px;
+        }
+
+        /* Toast Container */
         .toast-container {
             position: fixed;
-            top: 80px; /* Dưới thanh Topbar một chút */
-            right: 20px;
-            z-index: 1055; /* Hiển thị trên hầu hết các element khác */
+            top: 90px;
+            right: 25px;
+            z-index: 1070;
+        }
+
+        .toast-container .alert {
+            border: 1px solid var(--admin-border);
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+            border-left: 4px solid var(--admin-ocean);
+            border-radius: 0.35rem;
+            padding: 1rem 1.25rem;
+            min-width: 320px;
+        }
+
+        /* Select2 Custom Theme */
+        .select2-container--default .select2-selection--single {
+            height: 42px !important;
+            border: 1px solid var(--admin-border) !important;
+            border-radius: 0.35rem !important;
+            padding: 6px 12px !important;
+            background-color: #ffffff !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 28px !important;
+            color: var(--admin-dark) !important;
+        }
+
+        /* Footer Modern */
+        footer.sticky-footer {
+            padding: 1.5rem 0 !important;
+            background: #ffffff !important;
+            border-top: 1px solid var(--admin-border);
+            color: #64748b;
+            font-size: 0.85rem;
         }
     </style>
-
-
 </head>
 
 <body id="page-top">
@@ -100,18 +247,18 @@
     <div id="wrapper">
 
         <!-- Sidebar -->
-        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+        <ul class="navbar-nav sidebar sidebar-dark accordion" id="accordionSidebar">
 
             <!-- Sidebar - Brand -->
             <a class="sidebar-brand d-flex align-items-center justify-content-center" asp-area="Admin" asp-controller="Home" asp-action="Index">
                 <div class="sidebar-brand-icon">
-                    <i class="fas fa-chart-line"></i>
+                    <i class="fas fa-layer-group"></i>
                 </div>
-                <div class="sidebar-brand-text mx-3">Tracy ERP</div>
+                <div class="sidebar-brand-text mx-3">HUFLITSHOP</div>
             </a>
 
             <!-- Divider -->
-            <hr class="sidebar-divider my-0">
+            <hr class="sidebar-divider my-0 border-secondary opacity-25">
 
             <!-- Phân khúc 1: TỔNG QUAN & BÁO CÁO -->
             <div class="sidebar-heading">Tổng quan & Phân tích</div>
@@ -147,12 +294,11 @@
             </li>
 
             <!-- Divider -->
-            <hr class="sidebar-divider">
+            <hr class="sidebar-divider border-secondary opacity-25">
 
             <!-- Phân khúc 2: BÁN HÀNG & KHÁCH HÀNG -->
             <div class="sidebar-heading">Kinh doanh & Khách hàng</div>
 
-            <!-- Đơn hàng -->
             <li class="nav-item">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseSales" aria-expanded="true">
                     <i class="fas fa-shopping-bag"></i>
@@ -160,26 +306,25 @@
                         Quản lý bán hàng
                         @if (pendingCount != 0)
                         {
-                            <span class="badge badge-danger ml-1">@pendingCount</span>
+                            <span class="badge badge-counter-ocean ml-1">@pendingCount</span>
                         }
                     </span>
                 </a>
                 <div id="collapseSales" class="collapse" data-parent="#accordionSidebar">
-                    <div class="bg-white py-2 collapse-inner rounded">
+                    <div class="bg-white py-2 collapse-inner rounded border">
                         <a class="collapse-item" asp-area="Admin" asp-controller="Order" asp-action="Index">Tất cả đơn hàng</a>
-                        <a class="collapse-item" asp-area="Admin" asp-controller="Order" asp-action="Index" asp-route-pendingOnly="true">Đơn hàng chờ duyệt</a>
+                        <a class="collapse-item" asp-area="Admin" asp-controller="Order" asp-action="Index" asp-route-pendingOnly="true">Đơn chờ duyệt</a>
                     </div>
                 </div>
             </li>
 
-            <!-- Khách hàng & Phản hồi -->
             <li class="nav-item">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseCRM" aria-expanded="true">
                     <i class="fas fa-users-cog"></i>
                     <span>Khách hàng & CSKH</span>
                 </a>
                 <div id="collapseCRM" class="collapse" data-parent="#accordionSidebar">
-                    <div class="bg-white py-2 collapse-inner rounded">
+                    <div class="bg-white py-2 collapse-inner rounded border">
                         <a class="collapse-item" asp-area="Admin" asp-controller="Customer" asp-action="Index">Danh sách khách hàng</a>
                         <a class="collapse-item" asp-area="Admin" asp-controller="Reviews" asp-action="Index">Đánh giá & Phản hồi</a>
                         <a class="collapse-item" asp-area="Admin" asp-controller="Messages" asp-action="Chat" asp-route-userId="">Tư vấn Chat (Live)</a>
@@ -187,7 +332,6 @@
                 </div>
             </li>
 
-            <!-- Khuyến mãi -->
             <li class="nav-item">
                 <a class="nav-link" asp-area="Admin" asp-controller="Promotions" asp-action="Index">
                     <i class="fas fa-tags"></i>
@@ -196,19 +340,18 @@
             </li>
 
             <!-- Divider -->
-            <hr class="sidebar-divider">
+            <hr class="sidebar-divider border-secondary opacity-25">
 
             <!-- Phân khúc 3: SẢN PHẨM & VẬN HÀNH KHO -->
             <div class="sidebar-heading">Sản phẩm & Vận hành kho</div>
 
-            <!-- Sản phẩm -->
             <li class="nav-item">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseProductsList" aria-expanded="true">
                     <i class="fas fa-box-open"></i>
                     <span>Quản lý sản phẩm</span>
                 </a>
                 <div id="collapseProductsList" class="collapse" data-parent="#accordionSidebar">
-                    <div class="bg-white py-2 collapse-inner rounded">
+                    <div class="bg-white py-2 collapse-inner rounded border">
                         <a class="collapse-item" asp-area="Admin" asp-controller="Products" asp-action="Index" asp-route-id="0">Sản phẩm</a>
                         <a class="collapse-item" asp-area="Admin" asp-controller="Category" asp-action="Index">Danh mục</a>
                         <a class="collapse-item" asp-area="Admin" asp-controller="Color" asp-action="Index">Màu sắc (Colors)</a>
@@ -217,14 +360,13 @@
                 </div>
             </li>
 
-            <!-- Nhập kho & Nhà cung cấp -->
             <li class="nav-item">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseInventory" aria-expanded="true">
-                    <i class="fas fa-warehouse"></i>
+                    <i class="fas fa-boxes"></i>
                     <span>Quản lý kho hàng</span>
                 </a>
                 <div id="collapseInventory" class="collapse" data-parent="#accordionSidebar">
-                    <div class="bg-white py-2 collapse-inner rounded">
+                    <div class="bg-white py-2 collapse-inner rounded border">
                         <a class="collapse-item" asp-area="Admin" asp-controller="Supplier" asp-action="Index">Nhà cung cấp</a>
                         <a class="collapse-item" asp-area="Admin" asp-controller="StockReceipt" asp-action="Create">Lập phiếu nhập kho</a>
                         <a class="collapse-item" asp-area="Admin" asp-controller="StockReceipt" asp-action="Index">Lịch sử nhập kho</a>
@@ -233,14 +375,13 @@
             </li>
 
             <!-- Divider -->
-            <hr class="sidebar-divider">
+            <hr class="sidebar-divider border-secondary opacity-25">
 
             <!-- Phân khúc 4: NHÂN SỰ & CHẤM CÔNG -->
             <div class="sidebar-heading">Quản trị nhân sự (HRM)</div>
 
             @if (isAdmin)
             {
-                <!-- Nhân viên -->
                 <li class="nav-item">
                     <a class="nav-link" asp-area="Admin" asp-controller="Employee" asp-action="Index">
                         <i class="fas fa-user-tie"></i>
@@ -248,14 +389,13 @@
                     </a>
                 </li>
                 
-                <!-- Duyệt & phân lịch -->
                 <li class="nav-item">
                     <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseHRMOps" aria-expanded="true">
                         <i class="fas fa-calendar-check"></i>
                         <span>Vận hành & Đăng ký ca</span>
                     </a>
                     <div id="collapseHRMOps" class="collapse" data-parent="#accordionSidebar">
-                        <div class="bg-white py-2 collapse-inner rounded">
+                        <div class="bg-white py-2 collapse-inner rounded border">
                             <a class="collapse-item" asp-area="Admin" asp-controller="ShiftRegistrations" asp-action="Index">Duyệt ca làm</a>
                             <a class="collapse-item" asp-area="Admin" asp-controller="WorkSchedules" asp-action="Index">Bảng phân ca tuần</a>
                             <a class="collapse-item" asp-area="Admin" asp-controller="Requests" asp-action="Index">Đơn từ chờ duyệt</a>
@@ -264,14 +404,13 @@
                     </div>
                 </li>
 
-                <!-- Lương & Cấu hình -->
                 <li class="nav-item">
                     <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseHRMSettings" aria-expanded="true">
                         <i class="fas fa-cogs"></i>
                         <span>Tài chính & Thiết lập</span>
                     </a>
                     <div id="collapseHRMSettings" class="collapse" data-parent="#accordionSidebar">
-                        <div class="bg-white py-2 collapse-inner rounded">
+                        <div class="bg-white py-2 collapse-inner rounded border">
                             <a class="collapse-item" asp-area="Admin" asp-controller="Salary" asp-action="Index">Bảng lương tổng hợp</a>
                             <a class="collapse-item" asp-area="Admin" asp-controller="Shifts" asp-action="Index">Định nghĩa ca làm</a>
                             <a class="collapse-item" asp-area="Admin" asp-controller="ShopSetting" asp-action="Index">Cấu hình IP Wifi</a>
@@ -281,14 +420,13 @@
             }
             else
             {
-                <!-- Nhân viên cá nhân -->
                 <li class="nav-item">
                     <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseMyHRM" aria-expanded="true">
                         <i class="fas fa-user-circle"></i>
                         <span>Cá nhân & Ca làm</span>
                     </a>
                     <div id="collapseMyHRM" class="collapse" data-parent="#accordionSidebar">
-                        <div class="bg-white py-2 collapse-inner rounded">
+                        <div class="bg-white py-2 collapse-inner rounded border">
                             <a class="collapse-item" asp-area="" asp-controller="Profile" asp-action="Profile">Hồ sơ cá nhân</a>
                             <a class="collapse-item" asp-area="Admin" asp-controller="Salary" asp-action="MySalary">Bảng lương của tôi</a>
                             <a class="collapse-item" asp-area="Admin" asp-controller="StaffShift" asp-action="Index">Đăng ký ca làm</a>
@@ -299,394 +437,191 @@
                 </li>
             }
 
-            <!-- Divider -->
-            <hr class="sidebar-divider d-none d-md-block">
+            <hr class="sidebar-divider d-none d-md-block border-secondary opacity-25">
 
-            <!-- Sidebar Toggler (Sidebar) -->
             <div class="text-center d-none d-md-inline">
                 <button class="rounded-circle border-0" id="sidebarToggle"></button>
             </div>
-
         </ul>
-        <!-- End of Sidebar -->
+
         <!-- Content Wrapper -->
         <div id="content-wrapper" class="d-flex flex-column">
 
             <!-- Main Content -->
             <div id="content">
 
-                <!-- Topbar -->
-                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
-
-                    <!-- Sidebar Toggle (Topbar) -->
+                <!-- Topbar Header -->
+                <nav class="navbar navbar-expand navbar-light topbar mb-4 static-top">
                     <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
-                        <i class="fa fa-bars"></i>
+                        <i class="fa fa-bars text-dark"></i>
                     </button>
 
-                    <!-- Topbar Navbar -->
-                    <ul class="navbar-nav ml-auto">
+                    <ul class="navbar-nav ml-auto align-items-center">
 
-                        <!-- Nav Item - Search Dropdown (Visible Only XS) -->
-                        <li class="nav-item dropdown no-arrow d-sm-none">
-                            <a class="nav-link dropdown-toggle" href="#" id="searchDropdown" role="button"
-                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="fas fa-search fa-fw"></i>
-                            </a>
-                            <!-- Dropdown - Messages -->
-                            <div class="dropdown-menu dropdown-menu-right p-3 shadow animated--grow-in"
-                                 aria-labelledby="searchDropdown">
-                                <form class="form-inline mr-auto w-100 navbar-search">
-                                    <div class="input-group">
-                                        <input type="text" class="form-control bg-light border-0 small"
-                                               placeholder="Tìm kiếm ..." aria-label="Search"
-                                               aria-describedby="basic-addon2">
-                                        <div class="input-group-append">
-                                            <button class="btn btn-primary" type="button">
-                                                <i class="fas fa-search fa-sm"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                        </li>
-
-                        <!-- Nav Item - Alerts -->
-                        <li class="nav-item dropdown no-arrow mx-1">
-                            <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button"
-                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="fas fa-bell fa-fw" style="color: #D7DF01;"></i>
-                                <!-- Counter - Alerts -->
+                        <!-- Notifications Dropdown -->
+                        <li class="nav-item dropdown no-arrow mx-2">
+                            <a class="nav-link dropdown-toggle position-relative" href="#" id="alertsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-bell fa-fw" style="color: var(--admin-ocean); font-size: 1.1rem;"></i>
                                 @if (pendingCount != 0)
                                 {
-                                    <span class="badge badge-danger badge-counter">
+                                    <span class="badge badge-counter-ocean position-absolute" style="top: 18px; right: 2px;">
                                         @pendingCount
                                     </span>
                                 }
-
                             </a>
-                            <!-- Dropdown - Alerts -->
+                            
                             @if (pendingCount != 0)
                             {
-                                <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
-                                     aria-labelledby="alertsDropdown">
-                                    <h6 class="dropdown-header">
-                                        Thông báo
+                                <div class="dropdown-list dropdown-menu dropdown-menu-right border-0 animated--grow-in" aria-labelledby="alertsDropdown">
+                                    <h6 class="dropdown-header text-uppercase font-weight-bold" style="background: var(--admin-dark); color: #fff; padding: 12px 16px;">
+                                        Thông Báo Đơn Hàng Mới (@pendingCount)
                                     </h6>
-                                    @foreach (var item in pendingOrders)
-                                    {
-                                        <a class="dropdown-item d-flex align-items-center" asp-action="Index" asp-route-pendingOnly="true" asp-controller="Order" asp-area="Admin">
-                                            <div class="dropdown-list-image mr-3">
-                                                @if (!string.IsNullOrEmpty(item.UserAvatar))
-                                                {
-                                                    <img class="rounded-circle" src="@item.UserAvatar" alt="...">
-                                                }
-                                                else
-                                                {
-                                                    <img class="rounded-circle" src="~/Client/img/default-user.jpg" alt="..." />
-                                                }
-                                            </div>
-                                            <div>
-                                                @{
-                                                    TimeSpan time = DateTime.Now - item.OrderDate;
-                                                    int totalDays = (int)time.TotalDays;
-                                                    if (totalDays > 1)
+                                    
+                                    <!-- Khung bọc danh sách có thể scroll mượt mà -->
+                                    <div class="dropdown-list-content">
+                                        @foreach (var item in pendingOrders)
+                                        {
+                                            <a class="dropdown-item d-flex align-items-center py-3 border-bottom" asp-action="Index" asp-route-pendingOnly="true" asp-controller="Order" asp-area="Admin">
+                                                <div class="dropdown-list-image mr-3 flex-shrink-0">
+                                                    @if (!string.IsNullOrEmpty(item.UserAvatar))
                                                     {
-                                                        <div class="small text-gray-500">@item.OrderDate.ToString("dd/MM/yyyy")</div>
-                                                    }
-                                                    else if (totalDays == 1)
-                                                    {
-                                                        <div class="small text-gray-500">1 ngày trước</div>
+                                                        <img class="rounded-circle" src="@item.UserAvatar" alt="Avatar" style="width: 38px; height: 38px; object-fit: cover;">
                                                     }
                                                     else
                                                     {
-                                                        int totalHours = (int)time.TotalHours;
-                                                        if (totalHours < 1)
-                                                        {
-                                                            int totalMinutes = (int)time.TotalMinutes;
-                                                            if (totalMinutes < 1)
-                                                            {
-                                                                <div class="small text-gray-500">Vừa xong</div>
-                                                            }
-                                                            else
-                                                            {
-                                                                <div class="small text-gray-500">@totalMinutes phút trước</div>
-                                                            }
-                                                        }
-                                                        else
-                                                        {
-                                                            <div class="small text-gray-500">@totalHours giờ trước</div>
-                                                        }
+                                                        <img class="rounded-circle" src="~/Client/img/default-user.jpg" alt="Avatar" style="width: 38px; height: 38px; object-fit: cover;" />
                                                     }
-                                                }
-                                                <span class="font-weight-bold">@item.UserFullName đã đặt một đơn hàng. Nhấn để xem chi tiết.</span>
-                                            </div>
-                                        </a>
-                                    }
+                                                </div>
+                                                <div>
+                                                    <div class="small text-muted mb-1">
+                                                        @{
+                                                            TimeSpan time = DateTime.Now - item.OrderDate;
+                                                            int totalDays = (int)time.TotalDays;
+                                                            if (totalDays > 0) { <text>@totalDays ngày trước</text> }
+                                                            else if ((int)time.TotalHours > 0) { <text>@((int)time.TotalHours) giờ trước</text> }
+                                                            else { <text>Vừa xong</text> }
+                                                        }
+                                                    </div>
+                                                    <span class="font-weight-bold text-dark" style="font-size: 0.85rem;">@item.UserFullName vừa tạo đơn hàng mới.</span>
+                                                </div>
+                                            </a>
+                                        }
+                                    </div>
+                                    
+                                    <a class="dropdown-item text-center small text-gray-500 py-2 font-weight-bold" asp-action="Index" asp-route-pendingOnly="true" asp-controller="Order" asp-area="Admin">
+                                        Xem tất cả đơn chờ duyệt &rarr;
+                                    </a>
                                 </div>
                             }
                             else
                             {
-                                <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
-                                     aria-labelledby="alertsDropdown">
-                                    <h6 class="dropdown-header">
-                                        Thông báo
+                                <div class="dropdown-list dropdown-menu dropdown-menu-right border-0 animated--grow-in" aria-labelledby="alertsDropdown">
+                                    <h6 class="dropdown-header text-uppercase font-weight-bold" style="background: var(--admin-dark); color: #fff; padding: 12px 16px;">
+                                        Thông Báo
                                     </h6>
-                                    <div class="text-center" style="margin-top: 5%; margin-bottom: 5%;">
-                                        Chưa có thông báo mới.
+                                    <div class="text-center py-4 text-muted font-weight-bold small">
+                                        Không có thông báo mới.
                                     </div>
                                 </div>
                             }
                         </li>
+
                         <div class="topbar-divider d-none d-sm-block"></div>
 
-                        <!-- Nav Item - User Information -->
+                        <!-- User Profile Dropdown -->
                         <li class="nav-item dropdown no-arrow">
-                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
-                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                @if (isAdmin)
-                                {
-                                    <span class="mr-2 d-none d-lg-inline text-gray-600 small"><b>Xin chào, Admin: </b>@User.Identity?.Name</span>
-                                }
-                                else
-                                {
-                                    <span class="mr-2 d-none d-lg-inline text-gray-600 small"><b>Xin chào, Nhân viên: </b>@User.Identity?.Name</span>
-                                }
-
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span class="mr-2 d-none d-lg-inline text-dark font-weight-bold small">
+                                    @(isAdmin ? "Admin: " : "NV: ") @User.Identity?.Name
+                                </span>
                                 @if (string.IsNullOrEmpty(User.FindFirst("Avatar")?.Value))
                                 {
-                                    <img class="img-profile rounded-circle" src="~/Client/img/default-user.jpg" alt="">
+                                    <img class="img-profile rounded-circle" src="~/Client/img/default-user.jpg" alt="User">
                                 }
                                 else
                                 {
-                                    <img class="img-profile rounded-circle" src="@User.FindFirst("Avatar")?.Value" alt="">
+                                    <img class="img-profile rounded-circle" src="@User.FindFirst("Avatar")?.Value" alt="User">
                                 }
                             </a>
-                            <!-- Dropdown - User Information -->
-                            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
-                                <a class="dropdown-item" asp-area="Admin" asp-controller="Profiles" asp-action="Profiles">
-                                    <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Hồ sơ
-                                </a>
+                            <div class="dropdown-menu dropdown-menu-right shadow border-0 animated--grow-in" aria-labelledby="userDropdown">
+
                                 <div class="dropdown-divider"></div>
-
-                                <a class="dropdown-item" asp-area="" asp-action="Logout" asp-controller="Login"
-                                   asp-route-returnUrl="@Url.Action("Index","Home",new {Area="Admin"})">
-                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Đăng xuất
+                                <a class="dropdown-item py-2 text-danger font-weight-bold" asp-area="" asp-action="Logout" asp-controller="Login" asp-route-returnUrl="@Url.Action("Index","Home",new {Area="Admin"})">
+                                    <i class="fas fa-sign-out-alt mr-2"></i>Đăng xuất
                                 </a>
-
-
                             </div>
                         </li>
-
                     </ul>
-
                 </nav>
-                <!-- End of Topbar -->
-                <!-- Begin Page Content -->
-                <div class="container-fluid">
 
+                <!-- Page Main Render Body -->
+                <div class="container-fluid">
                     @RenderBody()
                 </div>
-                <!-- /.container-fluid -->
-
             </div>
-            <!-- End of Main Content -->
+
             <!-- Footer -->
-            <footer class="sticky-footer bg-white">
+            <footer class="sticky-footer">
                 <div class="container my-auto">
                     <div class="copyright text-center my-auto">
-                        <span>Copyright &copy; HUFLIT SHOP @DateTime.Now.Year</span>
+                        <span>Hệ Thống Bán Hàng & ERP Bán Lẻ &copy; HUFLIT SHOP @DateTime.Now.Year</span>
                     </div>
                 </div>
             </footer>
-            <!-- End of Footer -->
-
         </div>
-        <!-- End of Content Wrapper -->
-
     </div>
-    <!-- End of Page Wrapper -->
-    <!-- Toast Notification Container -->
+
+    <!-- Toast Floating Alerts -->
     <div class="toast-container">
         @if (TempData["SuccessMessage"] != null)
         {
-            <div class="alert alert-success shadow-sm alert-dismissible fade show" role="alert" style="min-width: 350px;">
+            <div class="alert alert-success shadow-lg alert-dismissible fade show" role="alert">
                 <i class="fas fa-check-circle mr-2"></i> @TempData["SuccessMessage"]
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             </div>
         }
         @if (TempData["ErrorMessage"] != null)
         {
-            <div class="alert alert-danger shadow-sm alert-dismissible fade show" role="alert" style="min-width: 350px;">
+            <div class="alert alert-danger shadow-lg alert-dismissible fade show" role="alert">
                 <i class="fas fa-exclamation-circle mr-2"></i> @TempData["ErrorMessage"]
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             </div>
         }
     </div>
 
-
-    <!-- Scroll to Top Button-->
     <a class="scroll-to-top rounded" href="#page-top">
         <i class="fas fa-angle-up"></i>
     </a>
 
-    <!-- Logout Modal-->
-    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-         aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
-                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
-                </div>
-                <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                    <a class="btn btn-primary" href="login.html">Logout</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Bootstrap core JavaScript-->
+    <!-- Scripts Core -->
     <script src="~/Admin/vendor/jquery/jquery.min.js"></script>
     <script src="~/Admin/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-
-    @*<script src="~/lib/bootstrap/dist/js/bootstrap.min.js"></script>*@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
-
-    <!-- Core plugin JavaScript-->
     <script src="~/Admin/vendor/jquery-easing/jquery.easing.min.js"></script>
-
-    <!-- Custom scripts for all pages-->
     <script src="~/Admin/js/sb-admin-2.min.js"></script>
-
-    <!--Page level plugin-->
     <script src="~/Admin/vendor/chart.js/Chart.min.js"></script>
 
-    <!-- Paging & Select2 -->
+    <!-- DataTables & Select2 -->
     <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.11.3/js/dataTables.bootstrap5.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="~/lib/sweetalert/sweetalert.min.js"></script>
+
     <script>
         $(function () {
-            // Apply DataTable globally unless disabled via class
             $('.table:not(.no-datatable)').DataTable();
+            $('.select2-enable, .select2-filter').select2({ width: '100%' });
 
-            // Initialize global Select2 inputs
-            $('.select2-enable').select2({
-                width: '100%'
-            });
-
-            $('.select2-filter').select2({
-                width: '100%'
-            });
-        });
-    </script>
-
-    <script>
-        // Auto-hide toast alerts
-        $(document).ready(function () {
-            // Tìm tất cả các alert trong toast container
+            // Auto-hide alerts
             var alerts = $('.toast-container .alert');
-
-            // Lặp qua từng alert và đặt thời gian tự động ẩn
             alerts.each(function () {
                 var alert = $(this);
                 setTimeout(function () {
-                    alert.fadeTo(500, 0).slideUp(500, function () {
-                        $(this).remove();
-                    });
-                }, 5000); // 5000ms = 5 giây
+                    alert.fadeTo(500, 0).slideUp(500, function () { $(this).remove(); });
+                }, 4500);
             });
         });
     </script>
-
-    <!-- Alert -->
-    <script src="~/lib/sweetalert/sweetalert.min.js"></script>
-
-    <!--Page level custom scripts-->
-    @*<script src="~/Admin/js/demo/chart-area-demo.js"></script>
-        <script src="~/Admin/js/demo/chart-pie-demo.js"></script>*@
-
-    <!-- Address -->
-    <script src="~/js/districts.min.js"></script>
-    <script>
-        //<![CDATA[
-        if (address_2 = localStorage.getItem('address_2_saved')) {
-            $('select[name="District"] option').each(function () {
-                if ($(this).text() == address_2) {
-                    $(this).attr('selected', '')
-                }
-            })
-            $('input.billing_address_2').attr('value', address_2)
-        }
-        if (district = localStorage.getItem('district')) {
-            $('select[name="District"]').html(district)
-            $('select[name="District"]').on('change', function () {
-                var target = $(this).children('option:selected')
-                target.attr('selected', '')
-                $('select[name="District"] option').not(target).removeAttr('selected')
-                address_2 = target.text()
-                $('input.billing_address_2').attr('value', address_2)
-                district = $('select[name="District"]').html()
-                localStorage.setItem('district', district)
-                localStorage.setItem('address_2_saved', address_2)
-            })
-        }
-        $('select[name="City"]').each(function () {
-            var $this = $(this),
-                stc = ''
-            c.forEach(function (i, e) {
-                e += +1
-                stc += '<option value="' + i + '">' + i + '</option>'
-                $this.html('<option value="">Chọn tỉnh/thành phố</option>' + stc)
-                if (address_1 = localStorage.getItem('address_1_saved')) {
-                    $('select[name="City"] option').each(function () {
-                        if ($(this).text() == address_1) {
-                            $(this).attr('selected', '')
-                        }
-                    })
-                    $('input.billing_address_1').attr('value', address_1)
-                }
-                $this.on('change', function (i) {
-                    i = $this.children('option:selected').index() - 1
-                    var str = '',
-                        r = $this.val()
-                    if (r != '') {
-                        arr[i].forEach(function (el) {
-                            str += '<option value="' + el + '">' + el + '</option>'
-                            $('select[name="District"]').html('<option value="">Chọn quận / huyện</option>' + str)
-                        })
-                        var address_1 = $this.children('option:selected').text()
-                        var district = $('select[name="District"]').html()
-                        localStorage.setItem('address_1_saved', address_1)
-                        localStorage.setItem('district', district)
-                        $('select[name="District"]').on('change', function () {
-                            var target = $(this).children('option:selected')
-                            target.attr('selected', '')
-                            $('select[name="District"] option').not(target).removeAttr('selected')
-                            var address_2 = target.text()
-                            $('input.billing_address_2').attr('value', address_2)
-                            district = $('select[name="District"]').html()
-                            localStorage.setItem('district', district)
-                            localStorage.setItem('address_2_saved', address_2)
-                        })
-                    } else {
-                        $('select[name="District"]').html('<option value="">Chọn quận / huyện</option>')
-                        district = $('select[name="District"]').html()
-                        localStorage.setItem('district', district)
-                        localStorage.removeItem('address_1_saved', address_1)
-                    }
-                })
-            })
-        })
-
-        //]]></script>
 
     <!-- SignalR for Real-time System Notifications -->
     <script src="~/lib/signalr/dist/browser/signalr.min.js"></script>
@@ -698,19 +633,11 @@
                 .build();
 
             connection.on("ReceiveSystemNotification", function (data) {
-                console.log("System Notification received:", data);
-                
-                // Play notification chime sound
                 try {
                     var audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869-84.wav");
-                    audio.play().catch(function(e) {
-                        console.log("Audio block: user interaction required.");
-                    });
-                } catch (e) {
-                    console.log("Sound failed", e);
-                }
+                    audio.play().catch(function(e) {});
+                } catch (e) {}
 
-                // Show SweetAlert popup notification
                 if (typeof swal === "function") {
                     swal({
                         title: data.title,
@@ -722,24 +649,17 @@
                     alert(data.title + "\n" + data.message);
                 }
 
-                // Dispatch custom event for real-time list updates
                 if (data.type === "NewOrder") {
                     window.dispatchEvent(new CustomEvent('NewOrderReceived', { detail: data }));
                 }
             });
 
-            connection.start()
-                .then(function () {
-                    console.log("Global System Notification connection established successfully!");
-                })
-                .catch(function (err) {
-                    console.error("SignalR connection failed: ", err.toString());
-                });
+            connection.start().catch(function (err) {
+                console.error("SignalR connection failed: ", err.toString());
+            });
         });
     </script>
 
     @RenderSection("Scripts", required: false)
-
 </body>
-
 </html>

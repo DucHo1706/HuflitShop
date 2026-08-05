@@ -3,6 +3,7 @@ using HuflitShopCore.Models;
 using HuflitShopCore.Services;
 using HuflitShopCore.Hubs;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -32,13 +33,13 @@ builder.Services.AddHttpClient<GeoapifyService>(client =>
 // 2. Cấu hình DbContext kết nối SQL Server
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(connectionString, sqlOptions => 
+    options.UseSqlServer(connectionString, sqlOptions =>
         sqlOptions.EnableRetryOnFailure(
             maxRetryCount: 5,
             maxRetryDelay: TimeSpan.FromSeconds(10),
             errorNumbersToAdd: null)));
 
-// 3. Cấu hình Cookie Authentication (theo đúng kiến trúc ban đầu của bạn)
+// 3. Cấu hình Cookie Authentication & Google OAuth
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
@@ -46,7 +47,15 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.AccessDeniedPath = "/Login/AccessDenied";
         options.ExpireTimeSpan = TimeSpan.FromDays(30);
         options.Cookie.Name = "HuflitShopAuth";
+    })
+    .AddGoogle(options =>
+    {
+        IConfigurationSection googleAuthNSection = builder.Configuration.GetSection("Authentication:Google");
+        options.ClientId = googleAuthNSection["ClientId"];
+        options.ClientSecret = googleAuthNSection["ClientSecret"];
+        options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
     });
+
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<CartService>();
 builder.Services.AddScoped<VnPayService>();
@@ -56,7 +65,7 @@ builder.Services.AddScoped<SizeService>();
 builder.Services.AddScoped<CustomerService>();
 builder.Services.AddScoped<EmployeeService>();
 builder.Services.AddScoped<ProductService>();
-builder.Services.AddScoped<ProductVariantService>(); 
+builder.Services.AddScoped<ProductVariantService>();
 builder.Services.AddScoped<ProductImageService>();
 builder.Services.AddScoped<PhotoService>();
 builder.Services.AddScoped<SupplierService>();
@@ -83,7 +92,6 @@ HuflitShopCore.Helpers.ImageRouteHelper.Initialize(app.Environment.WebRootPath);
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
@@ -91,7 +99,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-app.UseAuthentication(); 
+app.UseAuthentication();
 app.UseAuthorization();
 
 // Centralized authorization for Admin Area
@@ -112,7 +120,7 @@ app.Use(async (context, next) =>
             }
 
             bool hasAdminOrEmployeeRole = user.Claims
-                .Any(c => c.Type == System.Security.Claims.ClaimTypes.Role && 
+                .Any(c => c.Type == System.Security.Claims.ClaimTypes.Role &&
                           (c.Value == "1" || c.Value == "ROLE-ADMIN" || c.Value == "2" || c.Value == "ROLE-EMPLOYEE"));
 
             if (!hasAdminOrEmployeeRole)
