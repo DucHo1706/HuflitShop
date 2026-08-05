@@ -280,6 +280,19 @@
             transform: translateY(-2px);
         }
 
+        .voucher-ticket.disabled {
+            opacity: 0.55; 
+            filter: grayscale(80%);
+            cursor: not-allowed;
+            box-shadow: none !important;
+        }
+
+            .voucher-ticket.disabled .btn-apply-click {
+                pointer-events: none;
+                background-color: #f1f5f9 !important; 
+                color: #94a3b8 !important;
+                border-color: #e2e8f0 !important; 
+            }
     .voucher-left {
         width: 30%;
         background: var(--color-primary);
@@ -304,6 +317,16 @@
         display: flex;
         flex-direction: column;
         justify-content: space-between;
+        overflow: hidden;
+    }
+
+    .voucher-subtitle .badge {
+        white-space: normal !important; /* Cho phép text tự động xuống dòng khi hết chỗ */
+        text-align: left; /* Căn trái văn bản để dễ đọc hơn */
+        line-height: 1.5; /* Tạo khoảng cách dòng thoáng, sang trọng */
+        display: inline-block;
+        max-width: 100%; /* Ép chiều rộng tối đa vừa vặn với vùng chứa */
+        padding: 6px 8px; /* Tăng đệm xung quanh chữ cho khối badge đẹp hơn */
     }
 </style>
 
@@ -448,7 +471,7 @@
                         <i class="fas fa-credit-card"></i> Phương Thức Thanh Toán
                     </div>
 
-                    <div class="option-card selected" onclick="selectPayment('pm-cod')">
+                    <div class="option-card payment-option-card selected" onclick="selectPayment('pm-cod')">
                         <input type="radio" name="paymentMethodId" id="pmCOD" value="pm-cod" checked style="display:none;" />
                         <div class="d-flex align-items-center justify-content-between w-100">
                             <div class="d-flex align-items-center gap-3">
@@ -462,7 +485,7 @@
                         </div>
                     </div>
 
-                    <div class="option-card" onclick="selectPayment('pm-vnpay')">
+                    <div class="option-card payment-option-card" onclick="selectPayment('pm-vnpay')">
                         <input type="radio" name="paymentMethodId" id="pmVNPay" value="pm-vnpay" style="display:none;" />
                         <div class="d-flex align-items-center justify-content-between w-100">
                             <div class="d-flex align-items-center gap-3">
@@ -487,18 +510,18 @@
 
                     <div class="d-flex justify-content-between mb-3">
                         <span class="text-muted">Tổng tiền hàng</span>
-                        <span class="font-weight-bold">@(total.ToString("N0"))₫</span>
+                        <span class="font-weight-bold">@(total.ToString("N0")) đ</span>
                     </div>
                     <div class="d-flex justify-content-between mb-3">
                         <span class="text-muted">Phí vận chuyển</span>
-                        <span class="font-weight-bold" id="shippingFeeVal">@(shippingFee.ToString("N0"))₫</span>
+                        <span class="font-weight-bold" id="shippingFeeVal">@(shippingFee.ToString("N0")) đ</span>
                     </div>
                     <div class="d-flex justify-content-between mb-3">
                         <span class="text-muted">Giảm giá voucher</span>
-                        <span class="font-weight-bold" id="discountVal" style="color: var(--color-blue);">- 0₫</span>
+                        <span class="font-weight-bold" id="discountVal" style="color: var(--color-blue);">- 0 đ</span>
                     </div>
 
-                    <!-- Input Voucher -->
+                    <!-- Input Voucher (Đã cập nhật CSS Button) -->
                     <div class="mb-4 mt-4 p-3" style="background: #faf9f6; border: 1px solid var(--color-border);">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <label class="form-label font-weight-bold text-uppercase mb-0" style="font-size: 0.75rem; letter-spacing: 1px;">Mã Khuyến Mãi</label>
@@ -508,8 +531,8 @@
                         </div>
                         <div class="input-group">
                             <input type="text" id="voucherCodeInput" class="form-control form-control-modern" placeholder="MÃ GIẢM GIÁ" style="text-transform: uppercase; font-weight: bold" />
-                            <div class="input-group-append" style="padding-left: 5px;">
-                                <button class="btn-luxury-outline" type="button" id="btnApplyVoucher">ÁP DỤNG</button>
+                            <div class="input-group-append" style="padding-left: 10px;">
+                                <button class="btn-luxury-primary" style="padding: 10px 20px;" type="button" id="btnApplyVoucher">ÁP DỤNG</button>
                             </div>
                         </div>
                         <div id="voucherMessage" class="mt-2" style="font-size: 0.8rem; font-weight: 600;"></div>
@@ -520,7 +543,7 @@
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <span class="font-weight-bold text-uppercase">Tổng thanh toán</span>
                         <span class="font-weight-bold" id="finalPayVal" style="color: var(--color-gold); font-size: 1.6rem; font-family: var(--font-heading);">
-                            @((total + shippingFee).ToString("N0"))₫
+                            @((total + shippingFee).ToString("N0")) đ
                         </span>
                     </div>
 
@@ -542,7 +565,7 @@
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 0;">
             <div class="modal-header" style="background: var(--color-primary); color: white; padding: 15px 20px; border: none;">
-                <h5 class="modal-title font-weight-bold text-uppercase" style="font-family: var(--font-heading); letter-spacing: 1px;">
+                <h5 class="modal-title font-weight-bold text-uppercase text-white" style="font-family: var(--font-heading); letter-spacing: 1px;">
                     <i class="fas fa-wallet mr-2" style="color: var(--color-gold);"></i>Kho Voucher Khả Dụng
                 </h5>
                 <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="outline: none;">
@@ -568,16 +591,27 @@
         });
 
         function selectPayment(val) {
-            document.getElementById('pmCOD').checked = (val === 'pm-cod');
-            document.getElementById('pmVNPay').checked = (val === 'pm-vnpay');
+            // Uncheck all
+            document.getElementById('pmCOD').checked = false;
+            document.getElementById('pmVNPay').checked = false;
 
-            var cards = document.querySelectorAll('.option-card');
-            cards.forEach(function (card) {
+            // Check target
+            if (val === 'pm-cod') {
+                document.getElementById('pmCOD').checked = true;
+            } else {
+                document.getElementById('pmVNPay').checked = true;
+            }
+
+            // Toggle selected classes
+            var cards = document.querySelectorAll('.payment-option-card');
+            cards.forEach(function (card, idx) {
                 var input = card.querySelector('input');
                 var checkIcon = card.querySelector('.check-icon');
                 if (input.checked) {
                     card.classList.add('selected');
                     checkIcon.style.display = 'block';
+                    checkIcon.classList.remove('text-muted');
+                    checkIcon.style.color = 'var(--color-blue)';
                 } else {
                     card.classList.remove('selected');
                     checkIcon.style.display = 'none';
@@ -588,22 +622,81 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
+            // =========================================================================
+            // 1. QUẢN LÝ TRẠNG THÁI SỐ LIỆU ĐƠN HÀNG (STATE MANAGEMENT)
+            // =========================================================================
+            var orderState = {
+                orderTotal: parseFloat(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(total))) || 0,
+                shippingFee: parseFloat(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(shippingFee))) || 0,
+                discount: 0,
+                buyNowVariantId: "@(ViewBag.BuyNowVariantId ?? "")",
+                buyNowQty: parseInt("@(ViewBag.BuyNowQty ?? 1)") || 1
+            };
+
+            function updateTotalsUI() {
+                var finalAmount = orderState.orderTotal - orderState.discount + orderState.shippingFee;
+                if (finalAmount < 0) finalAmount = 0;
+
+                document.getElementById("shippingFeeVal").innerText = orderState.shippingFee.toLocaleString("vi-VN") + " đ";
+                document.getElementById("discountVal").innerText = "- " + orderState.discount.toLocaleString("vi-VN") + " đ";
+                document.getElementById("finalPayVal").innerText = finalAmount.toLocaleString("vi-VN") + " đ";
+
+                document.getElementById("shippingFeeInput").value = orderState.shippingFee;
+            }
+
+            // =========================================================================
+            // 2. XỬ LÝ ÁP DỤNG VOUCHER
+            // =========================================================================
             var btnApply = document.getElementById("btnApplyVoucher");
             var voucherInput = document.getElementById("voucherCodeInput");
             var msgDiv = document.getElementById("voucherMessage");
             var hiddenInput = document.getElementById("appliedPromoCode");
-            var discountValSpan = document.getElementById("discountVal");
-            var finalPaySpan = document.getElementById("finalPayVal");
-
-            var orderTotal = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(total));
-            var shippingFee = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(shippingFee));
-            var buyNowVariantId = document.getElementById("buyNowVariantId").value || "";
-            var buyNowQty = parseInt(document.getElementById("buyNowQty").value) || 1;
 
             var btnOpenModal = document.getElementById("btnOpenVoucherModal");
             var voucherModal = $("#voucherModal");
             var voucherContainer = document.getElementById("voucherListContainer");
             var loadingSpinner = document.getElementById("voucherModalLoading");
+
+            function processVoucher(code) {
+                if (!code) {
+                    msgDiv.innerHTML = "<span class='text-danger'><i class='fas fa-exclamation-circle mr-1'></i>Vui lòng nhập mã giảm giá.</span>";
+                    return;
+                }
+
+                msgDiv.innerHTML = "<span class='text-info'><i class='fas fa-spinner fa-spin mr-1'></i>Đang áp dụng...</span>";
+
+                $.ajax({
+                    url: "/Order/ApplyVoucher",
+                    type: "POST",
+                    data: {
+                        promoCode: code,
+                        orderTotal: orderState.orderTotal,
+                        buyNowVariantId: orderState.buyNowVariantId,
+                        buyNowQty: orderState.buyNowQty
+                    },
+                    headers: {
+                        "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function (res) {
+                        if (res.success) {
+                            msgDiv.innerHTML = "<span class='text-success'><i class='fas fa-check-circle mr-1'></i>" + res.message + "</span>";
+                            hiddenInput.value = code;
+                            orderState.discount = res.discount;
+                        } else {
+                            msgDiv.innerHTML = "<span class='text-danger'><i class='fas fa-exclamation-circle mr-1'></i>" + res.message + "</span>";
+                            hiddenInput.value = "";
+                            orderState.discount = 0;
+                        }
+                        updateTotalsUI(); // Tự động cập nhật UI tổng tiền
+                    },
+                    error: function () {
+                        msgDiv.innerHTML = "<span class='text-danger'><i class='fas fa-times-circle mr-1'></i>Có lỗi xảy ra khi áp dụng mã giảm giá.</span>";
+                        hiddenInput.value = "";
+                        orderState.discount = 0;
+                        updateTotalsUI();
+                    }
+                });
+            }
 
             btnOpenModal.addEventListener("click", function () {
                 loadingSpinner.style.display = "block";
@@ -613,11 +706,15 @@
                 $.ajax({
                     url: "/Order/GetAvailableVouchers",
                     type: "GET",
-                    data: { orderTotal: orderTotal, buyNowVariantId: buyNowVariantId, buyNowQty: buyNowQty },
+                    data: {
+                        orderTotal: orderState.orderTotal,
+                        buyNowVariantId: orderState.buyNowVariantId,
+                        buyNowQty: orderState.buyNowQty
+                    },
                     success: function (vouchers) {
                         loadingSpinner.style.display = "none";
                         if (!vouchers || vouchers.length === 0) {
-                            voucherContainer.innerHTML = "<div class='text-center py-4 text-muted'><i class='fas fa-info-circle mr-1'></i>Hiện không có voucher phù hợp.</div>";
+                            voucherContainer.innerHTML = "<div class='text-center py-4 text-muted font-weight-bold'><i class='fas fa-info-circle mr-1'></i>Hiện không có chương trình khuyến mãi nào khả dụng.</div>";
                             return;
                         }
 
@@ -626,207 +723,298 @@
                             var statusClass = v.isApplicable ? "" : "disabled";
                             var disabledAttr = v.isApplicable ? "" : "disabled";
                             var icon = v.discountType === "Percent" ? "fa-percentage" : "fa-money-bill-wave";
+                            var statusBadge = "";
+
+                            if (v.isApplicable) {
+                                statusBadge = "<span class='badge text-white font-weight-bold mb-1' style='background: #10b981; border-radius: 0;'>Đủ điều kiện</span>";
+                            } else {
+                                if (v.message.indexOf("Mua thêm") !== -1) {
+                                    statusBadge = "<span class='badge text-dark font-weight-bold mb-1' style='background: #f59e0b; border-radius: 0;'>" + v.message + "</span>";
+                                } else {
+                                    statusBadge = "<span class='badge text-white font-weight-bold mb-1' style='background: #ef4444; border-radius: 0;'>" + v.message + "</span>";
+                                }
+                            }
 
                             html += "<div class='voucher-ticket " + statusClass + "'>" +
-                                "  <div class='voucher-left'><i class='fas " + icon + "'></i><strong>" + v.promoCode + "</strong></div>" +
+                                "  <div class='voucher-left'>" +
+                                "    <i class='fas " + icon + "'></i>" +
+                                "    <span class='promo-badge' title='" + v.promoCode + "'>" + v.promoCode + "</span>" +
+                                "  </div>" +
                                 "  <div class='voucher-right'>" +
-                                "    <div class='font-weight-bold mb-1' style='font-size: 0.9rem;'>" + v.description + "</div>" +
-                                "    <div class='d-flex justify-content-between align-items-center mt-2'>" +
-                                "      <small class='text-muted'>Hạn: " + v.endDateFormatted + "</small>" +
-                                "      <button class='btn-luxury-outline btn-apply-click' style='padding: 4px 10px; font-size:0.75rem;' data-code='" + v.promoCode + "' " + disabledAttr + ">Áp dụng</button>" +
+                                "    <div>" +
+                                "      <div class='voucher-title'>" + v.description + "</div>" +
+                                "      <div class='voucher-subtitle'>" + statusBadge + "</div>" +
+                                "    </div>" +
+                                "    <div class='voucher-footer'>" +
+                                "      <div class='voucher-expiry'><i class='far fa-clock mr-1'></i>Hạn: " + v.endDateFormatted + "</div>" +
+                                "      <button type='button' class='btn-luxury-outline btn-apply-click' data-code='" + v.promoCode + "' " + disabledAttr + " style='padding: 4px 10px; font-size:0.75rem;'>Áp dụng</button>" +
                                 "    </div>" +
                                 "  </div>" +
                                 "</div>";
                         });
 
                         voucherContainer.innerHTML = html;
-
-                        var applyButtons = voucherContainer.querySelectorAll(".btn-apply-click");
-                        applyButtons.forEach(function (btn) {
-                            btn.addEventListener("click", function () {
-                                var code = this.getAttribute("data-code");
-                                voucherInput.value = code;
-                                voucherModal.modal("hide");
-                                btnApply.click();
-                            });
-                        });
+                    },
+                    error: function () {
+                        loadingSpinner.style.display = "none";
+                        voucherContainer.innerHTML = "<div class='text-center py-4 text-danger font-weight-bold'><i class='fas fa-exclamation-circle mr-1'></i>Không thể tải danh sách voucher.</div>";
                     }
                 });
             });
 
             btnApply.addEventListener("click", function () {
                 var code = voucherInput.value.trim();
-                if (!code) {
-                    msgDiv.innerHTML = "<span class='text-danger'>Vui lòng nhập mã giảm giá.</span>";
-                    return;
-                }
-
-                $.ajax({
-                    url: "/Order/ApplyVoucher",
-                    type: "POST",
-                    data: { promoCode: code, orderTotal: orderTotal, buyNowVariantId: buyNowVariantId, buyNowQty: buyNowQty },
-                    headers: { "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val() },
-                    success: function (res) {
-                        if (res.success) {
-                            msgDiv.innerHTML = "<span class='text-success'><i class='fas fa-check mr-1'></i>" + res.message + "</span>";
-                            hiddenInput.value = code;
-                            var currentShippingFee = parseFloat(document.getElementById("shippingFeeInput").value) || 0;
-                            discountValSpan.innerText = "- " + res.discount.toLocaleString("vi-VN") + "₫";
-                            finalPaySpan.innerText = (res.finalAmount + currentShippingFee).toLocaleString("vi-VN") + "₫";
-                        } else {
-                            msgDiv.innerHTML = "<span class='text-danger'>" + res.message + "</span>";
-                            hiddenInput.value = "";
-                            var currentShippingFee = parseFloat(document.getElementById("shippingFeeInput").value) || 0;
-                            discountValSpan.innerText = "- 0₫";
-                            finalPaySpan.innerText = (orderTotal + currentShippingFee).toLocaleString("vi-VN") + "₫";
-                        }
-                    }
-                });
+                processVoucher(code);
             });
 
-            // Address suggestion script logic
+            // Gắn event delegation cho các nút "Áp dụng" động sinh ra trong Modal
+            $(document).on('click', '.btn-apply-click', function (e) {
+                e.preventDefault();
+                var code = $(this).attr("data-code");
+                $("#voucherCodeInput").val(code);
+                $("#voucherModal").modal("hide");
+                processVoucher(code);
+            });
+
+            // =========================================================================
+            // 3. LOGIC GỢI Ý ĐỊA CHỈ GEOAPIFY VÀ GHN SHIPPING
+            // =========================================================================
+            function showAddressError(message) {
+                $('#shippingMethodCard').show();
+                $('#shippingOptionsContainer').html("<div class='text-center py-4 text-danger font-weight-bold'><i class='fas fa-exclamation-circle mr-1'></i>" + message + "</div>");
+            }
+
             var addressInput = document.getElementById('SpecificAddress');
             var addressSuggestions = document.getElementById('addressSuggestions');
             var addressSuggestionHelp = document.getElementById('addressSuggestionHelp');
             var addressSuggestionTimer = null;
+            var addressSuggestionRequest = null;
 
-            function closeAddressSuggestions() { addressSuggestions.hidden = true; addressSuggestions.replaceChildren(); }
+            function closeAddressSuggestions() {
+                addressSuggestions.hidden = true;
+                addressSuggestions.replaceChildren();
+            }
+
+            function resetAddressSuggestionState() {
+                closeAddressSuggestions();
+                addressSuggestionHelp.className = 'form-text text-muted';
+                addressSuggestionHelp.textContent = 'Nhập ít nhất 3 ký tự để nhận gợi ý đúng khu vực đã chọn.';
+            }
 
             addressInput.addEventListener('input', function () {
                 clearTimeout(addressSuggestionTimer);
                 closeAddressSuggestions();
+                addressSuggestionHelp.className = 'form-text text-muted';
+
                 var query = addressInput.value.trim();
-                var ward = $('#Ward').val(); var district = $('#District').val(); var province = $('#City').val();
+                var ward = $('#Ward').val();
+                var district = $('#District').val();
+                var province = $('#City').val();
 
-                if (!ward || !district || !province || query.length < 3) return;
+                if (!ward || !district || !province) {
+                    addressSuggestionHelp.textContent = 'Vui lòng chọn tỉnh, quận và phường trước khi tìm tên đường.';
+                    return;
+                }
+                if (query.length < 3) {
+                    addressSuggestionHelp.textContent = 'Nhập cả số nhà và tên đường để nhận gợi ý chính xác hơn.';
+                    return;
+                }
 
+                addressSuggestionHelp.textContent = 'Đang tìm địa chỉ phù hợp...';
                 addressSuggestionTimer = setTimeout(async function () {
+                    if (addressSuggestionRequest) addressSuggestionRequest.abort();
+                    addressSuggestionRequest = new AbortController();
+
                     var url = new URL('/Order/SuggestAddresses', window.location.origin);
-                    url.searchParams.set('query', query); url.searchParams.set('ward', ward);
-                    url.searchParams.set('district', district); url.searchParams.set('province', province);
+                    url.searchParams.set('query', query);
+                    url.searchParams.set('ward', ward);
+                    url.searchParams.set('district', district);
+                    url.searchParams.set('province', province);
 
                     try {
-                        var response = await fetch(url);
+                        var response = await fetch(url, { signal: addressSuggestionRequest.signal });
                         var result = await response.json();
                         closeAddressSuggestions();
 
-                        if (result.success && result.data && result.data.length > 0) {
-                            result.data.forEach(function (suggestion) {
-                                var button = document.createElement('button');
-                                button.type = 'button';
-                                button.className = 'address-suggestion-item';
-                                button.textContent = suggestion.label;
-                                button.addEventListener('click', function () {
-                                    addressInput.value = suggestion.value;
-                                    closeAddressSuggestions();
-                                });
-                                addressSuggestions.appendChild(button);
-                            });
-                            addressSuggestions.hidden = false;
+                        if (!result.configured) {
+                            addressSuggestionHelp.textContent = 'Bạn vẫn có thể nhập địa chỉ thủ công.';
+                            return;
                         }
-                    } catch (error) { }
-                }, 400);
+                        if (!result.success || !result.data || result.data.length === 0) {
+                            addressSuggestionHelp.textContent = 'Không tìm thấy gợi ý phù hợp; hãy kiểm tra lại số nhà và tên đường.';
+                            return;
+                        }
+
+                        result.data.forEach(function (suggestion) {
+                            var button = document.createElement('button');
+                            button.type = 'button';
+                            button.className = 'address-suggestion-item';
+                            button.setAttribute('role', 'option');
+                            button.textContent = suggestion.label;
+                            button.addEventListener('click', function () {
+                                addressInput.value = suggestion.value;
+                                closeAddressSuggestions();
+                                addressSuggestionHelp.className = 'form-text text-success font-weight-bold';
+                                addressSuggestionHelp.textContent = 'Đã chọn địa chỉ từ gợi ý Geoapify.';
+                            });
+                            addressSuggestions.appendChild(button);
+                        });
+
+                        var attribution = document.createElement('div');
+                        attribution.className = 'px-3 py-1 text-right text-muted small';
+                        attribution.textContent = 'powered by Geoapify';
+                        addressSuggestions.appendChild(attribution);
+                        addressSuggestions.hidden = false;
+                        addressSuggestionHelp.textContent = 'Chọn một địa chỉ phù hợp trong danh sách.';
+                    } catch (error) {
+                        if (error.name !== 'AbortError') {
+                            addressSuggestionHelp.textContent = 'Không thể tải gợi ý lúc này; bạn vẫn có thể nhập thủ công.';
+                        }
+                    }
+                }, 450);
             });
 
             document.addEventListener('click', function (event) {
                 if (!event.target.closest('.address-autocomplete')) closeAddressSuggestions();
             });
 
-            // Load GHN Address Data
             function loadProvinces() {
                 $.get('/Order/GetProvinces').done(function (res) {
-                    if (res.success) {
-                        var options = '<option value="">Chọn tỉnh / thành phố</option>';
-                        res.data.forEach(function (p) { options += '<option value="' + p.provinceId + '">' + p.provinceName + '</option>'; });
-                        $('#ghnProvince').html(options);
-                    }
-                });
+                    if (!res.success) { showAddressError(res.message); return; }
+                    var options = '<option value="">Chọn tỉnh / thành phố</option>';
+                    res.data.forEach(function (p) { options += '<option value="' + p.provinceId + '">' + p.provinceName + '</option>'; });
+                    $('#ghnProvince').html(options);
+                }).fail(function () { showAddressError('Không thể tải địa chỉ từ GHN.'); });
             }
 
             $('#ghnProvince').on('change', function () {
+                resetAddressSuggestionState();
                 var option = this.options[this.selectedIndex];
-                $('#ProvinceId').val(this.value || 0); $('#City').val(option && this.value ? option.text : '');
+                $('#ProvinceId').val(this.value || 0);
+                $('#City').val(option && this.value ? option.text : '');
+                $('#DistrictId').val(0); $('#District').val(''); $('#WardCode').val(''); $('#Ward').val('');
                 $('#ghnDistrict').prop('disabled', true).html('<option value="">Đang tải...</option>');
                 $('#ghnWard').prop('disabled', true).html('<option value="">Chọn phường / xã</option>');
+                $('#shippingMethodCard').hide();
                 if (!this.value) return;
 
                 $.get('/Order/GetDistricts', { provinceId: this.value }).done(function (res) {
-                    if (res.success) {
-                        var options = '<option value="">Chọn quận / huyện</option>';
-                        res.data.forEach(function (d) { options += '<option value="' + d.districtId + '">' + d.districtName + '</option>'; });
-                        $('#ghnDistrict').html(options).prop('disabled', false);
-                    }
-                });
+                    if (!res.success) { showAddressError(res.message); return; }
+                    var options = '<option value="">Chọn quận / huyện</option>';
+                    res.data.forEach(function (d) { options += '<option value="' + d.districtId + '">' + d.districtName + '</option>'; });
+                    $('#ghnDistrict').html(options).prop('disabled', false);
+                }).fail(function () { showAddressError('Không thể tải quận/huyện từ GHN.'); });
             });
 
             $('#ghnDistrict').on('change', function () {
+                resetAddressSuggestionState();
                 var option = this.options[this.selectedIndex];
-                $('#DistrictId').val(this.value || 0); $('#District').val(option && this.value ? option.text : '');
+                $('#DistrictId').val(this.value || 0);
+                $('#District').val(option && this.value ? option.text : '');
+                $('#WardCode').val(''); $('#Ward').val('');
                 $('#ghnWard').prop('disabled', true).html('<option value="">Đang tải...</option>');
+                $('#shippingMethodCard').hide();
                 if (!this.value) return;
 
                 $.get('/Order/GetWards', { districtId: this.value }).done(function (res) {
-                    if (res.success) {
-                        var options = '<option value="">Chọn phường / xã</option>';
-                        res.data.forEach(function (w) { options += '<option value="' + w.wardCode + '">' + w.wardName + '</option>'; });
-                        $('#ghnWard').html(options).prop('disabled', false);
-                    }
-                });
+                    if (!res.success) { showAddressError(res.message); return; }
+                    var options = '<option value="">Chọn phường / xã</option>';
+                    res.data.forEach(function (w) { options += '<option value="' + w.wardCode + '">' + w.wardName + '</option>'; });
+                    $('#ghnWard').html(options).prop('disabled', false);
+                }).fail(function () { showAddressError('Không thể tải phường/xã từ GHN.'); });
             });
 
             $('#ghnWard').on('change', function () {
+                resetAddressSuggestionState();
                 var option = this.options[this.selectedIndex];
-                $('#WardCode').val(this.value || ''); $('#Ward').val(option && this.value ? option.text : '');
+                $('#WardCode').val(this.value || '');
+                $('#Ward').val(option && this.value ? option.text : '');
                 loadShippingRates();
             });
 
             window.loadShippingRates = function () {
                 var districtId = parseInt($('#DistrictId').val()) || 0;
                 var wardCode = $('#WardCode').val();
-                if (!districtId || !wardCode) return;
+                if (!districtId || !wardCode) {
+                    $('#shippingMethodCard').hide();
+                    return;
+                }
 
                 $('#shippingMethodCard').show();
-                $('#shippingOptionsContainer').html('<div class="text-center py-3"><div class="spinner-border" style="color:var(--color-gold);" role="status"></div><p class="text-muted small mt-2 mb-0">Đang tính phí vận chuyển GHN...</p></div>');
+                $('#shippingOptionsContainer').html(
+                    '<div class="text-center py-4">' +
+                    '  <div class="spinner-border" style="color: var(--color-blue);" role="status">' +
+                    '    <span class="sr-only">Đang tính phí ship...</span>' +
+                    '  </div>' +
+                    '  <p class="text-muted mt-2 mb-0 font-weight-bold" style="font-size: 0.9rem;">Đang lấy phí và thời gian giao từ GHN...</p>' +
+                    '</div>'
+                );
 
                 $.ajax({
                     url: "/Order/GetShippingFee",
                     type: "POST",
-                    data: { districtId: districtId, wardCode: wardCode, buyNowVariantId: buyNowVariantId, buyNowQty: buyNowQty },
+                    data: {
+                        districtId: districtId,
+                        wardCode: wardCode,
+                        buyNowVariantId: orderState.buyNowVariantId,
+                        buyNowQty: orderState.buyNowQty
+                    },
                     success: function (res) {
                         if (res.success && res.quotes && res.quotes.length > 0) {
                             var html = "";
                             res.quotes.forEach(function (q) {
-                                html += '<div class="option-card" onclick="selectShippingOption(this)" data-service-id="' + q.serviceId + '" data-service-type-id="' + q.serviceTypeId + '" data-fee="' + q.shippingFee + '">' +
+                                var eta = q.expectedDeliveryTime || 'GHN cập nhật sau';
+                                html += '<div class="option-card shipping-option-card" onclick="selectShippingOption(this)" data-service-id="' + q.serviceId + '" data-service-type-id="' + q.serviceTypeId + '" data-fee="' + q.shippingFee + '">' +
                                     '  <div class="d-flex align-items-center justify-content-between w-100">' +
-                                    '    <div>' +
-                                    '      <div class="font-weight-bold text-uppercase" style="font-size: 0.9rem;">' + q.serviceName + '</div>' +
-                                    '      <small class="text-muted"><i class="far fa-clock mr-1"></i>Dự kiến: ' + (q.expectedDeliveryTime || 'GHN giao chuẩn') + '</small>' +
+                                    '    <div class="d-flex align-items-center gap-3">' +
+                                    '      <div style="font-size: 1.8rem; color: var(--color-blue);"><i class="fas fa-shipping-fast"></i></div>' +
+                                    '      <div>' +
+                                    '        <div class="font-weight-bold text-dark text-uppercase" style="font-size: 0.95rem;">' + q.serviceName + '</div>' +
+                                    '        <small class="text-muted"><i class="far fa-clock mr-1"></i>Dự kiến: ' + eta + '</small>' +
+                                    '      </div>' +
                                     '    </div>' +
-                                    '    <div class="font-weight-bold" style="color: var(--color-gold); font-size: 1.05rem;">' + q.shippingFee.toLocaleString("vi-VN") + '₫</div>' +
+                                    '    <div class="font-weight-bold" style="color: var(--color-gold); font-size: 1.1rem;">' + q.shippingFee.toLocaleString("vi-VN") + ' đ</div>' +
                                     '  </div>' +
                                     '</div>';
                             });
+
                             $('#shippingOptionsContainer').html(html);
-                            var firstCard = $('#shippingOptionsContainer .option-card').first();
-                            if (firstCard.length) selectShippingOption(firstCard[0]);
+
+                            // Chọn mặc định tùy chọn vận chuyển đầu tiên
+                            var firstCard = $('#shippingOptionsContainer .shipping-option-card').first();
+                            if (firstCard.length) {
+                                selectShippingOption(firstCard[0]);
+                            }
+                        } else {
+                            var message = res.message || 'Không thể tải danh sách dịch vụ vận chuyển.';
+                            var errorBox = $('<div class="text-center py-4 text-danger font-weight-bold"></div>').text(message);
+                            errorBox.prepend('<i class="fas fa-exclamation-circle mr-1"></i>');
+                            $('#shippingOptionsContainer').empty().append(errorBox);
                         }
+                    },
+                    error: function (xhr) {
+                        var message = xhr.responseJSON && xhr.responseJSON.message
+                            ? xhr.responseJSON.message
+                            : 'Không thể kết nối dịch vụ vận chuyển.';
+                        var errorBox = $('<div class="text-center py-4 text-danger font-weight-bold"></div>').text(message);
+                        errorBox.prepend('<i class="fas fa-exclamation-circle mr-1"></i>');
+                        $('#shippingOptionsContainer').empty().append(errorBox);
                     }
                 });
             };
 
             window.selectShippingOption = function (el) {
-                $('.option-card').removeClass('selected');
+                $('.shipping-option-card').removeClass('selected');
                 $(el).addClass('selected');
-                var fee = parseFloat($(el).attr('data-fee')) || 0;
-                $('#shippingFeeInput').val(fee);
+
+                // Cập nhật phí ship vào State Object
+                orderState.shippingFee = parseFloat($(el).attr('data-fee')) || 0;
+
                 $('#shippingServiceId').val($(el).attr('data-service-id'));
                 $('#shippingServiceTypeId').val($(el).attr('data-service-type-id'));
-                $('#shippingFeeVal').text(fee.toLocaleString("vi-VN") + "₫");
 
-                var discountText = $('#discountVal').text().replace('- ', '').replace('₫', '').replace(/\./g, '').trim();
-                var discount = parseFloat(discountText) || 0;
-                var finalAmount = orderTotal - discount + fee;
-                $('#finalPayVal').text(finalAmount.toLocaleString("vi-VN") + "₫");
+                // Cập nhật UI tính tổng
+                updateTotalsUI();
             };
 
             loadProvinces();
